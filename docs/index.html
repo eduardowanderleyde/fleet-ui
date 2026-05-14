@@ -296,7 +296,7 @@
       <li><a href="#screenshots">Screenshots</a></li>
       <li><a href="#quickstart">Quick Start</a></li>
     </ul>
-    <a class="btn btn-ghost" href="https://github.com/eduardowanderleyde/fleet-ui" target="_blank">
+    <a class="btn btn-ghost" href="https://github.com/eduardowanderleyde/fleet-ui" target="_blank" rel="noopener noreferrer">
       ★ GitHub
     </a>
   </div>
@@ -326,7 +326,7 @@
 
     <div class="hero-btns">
       <a class="btn btn-primary" href="#quickstart">Get Started</a>
-      <a class="btn btn-ghost" href="https://github.com/eduardowanderleyde/fleet-ui" target="_blank">View on GitHub</a>
+      <a class="btn btn-ghost" href="https://github.com/eduardowanderleyde/fleet-ui" target="_blank" rel="noopener noreferrer">View on GitHub</a>
     </div>
 
     <div class="hero-img">
@@ -432,19 +432,7 @@
 
       <div class="shot">
         <div class="shot-img">
-          <div class="placeholder">
-            <div class="icon">🤖</div>
-            <strong>Gazebo Simulation</strong>
-            <span>Replace with: Gazebo window with TurtleBot4 in warehouse world</span>
-          </div>
-        </div>
-        <h3>Gazebo + TurtleBot4</h3>
-        <p>The robot spawns in the warehouse world with full physics simulation.</p>
-      </div>
-
-      <div class="shot">
-        <div class="shot-img">
-          <img src="assets/screenshots/FLEET1.jpeg" alt="SLAM map with waypoints" />
+          <img src="assets/screenshots/FLEET1.jpeg" alt="Fleet UI with SLAM map and waypoints" />
         </div>
         <h3>Waypoint Editor</h3>
         <p>Click the live SLAM map to place waypoints. The robot navigates them in sequence.</p>
@@ -452,7 +440,7 @@
 
       <div class="shot">
         <div class="shot-img">
-          <img src="assets/screenshots/FLEET2.jpeg" alt="Recording in progress with output log" />
+          <img src="assets/screenshots/FLEET2.jpeg" alt="Recording in progress with live output" />
         </div>
         <h3>Route Recording</h3>
         <p>Live nav state, pose coordinates, and collection status update every 250 ms.</p>
@@ -463,31 +451,15 @@
           <img src="assets/warehouse_map.png" alt="Warehouse map background" />
         </div>
         <h3>Warehouse World</h3>
-        <p>Pre-loaded static map of the warehouse environment used as background reference.</p>
+        <p>Pre-loaded static map of the warehouse environment used as navigation background.</p>
       </div>
 
       <div class="shot">
         <div class="shot-img">
-          <div class="placeholder">
-            <div class="icon">▶️</div>
-            <strong>Replay Running</strong>
-            <span>Replace with: UI showing replay progress + terminal output panel</span>
-          </div>
+          <img src="assets/screenshots/FLEET3.jpeg" alt="Fleet UI system architecture" style="object-fit:contain; background:#fff;" />
         </div>
-        <h3>Route Replay</h3>
-        <p>The robot follows the recorded waypoints autonomously via Nav2 <code>/follow_waypoints</code>.</p>
-      </div>
-
-      <div class="shot">
-        <div class="shot-img">
-          <div class="placeholder">
-            <div class="icon">📊</div>
-            <strong>Trajectory Analysis</strong>
-            <span>Replace with: trajectory_overlay.png from analyze_runs.py</span>
-          </div>
-        </div>
-        <h3>Repeatability Analysis</h3>
-        <p>Trajectory overlay and RMSE metrics computed automatically across all replay runs.</p>
+        <h3>System Architecture</h3>
+        <p>Full data flow from Gazebo simulation through ROS 2 nodes to the web interface.</p>
       </div>
 
     </div>
