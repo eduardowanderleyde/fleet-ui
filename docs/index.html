@@ -273,10 +273,14 @@
     footer .links a { color: var(--muted); font-size: .85rem; }
     footer .links a:hover { color: var(--text); }
 
+    @media (max-width: 768px) {
+      nav ul { display: none; }
+    }
     @media (max-width: 640px) {
       section { padding: 56px 0; }
       .step { grid-template-columns: 1fr; }
       .step-num { width: 36px; height: 36px; font-size: .9rem; }
+      .terminals { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -380,7 +384,7 @@
     <h2>Four processes, one system</h2>
     <p>Start them in order. Terminal 1 takes ~12 s to be ready.</p>
 
-    <div style="margin-top:48px; border-radius:var(--radius); overflow:hidden; border:1px solid var(--border);">
+    <div style="margin-top:48px; border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); background:#fff; padding:24px;">
       <img src="assets/screenshots/FLEET3.jpeg" alt="Fleet UI architecture diagram" style="width:100%; display:block;" />
     </div>
 
@@ -570,8 +574,7 @@
                 Terminal 3 — Backend
               </div>
               <pre><code><span class="cmd">source</span> /opt/ros/jazzy/setup.bash
-<span class="cmd">source</span> ~/fleet-ui/fleet_ws/\
-install/setup.bash
+<span class="cmd">source</span> ~/fleet-ui/fleet_ws/install/setup.bash
 <span class="cmd">cd</span> ~/fleet-ui/backend
 <span class="cmd">python3</span> main.py</code></pre>
             </div>
@@ -595,7 +598,7 @@ install/setup.bash
         <div class="step-num">4</div>
         <div class="step-body">
           <h3>Record your first route</h3>
-          <p>Open <a href="http://localhost:5173">localhost:5173</a>, place waypoints on the map, and click <strong>Executar → record</strong>. The robot navigates and saves the route automatically.</p>
+          <p>Open <code>http://localhost:5173</code> in your browser, place waypoints on the map, and click <strong>Executar → record</strong>. The robot navigates and saves the route automatically.</p>
         </div>
       </div>
 
