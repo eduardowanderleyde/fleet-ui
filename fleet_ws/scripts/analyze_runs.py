@@ -14,6 +14,13 @@ A **referência** é sempre o **primeiro** bag da lista (índice 0).
 Dependências Python: numpy; matplotlib opcional para PNG (--no-plot se não tiver).
 
 Requer: rosbag2 + mensagens nav_msgs / geometry_msgs (ambiente colcon).
+
+Nota (branch timestamp-interpolation): o RMSE pairwise agora é calculado por
+interpolação linear em uma grade de tempo comum normalizada (100 pontos em
+[0, 1], um por trajetória, independente de sua duração absoluta), e não mais
+por reamostragem uniforme por índice. Ver `_resample_pair` abaixo e a
+Seção 2.8.1 (Interpolação para Grade de Tempo Comum) da dissertação associada
+a este repositório.
 """
 from __future__ import annotations
 
@@ -260,15 +267,54 @@ def _path_length(x: np.ndarray, y: np.ndarray) -> float:
 
 
 def _resample_pair(
-    xy1: np.ndarray, xy2: np.ndarray
+    t1: np.ndarray,
+    xy1: np.ndarray,
+    t2: np.ndarray,
+    xy2: np.ndarray,
+    n_points: int = 100,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Mesmo número de pontos (subamostragem uniforme) para comparar trajetórias."""
-    n = min(len(xy1), len(xy2))
-    if n < 2:
-        return xy1, xy2
-    i1 = np.linspace(0, len(xy1) - 1, n).astype(int)
-    i2 = np.linspace(0, len(xy2) - 1, n).astype(int)
-    return xy1[i1], xy2[i2]
+    """Reamostra duas trajetórias em uma grade de tempo comum normalizada.
+
+    Cada trajetória é normalizada dividindo seu vetor de tempo relativo pela
+    própria duração total, de modo que ambas passam a variar em [0, 1]
+    independentemente de sua duração absoluta em segundos. x(t_norm) e
+    y(t_norm) são então interpolados linearmente (numpy.interp) em
+    `n_points` pontos igualmente espaçados nesse intervalo normalizado
+    comum, produzindo dois vetores do mesmo tamanho e com correspondência
+    temporal relativa entre si -- não apenas correspondência de índice
+    ordinal, como em versões anteriores deste script.
+
+    Se qualquer uma das trajetórias tiver menos de 2 amostras, ou duração
+    total não positiva, a interpolação não é bem definida; nesse caso,
+    cai-se de volta para o menor número de amostras entre as duas
+    trajetórias (comportamento equivalente ao da versão anterior).
+    """
+    t1 = np.asarray(t1, dtype=np.float64)
+    t2 = np.asarray(t2, dtype=np.float64)
+
+    if len(t1) < 2 or len(t2) < 2 or len(xy1) < 2 or len(xy2) < 2:
+        n = min(len(xy1), len(xy2))
+        return xy1[:n], xy2[:n]
+
+    d1 = t1[-1] - t1[0]
+    d2 = t2[-1] - t2[0]
+    if d1 <= 0.0 or d2 <= 0.0:
+        n = min(len(xy1), len(xy2))
+        return xy1[:n], xy2[:n]
+
+    t1n = (t1 - t1[0]) / d1
+    t2n = (t2 - t2[0]) / d2
+
+    grid = np.linspace(0.0, 1.0, n_points)
+
+    x1i = np.interp(grid, t1n, xy1[:, 0])
+    y1i = np.interp(grid, t1n, xy1[:, 1])
+    x2i = np.interp(grid, t2n, xy2[:, 0])
+    y2i = np.interp(grid, t2n, xy2[:, 1])
+
+    a = np.column_stack([x1i, y1i])
+    b = np.column_stack([x2i, y2i])
+    return a, b
 
 
 def _rmse(a: np.ndarray, b: np.ndarray) -> float:
@@ -374,6 +420,12 @@ def main() -> int:
         default="auto",
         help="Fonte da trajetória: auto=/amcl_pose se existir senão /odom; amcl_pose=obrigatório no bag",
     )
+    parser.add_argument(
+        "--interp-points",
+        type=int,
+        default=100,
+        help="Número de pontos da grade de tempo normalizada [0,1] usada na interpolação (padrão: 100)",
+    )
     args = parser.parse_args()
 
     try:
@@ -418,14 +470,17 @@ def main() -> int:
             _write_trajectory_csv(fn, t_rel, xy)
         print(f"[OK] CSVs: {csv_dir}/")
 
-    # RMSE pairwise
+    # RMSE pairwise (interpolação em grade de tempo comum normalizada)
     n = len(trajectories)
     rmse_matrix: List[List[Optional[float]]] = [
         [None] * n for _ in range(n)
     ]
     for i in range(n):
         for j in range(i + 1, n):
-            a, b = _resample_pair(trajectories[i], trajectories[j])
+            a, b = _resample_pair(
+                times[i], trajectories[i], times[j], trajectories[j],
+                n_points=args.interp_points,
+            )
             r = _rmse(a, b)
             rmse_matrix[i][j] = r
             rmse_matrix[j][i] = r
@@ -448,7 +503,10 @@ def main() -> int:
             "duration_ratio_vs_ref": dur_ratio,
         }
         if i != ref_idx:
-            a, b = _resample_pair(trajectories[ref_idx], trajectories[i])
+            a, b = _resample_pair(
+                times[ref_idx], trajectories[ref_idx], times[i], trajectories[i],
+                n_points=args.interp_points,
+            )
             entry["rmse_vs_ref_m"] = _rmse(a, b)
             entry["mean_pointwise_distance_vs_ref_m"] = _mean_pointwise_distance(a, b)
         else:
@@ -466,6 +524,8 @@ def main() -> int:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "reference_run_index": ref_idx,
         "reference_label": labels[ref_idx],
+        "rmse_method": "time_normalized_interpolation",
+        "interp_points": args.interp_points,
         "runs": [_run_to_json(s) for s in all_stats],
         "pairwise_rmse_m": rmse_matrix,
         "vs_reference": vs_reference,
@@ -518,7 +578,7 @@ def main() -> int:
             f"poses={s.num_poses}  topic={s.traj_topic}"
         )
     if n > 1:
-        print("\n--- RMSE (m) entre pares (subamostragem uniforme) ---")
+        print(f"\n--- RMSE (m) entre pares (interpolação, {args.interp_points} pontos, grade normalizada) ---")
         for i in range(n):
             for j in range(i + 1, n):
                 r = rmse_matrix[i][j]
