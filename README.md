@@ -105,6 +105,72 @@ npm install
 
 ---
 
+## Docker quickstart
+
+Docker is the easiest path on Linux when you want a reproducible ROS 2 Jazzy
+environment without installing ROS directly on the host.
+
+> The compose setup uses `network_mode: host` because ROS 2/DDS discovery is much
+> simpler that way. This is intended for Linux hosts. On Docker Desktop
+> (macOS/Windows), ROS 2 networking and Gazebo GUI require additional setup.
+
+Build the image:
+
+```bash
+cd ~/fleet-ui
+make docker-build
+```
+
+Allow Gazebo GUI windows to use the host X server:
+
+```bash
+xhost +local:docker
+```
+
+Start the full stack (simulation, fleet nodes, backend and frontend):
+
+```bash
+make docker-up
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+Useful commands:
+
+```bash
+# Follow logs from all services
+make docker-logs
+
+# Open a shell with ROS 2 and the fleet workspace sourced
+make docker-shell
+
+# Run checks inside the container
+make docker-check
+
+# Stop services
+make docker-down
+```
+
+Runtime artifacts are mounted back to the host:
+
+| Host path | Container path | Purpose |
+|---|---|---|
+| `fleet_ws/routes` | `/workspace/fleet_ws/routes` | Recorded route YAMLs |
+| `fleet_ws/collections` | `/workspace/fleet_ws/collections` | MCAP bags |
+| `frontend/public` | `/workspace/frontend/public` | Saved SLAM background map |
+
+You can change the simulation world with:
+
+```bash
+WORLD=depot make docker-up
+```
+
+---
+
 ## Running
 
 Open **4 terminals**. Start them in order — Terminal 1 takes ~12 s to be ready.
