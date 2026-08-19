@@ -60,6 +60,8 @@ def _make_nav2_params(_ctx):
 ARGUMENTS = [
     DeclareLaunchArgument('world', default_value='warehouse',
                           description='Mundo: warehouse | depot'),
+    DeclareLaunchArgument('headless', default_value='False',
+                          description='Se True, roda Gazebo sem interface gráfica'),
     DeclareLaunchArgument('x_pose', default_value='0.0'),
     DeclareLaunchArgument('y_pose', default_value='0.0'),
     DeclareLaunchArgument('yaw',    default_value='0.0'),
@@ -80,7 +82,7 @@ def generate_launch_description():
         ),
         launch_arguments=[
             ('world',   world_path),
-            ('headless', 'False'),
+            ('headless', LaunchConfiguration('headless')),
             ('x_pose',  LaunchConfiguration('x_pose')),
             ('y_pose',  LaunchConfiguration('y_pose')),
             ('yaw',     LaunchConfiguration('yaw')),

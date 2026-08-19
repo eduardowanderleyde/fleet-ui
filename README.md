@@ -169,6 +169,46 @@ You can change the simulation world with:
 WORLD=depot make docker-up
 ```
 
+### Docker Desktop / Windows mode
+
+For Windows with Docker Desktop, use the headless one-container compose file.
+It avoids `network_mode: host` and does not require Gazebo GUI forwarding.
+
+From PowerShell or a WSL terminal inside the repository:
+
+```bash
+docker compose -f docker-compose.windows.yml build
+docker compose -f docker-compose.windows.yml up
+```
+
+Or, if `make` is available:
+
+```bash
+make docker-build-windows
+make docker-up-windows
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+Stop:
+
+```bash
+docker compose -f docker-compose.windows.yml down
+```
+
+Notes:
+
+- This mode runs Gazebo headless (`headless:=True`), so it is intended for the
+  web UI workflow rather than visual Gazebo debugging.
+- Backend and frontend ports are published as normal Docker Desktop ports:
+  `8000` and `5173`.
+- ROS 2 nodes run in the same container, which avoids cross-container DDS
+  discovery issues on Docker Desktop.
+
 ---
 
 ## Running
