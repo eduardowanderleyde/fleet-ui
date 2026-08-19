@@ -16,6 +16,11 @@ python3 -m py_compile \
 echo "[check] Unit tests"
 python3 -m unittest discover -s "$ROOT/tests"
 
+if [ ! -d "$ROOT/frontend/node_modules" ]; then
+  echo "[check] Installing frontend dependencies"
+  npm --prefix "$ROOT/frontend" ci
+fi
+
 echo "[check] Frontend build"
 npm --prefix "$ROOT/frontend" run build
 

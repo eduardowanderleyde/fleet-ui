@@ -102,8 +102,10 @@ def main() -> int:
         check_file(ROS_WS / "src" / "fleet_msgs", "pacote fleet_msgs"),
         check_command("python3"),
         check_command("npm"),
-        check_command("ros2"),
     ]
+
+    if not args.skip_ros:
+        checks.append(check_command("ros2"))
 
     if not args.skip_http:
         checks.append(check_http(f"{args.backend_url.rstrip('/')}/api/status", "backend /api/status"))
