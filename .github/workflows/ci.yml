@@ -30,6 +30,9 @@ jobs:
             fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py \
             fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py
 
+      - name: Install Python analysis dependencies
+        run: python3 -m pip install numpy
+
       - name: Unit tests
         run: python3 -m unittest discover -s tests
 

@@ -13,6 +13,11 @@ python3 -m py_compile \
   "$ROOT/fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py" \
   "$ROOT/fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py"
 
+if ! python3 -c "import numpy" >/dev/null 2>&1; then
+  echo "[check] Installing Python analysis dependencies"
+  python3 -m pip install --user numpy
+fi
+
 echo "[check] Unit tests"
 python3 -m unittest discover -s "$ROOT/tests"
 
