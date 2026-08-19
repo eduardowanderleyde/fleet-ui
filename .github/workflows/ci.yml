@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: Python syntax checks
+        run: |
+          python3 -m py_compile \
+            backend/main.py \
+            backend/ros_bridge.py \
+            fleet_ws/scripts/health_check.py \
+            fleet_ws/scripts/experiment_repeatability.py \
+            fleet_ws/scripts/analyze_runs.py \
+            fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py \
+            fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests
+
+      - name: Frontend build
+        run: npm --prefix frontend run build

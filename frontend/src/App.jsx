@@ -1,14 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-
-const API = '/api'
+import ConfigForm from './components/ConfigForm'
+import {
+  discoverRobots as fetchDiscoveredRobots,
+  getMap,
+  getSlamMapMeta,
+  getStatus,
+  goToPoint,
+  runConfig,
+  saveBackgroundMap,
+  testSsh,
+} from './api/fleetApi'
+import { useFleetStatus } from './hooks/useFleetStatus'
+import { useJobPolling } from './hooks/useJobPolling'
+import { useRoutes } from './hooks/useRoutes'
 
 const ROBOT_PROFILES = [
   { id: 'custom', label: 'Custom (simulação local)', type: 'local' },
   { id: 'tb3_1',  label: 'TurtleBot3 #1',           type: 'ssh', host: '192.168.1.101' },
   { id: 'tb3_2',  label: 'TurtleBot3 #2',           type: 'ssh', host: '192.168.1.102' },
 ]
-
-const ALL_TOPICS = ['scan', 'odom', 'imu', 'pose']
 
 const DEFAULT_CFG = {
   command:         'record',
@@ -267,8 +277,7 @@ function MapView({ robotPose, waypoints, onAddWaypoint }) {
       img.src = src + '?t=' + Date.now()
       img.onload = () => { floorImgRef.current = img; if (meta) setSavedMapMeta(meta); draw() }
     }
-    fetch(`${API}/slam_map_meta`)
-      .then(r => r.json())
+    getSlamMapMeta()
       .then(d => {
         if (d.available) loadImg('/slam_map.png', d)
         else {
@@ -291,8 +300,7 @@ function MapView({ robotPose, waypoints, onAddWaypoint }) {
     let alive = true
     const fetchMap = async () => {
       try {
-        const r = await fetch(`${API}/map`)
-        const data = await r.json()
+        const data = await getMap()
         if (!alive || !data.available) return
         mapMeta.current = {
           resolution: data.resolution,
@@ -411,15 +419,14 @@ function MapView({ robotPose, waypoints, onAddWaypoint }) {
   const saveBackground = async () => {
     setSavingMap(true); setSaveMsg(null)
     try {
-      const r = await fetch(`${API}/save_background_map`, { method: 'POST' })
-      const d = await r.json()
+      const d = await saveBackgroundMap()
       setSaveMsg(d.success ? 'ok' : 'erro')
       if (d.success) {
         const img = new Image()
         img.src = '/slam_map.png?t=' + Date.now()
         img.onload = () => {
           floorImgRef.current = img
-          fetch(`${API}/slam_map_meta`).then(r => r.json()).then(d => {
+          getSlamMapMeta().then(d => {
             if (d.available) setSavedMapMeta(d); draw()
           })
         }
@@ -512,204 +519,14 @@ function MapView({ robotPose, waypoints, onAddWaypoint }) {
   )
 }
 
-// ── Toggle Record/Replay ──────────────────────────────────────────────────────
-function CmdToggle({ value, onChange }) {
-  const base = { padding: '0.4rem 1.2rem', fontSize: '0.85rem', fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }
-  return (
-    <div style={{ display: 'flex', borderRadius: '8px', overflow: 'hidden', border: '1px solid #2a3142', alignSelf: 'flex-start' }}>
-      {['record'].map(cmd => (
-        <button key={cmd} onClick={() => onChange(cmd)}
-          style={{ ...base, background: value === cmd ? '#065f46' : '#161a22', color: value === cmd ? '#6ee7b7' : '#8b92a8' }}>
-          ⏺  Gravar
-        </button>
-      ))}
-    </div>
-  )
-}
-
-// ── Lista de waypoints ────────────────────────────────────────────────────────
-function WaypointList({ points, onChange }) {
-  const update = (i, j, val) => onChange(points.map((p, pi) => pi === i ? p.map((v, vi) => vi === j ? parseFloat(val) || 0 : v) : p))
-  const add    = ()  => onChange([...points, [0, 0, 0]])
-  const remove = i   => onChange(points.filter((_, pi) => pi !== i))
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-      {points.map((p, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.75rem', color: '#6366f1', width: '20px', textAlign: 'right', fontWeight: 700 }}>#{i + 1}</span>
-          {['x', 'y', 'yaw'].map((lbl, j) => (
-            <div key={lbl} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
-              <span style={{ fontSize: '0.65rem', color: '#4b5563' }}>{lbl}</span>
-              <input type="number" step="0.1" value={p[j]} onChange={e => update(i, j, e.target.value)} style={S.numInput} />
-            </div>
-          ))}
-          <button onClick={() => remove(i)} style={{ ...btn('#3a1a1a', '#f87171'), padding: '0.2rem 0.5rem', fontSize: '0.8rem', marginTop: '0.9rem' }}>✕</button>
-        </div>
-      ))}
-      <button onClick={add} style={{ ...btn('#161a22', '#6366f1'), padding: '0.3rem 0.75rem', fontSize: '0.8rem', alignSelf: 'flex-start', marginTop: '0.2rem' }}>
-        + Waypoint
-      </button>
-    </div>
-  )
-}
-
-// ── XYYaw ─────────────────────────────────────────────────────────────────────
-function XYYaw({ value, onChange, label }) {
-  const update = (i, val) => { const next = [...value]; next[i] = parseFloat(val) || 0; onChange(next) }
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-      {label && <span style={S.label}>{label}</span>}
-      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-        {['x', 'y', 'yaw'].map((lbl, i) => (
-          <div key={lbl} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
-            <span style={{ fontSize: '0.65rem', color: '#4b5563' }}>{lbl}</span>
-            <input type="number" step="0.1" value={value[i]} onChange={e => update(i, e.target.value)} style={S.numInput} />
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ── Formulário de configuração ────────────────────────────────────────────────
-function ConfigForm({ cfg, onChange, currentPose }) {
-  const set = (key, val) => onChange({ ...cfg, [key]: val })
-
-  const toggleTopic = t => {
-    const next = cfg.topics.includes(t) ? cfg.topics.filter(x => x !== t) : [...cfg.topics, t]
-    set('topics', next)
-  }
-
-  const usarPoseAtual = () => {
-    if (!currentPose?.valid) return
-    set('initial_pose', [
-      parseFloat(currentPose.x.toFixed(3)),
-      parseFloat(currentPose.y.toFixed(3)),
-      parseFloat(currentPose.yaw.toFixed(3)),
-    ])
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-
-      {/* Comando + Robô + Rota */}
-      <div style={S.section}>
-        <div style={S.row}>
-          <div style={S.field}>
-            <span style={S.label}>Comando</span>
-            <CmdToggle value={cfg.command} onChange={v => set('command', v)} />
-          </div>
-          <div style={{ ...S.field, maxWidth: '110px' }}>
-            <span style={S.label}>Robô</span>
-            <select value={cfg.robot} onChange={e => set('robot', e.target.value)} style={S.select}>
-              <option value="default">único</option>
-              <option value="tb1">tb1</option>
-              <option value="tb2">tb2</option>
-            </select>
-          </div>
-        </div>
-        <div style={S.field}>
-          <span style={S.label}>Nome da rota</span>
-          <input value={cfg.route} onChange={e => set('route', e.target.value)} placeholder="percurso_initial" style={S.input} />
-        </div>
-      </div>
-
-      {/* Coleta */}
-      <div style={S.section}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-          <input type="checkbox" checked={cfg.collect} onChange={e => set('collect', e.target.checked)} style={{ accentColor: '#6ee7b7', width: 16, height: 16 }} />
-          <span style={{ fontSize: '0.85rem', color: cfg.collect ? '#6ee7b7' : '#8b92a8', fontWeight: 600 }}>Gravar bag</span>
-        </label>
-        {cfg.collect && (
-          <div>
-            <span style={S.label}>Tópicos</span>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {ALL_TOPICS.map(t => (
-                <label key={t} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer',
-                  background: cfg.topics.includes(t) ? 'rgba(99,102,241,0.12)' : 'transparent',
-                  border: `1px solid ${cfg.topics.includes(t) ? '#6366f1' : '#2a3142'}`,
-                  borderRadius: '6px', padding: '0.3rem 0.65rem' }}>
-                  <input type="checkbox" checked={cfg.topics.includes(t)} onChange={() => toggleTopic(t)} style={{ accentColor: '#6366f1', margin: 0 }} />
-                  <span style={{ fontSize: '0.82rem', color: cfg.topics.includes(t) ? '#e6e9ef' : '#8b92a8', fontFamily: 'monospace' }}>{t}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Pose inicial */}
-      <div style={S.section}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={S.label}>Pose inicial</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            {currentPose?.valid && (
-              <span style={{ fontSize: '0.7rem', color: '#4b5563', fontFamily: 'monospace' }}>
-                ({currentPose.x.toFixed(2)}, {currentPose.y.toFixed(2)})
-              </span>
-            )}
-            <button onClick={usarPoseAtual} disabled={!currentPose?.valid}
-              style={{ ...btn('#161a22', currentPose?.valid ? '#6366f1' : '#2a3142', !currentPose?.valid), fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
-              ⊕ Pose atual
-            </button>
-          </div>
-        </div>
-        <XYYaw value={cfg.initial_pose} onChange={v => set('initial_pose', v)} />
-      </div>
-
-      {/* Waypoints / Retorno */}
-      <div style={S.section}>
-        {cfg.command === 'record' ? (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={S.label}>Waypoints <span style={{ color: '#6366f1', fontWeight: 400 }}>— clica no mapa</span></span>
-              <button onClick={() => set('points', [])}
-                style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.72rem', padding: 0 }}>
-                🗑 limpar
-              </button>
-            </div>
-
-            {/* Percursos predefinidos */}
-            <div>
-              <span style={{ ...S.label, marginBottom: '0.4rem' }}>Percursos predefinidos</span>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {[
-                  { label: 'Linha 1m',   pts: [[1,0,0],[2,0,0],[3,0,0]] },
-                  { label: 'Linha 2m',   pts: [[0,1,0],[0,2,0],[0,3,0]] },
-                  { label: 'Quadrado',   pts: [[1,0,0],[1,1,0],[0,1,0],[0,0,0]] },
-                  { label: 'L',          pts: [[2,0,0],[4,0,0],[4,2,0]] },
-                  { label: 'Zigzag',     pts: [[1,0,0],[2,1,0],[3,0,0],[4,1,0]] },
-                ].map(({ label, pts }) => (
-                  <button key={label} onClick={() => set('points', pts)}
-                    style={{ background: '#0d0f14', border: '1px solid #2a3142', borderRadius: '6px',
-                             color: '#8b92a8', cursor: 'pointer', fontSize: '0.72rem',
-                             padding: '0.25rem 0.55rem', fontFamily: 'inherit' }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <WaypointList points={cfg.points} onChange={v => set('points', v)} />
-          </>
-        ) : (
-          <XYYaw label="Retornar ao início antes do replay" value={cfg.return_to_start} onChange={v => set('return_to_start', v)} />
-        )}
-      </div>
-    </div>
-  )
-}
-
 // ── App principal ─────────────────────────────────────────────────────────────
 export default function App() {
   const [cfg, setCfg]               = useState(DEFAULT_CFG)
-  const [jobId, setJobId]           = useState(null)
-  const [job, setJob]               = useState(null)
-  const [running, setRunning]       = useState(false)
+  const { jobId, job, running, setRunning, startPolling, stopPolling, resetJob } = useJobPolling()
   const [error, setError]           = useState(null)
   const [showResult, setShowResult] = useState(false)
-  const [status, setStatus]         = useState({ robots: [], pose: { x: 0, y: 0, yaw: 0, valid: false } })
+  const status                      = useFleetStatus()
+  const { routes, loading: routesLoading, error: routesError, refreshRoutes } = useRoutes(cfg.robot)
   const [resetMsg, setResetMsg]     = useState(null)
   const [resetting, setResetting]   = useState(false)
 
@@ -727,7 +544,6 @@ export default function App() {
   const [extraProfiles, setExtraProfiles]     = useState([])
 
   const outputRef   = useRef(null)
-  const pollRef     = useRef(null)
   const panelRef    = useRef(null)
   const discoverRef = useRef(null)
 
@@ -741,28 +557,13 @@ export default function App() {
     return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  // Polling de status
-  useEffect(() => {
-    const t = setInterval(() =>
-      fetch(`${API}/status`).then(r => r.json()).then(d => d && setStatus(d)).catch(() => {}), 300)
-    return () => clearInterval(t)
-  }, [])
-
-  const startPolling = useCallback(id => {
-    if (pollRef.current) clearInterval(pollRef.current)
-    pollRef.current = setInterval(async () => {
-      const r = await fetch(`${API}/job/${id}`).catch(() => null)
-      if (!r) return
-      const data = await r.json().catch(() => null)
-      if (!data) return
-      setJob(data)
-      if (!data.running) { clearInterval(pollRef.current); setRunning(false) }
-    }, 500)
-  }, [])
-
   useEffect(() => {
     if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight
   }, [job?.lines?.length])
+
+  useEffect(() => {
+    if (job && !job.running && job.exit_code === 0) refreshRoutes()
+  }, [job?.running, job?.exit_code, refreshRoutes])
 
   // Adiciona waypoint vindo do clique no mapa
   const handleMapAddWaypoint = useCallback((x, y) => {
@@ -776,13 +577,12 @@ export default function App() {
     setNavigating(true)
     try {
       for (const [x, y, yaw] of cfg.points) {
-        const r = await fetch(`${API}/go_to_point?x=${x}&y=${y}&yaw=${yaw}`, { method: 'POST' })
-        const d = await r.json()
+        const d = await goToPoint({ robotId: cfg.robot, x, y, yaw })
         if (!d.success) break
         // Aguarda robot chegar (polling nav_state)
         await new Promise(res => {
           const t = setInterval(async () => {
-            const s = await fetch(`${API}/status`).then(r => r.json()).catch(() => null)
+            const s = await getStatus().catch(() => null)
             if (!s) return
             const nav = s.robots?.[0]?.nav_state
             if (nav === 'idle' || nav === 'failed') { clearInterval(t); res() }
@@ -791,7 +591,7 @@ export default function App() {
         })
       }
     } finally { setNavigating(false) }
-  }, [cfg.points])
+  }, [cfg.points, cfg.robot])
 
   // Prop obrigatória do MapView — mantida como no-op (clique já adiciona waypoint)
   const handleMapNavigateTo = useCallback(() => {}, [])
@@ -802,20 +602,15 @@ export default function App() {
     if (profile.type === 'ssh') { setConnStatus('error'); setConnMsg(`SSH para ${profile.host} ainda não implementado.`); return }
     setConnStatus('connecting'); setConnMsg('')
     try {
-      const r = await fetch(`${API}/status`, { signal: AbortSignal.timeout(4000) })
-      await r.json()
-      if (r.ok) { setConnStatus('connected'); setConnMsg('Backend respondendo.'); setConnPanel(false) }
-      else throw new Error(`HTTP ${r.status}`)
+      await getStatus({ signal: AbortSignal.timeout(4000) })
+      setConnStatus('connected'); setConnMsg('Backend respondendo.'); setConnPanel(false)
     } catch (e) { setConnStatus('error'); setConnMsg(`Backend não respondeu: ${e.message}`) }
   }
 
   const discoverRobots = async () => {
     setDiscovering(true); setDiscovered([]); setDiscoverError(null)
     try {
-      const url = subnet.trim() ? `${API}/discover_robots?subnet=${encodeURIComponent(subnet.trim())}` : `${API}/discover_robots`
-      const r = await fetch(url, { signal: AbortSignal.timeout(40000) })
-      if (!r.ok) { setDiscoverError(`Erro HTTP ${r.status}`); return }
-      const data = await r.json()
+      const data = await fetchDiscoveredRobots({ subnet, signal: AbortSignal.timeout(40000) })
       if (data.error) { setDiscoverError(data.error); return }
       setDiscovered(data.found || [])
       if (!data.found?.length) setDiscoverError(`Nenhum host encontrado em ${data.subnet_scanned || '(auto)'}.0/24`)
@@ -826,8 +621,7 @@ export default function App() {
   const testSSH = async ip => {
     setTestingSSH(prev => ({ ...prev, [ip]: 'testing' }))
     try {
-      const r = await fetch(`${API}/test_ssh`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ host: ip, user: sshUser }) })
-      const data = await r.json()
+      const data = await testSsh({ host: ip, user: sshUser })
       const st = data.success && data.has_ros2 ? 'ok' : data.success ? 'no_ros' : 'error'
       setTestingSSH(prev => ({ ...prev, [ip]: st }))
       if (st === 'ok') setExtraProfiles(prev => prev.find(p => p.host === ip) ? prev : [...prev, { id: `ssh_${ip}`, label: `SSH ${ip} (${sshUser})`, type: 'ssh', host: ip, user: sshUser }])
@@ -840,22 +634,21 @@ export default function App() {
     if (cfg.command === 'record' && !cfg.points.length){ setError('Adiciona pelo menos 1 waypoint.'); return }
     if (cfg.collect && !cfg.topics.length)             { setError('Seleciona pelo menos 1 tópico.'); return }
 
-    setRunning(true); setJob(null); setJobId(null)
-    const r = await fetch(`${API}/run_config`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cfg),
-    }).catch(e => { setRunning(false); setError(`Erro: ${e.message}`); return null })
-    if (!r) return
-    const data = await r.json().catch(() => null)
-    if (!data?.job_id) { setRunning(false); setError(data?.message || 'Erro ao iniciar job'); return }
-    setJobId(data.job_id)
-    startPolling(data.job_id)
+    resetJob(); setRunning(true)
+    try {
+      const data = await runConfig(cfg)
+      if (!data?.job_id) { setRunning(false); setError(data?.message || 'Erro ao iniciar job'); return }
+      startPolling(data.job_id)
+    } catch (e) {
+      setRunning(false)
+      setError(`Erro: ${e.message}`)
+    }
   }
 
   const resetToOrigin = async () => {
     setResetting(true); setResetMsg(null)
     try {
-      const r = await fetch(`${API}/go_to_point?x=0&y=0&yaw=0`, { method: 'POST' })
-      const data = await r.json()
+      const data = await goToPoint({ robotId: cfg.robot, x: 0, y: 0, yaw: 0 })
       setResetMsg(data.success ? 'ok' : (data.message || 'erro'))
     } catch (e) { setResetMsg(`erro: ${e.message}`) }
     finally { setResetting(false); setTimeout(() => setResetMsg(null), 6000) }
@@ -993,7 +786,15 @@ export default function App() {
         {/* Coluna esquerda: formulário */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', overflowY: 'auto', paddingRight: '0.2rem', minHeight: 0 }}>
           <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6ee7b7', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>Configuração</span>
-          <ConfigForm cfg={cfg} onChange={setCfg} currentPose={pose} onAddWaypoint={handleMapAddWaypoint} />
+          <ConfigForm
+            cfg={cfg}
+            onChange={setCfg}
+            currentPose={pose}
+            routeNames={routes}
+            routesLoading={routesLoading}
+            routesError={routesError}
+            onRefreshRoutes={refreshRoutes}
+          />
 
           {!isConnected && (
             <div style={{ color: '#fbbf24', fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(251,191,36,0.08)', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.2)' }}>
@@ -1028,7 +829,7 @@ export default function App() {
               {running ? '⏳ A executar…' : `▶ Executar ${cfg.command}`}
             </button>
             {running && (
-              <button onClick={() => { if (pollRef.current) clearInterval(pollRef.current); setRunning(false) }}
+              <button onClick={stopPolling}
                 style={btn('#3a1a1a', '#f87171')}>■ Parar</button>
             )}
           </div>

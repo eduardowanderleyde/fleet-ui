@@ -22,14 +22,18 @@ fleet-ui/
 │   │   │   └── launch/
 │   │   │       ├── turtlebot4_sim.launch.py   # Terminal 1
 │   │   │       └── fleet.launch.py            # Terminal 2
-│   │   ├── fleet_data_collector/ # MCAP sensor recording
-│   │   └── route_tool/           # Route utility (legacy)
+│   │   └── fleet_data_collector/ # MCAP sensor recording
+│   ├── scripts/            # CLI tools and healthcheck
+│   │   ├── experiment_repeatability.py
+│   │   ├── analyze_runs.py
+│   │   └── health_check.py
+│   ├── docs/               # Experiment protocol
 │   ├── routes/             # Recorded route YAMLs  (created at runtime)
 │   ├── collections/        # MCAP bag files         (created at runtime)
 │   └── fix_ament_hooks.sh  # Required after every colcon build (see below)
 ├── backend/                # FastAPI + ROS 2 bridge
 ├── frontend/               # React + Vite
-└── scripts/                # CLI tools: experiment_repeatability.py, analyze_runs.py
+└── check.sh                # Local frontend/Python validation
 ```
 
 ---
@@ -159,6 +163,30 @@ npm run dev
 
 Open **http://localhost:5173** in your browser.
 
+### Optional healthcheck
+
+After starting the four processes, run:
+
+```bash
+cd ~/fleet-ui
+python3 fleet_ws/scripts/health_check.py
+```
+
+Useful variants:
+
+```bash
+# Only verify local files/tools, without live services.
+python3 fleet_ws/scripts/health_check.py --skip-http --skip-ros
+
+# Verify a backend/frontend running on another host.
+python3 fleet_ws/scripts/health_check.py \
+  --backend-url http://192.168.1.10:8000 \
+  --frontend-url http://192.168.1.10:5173
+```
+
+The healthcheck reports missing commands, workspace packages, HTTP readiness,
+ROS services/topics, and the Nav2 `/navigate_to_pose` action.
+
 ---
 
 ## After modifying ROS 2 packages
@@ -198,3 +226,32 @@ python3 scripts/analyze_runs.py \
 ```
 
 Output: `summary.json` (RMSE metrics), `trajectory_overlay.png`, per-run CSVs.
+
+---
+
+## Development checks
+
+Before opening a pull request or after changing frontend/backend scripts:
+
+```bash
+cd ~/fleet-ui
+bash check.sh
+```
+
+This compiles the main Python files and runs `npm --prefix frontend run build`.
+It does not start ROS, Gazebo, or Nav2.
+
+---
+
+## Backend configuration
+
+The FastAPI backend accepts these optional environment variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `FLEET_WS` | repo root | Fleet UI repository root |
+| `FLEET_ROS_WS` | `fleet_ws` under the repo root | ROS 2 colcon workspace |
+| `FLEET_CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Comma-separated allowed frontend origins |
+| `FLEET_DISCOVERY_WORKERS` | `32` | Worker count for SSH port discovery |
+| `FLEET_SSH_STRICT_HOST_KEY_CHECKING` | `accept-new` | SSH host-key policy used by `/api/test_ssh` |
+| `FLEET_SSH_KNOWN_HOSTS` | unset | Optional custom known_hosts file for SSH tests |
