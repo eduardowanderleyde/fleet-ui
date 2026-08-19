@@ -481,6 +481,19 @@ def _write_export(
 ) -> None:
     if args is not None and getattr(args, "initial_pose", None):
         payload = {**payload, "initial_pose": args.initial_pose}
+    if args is not None:
+        protocol_meta = {
+            "protocol_id": getattr(args, "protocol_id", "") or None,
+            "replicate_id": getattr(args, "replicate_id", None),
+            "replicate_total": getattr(args, "replicate_total", None),
+            "condition": getattr(args, "condition", "") or None,
+            "notes": getattr(args, "notes", "") or None,
+            "argv": sys.argv,
+        }
+        payload = {
+            **payload,
+            "protocol_metadata": {k: v for k, v in protocol_meta.items() if v not in (None, "")},
+        }
     payload = {
         **payload,
         "finished_at": datetime.now(timezone.utc).isoformat(),
@@ -488,6 +501,23 @@ def _write_export(
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
     print(f"\n[OK] Resumo exportado: {path}")
+
+
+def _add_protocol_metadata_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--protocol-id", default="", help="Identificador do protocolo/cenário experimental")
+    parser.add_argument("--replicate-id", type=int, default=None, help="Índice da réplica atual (1..N)")
+    parser.add_argument("--replicate-total", type=int, default=None, help="Total planejado de réplicas")
+    parser.add_argument("--condition", default="", help="Condição experimental controlada (ex.: slam_reset=false)")
+    parser.add_argument("--notes", default="", help="Notas livres registradas no export JSON")
+
+
+def _replicate_export_path(base_path: Optional[str], replicate_id: int) -> Optional[str]:
+    if not base_path:
+        return None
+    path = Path(base_path)
+    suffix = path.suffix or ".json"
+    stem = path.stem if path.suffix else path.name
+    return str(path.with_name(f"{stem}_r{replicate_id:02d}{suffix}"))
 
 
 def cmd_record(args: argparse.Namespace) -> int:
@@ -955,6 +985,7 @@ def main() -> int:
         default=None,
         help="Publica /initialpose (AMCL) em map antes da coleta; yaw em radianos. Equiv. 2D Pose no RViz.",
     )
+    _add_protocol_metadata_args(pr)
     pr.set_defaults(func=cmd_record)
 
     pb = sub.add_parser("replay", help="Coleta + play_route da rota salva")
@@ -1005,10 +1036,38 @@ def main() -> int:
         default=None,
         help="Antes da coleta: navega para esta pose via go_to_point (retorno ao início da rota).",
     )
+    pb.add_argument("--repeat", type=int, default=1, help="Número de réplicas de replay a executar em sequência")
+    pb.add_argument(
+        "--continue-on-failure",
+        action="store_true",
+        help="Continua as próximas réplicas mesmo se uma réplica falhar",
+    )
+    _add_protocol_metadata_args(pb)
     pb.set_defaults(func=cmd_replay)
 
     args = p.parse_args()
     _apply_single_robot(args)
+    if args.command == "replay" and args.repeat < 1:
+        print("--repeat deve ser >= 1.", file=sys.stderr)
+        return 2
+    if args.command == "replay" and args.repeat > 1:
+        base_export = args.export
+        original_replicate_id = args.replicate_id
+        original_replicate_total = args.replicate_total
+        worst_code = 0
+        for idx in range(1, args.repeat + 1):
+            print(f"\n=== Réplica replay {idx}/{args.repeat} ===")
+            args.replicate_id = original_replicate_id or idx
+            args.replicate_total = original_replicate_total or args.repeat
+            args.export = _replicate_export_path(base_export, idx)
+            code = cmd_replay(args)
+            worst_code = max(worst_code, code)
+            if code != 0 and not args.continue_on_failure:
+                return code
+        args.export = base_export
+        args.replicate_id = original_replicate_id
+        args.replicate_total = original_replicate_total
+        return worst_code
     return args.func(args)
 
 

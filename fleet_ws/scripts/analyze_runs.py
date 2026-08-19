@@ -8,6 +8,7 @@ Uso (com workspace ROS 2 sourceado):
   source install/setup.bash
   python3 scripts/analyze_runs.py collections/default/run_a collections/default/run_b
   python3 scripts/analyze_runs.py bag1 bag2 --trajectory-topic auto   # prefere /amcl_pose se existir
+  python3 scripts/analyze_runs.py bag1 bag2 --resample-mode time --resample-samples 100
 
 A **referência** é sempre o **primeiro** bag da lista (índice 0).
 
@@ -259,16 +260,62 @@ def _path_length(x: np.ndarray, y: np.ndarray) -> float:
     return float(np.sum(np.sqrt(dx * dx + dy * dy)))
 
 
-def _resample_pair(
+def _resample_pair_by_index(
     xy1: np.ndarray, xy2: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Mesmo número de pontos (subamostragem uniforme) para comparar trajetórias."""
+    """Mesmo número de pontos por subamostragem uniforme de índice."""
     n = min(len(xy1), len(xy2))
     if n < 2:
         return xy1, xy2
     i1 = np.linspace(0, len(xy1) - 1, n).astype(int)
     i2 = np.linspace(0, len(xy2) - 1, n).astype(int)
     return xy1[i1], xy2[i2]
+
+
+def _normalised_time_grid(t: np.ndarray) -> np.ndarray:
+    if len(t) < 2:
+        return np.zeros(len(t), dtype=np.float64)
+    start = float(t[0])
+    end = float(t[-1])
+    duration = end - start
+    if duration <= 1e-9:
+        return np.linspace(0.0, 1.0, len(t), dtype=np.float64)
+    return (t - start) / duration
+
+
+def _resample_xy_by_time(t: np.ndarray, xy: np.ndarray, samples: int) -> np.ndarray:
+    """Interpola x/y em grade temporal normalizada [0, 1]."""
+    if len(xy) < 2 or samples < 2:
+        return xy
+    tn = _normalised_time_grid(t)
+    # Remove timestamps duplicados para numpy.interp manter monotonicidade estrita.
+    unique_t, unique_idx = np.unique(tn, return_index=True)
+    unique_xy = xy[unique_idx]
+    if len(unique_t) < 2:
+        return _resample_pair_by_index(xy, xy)[0]
+    grid = np.linspace(0.0, 1.0, samples, dtype=np.float64)
+    return np.column_stack([
+        np.interp(grid, unique_t, unique_xy[:, 0]),
+        np.interp(grid, unique_t, unique_xy[:, 1]),
+    ])
+
+
+def _resample_pair(
+    xy1: np.ndarray,
+    xy2: np.ndarray,
+    *,
+    t1: Optional[np.ndarray] = None,
+    t2: Optional[np.ndarray] = None,
+    mode: str = "time",
+    samples: int = 100,
+) -> Tuple[np.ndarray, np.ndarray]:
+    if mode == "index":
+        return _resample_pair_by_index(xy1, xy2)
+    if mode != "time":
+        raise ValueError(f"resample mode inválido: {mode}")
+    if t1 is None or t2 is None:
+        return _resample_pair_by_index(xy1, xy2)
+    return _resample_xy_by_time(t1, xy1, samples), _resample_xy_by_time(t2, xy2, samples)
 
 
 def _rmse(a: np.ndarray, b: np.ndarray) -> float:
@@ -374,7 +421,22 @@ def main() -> int:
         default="auto",
         help="Fonte da trajetória: auto=/amcl_pose se existir senão /odom; amcl_pose=obrigatório no bag",
     )
+    parser.add_argument(
+        "--resample-mode",
+        choices=("time", "index"),
+        default="time",
+        help="Como alinhar trajetórias para RMSE: time=interpolação temporal normalizada; index=subamostragem legada",
+    )
+    parser.add_argument(
+        "--resample-samples",
+        type=int,
+        default=100,
+        help="Número de amostras na grade temporal normalizada quando --resample-mode=time",
+    )
     args = parser.parse_args()
+    if args.resample_samples < 2:
+        print("--resample-samples deve ser >= 2.", file=sys.stderr)
+        return 2
 
     try:
         _need_ros()
@@ -425,7 +487,14 @@ def main() -> int:
     ]
     for i in range(n):
         for j in range(i + 1, n):
-            a, b = _resample_pair(trajectories[i], trajectories[j])
+            a, b = _resample_pair(
+                trajectories[i],
+                trajectories[j],
+                t1=times[i],
+                t2=times[j],
+                mode=args.resample_mode,
+                samples=args.resample_samples,
+            )
             r = _rmse(a, b)
             rmse_matrix[i][j] = r
             rmse_matrix[j][i] = r
@@ -448,7 +517,14 @@ def main() -> int:
             "duration_ratio_vs_ref": dur_ratio,
         }
         if i != ref_idx:
-            a, b = _resample_pair(trajectories[ref_idx], trajectories[i])
+            a, b = _resample_pair(
+                trajectories[ref_idx],
+                trajectories[i],
+                t1=times[ref_idx],
+                t2=times[i],
+                mode=args.resample_mode,
+                samples=args.resample_samples,
+            )
             entry["rmse_vs_ref_m"] = _rmse(a, b)
             entry["mean_pointwise_distance_vs_ref_m"] = _mean_pointwise_distance(a, b)
         else:
@@ -470,6 +546,11 @@ def main() -> int:
         "pairwise_rmse_m": rmse_matrix,
         "vs_reference": vs_reference,
         "labels": labels,
+        "resampling": {
+            "mode": args.resample_mode,
+            "samples": args.resample_samples if args.resample_mode == "time" else None,
+            "time_grid": "normalised_0_1" if args.resample_mode == "time" else None,
+        },
     }
     summary_path = out_dir / "summary.json"
     with open(summary_path, "w", encoding="utf-8") as f:
@@ -518,7 +599,7 @@ def main() -> int:
             f"poses={s.num_poses}  topic={s.traj_topic}"
         )
     if n > 1:
-        print("\n--- RMSE (m) entre pares (subamostragem uniforme) ---")
+        print(f"\n--- RMSE (m) entre pares ({args.resample_mode}) ---")
         for i in range(n):
             for j in range(i + 1, n):
                 r = rmse_matrix[i][j]

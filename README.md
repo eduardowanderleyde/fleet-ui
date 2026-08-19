@@ -222,10 +222,35 @@ source /opt/ros/jazzy/setup.bash && source install/setup.bash
 python3 scripts/analyze_runs.py \
   collections/default/baseline/*.mcap \
   collections/default/replay_1/*.mcap \
-  --output-dir analysis_results/
+  --output-dir analysis_results/ \
+  --resample-mode time \
+  --resample-samples 100
 ```
 
 Output: `summary.json` (RMSE metrics), `trajectory_overlay.png`, per-run CSVs.
+
+`analyze_runs.py` aligns trajectories with normalized temporal interpolation by
+default (`--resample-mode time`). Use `--resample-mode index` only to reproduce
+legacy reports based on uniform index subsampling.
+
+For controlled replay campaigns with multiple replicas:
+
+```bash
+cd ~/fleet-ui/fleet_ws
+source /opt/ros/jazzy/setup.bash && source install/setup.bash
+python3 scripts/experiment_repeatability.py replay \
+  --single-robot \
+  --route percurso_initial \
+  --repeat 5 \
+  --return-to-start 0,0,0 \
+  --protocol-id val01 \
+  --condition slam_reset=false \
+  --export runs/val01_replay.json
+```
+
+With `--repeat N`, each replay writes a separate export file such as
+`val01_replay_r01.json`, including protocol metadata (`protocol_id`,
+`replicate_id`, `replicate_total`, `condition`, command line and notes).
 
 ---
 
