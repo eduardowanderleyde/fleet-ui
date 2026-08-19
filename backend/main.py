@@ -14,16 +14,21 @@ import threading
 import zlib
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Literal
 
 import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+
+from ros_bridge import RosBridge
 
 # Raiz do projeto (fleet-ui/). Use FLEET_WS para sobrescrever.
 WORKSPACE = os.environ.get("FLEET_WS") or str(Path(__file__).resolve().parent.parent)
 # Workspace colcon ROS 2 (fleet_ws/ dentro da raiz)
 ROS_WS = os.environ.get("FLEET_ROS_WS") or str(Path(WORKSPACE) / "fleet_ws")
+_bridge = RosBridge(ROS_WS, ros_distro=os.environ.get("ROS_DISTRO", "jazzy"))
 
 # Status da frota (atualizado pelo subscriber ROS em thread)
 _fleet_status: dict = {"robots": []}
@@ -34,31 +39,11 @@ _ws_clients: list[WebSocket] = []
 
 
 def _ros_env():
-    return {
-        **os.environ,
-        "ROS_DOMAIN_ID": os.environ.get("ROS_DOMAIN_ID", "0"),
-    }
+    return _bridge.ros_env()
 
 
 def _run_ros2_service(srv: str, srv_type: str, request_json: str, timeout: int = 10) -> tuple[bool, str]:
-    cmd = f"source /opt/ros/jazzy/setup.bash 2>/dev/null; source {ROS_WS}/install/setup.bash 2>/dev/null; ros2 service call {srv} {srv_type} '{request_json}'"
-    try:
-        r = subprocess.run(
-            ["bash", "-c", cmd],
-            env=_ros_env(),
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            cwd=ROS_WS,
-        )
-        out = (r.stdout or "").strip() + (r.stderr or "").strip()
-        if r.returncode != 0:
-            return False, out or "ros2 service call failed"
-        return True, out
-    except subprocess.TimeoutExpired:
-        return False, "timeout"
-    except Exception as e:
-        return False, str(e)
+    return _bridge.run_service(srv, srv_type, request_json, timeout=timeout)
 
 
 def _encode_map_png(data: list, width: int, height: int) -> bytes:
@@ -98,6 +83,40 @@ def _encode_map_png(data: list, width: int, height: int) -> bytes:
     png += png_chunk(b'IDAT', compressed)
     png += png_chunk(b'IEND', b'')
     return png
+
+
+class RunConfigRequest(BaseModel):
+    command: Literal["record", "replay"] = "record"
+    robot: str = "default"
+    route: str = "percurso1"
+    collect: bool = True
+    topics: list[str] = Field(default_factory=lambda: ["scan", "odom", "imu", "pose"])
+    initial_pose: list[float] | None = None
+    points: list[list[float]] = Field(default_factory=list)
+    return_to_start: list[float] | None = None
+
+
+class SaveRouteWaypointsRequest(BaseModel):
+    robot_id: str = ""
+    route_name: str
+    waypoints: list[dict]
+
+
+class SshTestRequest(BaseModel):
+    host: str
+    user: str = "ubuntu"
+    port: int = 22
+
+
+def _model_dump(model: BaseModel) -> dict:
+    if hasattr(model, "model_dump"):
+        return model.model_dump()
+    return model.dict()
+
+
+def _cors_origins() -> list[str]:
+    raw = os.environ.get("FLEET_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
 
 @asynccontextmanager
@@ -214,7 +233,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Fleet UI API", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=_cors_origins(), allow_methods=["*"], allow_headers=["*"])
 
 
 @app.get("/api/status")
@@ -250,47 +269,16 @@ _jobs: dict = {}   # job_id → {running, lines, result, error}
 
 
 def _build_cmd(cfg: dict) -> list[str]:
-    cmd = cfg.get("command", "record")
-    robot = cfg.get("robot", "")
-    single = not robot or robot == "default"
-    route = cfg.get("route", "percurso1")
-    collect = cfg.get("collect", True)
-    topics = cfg.get("topics", ["scan", "odom", "imu", "pose"])
-    ip = cfg.get("initial_pose")
-    args = [
-        "python3", str(Path(ROS_WS) / "scripts" / "experiment_repeatability.py"),
-        cmd, "--route", route,
-    ]
-    if single:
-        args += ["--single-robot"]
-    else:
-        args += ["--robot", robot]
-    if not collect:
-        args += ["--skip-collection"]
-    elif topics:
-        args += ["--topics"] + topics
-    # só adiciona --initial-pose se tiver valor não-nulo
-    if ip is not None and any(v != 0 for v in ip):
-        args += [f"--initial-pose={ip[0]},{ip[1]},{ip[2]}"]
-    if cmd == "record":
-        pts = cfg.get("points", [])
-        if pts:
-            joined = ";".join(f"{p[0]},{p[1]},{p[2] if len(p) > 2 else 0}" for p in pts)
-            # usa = para evitar confusão do argparse com valores negativos
-            args += [f"--points={joined}"]
-    elif cmd == "replay":
-        rts = cfg.get("return_to_start")
-        if rts and any(v != 0 for v in rts):
-            args += [f"--return-to-start={rts[0]},{rts[1]},{rts[2]}"]
-    return args
+    return _bridge.build_experiment_cmd(cfg)
 
 
 @app.post("/api/run_config")
-async def run_config(cfg: dict):
+async def run_config(cfg: RunConfigRequest):
+    cfg_data = _model_dump(cfg)
     job_id = str(uuid.uuid4())[:8]
     export_path = str(Path(ROS_WS) / f"_job_{job_id}.json")
     try:
-        cmd = _build_cmd(cfg)
+        cmd = _build_cmd(cfg_data)
         cmd += ["--export", export_path]
     except Exception as e:
         return JSONResponse({"success": False, "message": str(e)}, status_code=400)
@@ -346,12 +334,13 @@ async def get_job(job_id: str):
 
 
 @app.post("/api/save_route_waypoints")
-async def save_route_waypoints(body: dict):
+async def save_route_waypoints(body: SaveRouteWaypointsRequest):
     """Salva lista de waypoints diretamente como yaml (sem precisar do record flow)."""
     import yaml
-    robot_id = body.get("robot_id", "") or ""
-    route_name = (body.get("route_name") or "").strip()
-    waypoints = body.get("waypoints", [])
+    data_in = _model_dump(body)
+    robot_id = data_in.get("robot_id", "") or ""
+    route_name = (data_in.get("route_name") or "").strip()
+    waypoints = data_in.get("waypoints", [])
     if not route_name:
         return JSONResponse(content={"success": False, "message": "route_name vazio"}, status_code=400)
     if not waypoints:
@@ -518,94 +507,19 @@ async def discover_robots(subnet: str = ""):
     subnet ex: '192.168.1' (varre .1–.254).
     Se omitido, detecta automaticamente a subnet local.
     """
-    import ipaddress
-    import socket
-    import concurrent.futures
-
-    # Detecta subnet local se não informada
-    if not subnet:
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
-            local_ip = s.getsockname()[0]
-            s.close()
-            subnet = ".".join(local_ip.split(".")[:3])
-            print(f"[discover] IP local: {local_ip}  subnet: {subnet}")
-        except Exception as e:
-            print(f"[discover] falhou auto-detecção: {e}")
-            return {"found": [], "subnet_scanned": "", "error": "Não foi possível detectar subnet local. Informe manualmente (ex: 192.168.1)"}
-
-    subnet = subnet.strip()
-
-    # Valida formato
-    try:
-        parts = subnet.split(".")
-        if len(parts) != 3 or not all(p.isdigit() and 0 <= int(p) <= 255 for p in parts):
-            return {"found": [], "subnet_scanned": subnet, "error": f"Subnet inválida: {subnet}. Use formato X.X.X (ex: 192.168.1)"}
-    except Exception:
-        return {"found": [], "subnet_scanned": subnet, "error": f"Subnet inválida: {subnet}"}
-
-    targets = [f"{subnet}.{i}" for i in range(1, 255)]
-
-    def _check(ip: str) -> dict | None:
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(0.3)
-            result = sock.connect_ex((ip, 22))
-            sock.close()
-            if result != 0:
-                return None
-            # Tenta resolver hostname
-            try:
-                hostname = socket.gethostbyaddr(ip)[0]
-            except Exception:
-                hostname = ip
-            # Heurística: robotics hostnames
-            is_robot = any(kw in hostname.lower() for kw in ("tb", "turtle", "robot", "pi", "nano", "jetson", "ros"))
-            return {"ip": ip, "hostname": hostname, "ssh": True, "likely_robot": is_robot}
-        except Exception:
-            return None
-
-    found = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=60) as ex:
-        for res in ex.map(_check, targets):
-            if res:
-                found.append(res)
-
-    found.sort(key=lambda x: (not x["likely_robot"], x["ip"]))
-    return {"found": found, "subnet_scanned": subnet}
+    return _bridge.discover_robots(subnet)
 
 
 @app.post("/api/test_ssh")
-async def test_ssh(body: dict):
+async def test_ssh(body: SshTestRequest):
     """Testa SSH num host: verifica conexão e presença do ROS 2."""
-    host = (body.get("host") or "").strip()
-    user = (body.get("user") or "ubuntu").strip()
-    port = int(body.get("port") or 22)
+    data = _model_dump(body)
+    host = (data.get("host") or "").strip()
+    user = (data.get("user") or "ubuntu").strip()
+    port = int(data.get("port") or 22)
     if not host:
         return JSONResponse({"success": False, "message": "host vazio"}, status_code=400)
-    try:
-        cmd = (
-            f"ssh -o ConnectTimeout=4 -o StrictHostKeyChecking=no -o BatchMode=yes "
-            f"-p {port} {user}@{host} "
-            f"'which ros2 && ros2 --version 2>/dev/null || echo NO_ROS2'"
-        )
-        r = subprocess.run(["bash", "-c", cmd], capture_output=True, text=True, timeout=8)
-        out = (r.stdout or "").strip()
-        err = (r.stderr or "").strip()
-        if r.returncode != 0:
-            return {"success": False, "message": err or f"SSH falhou (exit {r.returncode})"}
-        has_ros = "NO_ROS2" not in out and out
-        return {
-            "success": True,
-            "has_ros2": has_ros,
-            "ros2_version": out if has_ros else None,
-            "message": f"ROS 2 encontrado: {out}" if has_ros else "SSH OK mas ROS 2 não encontrado",
-        }
-    except subprocess.TimeoutExpired:
-        return {"success": False, "message": "Timeout ao conectar via SSH"}
-    except Exception as e:
-        return {"success": False, "message": str(e)}
+    return _bridge.test_ssh(host=host, user=user, port=port)
 
 
 if __name__ == "__main__":
