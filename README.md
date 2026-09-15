@@ -209,6 +209,33 @@ Notes:
 - ROS 2 nodes run in the same container, which avoids cross-container DDS
   discovery issues on Docker Desktop.
 
+#### No Gazebo/rviz window appears — this is expected
+
+Docker Desktop on Windows has no X server, so this mode never opens a Gazebo
+GUI window. `rviz2` is still launched by `turtlebot4_sim.launch.py` and will
+crash on startup with `qt.qpa.xcb: could not connect to display` /
+`process has died [pid ..., exit code -6]` — that is harmless, the rest of
+the simulation keeps running normally. Use the web UI at
+`http://localhost:5173` to see the map and the robot instead of the native
+Gazebo/rviz windows.
+
+To confirm the stack is actually working without the UI, hit the backend API
+directly:
+
+```bash
+# move the robot to a point
+curl -X POST "http://localhost:8000/api/go_to_point?x=1.5&y=0.0&yaw=0.0"
+
+# poll live pose
+curl http://localhost:8000/api/status
+
+# record a route while driving through points with go_to_point, then:
+curl -X POST "http://localhost:8000/api/start_record?route_name=demo1"
+# ...go_to_point calls...
+curl -X POST "http://localhost:8000/api/stop_record?route_name=demo1"
+curl -X POST "http://localhost:8000/api/play_route?route_name=demo1"
+```
+
 ---
 
 ## Running
