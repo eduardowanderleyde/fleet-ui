@@ -4,6 +4,18 @@ from glob import glob
 
 package_name = 'fleet_orchestrator'
 
+
+def _urdf_data_files():
+    """data_files não suporta árvores aninhadas de forma nativa (ament_python):
+    gera uma entrada (dest_dir, [files]) por subdiretório de urdf/."""
+    entries = []
+    for root, _dirs, files in os.walk('urdf'):
+        xacro_files = [os.path.join(root, f) for f in files if f.endswith('.xacro')]
+        if xacro_files:
+            entries.append((os.path.join('share', package_name, root), xacro_files))
+    return entries
+
+
 setup(
     name=package_name,
     version='0.1.0',
@@ -13,6 +25,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
+        *_urdf_data_files(),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

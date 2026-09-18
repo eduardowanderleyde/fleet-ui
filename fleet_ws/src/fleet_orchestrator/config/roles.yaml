@@ -1,5 +1,5 @@
 roles:
   tb1: MUUT   # Mobile Unit Under Tasking (robô móvel)
-  tb2: FUUT   # Fixed Unit Under Tasking (sensor fixo)
-  tb3: SU     # Support Unit (infra/rede)
+  tb2: MUUT   # temporariamente MUUT p/ demo multi-robô (original: FUUT, sensor fixo)
+  tb3: MUUT   # temporariamente MUUT p/ demo multi-robô (original: SU, infra/rede)
 

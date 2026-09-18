@@ -50,7 +50,7 @@ def launch_setup(context, *args, **kwargs):
             name="fleet_orchestrator",
             output="screen",
             parameters=[
-                {"routes_dir": routes_dir, "use_shared_map_frame": use_shared},
+                {"routes_dir": routes_dir, "use_shared_map_frame": use_shared, "use_sim_time": True},
                 {"robots": ["tb1", "tb2", "tb3"]},
             ],
         )
@@ -60,7 +60,7 @@ def launch_setup(context, *args, **kwargs):
             name="sensor_collector",
             output="screen",
             parameters=[
-                {"collections_dir": collections_dir},
+                {"collections_dir": collections_dir, "use_sim_time": True},
                 {"robots": ["tb1", "tb2", "tb3"]},
             ],
         )

@@ -36,19 +36,19 @@ class RobotSession:
 
 
 class SensorCollector(Node):
-    # Tópicos com prefixo de robot_id
+    # Tópicos com prefixo de robot_id. tf/tf_static entraram aqui (deixaram de
+    # ser globais) porque a simulação multi-robô usa 1 tópico /tf por robô
+    # (/tb1/tf, /tb2/tf, ...), não um /tf único compartilhado — ver
+    # fleet_orchestrator/main.py::_setup_robot_tf para o mesmo raciocínio.
     _TYPE_MAP = {
         "scan": ("sensor_msgs/msg/LaserScan", LaserScan),
         "odom": ("nav_msgs/msg/Odometry", Odometry),
         "imu":  ("sensor_msgs/msg/Imu", Imu),
+        "tf":        ("tf2_msgs/msg/TFMessage", TFMessage),
+        "tf_static": ("tf2_msgs/msg/TFMessage", TFMessage),
         # Localização: inclua apenas um destes conforme o modo usado
         "amcl_pose": ("geometry_msgs/msg/PoseWithCovarianceStamped", PoseWithCovarianceStamped),  # AMCL (mapa fixo) ← padrão recomendado
         "pose":      ("geometry_msgs/msg/PoseWithCovarianceStamped", PoseWithCovarianceStamped),  # SLAM Toolbox (live)
-    }
-    # Tópicos globais (sem prefixo de robot_id, nome fixo)
-    _GLOBAL_TOPICS = {
-        "tf":        ("/tf",        "tf2_msgs/msg/TFMessage", TFMessage),
-        "tf_static": ("/tf_static", "tf2_msgs/msg/TFMessage", TFMessage),
     }
 
     def __init__(self) -> None:
@@ -151,17 +151,14 @@ class SensorCollector(Node):
             resp.error_code = "UNSUPPORTED_OUTPUT_MODE"
             return resp
 
-        # resolved: (topic_name, type_str, msg_cls, is_global)
-        resolved: List[tuple[str, str, Type, bool]] = []
+        # resolved: (topic_name, type_str, msg_cls)
+        resolved: List[tuple[str, str, Type]] = []
         for short in req.topics:
             s = short.strip().lstrip("/")
-            if s in self._GLOBAL_TOPICS:
-                tname, type_str, cls = self._GLOBAL_TOPICS[s]
-                resolved.append((tname, type_str, cls, True))
-            elif s in self._TYPE_MAP:
+            if s in self._TYPE_MAP:
                 tname = self._topic_name(rid, s)
                 type_str, cls = self._TYPE_MAP[s]
-                resolved.append((tname, type_str, cls, False))
+                resolved.append((tname, type_str, cls))
             else:
                 resp.success = False
                 resp.message = f"Unknown topic short name: {short!r}"
@@ -197,19 +194,19 @@ class SensorCollector(Node):
         sess.is_collecting = True
 
         topic_id = 0
-        for tname, type_str, msg_cls, is_global in resolved:
+        for tname, type_str, msg_cls in resolved:
             meta = TopicMetadata(topic_id, tname, type_str, "cdr", [])
             topic_id += 1
             writer.create_topic(meta)
 
-            def make_cb(full_name: str, cls: Type, global_topic: bool):
+            def make_cb(full_name: str, cls: Type):
                 def _write(msg) -> None:
                     if sess.writer is None:
                         return
                     try:
                         data = serialize_message(msg)
                         # TFMessage: usa stamp do primeiro transform se disponível
-                        if global_topic and hasattr(msg, "transforms") and msg.transforms:
+                        if hasattr(msg, "transforms") and msg.transforms:
                             stamp_ns = Time.from_msg(msg.transforms[0].header.stamp).nanoseconds
                             if stamp_ns == 0:
                                 stamp_ns = self.get_clock().now().nanoseconds
@@ -225,7 +222,7 @@ class SensorCollector(Node):
                 return _write
 
             short_name = tname.lstrip("/").split("/")[-1]
-            if is_global:
+            if short_name in ("tf", "tf_static"):
                 qos = self._qos_tf()
             elif short_name in self._TRANSIENT_LOCAL_TOPICS:
                 qos = self._qos_transient()
@@ -236,7 +233,7 @@ class SensorCollector(Node):
             sub = self.create_subscription(
                 msg_cls,
                 tname,
-                make_cb(tname, msg_cls, is_global),
+                make_cb(tname, msg_cls),
                 qos,
             )
             sess.subscriptions.append(sub)

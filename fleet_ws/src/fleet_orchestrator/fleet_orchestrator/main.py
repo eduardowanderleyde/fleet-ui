@@ -17,8 +17,10 @@ from rclpy.action import ActionClient
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile
 from rclpy.time import Time
-from tf2_ros import Buffer, TransformListener, TransformException
+from tf2_msgs.msg import TFMessage
+from tf2_ros import Buffer, TransformException
 
 from fleet_msgs.msg import FleetStatus, RobotState
 from fleet_msgs.srv import (
@@ -96,12 +98,13 @@ class FleetOrchestrator(Node):
         self._state: Dict[str, RobotRuntime] = {rid: RobotRuntime() for rid in self._robots}
 
         self._cb_group = ReentrantCallbackGroup()
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
+        self._tf_buffers: Dict[str, Buffer] = {}
+        self._tf_subs: Dict[str, list] = {}
 
         self._nav_clients: Dict[str, ActionClient] = {}
         self._wp_clients: Dict[str, ActionClient] = {}
         for rid in self._robots:
+            self._setup_robot_tf(rid)
             self._nav_clients[rid] = ActionClient(
                 self, NavigateToPose, "/navigate_to_pose" if rid == "" else f"/{rid}/navigate_to_pose",
                 callback_group=self._cb_group
@@ -145,10 +148,38 @@ class FleetOrchestrator(Node):
     def _motion_allowed(self, robot_id: str) -> bool:
         return self._role(robot_id) == "MUUT"
 
+    def _setup_robot_tf(self, robot_id: str) -> None:
+        """1 Buffer + 2 subscriptions por robô, escutando /<robot_id>/tf(_static)
+        (vazio -> /tf, comportamento single-robot inalterado). Necessário porque
+        tf2_ros.TransformListener hardcoda a subscrição em /tf/tf_static — não dá
+        pra reaproveitá-lo para escutar o tópico namespaced de cada robô. Réplica
+        manual do callback/QoS que TransformListener usa internamente."""
+        if robot_id in self._tf_buffers:
+            return
+        buf = Buffer()
+        prefix = "" if robot_id == "" else f"/{robot_id}"
+
+        def _dynamic_cb(msg: TFMessage) -> None:
+            for t in msg.transforms:
+                buf.set_transform(t, "default_authority")
+
+        def _static_cb(msg: TFMessage) -> None:
+            for t in msg.transforms:
+                buf.set_transform_static(t, "default_authority")
+
+        dynamic_qos = QoSProfile(depth=100, durability=DurabilityPolicy.VOLATILE, history=HistoryPolicy.KEEP_LAST)
+        static_qos = QoSProfile(depth=100, durability=DurabilityPolicy.TRANSIENT_LOCAL, history=HistoryPolicy.KEEP_LAST)
+        sub_dyn = self.create_subscription(TFMessage, f"{prefix}/tf", _dynamic_cb, dynamic_qos, callback_group=self._cb_group)
+        sub_static = self.create_subscription(TFMessage, f"{prefix}/tf_static", _static_cb, static_qos, callback_group=self._cb_group)
+
+        self._tf_buffers[robot_id] = buf
+        self._tf_subs[robot_id] = [sub_dyn, sub_static]
+
     def _known_robot(self, robot_id: str) -> bool:
         if robot_id not in self._state:
             if robot_id == "":
                 self._state[""] = RobotRuntime()
+                self._setup_robot_tf("")
                 self._nav_clients[""] = ActionClient(
                     self, NavigateToPose, "/navigate_to_pose", callback_group=self._cb_group
                 )
@@ -166,9 +197,11 @@ class FleetOrchestrator(Node):
         return os.path.join(self._routes_dir, self._subdir(robot_id))
 
     def _map_base(self, robot_id: str) -> tuple[str, str]:
-        if robot_id == "":
-            return "map", "base_link"
-        return f"{robot_id}/map", f"{robot_id}/base_link"
+        # Isolamento entre robôs é feito por buffer/tópico TF separado (ver
+        # _setup_robot_tf), não por prefixo de frame_id: SLAM/Nav2 (via
+        # turtlebot4_navigation, intocado) publicam map/base_link sem prefixo
+        # em /<robot_id>/tf — essa é a convenção padrão do Nav2 multi-robô.
+        return "map", "base_link"
 
     def _action_name(self, robot_id: str) -> str:
         if robot_id == "":
@@ -178,11 +211,11 @@ class FleetOrchestrator(Node):
     def _get_pose(self, robot_id: str) -> Optional[PoseStamped]:
         map_f, base_f = self._map_base(robot_id)
         try:
-            transform = self.tf_buffer.lookup_transform(
+            transform = self._tf_buffers[robot_id].lookup_transform(
                 map_f, base_f, Time(), timeout=Duration(seconds=0.5)
             )
         except TransformException as ex:
-            self.get_logger().warn(f"TF {map_f}->{base_f}: {ex}")
+            self.get_logger().warn(f"TF {map_f}->{base_f} (robot={robot_id!r}): {ex}")
             return None
         pose = PoseStamped()
         pose.header.stamp = transform.header.stamp
