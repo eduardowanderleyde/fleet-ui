@@ -23,6 +23,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from ros_bridge import RosBridge
+from agents import Analyst, Executor, Planner
 
 # Raiz do projeto (fleet-ui/). Use FLEET_WS para sobrescrever.
 WORKSPACE = os.environ.get("FLEET_WS") or str(Path(__file__).resolve().parent.parent)
@@ -106,6 +107,11 @@ class SshTestRequest(BaseModel):
     host: str
     user: str = "ubuntu"
     port: int = 22
+
+
+class AgentRunRequest(BaseModel):
+    instruction: str
+    model: str = "claude-sonnet-5"
 
 
 def _model_dump(model: BaseModel) -> dict:
@@ -520,6 +526,55 @@ async def test_ssh(body: SshTestRequest):
     if not host:
         return JSONResponse({"success": False, "message": "host vazio"}, status_code=400)
     return _bridge.test_ssh(host=host, user=user, port=port)
+
+
+_agent_jobs: dict = {}  # job_id → {running, steps, final_text, error}
+
+
+def _agent_base_url() -> str:
+    """URL pela qual o Executor do agente chama de volta esta própria API."""
+    return os.environ.get("FLEET_UI_BASE_URL", "http://127.0.0.1:8000")
+
+
+@app.post("/api/agent/run")
+async def agent_run(body: AgentRunRequest):
+    """Dispara o Planner de IA numa instrução em linguagem natural.
+    Assíncrono como /api/run_config: devolve job_id, consulte com /api/agent/job/{id}."""
+    instruction = (body.instruction or "").strip()
+    if not instruction:
+        return JSONResponse({"success": False, "message": "instruction vazia"}, status_code=400)
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return JSONResponse({"success": False, "message": "ANTHROPIC_API_KEY não configurada"}, status_code=400)
+
+    job_id = str(uuid.uuid4())[:8]
+    _agent_jobs[job_id] = {"running": True, "steps": [], "final_text": None, "error": None}
+
+    async def _run():
+        executor = Executor(base_url=_agent_base_url())
+        try:
+            planner = Planner(executor, Analyst(), model=body.model)
+            result = await planner.run(instruction)
+            _agent_jobs[job_id]["steps"] = [
+                {"tool_name": s.tool_name, "tool_input": s.tool_input, "result": s.result}
+                for s in result.steps
+            ]
+            _agent_jobs[job_id]["final_text"] = result.final_text
+        except Exception as exc:
+            _agent_jobs[job_id]["error"] = str(exc)
+        finally:
+            _agent_jobs[job_id]["running"] = False
+            await executor.aclose()
+
+    asyncio.create_task(_run())
+    return {"job_id": job_id}
+
+
+@app.get("/api/agent/job/{job_id}")
+async def agent_job(job_id: str):
+    job = _agent_jobs.get(job_id)
+    if not job:
+        return JSONResponse({"error": "job not found"}, status_code=404)
+    return job
 
 
 if __name__ == "__main__":
