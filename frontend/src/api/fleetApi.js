@@ -72,3 +72,15 @@ export async function testSsh({ host, user = 'ubuntu', port = 22 }) {
     body: JSON.stringify({ host, user, port }),
   }))
 }
+
+export async function runAgentFleet(instructions, model) {
+  return readJson(await fetch(apiPath('/agent/run_fleet'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ instructions, ...(model ? { model } : {}) }),
+  }))
+}
+
+export async function getAgentFleetJob(jobId) {
+  return readJson(await fetch(apiPath(`/agent/fleet_job/${jobId}`)))
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import ConfigForm from './components/ConfigForm'
+import AgentFleetPanel from './components/AgentFleetPanel'
 import {
   discoverRobots as fetchDiscoveredRobots,
   getMap,
@@ -535,6 +536,7 @@ export default function App() {
   const [connStatus, setConnStatus]           = useState('idle')
   const [connMsg, setConnMsg]                 = useState('')
   const [discoverPanel, setDiscoverPanel]     = useState(false)
+  const [agentPanel, setAgentPanel]           = useState(false)
   const [discovering, setDiscovering]         = useState(false)
   const [discovered, setDiscovered]           = useState([])
   const [discoverError, setDiscoverError]     = useState(null)
@@ -546,12 +548,14 @@ export default function App() {
   const outputRef   = useRef(null)
   const panelRef    = useRef(null)
   const discoverRef = useRef(null)
+  const agentRef    = useRef(null)
 
   // Fecha painéis ao clicar fora
   useEffect(() => {
     const h = e => {
       if (panelRef.current && !panelRef.current.contains(e.target))    setConnPanel(false)
       if (discoverRef.current && !discoverRef.current.contains(e.target)) setDiscoverPanel(false)
+      if (agentRef.current && !agentRef.current.contains(e.target))    setAgentPanel(false)
     }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
@@ -702,7 +706,7 @@ export default function App() {
       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: '1px solid #2a3142', flexShrink: 0, position: 'relative' }}>
 
         <div ref={panelRef} style={{ position: 'relative' }}>
-          <button onClick={() => { setConnPanel(v => !v); setDiscoverPanel(false) }}
+          <button onClick={() => { setConnPanel(v => !v); setDiscoverPanel(false); setAgentPanel(false) }}
             style={{ ...btn('#161a22', '#6366f1'), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ width: 10, height: 10, borderRadius: '50%', background: connLight, display: 'inline-block', boxShadow: connStatus === 'connected' ? `0 0 6px ${connLight}` : 'none' }} />
             Conectar robô <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>{connPanel ? '▲' : '▼'}</span>
@@ -742,7 +746,7 @@ export default function App() {
         </div>
 
         <div ref={discoverRef} style={{ position: 'relative' }}>
-          <button onClick={() => { setDiscoverPanel(v => !v); setConnPanel(false) }}
+          <button onClick={() => { setDiscoverPanel(v => !v); setConnPanel(false); setAgentPanel(false) }}
             style={{ ...btn('#161a22', '#fbbf24'), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             🔍 Procurar <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>{discoverPanel ? '▲' : '▼'}</span>
           </button>
@@ -774,6 +778,14 @@ export default function App() {
               })}
             </div>
           )}
+        </div>
+
+        <div ref={agentRef} style={{ position: 'relative' }}>
+          <button onClick={() => { setAgentPanel(v => !v); setConnPanel(false); setDiscoverPanel(false) }}
+            style={{ ...btn('#161a22', '#a78bfa'), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            🤖 Agentes IA <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>{agentPanel ? '▲' : '▼'}</span>
+          </button>
+          {agentPanel && <AgentFleetPanel robotIds={['tb1', 'tb2', 'tb3']} />}
         </div>
 
         {isConnected && <span style={{ fontSize: '0.8rem', color: '#6ee7b7', fontFamily: 'monospace' }}>● Conectado — {[...ROBOT_PROFILES, ...extraProfiles].find(p => p.id === selectedProfile)?.label}</span>}
