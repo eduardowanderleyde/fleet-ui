@@ -24,6 +24,10 @@ jobs:
           python3 -m py_compile \
             backend/main.py \
             backend/ros_bridge.py \
+            backend/agents/executor.py \
+            backend/agents/analyst.py \
+            backend/agents/planner.py \
+            backend/agents/tools.py \
             fleet_ws/scripts/health_check.py \
             fleet_ws/scripts/experiment_repeatability.py \
             fleet_ws/scripts/analyze_runs.py \
@@ -31,7 +35,7 @@ jobs:
             fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py
 
       - name: Install Python analysis dependencies
-        run: python3 -m pip install numpy
+        run: python3 -m pip install numpy httpx anthropic
 
       - name: Unit tests
         run: python3 -m unittest discover -s tests
