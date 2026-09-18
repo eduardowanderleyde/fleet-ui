@@ -114,6 +114,11 @@ class AgentRunRequest(BaseModel):
     model: str = "claude-sonnet-5"
 
 
+class AgentFleetRunRequest(BaseModel):
+    instructions: dict[str, str]  # robot_id → instrução
+    model: str = "claude-sonnet-5"
+
+
 def _model_dump(model: BaseModel) -> dict:
     if hasattr(model, "model_dump"):
         return model.model_dump()
@@ -529,11 +534,31 @@ async def test_ssh(body: SshTestRequest):
 
 
 _agent_jobs: dict = {}  # job_id → {running, steps, final_text, error}
+_fleet_jobs: dict = {}  # job_id → {running, robots: {robot_id → {running, steps, final_text, error}}}
 
 
 def _agent_base_url() -> str:
     """URL pela qual o Executor do agente chama de volta esta própria API."""
     return os.environ.get("FLEET_UI_BASE_URL", "http://127.0.0.1:8000")
+
+
+async def _execute_planner(state: dict, instruction: str, model: str, robot_id: str | None = None) -> None:
+    """Roda um Planner até concluir, escrevendo o resultado em `state` (dict de job).
+    `robot_id`, se informado, restringe o Planner a um único robô (ver Planner.robot_id)."""
+    executor = Executor(base_url=_agent_base_url())
+    try:
+        planner = Planner(executor, Analyst(), model=model, robot_id=robot_id)
+        result = await planner.run(instruction)
+        state["steps"] = [
+            {"tool_name": s.tool_name, "tool_input": s.tool_input, "result": s.result}
+            for s in result.steps
+        ]
+        state["final_text"] = result.final_text
+    except Exception as exc:
+        state["error"] = str(exc)
+    finally:
+        state["running"] = False
+        await executor.aclose()
 
 
 @app.post("/api/agent/run")
@@ -548,30 +573,47 @@ async def agent_run(body: AgentRunRequest):
 
     job_id = str(uuid.uuid4())[:8]
     _agent_jobs[job_id] = {"running": True, "steps": [], "final_text": None, "error": None}
-
-    async def _run():
-        executor = Executor(base_url=_agent_base_url())
-        try:
-            planner = Planner(executor, Analyst(), model=body.model)
-            result = await planner.run(instruction)
-            _agent_jobs[job_id]["steps"] = [
-                {"tool_name": s.tool_name, "tool_input": s.tool_input, "result": s.result}
-                for s in result.steps
-            ]
-            _agent_jobs[job_id]["final_text"] = result.final_text
-        except Exception as exc:
-            _agent_jobs[job_id]["error"] = str(exc)
-        finally:
-            _agent_jobs[job_id]["running"] = False
-            await executor.aclose()
-
-    asyncio.create_task(_run())
+    asyncio.create_task(_execute_planner(_agent_jobs[job_id], instruction, body.model))
     return {"job_id": job_id}
 
 
 @app.get("/api/agent/job/{job_id}")
 async def agent_job(job_id: str):
     job = _agent_jobs.get(job_id)
+    if not job:
+        return JSONResponse({"error": "job not found"}, status_code=404)
+    return job
+
+
+@app.post("/api/agent/run_fleet")
+async def agent_run_fleet(body: AgentFleetRunRequest):
+    """Dispara um Planner independente por robô, cada um restrito ao seu próprio
+    robot_id, rodando em paralelo. `instructions` mapeia robot_id → instrução.
+    Consulte com /api/agent/fleet_job/{id}."""
+    instructions = {rid: instr.strip() for rid, instr in body.instructions.items() if instr and instr.strip()}
+    if not instructions:
+        return JSONResponse({"success": False, "message": "instructions vazio"}, status_code=400)
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return JSONResponse({"success": False, "message": "ANTHROPIC_API_KEY não configurada"}, status_code=400)
+
+    job_id = str(uuid.uuid4())[:8]
+    robots_state = {rid: {"running": True, "steps": [], "final_text": None, "error": None} for rid in instructions}
+    _fleet_jobs[job_id] = {"running": True, "robots": robots_state}
+
+    async def _run_all():
+        await asyncio.gather(*(
+            _execute_planner(robots_state[rid], instr, body.model, robot_id=rid)
+            for rid, instr in instructions.items()
+        ))
+        _fleet_jobs[job_id]["running"] = False
+
+    asyncio.create_task(_run_all())
+    return {"job_id": job_id}
+
+
+@app.get("/api/agent/fleet_job/{job_id}")
+async def agent_fleet_job(job_id: str):
+    job = _fleet_jobs.get(job_id)
     if not job:
         return JSONResponse({"error": "job not found"}, status_code=404)
     return job

@@ -47,14 +47,36 @@ class Planner:
         model: str = DEFAULT_MODEL,
         api_key: str | None = None,
         max_turns: int = 12,
+        robot_id: str | None = None,
     ) -> None:
+        """`robot_id`, se informado, restringe este Planner a um único robô: toda
+        ferramenta que aceita robot_id (ou config.robot) é forçada para esse valor,
+        mesmo que o modelo peça outro — para rodar N agentes independentes com
+        segurança, um por robô, sem que um agente possa mexer no robô de outro."""
         self.executor = executor
         self.analyst = analyst or Analyst()
         self.model = model
         self.max_turns = max_turns
+        self.robot_id = robot_id
         self._client = AsyncAnthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
 
+    def _system_prompt(self) -> str:
+        if not self.robot_id:
+            return SYSTEM_PROMPT
+        return SYSTEM_PROMPT + f" Você está restrito ao robô '{self.robot_id}' — não pode operar nenhum outro."
+
+    def _scope_input(self, tool_name: str, tool_input: dict) -> dict:
+        if not self.robot_id:
+            return tool_input
+        scoped = dict(tool_input)
+        if "robot_id" in scoped:
+            scoped["robot_id"] = self.robot_id
+        if tool_name == "run_experiment" and isinstance(scoped.get("config"), dict):
+            scoped["config"] = {**scoped["config"], "robot": self.robot_id}
+        return scoped
+
     async def _dispatch(self, tool_name: str, tool_input: dict) -> Any:
+        """`tool_input` deve já estar escopado (ver `_scope_input`) — chamado por `run()`."""
         if tool_name == "list_robots":
             return await self.executor.list_robots()
         if tool_name == "list_routes":
@@ -96,7 +118,7 @@ class Planner:
             response = await self._client.messages.create(
                 model=self.model,
                 max_tokens=2048,
-                system=SYSTEM_PROMPT,
+                system=self._system_prompt(),
                 tools=TOOL_SPECS,
                 messages=messages,
             )
@@ -110,15 +132,16 @@ class Planner:
             for block in response.content:
                 if block.type != "tool_use":
                     continue
+                scoped_input = self._scope_input(block.name, block.input)
                 try:
-                    result = await self._dispatch(block.name, block.input)
+                    result = await self._dispatch(block.name, scoped_input)
                     content = json.dumps(result, default=str)
                     is_error = False
                 except Exception as exc:  # noqa: BLE001 - repassa qualquer falha de ferramenta ao modelo
                     result = str(exc)
                     content = result
                     is_error = True
-                steps.append(PlanStep(tool_name=block.name, tool_input=block.input, result=result))
+                steps.append(PlanStep(tool_name=block.name, tool_input=scoped_input, result=result))
                 tool_results.append(
                     {"type": "tool_result", "tool_use_id": block.id, "content": content, "is_error": is_error}
                 )
