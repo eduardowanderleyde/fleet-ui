@@ -13,6 +13,7 @@ import subprocess
 import threading
 import zlib
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
@@ -684,11 +685,39 @@ async def test_ssh(body: SshTestRequest):
 
 _agent_jobs: dict = {}  # job_id → {running, steps, final_text, error}
 _fleet_jobs: dict = {}  # job_id → {running, robots: {robot_id → {running, steps, final_text, error}}}
+_AGENT_RUNS_DIR = Path(ROS_WS) / "agent_runs"  # persistência em disco — ver _save_agent_run
 
 
 def _agent_base_url() -> str:
     """URL pela qual o Executor do agente chama de volta esta própria API."""
     return os.environ.get("FLEET_UI_BASE_URL", "http://127.0.0.1:8000")
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _save_agent_run(file_stem: str, data: dict) -> None:
+    """Persiste um job de agente (single ou fleet) já concluído em disco, para
+    sobreviver a um restart do backend — _agent_jobs/_fleet_jobs são só memória.
+    Best-effort: uma falha ao salvar não deve derrubar o job em si."""
+    try:
+        _AGENT_RUNS_DIR.mkdir(parents=True, exist_ok=True)
+        (_AGENT_RUNS_DIR / f"{file_stem}.json").write_text(
+            json.dumps(data, ensure_ascii=False, indent=2, default=str)
+        )
+    except Exception as exc:
+        print(f"[fleet_ui] falha ao salvar agent_run {file_stem}: {exc}")
+
+
+def _load_agent_run(file_stem: str) -> dict | None:
+    path = _AGENT_RUNS_DIR / f"{file_stem}.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return None
 
 
 async def _execute_planner(state: dict, instruction: str, model: str, robot_id: str | None = None) -> None:
@@ -721,14 +750,23 @@ async def agent_run(body: AgentRunRequest):
         return JSONResponse({"success": False, "message": "ANTHROPIC_API_KEY não configurada"}, status_code=400)
 
     job_id = str(uuid.uuid4())[:8]
-    _agent_jobs[job_id] = {"running": True, "steps": [], "final_text": None, "error": None}
-    asyncio.create_task(_execute_planner(_agent_jobs[job_id], instruction, body.model))
+    _agent_jobs[job_id] = {
+        "running": True, "steps": [], "final_text": None, "error": None,
+        "instruction": instruction, "model": body.model, "started_at": _now_iso(), "finished_at": None,
+    }
+
+    async def _run_and_persist():
+        await _execute_planner(_agent_jobs[job_id], instruction, body.model)
+        _agent_jobs[job_id]["finished_at"] = _now_iso()
+        _save_agent_run(f"single_{job_id}", {"kind": "single", "job_id": job_id, **_agent_jobs[job_id]})
+
+    asyncio.create_task(_run_and_persist())
     return {"job_id": job_id}
 
 
 @app.get("/api/agent/job/{job_id}")
 async def agent_job(job_id: str):
-    job = _agent_jobs.get(job_id)
+    job = _agent_jobs.get(job_id) or _load_agent_run(f"single_{job_id}")
     if not job:
         return JSONResponse({"error": "job not found"}, status_code=404)
     return job
@@ -746,8 +784,14 @@ async def agent_run_fleet(body: AgentFleetRunRequest):
         return JSONResponse({"success": False, "message": "ANTHROPIC_API_KEY não configurada"}, status_code=400)
 
     job_id = str(uuid.uuid4())[:8]
-    robots_state = {rid: {"running": True, "steps": [], "final_text": None, "error": None} for rid in instructions}
-    _fleet_jobs[job_id] = {"running": True, "robots": robots_state}
+    robots_state = {
+        rid: {"running": True, "steps": [], "final_text": None, "error": None, "instruction": instr}
+        for rid, instr in instructions.items()
+    }
+    _fleet_jobs[job_id] = {
+        "running": True, "robots": robots_state, "model": body.model,
+        "started_at": _now_iso(), "finished_at": None,
+    }
 
     async def _run_all():
         await asyncio.gather(*(
@@ -755,6 +799,8 @@ async def agent_run_fleet(body: AgentFleetRunRequest):
             for rid, instr in instructions.items()
         ))
         _fleet_jobs[job_id]["running"] = False
+        _fleet_jobs[job_id]["finished_at"] = _now_iso()
+        _save_agent_run(f"fleet_{job_id}", {"kind": "fleet", "job_id": job_id, **_fleet_jobs[job_id]})
 
     asyncio.create_task(_run_all())
     return {"job_id": job_id}
@@ -762,10 +808,46 @@ async def agent_run_fleet(body: AgentFleetRunRequest):
 
 @app.get("/api/agent/fleet_job/{job_id}")
 async def agent_fleet_job(job_id: str):
-    job = _fleet_jobs.get(job_id)
+    job = _fleet_jobs.get(job_id) or _load_agent_run(f"fleet_{job_id}")
     if not job:
         return JSONResponse({"error": "job not found"}, status_code=404)
     return job
+
+
+def _summarize_agent_run(data: dict) -> dict:
+    base = {
+        "kind": data.get("kind"),
+        "job_id": data.get("job_id"),
+        "model": data.get("model"),
+        "started_at": data.get("started_at"),
+        "finished_at": data.get("finished_at"),
+    }
+    if data.get("kind") == "fleet":
+        base["robots"] = {
+            rid: {"instruction": r.get("instruction"), "final_text": r.get("final_text"), "error": r.get("error")}
+            for rid, r in (data.get("robots") or {}).items()
+        }
+    else:
+        base["instruction"] = data.get("instruction")
+        base["final_text"] = data.get("final_text")
+        base["error"] = data.get("error")
+    return base
+
+
+@app.get("/api/agent/history")
+async def agent_history(limit: int = 50):
+    """Lista execuções passadas de agentes (persistidas em disco por _save_agent_run),
+    mais recentes primeiro — sobrevive a um restart do backend."""
+    if not _AGENT_RUNS_DIR.exists():
+        return {"runs": []}
+    files = sorted(_AGENT_RUNS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    runs = []
+    for f in files[:max(1, limit)]:
+        try:
+            runs.append(_summarize_agent_run(json.loads(f.read_text())))
+        except Exception:
+            continue
+    return {"runs": runs}
 
 
 if __name__ == "__main__":

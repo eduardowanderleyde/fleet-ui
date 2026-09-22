@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -31,14 +32,19 @@ class AgentEndpointTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self._orig_planner = backend_main.Planner
         self._orig_key = os.environ.get("ANTHROPIC_API_KEY")
+        self._orig_runs_dir = backend_main._AGENT_RUNS_DIR
+        self._tmp_runs_dir = tempfile.TemporaryDirectory()
         os.environ["ANTHROPIC_API_KEY"] = "test-key"
         backend_main.Planner = FakePlanner
+        backend_main._AGENT_RUNS_DIR = Path(self._tmp_runs_dir.name)
         self.client = httpx.AsyncClient(
             transport=httpx.ASGITransport(app=backend_main.app), base_url="http://test"
         )
 
     async def asyncTearDown(self):
         backend_main.Planner = self._orig_planner
+        backend_main._AGENT_RUNS_DIR = self._orig_runs_dir
+        self._tmp_runs_dir.cleanup()
         if self._orig_key is None:
             os.environ.pop("ANTHROPIC_API_KEY", None)
         else:
