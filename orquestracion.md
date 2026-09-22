@@ -204,7 +204,11 @@ escutando `/tb{1,2,3}/tf` e consultando `map → base_link` sem prefixo.
 ### Limitação conhecida (teto de recursos ao rodar 3 robôs)
 
 Hardware desta máquina: CPU AMD Ryzen 7 5800XT (8 núcleos / 16 threads), 46 GB
-de RAM, GPU dedicada AMD (PCI `1002:7590`, driver de kernel `amdgpu`).
+de RAM, GPU dedicada **AMD Radeon RX 9060 XT 8GB** (chip Navi 44, arquitetura
+RDNA4/GFX1200, PCI `1002:7590`, driver de kernel `amdgpu`) — confirmado 7,95 GB
+de VRAM total via `/sys/class/drm/card1/device/mem_info_vram_total`, e
+identidade do chip confirmada cruzando o PCI ID com relatos públicos de bug
+(o banco `pci.ids` local desta máquina está desatualizado e não tinha esse ID).
 
 **Correção de um diagnóstico anterior:** este documento chegou a afirmar "este
 ambiente não tem GPU" e atribuir a instabilidade com 3 robôs à ausência dela.
@@ -239,6 +243,18 @@ consistente; rodar os 3 de forma 100% estável ficaria mais fácil reduzindo
 carga por robô (SLAM com scan-matching menos frequente, costmap com
 resolução menor) ou distribuindo os processos entre mais núcleos — não
 depende de trocar de máquina por uma "com GPU", porque esta já tem.
+
+**O Nav2 e o SLAM Toolbox não usam GPU nenhuma, em hipótese nenhuma.**
+Confirmado checando com `ldd` os binários reais (`controller_server`,
+`planner_server`, `bt_navigator`, `smoother_server`, `behavior_server`,
+`lifecycle_manager`, `async_slam_toolbox_node`, `sync_slam_toolbox_node`):
+nenhum linka com CUDA, OpenCL, Vulkan ou qualquer lib gráfica. Faz sentido —
+planejar rota, seguir trajetória e casar scans de lidar é geometria/álgebra
+sobre poucos dados, não o tipo de carga massivamente paralela que se
+beneficia de GPU (diferente da renderização do sensor lidar no Gazebo, que
+usa). Ou seja: em todo o sistema, a GPU só entra pela simulação (Gazebo);
+tudo que decide pra onde o robô vai é 100% CPU, e é aí que está o teto real
+dos 3 robôs.
 
 `fleet_ws/src/fleet_orchestrator/config/roles.yaml` teve `tb2`/`tb3`
 temporariamente marcados como `MUUT` (móveis) para esta demonstração — o
