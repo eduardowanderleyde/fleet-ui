@@ -38,7 +38,16 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 
-ROBOTS = ["tb1", "tb2", "tb3"]
+# Lido no import (este arquivo é reexecutado a cada `ros2 launch`), não como
+# LaunchConfiguration, porque ROBOTS decide QUANTOS nós existem no
+# LaunchDescription — isso tem que estar resolvido antes de generate_launch_
+# description() rodar, uma lista de LaunchConfiguration não dá pra iterar.
+#
+# Default caiu de 3 para 2 robôs: rodar os 3 ao mesmo tempo sem GPU deixa o
+# Nav2 instável sob carga (NAV2_ABORTED recorrente, ~600%+ CPU — ver
+# orquestracion.md). tb1+tb2 já cobrem a demo de múltiplos agentes de forma
+# confiável; use FLEET_ROBOTS=tb1,tb2,tb3 para voltar aos 3.
+ROBOTS = [r.strip() for r in os.environ.get("FLEET_ROBOTS", "tb1,tb2").split(",") if r.strip()]
 # Espaçados ~2m em y — checar manualmente com headless:=false antes de confiar
 # de olhos fechados (não há garantia de que essas poses estão livres de
 # obstáculo em warehouse.sdf só de ler o SDF estaticamente).

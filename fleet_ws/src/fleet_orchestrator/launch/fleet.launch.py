@@ -24,6 +24,12 @@ def launch_setup(context, *args, **kwargs):
     pkg = get_package_share_directory("fleet_orchestrator")
     single_yaml = os.path.join(pkg, "config", "single_robot_sim.yaml")
 
+    # Mesma variável usada por turtlebot4_multi_sim.launch.py para decidir
+    # quantos robôs sobem na simulação — precisa bater com o que é passado
+    # aqui, senão fleet_orchestrator/sensor_collector ficam gerenciando um
+    # robô "fantasma" que não existe no Gazebo.
+    robots = [r.strip() for r in os.environ.get("FLEET_ROBOTS", "tb1,tb2").split(",") if r.strip()]
+
     use_shared = LaunchConfiguration("use_shared_map_frame")
     routes_dir = LaunchConfiguration("routes_dir")
     collections_dir = LaunchConfiguration("collections_dir")
@@ -51,7 +57,7 @@ def launch_setup(context, *args, **kwargs):
             output="screen",
             parameters=[
                 {"routes_dir": routes_dir, "use_shared_map_frame": use_shared, "use_sim_time": True},
-                {"robots": ["tb1", "tb2", "tb3"]},
+                {"robots": robots},
             ],
         )
         collector = Node(
@@ -61,7 +67,7 @@ def launch_setup(context, *args, **kwargs):
             output="screen",
             parameters=[
                 {"collections_dir": collections_dir, "use_sim_time": True},
-                {"robots": ["tb1", "tb2", "tb3"]},
+                {"robots": robots},
             ],
         )
     return [orchestrator, collector]

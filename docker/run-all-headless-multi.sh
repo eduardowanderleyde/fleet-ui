@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Windows Docker Desktop mode, adapted for the 3-robot (tb1/tb2/tb3) simulation.
-# Everything runs in one container so ROS 2 DDS discovery stays local, which
-# avoids cross-container discovery issues that network_mode: host would need
-# on Linux (not available the same way on Docker Desktop for Windows/macOS).
+# Windows Docker Desktop mode, adapted for the multi-robot (tb1/tb2[/tb3])
+# simulation. Everything runs in one container so ROS 2 DDS discovery stays
+# local, which avoids cross-container discovery issues that network_mode:
+# host would need on Linux (not available the same way on Docker Desktop for
+# Windows/macOS).
+
+FLEET_ROBOTS="${FLEET_ROBOTS:-tb1,tb2}"
 
 PIDS=()
 
@@ -45,12 +48,18 @@ wait_for_topics() {
 
 cd "${FLEET_ROOT:-/workspace}/fleet_ws"
 
-echo "[docker] Starting headless 3-robot simulation (${WORLD:-warehouse})..."
+echo "[docker] Starting headless simulation (${WORLD:-warehouse}, robots=${FLEET_ROBOTS})..."
 ros2 launch fleet_orchestrator turtlebot4_multi_sim.launch.py "world:=${WORLD:-warehouse}" headless:=true &
 PIDS+=("$!")
 
-echo "[docker] Waiting for tb1/tb2/tb3 scan+tf topics (up to ${FLEET_START_DELAY:-90}s)..."
-wait_for_topics "${FLEET_START_DELAY:-90}" "/tb1/scan" "/tb2/scan" "/tb3/scan" "/tb1/tf"
+# Espera scan+tf de cada robô configurado (não fixo em tb1/tb2/tb3, senão
+# rodar com menos robôs sempre estoura o timeout esperando um tópico que
+# nunca vai existir).
+SCAN_TOPICS=()
+IFS=',' read -ra _robots <<<"$FLEET_ROBOTS"
+for r in "${_robots[@]}"; do SCAN_TOPICS+=("/${r}/scan"); done
+echo "[docker] Waiting for scan+tf topics (up to ${FLEET_START_DELAY:-90}s)..."
+wait_for_topics "${FLEET_START_DELAY:-90}" "${SCAN_TOPICS[@]}" "/${_robots[0]}/tf"
 
 echo "[docker] Starting fleet nodes (orchestrator + sensor collector)..."
 ros2 launch fleet_orchestrator fleet.launch.py &
