@@ -55,6 +55,66 @@ class Analyst:
             "flagged_runs": flagged,
         }
 
+    def diagnose_experiment(self, run_id: str, rmse_threshold_m: float = 0.05) -> dict:
+        """analyze_experiment() só sinaliza "RMSE acima do limiar" — isso diz
+        *que* algo saiu diferente do esperado, não *por quê*. Aqui, pra cada
+        execução sinalizada, cruza os sinais que summary.json já carrega
+        (static_traj_warn, duration_ratio_vs_ref, final_endpoint_error_m,
+        num_poses) numa hipótese em linguagem natural. Não lê bag/TF/log ao
+        vivo — só o que analyze_runs.py já calculou; é diagnóstico
+        post-mortem sobre a campanha, não um agente monitorando em tempo
+        real (isso exigiria ROS rodando, escopo maior)."""
+        base = self.analyze_experiment(run_id, rmse_threshold_m)
+        summary = self.load_summary(run_id)
+        stats_by_label = {r["label"]: r for r in summary.get("runs", [])}
+
+        diagnosed = []
+        for entry in base["flagged_runs"]:
+            run_stats = stats_by_label.get(entry["label"], {})
+            diagnosed.append({**entry, **self._diagnose_run(entry, run_stats)})
+
+        return {**base, "flagged_runs": diagnosed}
+
+    @staticmethod
+    def _diagnose_run(vs_ref_entry: dict, run_stats: dict) -> dict:
+        """Regras heurísticas simples, em ordem de severidade — a primeira que
+        bater vira a hipótese principal; todas as que baterem ficam em
+        `signals` pra não esconder o raciocínio."""
+        signals: list[str] = []
+
+        if run_stats.get("static_traj_warn"):
+            signals.append(
+                "trajetória estática (path_length_m≈0) — robô praticamente não se moveu; "
+                "rota pode ter falhado ao iniciar, colidido logo no começo, ou AMCL/SLAM travado"
+            )
+        if run_stats.get("num_poses", 999) < 10:
+            signals.append(
+                f"só {run_stats.get('num_poses')} poses registradas — coleta parou cedo ou rota muito curta"
+            )
+        ratio = vs_ref_entry.get("duration_ratio_vs_ref")
+        if ratio is not None and ratio < 0.5:
+            signals.append(
+                f"durou {ratio:.0%} do tempo do baseline — pode ter abortado a navegação antes de completar a rota"
+            )
+        elif ratio is not None and ratio > 1.5:
+            signals.append(
+                f"durou {ratio:.0%} do tempo do baseline — possível replanejamento/recovery behavior do Nav2"
+            )
+        final_err = vs_ref_entry.get("final_endpoint_error_m")
+        rmse = vs_ref_entry.get("rmse_vs_ref_m")
+        if final_err is not None and rmse is not None and rmse > 0 and final_err > 2 * rmse:
+            signals.append(
+                f"erro no ponto final ({final_err:.3f}m) bem maior que o RMSE do trajeto ({rmse:.3f}m) — "
+                "caminho ficou parecido com o baseline mas não convergiu no destino"
+            )
+        if not signals:
+            signals.append(
+                "RMSE acima do limiar sem sinais óbvios de falha (trajetória não-estática, duração normal) — "
+                "possível drift de localização/mapa ou variação normal de navegação; vale inspecionar o bag"
+            )
+
+        return {"hypothesis": signals[0], "signals": signals}
+
     def compare_runs(self, run_id: str, label_a: str, label_b: str) -> dict:
         """Compara duas execuções (labels) dentro da mesma campanha via a matriz RMSE pareada."""
         summary = self.load_summary(run_id)

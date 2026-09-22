@@ -95,6 +95,12 @@ ou fazer qualquer coisa fora do conjunto de ferramentas permitido.
 - **`Analyst`** — não fala com ROS nem com a API; lê os artefatos que
   `analyze_runs.py` já produz (`summary.json`) e responde perguntas como
   "qual execução teve RMSE acima de 5 cm?" ou "compara a rota A com a B".
+  `diagnose_experiment` vai além de sinalizar: cruza os sinais que o
+  `summary.json` já carrega (trajetória estática, duração muito diferente
+  do baseline, erro concentrado só no ponto final) numa hipótese em
+  linguagem natural do que pode ter dado errado — sem ler bag/TF ao vivo,
+  é diagnóstico post-mortem sobre a campanha, não monitoramento em tempo
+  real (isso pediria ROS rodando, escopo maior).
 - **`Planner`** — o loop de tool-calling com a Claude API. Recebe uma
   instrução, decide uma sequência de chamadas a `Executor`/`Analyst`, e
   devolve o texto final mais o histórico de passos.

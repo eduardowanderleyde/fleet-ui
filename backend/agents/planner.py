@@ -112,6 +112,10 @@ class Planner:
             return self.analyst.analyze_experiment(
                 tool_input["run_id"], tool_input.get("rmse_threshold_m", 0.05)
             )
+        if tool_name == "diagnose_experiment":
+            return self.analyst.diagnose_experiment(
+                tool_input["run_id"], tool_input.get("rmse_threshold_m", 0.05)
+            )
         if tool_name == "compare_runs":
             return self.analyst.compare_runs(
                 tool_input["run_id"], tool_input["label_a"], tool_input["label_b"]

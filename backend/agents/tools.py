@@ -137,6 +137,25 @@ TOOL_SPECS: list[dict] = [
         },
     },
     {
+        "name": "diagnose_experiment",
+        "description": (
+            "Como analyze_experiment, mas para cada execução sinalizada (RMSE acima do "
+            "limiar) também sugere uma hipótese de causa (trajetória estática, abortou "
+            "cedo, não convergiu no destino, etc) cruzando os sinais já calculados em "
+            "summary.json. Use depois de analyze_experiment quando o usuário pedir para "
+            "investigar/explicar por que uma execução ficou fora do esperado, não só "
+            "listar quais ficaram."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "run_id": {"type": "string"},
+                "rmse_threshold_m": {"type": "number", "default": 0.05},
+            },
+            "required": ["run_id"],
+        },
+    },
+    {
         "name": "compare_runs",
         "description": "Compara duas execuções (labels) de uma mesma campanha via RMSE pareado.",
         "input_schema": {
