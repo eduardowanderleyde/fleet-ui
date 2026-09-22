@@ -7,6 +7,42 @@ planeje e execute experimentos de robótica — mover robôs, gravar/reproduzir
 rotas, analisar resultados — chamando ferramentas de alto nível em vez de
 tocar em ROS 2 diretamente.
 
+## TL;DR — explicação simples (leia isto primeiro)
+
+O **Fleet UI** é o painel onde você grava um percurso com o robô e manda ele
+repetir, pra medir **repetibilidade** (o robô faz o mesmo caminho do mesmo
+jeito toda vez?). Isso é o núcleo da dissertação.
+
+Em cima disso foi adicionada uma camada de **agentes de IA**: em vez de você
+clicar em botões, você escreve em português o que quer, e um agente (usando a
+API da Anthropic/Claude) decide quais chamadas fazer no Fleet UI. Dá pra ter
+**até 3 agentes ao mesmo tempo**, cada um cuidando de um robô simulado
+diferente, sem um mexer no robô do outro.
+
+**O que é uma "run"** (a pasta `fleet_ws/runs/<nome>/`): quando você pede
+"grave esse percurso e repita 5 vezes", cada repetição é 1 execução, e o
+conjunto (gravação + repetições) é 1 **campanha**. Dentro da pasta da
+campanha fica `analysis/summary.json` — uma tabela com o quanto cada
+repetição desviou da gravação original (RMSE, duração, etc). É o dado bruto
+que vira gráfico/tabela na dissertação; já existia antes desta camada de
+agentes, só que agora um agente de IA consegue rodar a campanha inteira
+sozinho a partir de um pedido em linguagem natural, em vez de você rodar
+comando por comando.
+
+**Ordem cronológica do que foi construído** (cada item tem uma seção própria
+mais abaixo):
+1. Camada de agentes de IA (Planner decide os passos, Executor chama o Fleet
+   UI de verdade, Analyst lê os resultados).
+2. Simulação com múltiplos robôs ao mesmo tempo (antes só dava 1).
+3. `run_campaign` — o agente roda a campanha completa (gravar + repetir N
+   vezes + gerar a tabela de resultado) sozinho.
+4. Histórico dos agentes salvo em disco (antes, reiniciar o programa
+   apagava tudo que o agente tinha feito).
+5. Testes automáticos (código que confere sozinho se tudo continua
+   funcionando — pegou 2 bugs reais nesse processo).
+6. `diagnose_experiment` — quando uma repetição sai muito diferente do
+   esperado, o agente tenta explicar o motivo provável.
+
 ## Por que essa camada existe
 
 O Fleet UI já resolvia o problema de operar **um** robô (ou uma frota
