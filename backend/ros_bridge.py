@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import ast
 import concurrent.futures
 import json
 import os
+import re
 import shlex
 import socket
 import subprocess
@@ -48,6 +50,31 @@ class RosBridge:
             return False, "timeout"
         except Exception as exc:
             return False, str(exc)
+
+    @staticmethod
+    def extract_list_field(out: str, field: str) -> list:
+        """Extrai um campo de lista do texto que `ros2 service call` imprime.
+
+        A saída do CLI NUNCA foi YAML válido — é prosa solta ("waiting for
+        service...", "requester: making request: ...") seguida de
+        "response:\\n" e o repr() do Python da mensagem de resposta, ex.:
+        `fleet_msgs.srv.ListRobots_Response(robot_ids=['tb1', 'tb2'])`.
+        Tentar `yaml.safe_load(out)` nisso sempre lançou ScannerError
+        (confirmado ao vivo contra uma frota real de 2 robôs — list_robots
+        voltava `[]` mesmo com tb1/tb2 configurados). Em vez de tentar
+        casar esse texto num parser genérico, extrai só o campo pedido via
+        regex + `ast.literal_eval` (é um literal Python de verdade, não
+        precisa de um parser mais esperto que isso)."""
+        idx = out.rfind("response:")
+        tail = out[idx + len("response:"):] if idx != -1 else out
+        match = re.search(rf"{re.escape(field)}=(\[[^\]]*\])", tail)
+        if not match:
+            return []
+        try:
+            value = ast.literal_eval(match.group(1))
+            return list(value) if isinstance(value, (list, tuple)) else []
+        except (ValueError, SyntaxError):
+            return []
 
     def build_experiment_cmd(self, cfg: dict) -> list[str]:
         command = cfg.get("command", "record")

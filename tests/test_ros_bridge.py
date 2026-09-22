@@ -89,6 +89,36 @@ class RosBridgeCommandTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("boom", out)
 
+    def test_extract_list_field_parses_real_ros2_service_call_output(self):
+        """Saída real capturada de `ros2 service call list_robots
+        fleet_msgs/srv/ListRobots '{}'` contra uma frota tb1+tb2 de verdade —
+        yaml.safe_load(out) lançava ScannerError nisso (não é YAML válido,
+        nunca foi: é prosa + repr() do Python). list_robots/list_routes
+        voltavam [] mesmo com robôs configurados até essa correção."""
+        raw_stdout = (
+            "waiting for service to become available...\n"
+            "requester: making request: fleet_msgs.srv.ListRobots_Request()\n"
+            "\n"
+            "response:\n"
+            "fleet_msgs.srv.ListRobots_Response(robot_ids=['tb1', 'tb2'])"
+        )
+        raw_stderr = (
+            "[WARN] [rcl]: ROS_LOCALHOST_ONLY is deprecated but still honored if it is enabled. "
+            "Use ROS_AUTOMATIC_DISCOVERY_RANGE and ROS_STATIC_PEERS instead.\n"
+            "[WARN] [rcl]: 'localhost_only' is enabled, 'automatic_discovery_range' and 'static_peers' will be ignored."
+        )
+        # Mesma concatenação que RosBridge.run_service produz de verdade.
+        out = raw_stdout.strip() + raw_stderr.strip()
+
+        self.assertEqual(RosBridge.extract_list_field(out, "robot_ids"), ["tb1", "tb2"])
+
+    def test_extract_list_field_handles_empty_list(self):
+        out = "response:\nfleet_msgs.srv.ListRoutes_Response(route_names=[])"
+        self.assertEqual(RosBridge.extract_list_field(out, "route_names"), [])
+
+    def test_extract_list_field_returns_empty_on_unparseable_output(self):
+        self.assertEqual(RosBridge.extract_list_field("qualquer coisa sem o campo", "robot_ids"), [])
+
 
 if __name__ == "__main__":
     unittest.main()

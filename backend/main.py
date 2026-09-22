@@ -614,13 +614,7 @@ async def list_robots():
     ok, out = _run_ros2_service("list_robots", "fleet_msgs/srv/ListRobots", "{}")
     if not ok:
         return JSONResponse(content={"robot_ids": []}, status_code=200)
-    try:
-        import yaml
-        data = yaml.safe_load(out) if out else {}
-        robot_ids = data.get("robot_ids", []) or []
-        return {"robot_ids": robot_ids}
-    except Exception:
-        return {"robot_ids": []}
+    return {"robot_ids": _bridge.extract_list_field(out, "robot_ids")}
 
 
 @app.get("/api/list_routes")
@@ -632,12 +626,7 @@ async def list_routes(robot_id: str = ""):
     )
     if not ok:
         return {"route_names": []}
-    try:
-        import yaml
-        data = yaml.safe_load(out) if out else {}
-        return {"route_names": data.get("route_names", []) or []}
-    except Exception:
-        return {"route_names": []}
+    return {"route_names": _bridge.extract_list_field(out, "route_names")}
 
 
 @app.post("/api/enable_collection")

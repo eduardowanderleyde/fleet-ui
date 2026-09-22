@@ -14,12 +14,16 @@ from agents.executor import Executor, ExecutorError  # noqa: E402
 
 
 def _fake_run_service(service, service_type, request_json, timeout=10):
-    """Substitui RosBridge.run_service: sem ROS 2, sem subprocess, respostas fixas."""
+    """Substitui RosBridge.run_service: sem ROS 2, sem subprocess, respostas fixas.
+    O formato de list_robots/list_routes espelha a saída REAL de
+    `ros2 service call` (prosa + repr do Python após "response:") — não é
+    YAML, nunca foi; ver RosBridge.extract_list_field e o teste de
+    regressão em test_ros_bridge.py que capturou isso ao vivo."""
     req = json.loads(request_json) if request_json else {}
     if service == "list_robots":
-        return True, "robot_ids: ['tb1', 'tb2']"
+        return True, "response:\nfleet_msgs.srv.ListRobots_Response(robot_ids=['tb1', 'tb2'])"
     if service == "list_routes":
-        return True, "route_names: ['percurso1']"
+        return True, "response:\nfleet_msgs.srv.ListRoutes_Response(route_names=['percurso1'])"
     if service in (
         "start_record", "stop_record", "play_route", "go_to_point",
         "cancel", "enable_collection", "disable_collection",
