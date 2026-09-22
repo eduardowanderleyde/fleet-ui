@@ -6,6 +6,11 @@ frontend/.vite/
 # Backend venv (if used)
 backend/venv/
 
+# Secrets
+.env
+*.env
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]

@@ -45,6 +45,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR ${FLEET_ROOT}
 
+COPY backend/requirements.txt ${FLEET_ROOT}/backend/requirements.txt
+RUN pip install --no-cache-dir --break-system-packages --ignore-installed -r backend/requirements.txt
+
 COPY frontend/package*.json ${FLEET_ROOT}/frontend/
 RUN npm --prefix frontend ci
 
