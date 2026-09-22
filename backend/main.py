@@ -25,10 +25,14 @@ from pydantic import BaseModel, Field
 from ros_bridge import RosBridge
 from agents import Analyst, Executor, Planner
 
-# Robô cujo mapa/pose alimentam /api/map e /api/status.pose neste branch
-# multi-robô (SLAM/Nav2 publicam map, amcl_pose e tf por-robô em /<id>/...,
-# não mais em tópicos globais). Ver fleet_orchestrator._setup_robot_tf.
-_STATUS_ROBOT_ID = os.environ.get("FLEET_STATUS_ROBOT", "tb1")
+# Robôs simulados (mesma variável usada pelos launch files ROS 2 — precisa
+# bater com quem realmente existe no Gazebo). SLAM/Nav2 publicam map,
+# amcl_pose e tf por-robô em /<id>/..., não mais em tópicos globais. Ver
+# fleet_orchestrator._setup_robot_tf.
+_ROBOTS = [r.strip() for r in os.environ.get("FLEET_ROBOTS", "tb1,tb2").split(",") if r.strip()]
+# Robô usado como default no campo "pose"/"/api/map" sem robot_id explícito
+# (compat com clientes antigos que não sabem que existe mais de um robô).
+_STATUS_ROBOT_ID = os.environ.get("FLEET_STATUS_ROBOT") or (_ROBOTS[0] if _ROBOTS else "tb1")
 
 # Raiz do projeto (fleet-ui/). Use FLEET_WS para sobrescrever.
 WORKSPACE = os.environ.get("FLEET_WS") or str(Path(__file__).resolve().parent.parent)
@@ -38,8 +42,8 @@ _bridge = RosBridge(ROS_WS, ros_distro=os.environ.get("ROS_DISTRO", "jazzy"))
 
 # Status da frota (atualizado pelo subscriber ROS em thread)
 _fleet_status: dict = {"robots": []}
-_robot_pose: dict = {"x": 0.0, "y": 0.0, "yaw": 0.0, "valid": False}
-_map_meta: dict = {}  # resolution, origin_x, origin_y, width, height, png_b64
+_robot_poses: dict[str, dict] = {rid: {"x": 0.0, "y": 0.0, "yaw": 0.0, "valid": False} for rid in _ROBOTS}
+_map_metas: dict[str, dict] = {}  # robot_id -> {resolution, origin_x, origin_y, width, height, png_b64}
 _status_lock = threading.Lock()
 _ws_clients: list[WebSocket] = []
 
@@ -166,83 +170,97 @@ async def lifespan(app: FastAPI):
                         for r in msg.robots
                     ]
 
-            def amcl_cb(msg):
-                p = msg.pose.pose.position
-                q = msg.pose.pose.orientation
-                yaw = math.atan2(
-                    2.0 * (q.w * q.z + q.x * q.y),
-                    1.0 - 2.0 * (q.y * q.y + q.z * q.z),
-                )
-                with _status_lock:
-                    _robot_pose.update({"x": p.x, "y": p.y, "yaw": yaw, "valid": True})
-
-            # TF lookup: map -> base_link (fallback contínuo; /pose do
-            # slam_toolbox só publica esporadicamente, não dá pose ao vivo).
-            # tf2_ros.TransformListener hardcoda a subscrição em /tf e
+            # TF lookup: map -> base_link por robô (fallback contínuo; /pose
+            # do slam_toolbox só publica esporadicamente, não dá pose ao
+            # vivo). tf2_ros.TransformListener hardcoda a subscrição em /tf e
             # /tf_static (tópicos globais); nesse branch cada robô publica em
-            # /<id>/tf, então replicamos manualmente o Buffer + subscrições
-            # namespaced (mesmo padrão de fleet_orchestrator._setup_robot_tf).
-            # Executor trocado para MultiThreadedExecutor logo abaixo para não
-            # deixar o volume alto de /tf atrasar fleet/status e map.
+            # /<id>/tf, então replicamos manualmente 1 Buffer + subscrições
+            # namespaced por robô (mesmo padrão de
+            # fleet_orchestrator._setup_robot_tf). Executor trocado para
+            # MultiThreadedExecutor logo abaixo para não deixar o volume alto
+            # de /tf de N robôs atrasar fleet/status e os N maps.
             import tf2_ros
             from rclpy.time import Time as RclpyTime
             from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
             from tf2_msgs.msg import TFMessage
 
-            tf_buffer = tf2_ros.Buffer()
-            _tf_prefix = f"/{_STATUS_ROBOT_ID}" if _STATUS_ROBOT_ID else ""
+            def _setup_robot(rid: str) -> None:
+                prefix = f"/{rid}" if rid else ""
+                tf_buffer = tf2_ros.Buffer()
 
-            def _tf_dynamic_cb(msg):
-                for t in msg.transforms:
-                    tf_buffer.set_transform(t, "default_authority")
+                def _tf_dynamic_cb(msg):
+                    for t in msg.transforms:
+                        tf_buffer.set_transform(t, "default_authority")
 
-            def _tf_static_cb(msg):
-                for t in msg.transforms:
-                    tf_buffer.set_transform_static(t, "default_authority")
+                def _tf_static_cb(msg):
+                    for t in msg.transforms:
+                        tf_buffer.set_transform_static(t, "default_authority")
 
-            node.create_subscription(
-                TFMessage, f"{_tf_prefix}/tf", _tf_dynamic_cb,
-                QoSProfile(depth=100, durability=DurabilityPolicy.VOLATILE, history=HistoryPolicy.KEEP_LAST),
-            )
-            node.create_subscription(
-                TFMessage, f"{_tf_prefix}/tf_static", _tf_static_cb,
-                QoSProfile(depth=100, durability=DurabilityPolicy.TRANSIENT_LOCAL, history=HistoryPolicy.KEEP_LAST),
-            )
+                node.create_subscription(
+                    TFMessage, f"{prefix}/tf", _tf_dynamic_cb,
+                    QoSProfile(depth=100, durability=DurabilityPolicy.VOLATILE, history=HistoryPolicy.KEEP_LAST),
+                )
+                node.create_subscription(
+                    TFMessage, f"{prefix}/tf_static", _tf_static_cb,
+                    QoSProfile(depth=100, durability=DurabilityPolicy.TRANSIENT_LOCAL, history=HistoryPolicy.KEEP_LAST),
+                )
 
-            def tf_timer_cb():
-                try:
-                    t = tf_buffer.lookup_transform("map", "base_link", RclpyTime())
-                    tr = t.transform.translation
-                    q = t.transform.rotation
+                def tf_timer_cb():
+                    try:
+                        t = tf_buffer.lookup_transform("map", "base_link", RclpyTime())
+                        tr = t.transform.translation
+                        q = t.transform.rotation
+                        yaw = math.atan2(
+                            2.0 * (q.w * q.z + q.x * q.y),
+                            1.0 - 2.0 * (q.y * q.y + q.z * q.z),
+                        )
+                        with _status_lock:
+                            _robot_poses.setdefault(rid, {}).update(
+                                {"x": tr.x, "y": tr.y, "yaw": yaw, "valid": True}
+                            )
+                    except Exception:
+                        pass
+
+                node.create_timer(0.1, tf_timer_cb)
+
+                def amcl_cb(msg):
+                    p = msg.pose.pose.position
+                    q = msg.pose.pose.orientation
                     yaw = math.atan2(
                         2.0 * (q.w * q.z + q.x * q.y),
                         1.0 - 2.0 * (q.y * q.y + q.z * q.z),
                     )
                     with _status_lock:
-                        _robot_pose.update({"x": tr.x, "y": tr.y, "yaw": yaw, "valid": True})
-                except Exception:
-                    pass
+                        _robot_poses.setdefault(rid, {}).update(
+                            {"x": p.x, "y": p.y, "yaw": yaw, "valid": True}
+                        )
 
-            node.create_timer(0.1, tf_timer_cb)
+                node.create_subscription(PoseWithCovarianceStamped, f"{prefix}/amcl_pose", amcl_cb, 10)
+                node.create_subscription(PoseWithCovarianceStamped, f"{prefix}/pose", amcl_cb, 10)
 
-            def map_cb(msg):
-                info = msg.info
-                if info.width == 0 or info.height == 0:
-                    return
-                try:
-                    png = _encode_map_png(list(msg.data), info.width, info.height)
-                    b64 = base64.b64encode(png).decode()
-                    with _status_lock:
-                        _map_meta.update({
-                            "resolution": info.resolution,
-                            "origin_x": info.origin.position.x,
-                            "origin_y": info.origin.position.y,
-                            "width": info.width,
-                            "height": info.height,
-                            "png_b64": b64,
-                        })
-                except Exception as e:
-                    node.get_logger().warning(f"map_cb error: {e}")
+                def map_cb(msg):
+                    info = msg.info
+                    if info.width == 0 or info.height == 0:
+                        return
+                    try:
+                        png = _encode_map_png(list(msg.data), info.width, info.height)
+                        b64 = base64.b64encode(png).decode()
+                        with _status_lock:
+                            _map_metas[rid] = {
+                                "resolution": info.resolution,
+                                "origin_x": info.origin.position.x,
+                                "origin_y": info.origin.position.y,
+                                "width": info.width,
+                                "height": info.height,
+                                "png_b64": b64,
+                            }
+                    except Exception as e:
+                        node.get_logger().warning(f"map_cb({rid!r}) error: {e}")
+
+                node.create_subscription(OccupancyGrid, f"{prefix}/map", map_cb, 1)
+
+            for _rid in _ROBOTS:
+                _setup_robot(_rid)
 
             # Verifica Nav2 periodicamente via ros2 action list (mais confiável que ActionClient)
             def nav2_check_cb():
@@ -261,9 +279,6 @@ async def lifespan(app: FastAPI):
             node.create_timer(3.0, nav2_check_cb)
 
             node.create_subscription(FleetStatus, "fleet/status", fleet_cb, 10)
-            node.create_subscription(PoseWithCovarianceStamped, f"{_tf_prefix}/amcl_pose", amcl_cb, 10)
-            node.create_subscription(PoseWithCovarianceStamped, f"{_tf_prefix}/pose", amcl_cb, 10)
-            node.create_subscription(OccupancyGrid, f"{_tf_prefix}/map", map_cb, 1)
             executor = rclpy.executors.MultiThreadedExecutor()
             executor.add_node(node)
             executor.spin()
@@ -281,10 +296,23 @@ app = FastAPI(title="Fleet UI API", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=_cors_origins(), allow_methods=["*"], allow_headers=["*"])
 
 
+_EMPTY_POSE = {"x": 0.0, "y": 0.0, "yaw": 0.0, "valid": False}
+
+
+def _status_payload() -> dict:
+    # "pose" (singular) fica de compat com quem ainda não sabe que existe
+    # mais de um robô; "poses" traz todos, é o que a UI multi-robô usa.
+    return {
+        **_fleet_status,
+        "pose": _robot_poses.get(_STATUS_ROBOT_ID, _EMPTY_POSE),
+        "poses": _robot_poses,
+    }
+
+
 @app.get("/api/status")
 async def get_status():
     with _status_lock:
-        return {**_fleet_status, "pose": _robot_pose}
+        return _status_payload()
 
 
 @app.websocket("/ws/status")
@@ -293,12 +321,12 @@ async def websocket_status(websocket: WebSocket):
     _ws_clients.append(websocket)
     try:
         with _status_lock:
-            payload = {**_fleet_status, "pose": _robot_pose}
+            payload = _status_payload()
         await websocket.send_text(json.dumps(payload))
         while True:
             await asyncio.sleep(0.25)
             with _status_lock:
-                payload = {**_fleet_status, "pose": _robot_pose}
+                payload = _status_payload()
             await websocket.send_text(json.dumps(payload))
     except WebSocketDisconnect:
         pass
@@ -404,21 +432,25 @@ async def save_route_waypoints(body: SaveRouteWaypointsRequest):
 
 
 @app.get("/api/map")
-async def get_map():
+async def get_map(robot_id: str = ""):
+    rid = robot_id or _STATUS_ROBOT_ID
     with _status_lock:
-        if not _map_meta:
+        meta = _map_metas.get(rid)
+        if not meta:
             return JSONResponse(content={"available": False})
-        return {"available": True, **_map_meta}
+        return {"available": True, "robot_id": rid, **meta}
 
 
 @app.post("/api/save_background_map")
-async def save_background_map():
+async def save_background_map(robot_id: str = ""):
     """Guarda o mapa SLAM actual como fundo persistente em public/slam_map.png + slam_map.json."""
     import base64 as _b64
+    rid = robot_id or _STATUS_ROBOT_ID
     with _status_lock:
-        if not _map_meta or not _map_meta.get("png_b64"):
+        meta = _map_metas.get(rid)
+        if not meta or not meta.get("png_b64"):
             return JSONResponse({"success": False, "message": "Mapa SLAM não disponível ainda."}, status_code=400)
-        meta = dict(_map_meta)
+        meta = dict(meta)
 
     public_dir = Path(WORKSPACE) / "frontend" / "public"
     public_dir.mkdir(parents=True, exist_ok=True)

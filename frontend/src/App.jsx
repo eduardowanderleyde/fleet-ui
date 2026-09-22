@@ -61,7 +61,7 @@ const WAREHOUSE_MAP = {
 const HOUSE_WORLD = { x0: -5.0, y0: -5.0, x1: 7.0, y1: 7.0 }
 
 // ── MapView ───────────────────────────────────────────────────────────────────
-function MapView({ robotPose, waypoints, onAddWaypoint }) {
+function MapView({ robotId, robotPose, waypoints, onAddWaypoint }) {
   // mantém compatibilidade de estado existente + novos
   const canvasRef    = useRef(null)
   const imgRef       = useRef(null)   // SLAM PNG
@@ -296,12 +296,21 @@ function MapView({ robotPose, waypoints, onAddWaypoint }) {
       .catch(() => loadImg(WAREHOUSE_MAP.src, WAREHOUSE_MAP))
   }, [draw])
 
-  // Busca mapa periodicamente
+  // Busca mapa periodicamente (do robô selecionado — cada robô tem seu
+  // próprio SLAM, não um mapa global). Troca de robô limpa o mapa anterior
+  // na hora: cada um roda SLAM independente, então a pose de um nunca faz
+  // sentido sobre o mapa do outro, nem por um instante.
+  useEffect(() => {
+    mapMeta.current = null
+    imgRef.current = null
+    setMapOk(false)
+  }, [robotId])
+
   useEffect(() => {
     let alive = true
     const fetchMap = async () => {
       try {
-        const data = await getMap()
+        const data = await getMap(robotId)
         if (!alive || !data.available) return
         mapMeta.current = {
           resolution: data.resolution,
@@ -327,7 +336,7 @@ function MapView({ robotPose, waypoints, onAddWaypoint }) {
     fetchMap()
     const t = setInterval(fetchMap, 1500)
     return () => { alive = false; clearInterval(t) }
-  }, [draw])
+  }, [draw, robotId])
 
   // Redesenha quando pose ou waypoints mudam
   useEffect(() => { draw() }, [draw, robotPose, waypoints])
@@ -658,8 +667,14 @@ export default function App() {
     finally { setResetting(false); setTimeout(() => setResetMsg(null), 6000) }
   }
 
-  const pose   = status.pose || {}
-  const robot  = status.robots?.[0] || {}
+  // Robô cujo mapa/pose/status são exibidos: o selecionado no dropdown
+  // "Robô" (cfg.robot), com fallback pro primeiro robô da frota reportado
+  // por /api/status quando "único"/nenhum estiver selecionado ainda.
+  const effectiveRobotId = (cfg.robot && cfg.robot !== 'default')
+    ? cfg.robot
+    : (status.robots?.[0]?.robot_id || 'tb1')
+  const pose   = status.poses?.[effectiveRobotId] || status.pose || {}
+  const robot  = status.robots?.find(r => r.robot_id === effectiveRobotId) || status.robots?.[0] || {}
   const nav2Ok = status.nav2_ready === true
   const isConnected = connStatus === 'connected'
 
@@ -850,6 +865,7 @@ export default function App() {
         {/* Coluna central: mapa — ocupa todo o espaço disponível */}
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           <MapView
+            robotId={effectiveRobotId}
             robotPose={pose}
             waypoints={cfg.command === 'record' ? cfg.points : []}
             onAddWaypoint={handleMapAddWaypoint}

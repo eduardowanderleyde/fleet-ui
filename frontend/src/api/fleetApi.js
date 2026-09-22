@@ -29,8 +29,11 @@ export async function runConfig(config) {
   }))
 }
 
-export async function getMap() {
-  return readJson(await fetch(apiPath('/map')))
+export async function getMap(robotId = '') {
+  const params = new URLSearchParams()
+  if (robotId && robotId !== 'default') params.set('robot_id', robotId)
+  const qs = params.toString()
+  return readJson(await fetch(apiPath(`/map${qs ? `?${qs}` : ''}`)))
 }
 
 export async function getSlamMapMeta() {
