@@ -201,16 +201,44 @@ escutando `/tb{1,2,3}/tf` e consultando `map → base_link` sem prefixo.
 - `ros2 service call /go_to_point ... robot_id: tb1` navegou de verdade via
   Nav2 até o alvo.
 
-### Limitação conhecida
+### Limitação conhecida (teto de recursos ao rodar 3 robôs)
 
-Este ambiente não tem GPU. O processo `gz sim` sozinho consome ~76% de um
-núcleo simulando 3 robôs com lidar renderizado por software, o que causa
-instabilidade no `/clock` simulado sob carga sustentada — o `lifecycle_manager`
-do terceiro robô eventualmente trava numa transição de estado. Isso é um teto
-de hardware, não um bug de lógica: tb1 e tb2 sobem e navegam de forma
-consistente; rodar os 3 ao mesmo tempo de forma 100% estável exigiria menos
-carga por robô (lidar mais barato, costmap com resolução menor) ou uma
-máquina com GPU.
+Hardware desta máquina: CPU AMD Ryzen 7 5800XT (8 núcleos / 16 threads), 46 GB
+de RAM, GPU dedicada AMD (PCI `1002:7590`, driver de kernel `amdgpu`).
+
+**Correção de um diagnóstico anterior:** este documento chegou a afirmar "este
+ambiente não tem GPU" e atribuir a instabilidade com 3 robôs à ausência dela.
+Isso estava **errado** — a máquina tem uma GPU dedicada, e foi verificado
+diretamente que o `gz sim` a está usando de verdade, não caindo para
+renderização por software. Evidência (comando a comando, reproduzível):
+
+```bash
+# 1. Achar o processo real do servidor gz sim (não o wrapper `sh -c ruby ...`)
+pstree -p $(pgrep -f "gz sim -r -s" | head -1)
+
+# 2. Confirmar que ele tem o dispositivo da GPU aberto
+lsof -p <pid-do-gz-sim-real> | grep -i dri
+# → mostra /dev/dri/renderD128 com múltiplos file descriptors ativos
+
+# 3. Confirmar que as bibliotecas carregadas são a pilha Mesa de hardware
+#    (libEGL_mesa/libGLX_mesa), não o fallback de software (swrast/llvmpipe)
+grep -oE '[^ ]+\.so[^ ]*' /proc/<pid>/maps | grep -iE "mesa|gl|egl"
+
+# 4. Prova direta do driver do kernel: percentual de uso real da GPU
+cat /sys/class/drm/card1/device/gpu_busy_percent
+# → valor não-zero exatamente durante a simulação
+```
+
+As quatro evidências bateram: a GPU é usada de verdade. Ou seja, o teto real
+ao subir 3 robôs **não é falta de GPU** — é custo de CPU: cada robô roda seu
+próprio SLAM Toolbox, controller/costmap do Nav2 e bt_navigator, e o gargalo
+observado (`lifecycle_manager` do terceiro robô travando numa transição sob
+carga sustentada) é consistente com contenção de CPU/DDS entre esses
+processos, não com renderização de sensor. tb1 e tb2 sobem e navegam de forma
+consistente; rodar os 3 de forma 100% estável ficaria mais fácil reduzindo
+carga por robô (SLAM com scan-matching menos frequente, costmap com
+resolução menor) ou distribuindo os processos entre mais núcleos — não
+depende de trocar de máquina por uma "com GPU", porque esta já tem.
 
 `fleet_ws/src/fleet_orchestrator/config/roles.yaml` teve `tb2`/`tb3`
 temporariamente marcados como `MUUT` (móveis) para esta demonstração — o
