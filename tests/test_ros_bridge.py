@@ -1,6 +1,8 @@
+import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,6 +55,39 @@ class RosBridgeCommandTests(unittest.TestCase):
 
         self.assertEqual(result["found"], [])
         self.assertIn("Subnet inválida", result["error"])
+
+    def test_analyze_bags_builds_expected_command(self):
+        captured = {}
+
+        def fake_run(cmd, **kwargs):
+            captured["cmd"] = cmd
+            return subprocess.CompletedProcess(cmd, returncode=0, stdout="ok", stderr="")
+
+        with patch("ros_bridge.subprocess.run", side_effect=fake_run):
+            ok, out = self.bridge.analyze_bags(
+                ["collections/default/baseline", "collections/default/replay_01"],
+                ["baseline", "replay_01"],
+                "fleet_ws/runs/rota_a_abc123/analysis",
+            )
+
+        self.assertTrue(ok)
+        self.assertEqual(out, "ok")
+        shell_cmd = captured["cmd"][-1]  # ["bash", "-c", <shell_cmd>]
+        self.assertIn("analyze_runs.py", shell_cmd)
+        self.assertIn("collections/default/baseline", shell_cmd)
+        self.assertIn("collections/default/replay_01", shell_cmd)
+        self.assertIn("--output-dir fleet_ws/runs/rota_a_abc123/analysis", shell_cmd)
+        self.assertIn("--labels baseline replay_01", shell_cmd)
+
+    def test_analyze_bags_reports_failure_on_nonzero_exit(self):
+        def fake_run(cmd, **kwargs):
+            return subprocess.CompletedProcess(cmd, returncode=1, stdout="", stderr="boom")
+
+        with patch("ros_bridge.subprocess.run", side_effect=fake_run):
+            ok, out = self.bridge.analyze_bags(["b1"], ["baseline"], "out")
+
+        self.assertFalse(ok)
+        self.assertIn("boom", out)
 
 
 if __name__ == "__main__":

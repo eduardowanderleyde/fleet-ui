@@ -85,13 +85,43 @@ TOOL_SPECS: list[dict] = [
     {
         "name": "run_experiment",
         "description": (
-            "Dispara uma campanha record/replay assíncrona e aguarda o resultado. "
-            "config segue o schema de RunConfigRequest do backend (command, robot, route, collect, topics, points, ...)."
+            "Dispara UM record ou UM replay (não uma campanha com repetições — para isso "
+            "use run_campaign) e aguarda o resultado. config segue o schema de "
+            "RunConfigRequest do backend (command: 'record'|'replay', robot, route, collect, "
+            "topics, points, ...)."
         ),
         "input_schema": {
             "type": "object",
             "properties": {"config": {"type": "object"}},
             "required": ["config"],
+        },
+    },
+    {
+        "name": "run_campaign",
+        "description": (
+            "Roda uma campanha completa: grava 1 execução baseline (usando `points` como "
+            "waypoints) e reproduz a mesma rota `repetitions` vezes, depois roda a análise "
+            "automaticamente (RMSE, duração, etc). Ao final, use analyze_experiment ou "
+            "compare_runs com o run_id devolvido para interpretar os resultados. Pode levar "
+            "vários minutos — é a ferramenta certa para 'rode N repetições e me diga se "
+            "alguma ficou fora do esperado'."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "robot": {"type": "string", "default": "default"},
+                "route": {"type": "string"},
+                "points": {
+                    "type": "array",
+                    "description": "Waypoints [x, y, yaw] da gravação baseline.",
+                    "items": {"type": "array", "items": {"type": "number"}},
+                },
+                "repetitions": {"type": "integer", "default": 3, "minimum": 1},
+                "collect": {"type": "boolean", "default": True},
+                "topics": {"type": "array", "items": {"type": "string"}},
+                "run_id": {"type": "string", "description": "Opcional — gerado automaticamente se omitido."},
+            },
+            "required": ["route", "points"],
         },
     },
     {

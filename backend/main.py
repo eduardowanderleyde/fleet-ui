@@ -128,6 +128,17 @@ class AgentFleetRunRequest(BaseModel):
     model: str = "claude-sonnet-5"
 
 
+class RunCampaignRequest(BaseModel):
+    robot: str = "default"
+    route: str = "percurso1"
+    points: list[list[float]] = Field(default_factory=list)  # waypoints da gravação baseline
+    repetitions: int = 3
+    collect: bool = True
+    topics: list[str] = Field(default_factory=lambda: ["scan", "odom", "imu", "pose"])
+    return_to_start: list[float] | None = None
+    run_id: str | None = None  # gerado automaticamente se omitido
+
+
 def _model_dump(model: BaseModel) -> dict:
     if hasattr(model, "model_dump"):
         return model.model_dump()
@@ -336,7 +347,6 @@ async def websocket_status(websocket: WebSocket):
 
 
 import uuid
-import shlex
 
 _jobs: dict = {}   # job_id → {running, lines, result, error}
 
@@ -359,34 +369,17 @@ async def run_config(cfg: RunConfigRequest):
     _jobs[job_id] = {"running": True, "lines": [], "result": None, "error": None, "exit_code": None}
 
     def _run():
-        env = {**_ros_env(), "PYTHONUNBUFFERED": "1"}
-        ros_setup = f"source /opt/ros/jazzy/setup.bash 2>/dev/null; source {ROS_WS}/install/setup.bash 2>/dev/null; "
-        shell_cmd = ros_setup + " ".join(shlex.quote(c) for c in cmd)
-        _jobs[job_id]["lines"].append(f"[CMD] {' '.join(cmd)}")
+        job = _jobs[job_id]
+        job["lines"].append(f"[CMD] {' '.join(cmd)}")
         try:
-            proc = subprocess.Popen(
-                ["bash", "-c", shell_cmd],
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                text=True, bufsize=1, cwd=ROS_WS, env=env,
-            )
-            _NOISE = ("TF_OLD_DATA", "RTPS_TRANSPORT_SHM", "Possible reasons", "ros.org/tf")
-            for line in proc.stdout:
-                l = line.rstrip()
-                if any(n in l for n in _NOISE):
-                    continue
-                _jobs[job_id]["lines"].append(l)
-            proc.wait()
-            _jobs[job_id]["exit_code"] = proc.returncode
-            # load export json
-            ep = Path(export_path)
-            if ep.exists():
-                import json as _json
-                _jobs[job_id]["result"] = _json.loads(ep.read_text())
-                ep.unlink(missing_ok=True)
+            step = _bridge.run_experiment_step(cmd, export_path, line_callback=job["lines"].append)
+            job["result"] = step["result"]
+            job["error"] = step["error"]
+            job["exit_code"] = step["exit_code"]
         except Exception as ex:
-            _jobs[job_id]["error"] = str(ex)
+            job["error"] = str(ex)
         finally:
-            _jobs[job_id]["running"] = False
+            job["running"] = False
 
     threading.Thread(target=_run, daemon=True).start()
     return {"job_id": job_id}
@@ -404,6 +397,96 @@ async def get_job(job_id: str):
         "error": job["error"],
         "exit_code": job["exit_code"],
     }
+
+
+_campaign_jobs: dict = {}  # run_id → {running, steps: [...], summary, analysis_log, error}
+
+
+def _campaign_steps(cfg: dict) -> list[tuple[str, dict]]:
+    """1 gravação baseline + N reproduções, na mesma convenção de labels
+    (baseline, replay_01, ...) que analyze_runs.py/Analyst já esperam."""
+    steps = [("baseline", {**cfg, "command": "record"})]
+    for i in range(1, int(cfg.get("repetitions", 3)) + 1):
+        steps.append((f"replay_{i:02d}", {**cfg, "command": "replay"}))
+    return steps
+
+
+def _run_campaign(run_id: str, cfg: dict) -> None:
+    job = _campaign_jobs[run_id]
+    bag_paths: list[str] = []
+    labels: list[str] = []
+
+    for label, step_cfg in _campaign_steps(cfg):
+        step = {"label": label, "lines": [], "result": None, "error": None, "exit_code": None}
+        job["steps"].append(step)
+        try:
+            cmd = _build_cmd(step_cfg)
+        except Exception as e:
+            step["error"] = str(e)
+            job["error"] = f"{label}: {e}"
+            job["running"] = False
+            return
+        export_path = str(Path(ROS_WS) / f"_campaign_{run_id}_{label}.json")
+        cmd += ["--export", export_path]
+        step["lines"].append(f"[CMD] {' '.join(cmd)}")
+        outcome = _bridge.run_experiment_step(cmd, export_path, line_callback=step["lines"].append)
+        step["result"] = outcome["result"]
+        step["error"] = outcome["error"]
+        step["exit_code"] = outcome["exit_code"]
+        if outcome["error"] or outcome["exit_code"] not in (0, None):
+            job["error"] = f"{label} falhou (exit={outcome['exit_code']}): {outcome['error'] or 'ver lines do passo'}"
+            job["running"] = False
+            return
+        bag_path = (outcome["result"] or {}).get("rosbag_path")
+        if not bag_path:
+            job["error"] = f"{label}: rosbag_path ausente no export (coleta desligada nesse passo?)"
+            job["running"] = False
+            return
+        bag_paths.append(bag_path)
+        labels.append(label)
+
+    out_dir = str(Path(ROS_WS) / "runs" / run_id / "analysis")
+    ok, out = _bridge.analyze_bags(bag_paths, labels, out_dir)
+    job["analysis_log"] = out
+    if not ok:
+        job["error"] = f"analyze_runs.py falhou: {out[-800:]}"
+        job["running"] = False
+        return
+
+    summary_path = Path(out_dir) / "summary.json"
+    if summary_path.exists():
+        job["summary"] = json.loads(summary_path.read_text())
+        job["run_id"] = run_id
+    else:
+        job["error"] = "analyze_runs.py terminou mas summary.json não foi encontrado"
+    job["running"] = False
+
+
+@app.post("/api/run_campaign")
+async def run_campaign(cfg: RunCampaignRequest):
+    """Fecha o loop planner→campanha→análise: grava 1 baseline + N reproduções
+    da mesma rota, roda analyze_runs.py sobre os bags resultantes, e deixa o
+    summary.json em fleet_ws/runs/<run_id>/analysis/ — o mesmo formato que
+    Analyst.analyze_experiment/compare_runs já leem. Assíncrono como
+    /api/run_config: devolve run_id, consulte com /api/campaign_job/{run_id}."""
+    cfg_data = _model_dump(cfg)
+    if cfg_data["repetitions"] < 1:
+        return JSONResponse({"success": False, "message": "repetitions deve ser >= 1"}, status_code=400)
+    run_id = cfg_data.get("run_id") or f"{cfg_data['route']}_{uuid.uuid4().hex[:8]}"
+    if run_id in _campaign_jobs and _campaign_jobs[run_id]["running"]:
+        return JSONResponse({"success": False, "message": f"Campanha '{run_id}' já em execução"}, status_code=409)
+
+    _campaign_jobs[run_id] = {"running": True, "steps": [], "summary": None, "analysis_log": None, "error": None}
+    threading.Thread(target=_run_campaign, args=(run_id, cfg_data), daemon=True).start()
+    return {"run_id": run_id}
+
+
+@app.get("/api/campaign_job/{run_id}")
+async def get_campaign_job(run_id: str):
+    job = _campaign_jobs.get(run_id)
+    if not job:
+        return JSONResponse({"error": "campaign not found"}, status_code=404)
+    return job
 
 
 @app.post("/api/save_route_waypoints")

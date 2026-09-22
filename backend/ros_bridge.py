@@ -82,6 +82,64 @@ class RosBridge:
                 args += [f"--return-to-start={return_to_start[0]},{return_to_start[1]},{return_to_start[2]}"]
         return args
 
+    def run_experiment_step(
+        self, cmd: list[str], export_path: str, line_callback=None,
+    ) -> dict:
+        """Roda um record/replay do experiment_repeatability.py até o fim (bloqueante).
+        Usado tanto por /api/run_config (1 passo) quanto por uma campanha (N passos em
+        sequência) — ver /api/run_campaign. `line_callback`, se dado, recebe cada linha
+        de saída assim que chega (para streaming de progresso)."""
+        env = {**self.ros_env(), "PYTHONUNBUFFERED": "1"}
+        shell_cmd = self.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
+        lines: list[str] = []
+        out: dict = {"lines": lines, "result": None, "error": None, "exit_code": None}
+        noise = ("TF_OLD_DATA", "RTPS_TRANSPORT_SHM", "Possible reasons", "ros.org/tf")
+        try:
+            proc = subprocess.Popen(
+                ["bash", "-c", shell_cmd],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                text=True, bufsize=1, cwd=self.ros_ws, env=env,
+            )
+            for line in proc.stdout:
+                l = line.rstrip()
+                if any(n in l for n in noise):
+                    continue
+                lines.append(l)
+                if line_callback:
+                    line_callback(l)
+            proc.wait()
+            out["exit_code"] = proc.returncode
+            ep = Path(export_path)
+            if ep.exists():
+                out["result"] = json.loads(ep.read_text())
+                ep.unlink(missing_ok=True)
+        except Exception as exc:
+            out["error"] = str(exc)
+        return out
+
+    def analyze_bags(self, bag_paths: list[str], labels: list[str], output_dir: str, timeout: int = 180) -> tuple[bool, str]:
+        """Roda analyze_runs.py sobre os bags de uma campanha, produzindo
+        <output_dir>/summary.json (formato que Analyst.load_summary espera)."""
+        script = str(Path(self.ros_ws) / "scripts" / "analyze_runs.py")
+        cmd = (
+            self.ros_setup_prefix()
+            + "python3 " + shlex.quote(script) + " "
+            + " ".join(shlex.quote(p) for p in bag_paths)
+            + " --output-dir " + shlex.quote(output_dir)
+            + " --labels " + " ".join(shlex.quote(l) for l in labels)
+        )
+        try:
+            result = subprocess.run(
+                ["bash", "-c", cmd], env=self.ros_env(), capture_output=True,
+                text=True, timeout=timeout, cwd=self.ros_ws,
+            )
+            out = (result.stdout or "") + (result.stderr or "")
+            return result.returncode == 0, out
+        except subprocess.TimeoutExpired:
+            return False, "timeout"
+        except Exception as exc:
+            return False, str(exc)
+
     def discover_robots(self, subnet: str = "") -> dict:
         subnet = subnet.strip()
         if not subnet:

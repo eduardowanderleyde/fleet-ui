@@ -125,3 +125,27 @@ class Executor:
             if time.monotonic() > deadline:
                 raise ExecutorError(f"Timeout esperando job {job_id}")
             await asyncio.sleep(poll_interval)
+
+    # -- campanhas (baseline + N repetições + análise) -------------------------
+
+    async def run_campaign(self, config: dict) -> str:
+        """Dispara 1 gravação baseline + N reproduções da mesma rota, seguidas de
+        analyze_runs.py, via /api/run_campaign. Retorna o run_id (para usar depois
+        com Analyst.analyze_experiment/compare_runs)."""
+        data = await self._post("/api/run_campaign", json=config)
+        return data["run_id"]
+
+    async def get_campaign_job(self, run_id: str) -> dict:
+        return await self._get(f"/api/campaign_job/{run_id}")
+
+    async def wait_for_campaign_job(self, run_id: str, poll_interval: float = 2.0, timeout: float = 1800.0) -> dict:
+        """Faz polling de /api/campaign_job/{run_id} até terminar. Timeout maior que
+        wait_for_job: 1 baseline + N reproduções + análise leva bem mais que um passo só."""
+        deadline = time.monotonic() + timeout
+        while True:
+            job = await self.get_campaign_job(run_id)
+            if not job.get("running"):
+                return job
+            if time.monotonic() > deadline:
+                raise ExecutorError(f"Timeout esperando campanha {run_id}")
+            await asyncio.sleep(poll_interval)

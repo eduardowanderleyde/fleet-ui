@@ -73,6 +73,10 @@ class Planner:
             scoped["robot_id"] = self.robot_id
         if tool_name == "run_experiment" and isinstance(scoped.get("config"), dict):
             scoped["config"] = {**scoped["config"], "robot": self.robot_id}
+        if tool_name == "run_campaign":
+            # "robot" não é obrigatório no schema (default backend é "default"),
+            # então força incondicionalmente — não dá pra confiar em "in scoped".
+            scoped["robot"] = self.robot_id
         return scoped
 
     async def _dispatch(self, tool_name: str, tool_input: dict) -> Any:
@@ -100,6 +104,10 @@ class Planner:
         if tool_name == "run_experiment":
             job_id = await self.executor.run_experiment(tool_input["config"])
             return await self.executor.wait_for_job(job_id)
+        if tool_name == "run_campaign":
+            campaign_cfg = {k: v for k, v in tool_input.items() if k != "run_id" or v}
+            run_id = await self.executor.run_campaign(campaign_cfg)
+            return await self.executor.wait_for_campaign_job(run_id)
         if tool_name == "analyze_experiment":
             return self.analyst.analyze_experiment(
                 tool_input["run_id"], tool_input.get("rmse_threshold_m", 0.05)
