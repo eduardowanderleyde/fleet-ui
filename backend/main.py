@@ -25,6 +25,11 @@ from pydantic import BaseModel, Field
 from ros_bridge import RosBridge
 from agents import Analyst, Executor, Planner
 
+# Robô cujo mapa/pose alimentam /api/map e /api/status.pose neste branch
+# multi-robô (SLAM/Nav2 publicam map, amcl_pose e tf por-robô em /<id>/...,
+# não mais em tópicos globais). Ver fleet_orchestrator._setup_robot_tf.
+_STATUS_ROBOT_ID = os.environ.get("FLEET_STATUS_ROBOT", "tb1")
+
 # Raiz do projeto (fleet-ui/). Use FLEET_WS para sobrescrever.
 WORKSPACE = os.environ.get("FLEET_WS") or str(Path(__file__).resolve().parent.parent)
 # Workspace colcon ROS 2 (fleet_ws/ dentro da raiz)
@@ -171,11 +176,38 @@ async def lifespan(app: FastAPI):
                 with _status_lock:
                     _robot_pose.update({"x": p.x, "y": p.y, "yaw": yaw, "valid": True})
 
-            # TF lookup: map → base_link (TurtleBot4 usa base_link)
+            # TF lookup: map -> base_link (fallback contínuo; /pose do
+            # slam_toolbox só publica esporadicamente, não dá pose ao vivo).
+            # tf2_ros.TransformListener hardcoda a subscrição em /tf e
+            # /tf_static (tópicos globais); nesse branch cada robô publica em
+            # /<id>/tf, então replicamos manualmente o Buffer + subscrições
+            # namespaced (mesmo padrão de fleet_orchestrator._setup_robot_tf).
+            # Executor trocado para MultiThreadedExecutor logo abaixo para não
+            # deixar o volume alto de /tf atrasar fleet/status e map.
             import tf2_ros
             from rclpy.time import Time as RclpyTime
+            from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
+            from tf2_msgs.msg import TFMessage
+
             tf_buffer = tf2_ros.Buffer()
-            tf2_ros.TransformListener(tf_buffer, node)
+            _tf_prefix = f"/{_STATUS_ROBOT_ID}" if _STATUS_ROBOT_ID else ""
+
+            def _tf_dynamic_cb(msg):
+                for t in msg.transforms:
+                    tf_buffer.set_transform(t, "default_authority")
+
+            def _tf_static_cb(msg):
+                for t in msg.transforms:
+                    tf_buffer.set_transform_static(t, "default_authority")
+
+            node.create_subscription(
+                TFMessage, f"{_tf_prefix}/tf", _tf_dynamic_cb,
+                QoSProfile(depth=100, durability=DurabilityPolicy.VOLATILE, history=HistoryPolicy.KEEP_LAST),
+            )
+            node.create_subscription(
+                TFMessage, f"{_tf_prefix}/tf_static", _tf_static_cb,
+                QoSProfile(depth=100, durability=DurabilityPolicy.TRANSIENT_LOCAL, history=HistoryPolicy.KEEP_LAST),
+            )
 
             def tf_timer_cb():
                 try:
@@ -229,10 +261,12 @@ async def lifespan(app: FastAPI):
             node.create_timer(3.0, nav2_check_cb)
 
             node.create_subscription(FleetStatus, "fleet/status", fleet_cb, 10)
-            node.create_subscription(PoseWithCovarianceStamped, "amcl_pose", amcl_cb, 10)
-            node.create_subscription(PoseWithCovarianceStamped, "pose", amcl_cb, 10)
-            node.create_subscription(OccupancyGrid, "map", map_cb, 1)
-            rclpy.spin(node)
+            node.create_subscription(PoseWithCovarianceStamped, f"{_tf_prefix}/amcl_pose", amcl_cb, 10)
+            node.create_subscription(PoseWithCovarianceStamped, f"{_tf_prefix}/pose", amcl_cb, 10)
+            node.create_subscription(OccupancyGrid, f"{_tf_prefix}/map", map_cb, 1)
+            executor = rclpy.executors.MultiThreadedExecutor()
+            executor.add_node(node)
+            executor.spin()
             node.destroy_node()
             rclpy.shutdown()
         except Exception as e:
