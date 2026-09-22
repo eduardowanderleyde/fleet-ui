@@ -61,7 +61,7 @@ const WAREHOUSE_MAP = {
 const HOUSE_WORLD = { x0: -5.0, y0: -5.0, x1: 7.0, y1: 7.0 }
 
 // ── MapView ───────────────────────────────────────────────────────────────────
-function MapView({ robotId, robotPose, waypoints, onAddWaypoint }) {
+function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
   // mantém compatibilidade de estado existente + novos
   const canvasRef    = useRef(null)
   const imgRef       = useRef(null)   // SLAM PNG
@@ -204,14 +204,23 @@ function MapView({ robotId, robotPose, waypoints, onAddWaypoint }) {
       ctx.fillText(String(i + 1), c.x, c.y)
     })
 
-    // ── Robô ──────────────────────────────────────────────────────────────────
-    if (robotPose?.valid) {
-      const c = worldToCanvas(robotPose.x, robotPose.y)
-      if (c) {
-        ctx.save()
-        ctx.translate(c.x, c.y)
-        ctx.rotate(-robotPose.yaw)
-        // Anel exterior pulsante
+    // ── Robôs (todos os poses conhecidos; o selecionado no dropdown se
+    //    destaca em verde com anel/seta maior — os demais ficam num tom
+    //    próprio + rótulo com o id, pra dar pra distinguir tb1/tb2/tb3 no
+    //    mesmo mapa) ────────────────────────────────────────────────────
+    const OTHER_ROBOT_COLORS = ['#93c5fd', '#fbbf24', '#f472b6', '#a78bfa', '#5eead4']
+    Object.entries(poses || {}).forEach(([rid, p], i) => {
+      if (!p?.valid) return
+      const c = worldToCanvas(p.x, p.y)
+      if (!c) return
+      const isActive = rid === robotId
+      const color = isActive ? '#6ee7b7' : OTHER_ROBOT_COLORS[i % OTHER_ROBOT_COLORS.length]
+
+      ctx.save()
+      ctx.translate(c.x, c.y)
+      ctx.rotate(-p.yaw)
+      if (isActive) {
+        // Anel exterior pulsante — só no robô selecionado, pra não poluir com vários
         ctx.beginPath()
         ctx.arc(0, 0, 18, 0, Math.PI * 2)
         ctx.fillStyle = 'rgba(110,231,183,0.12)'
@@ -219,28 +228,37 @@ function MapView({ robotId, robotPose, waypoints, onAddWaypoint }) {
         ctx.strokeStyle = 'rgba(110,231,183,0.35)'
         ctx.lineWidth = 1.5
         ctx.stroke()
-        // Corpo
-        ctx.shadowColor = '#6ee7b7'
-        ctx.shadowBlur = 14
-        ctx.beginPath()
-        ctx.arc(0, 0, 11, 0, Math.PI * 2)
-        ctx.fillStyle = '#065f46'
-        ctx.fill()
-        ctx.strokeStyle = '#6ee7b7'
-        ctx.lineWidth = 2
-        ctx.stroke()
-        ctx.shadowBlur = 0
-        // Seta de direcção
-        ctx.beginPath()
-        ctx.moveTo(14, 0)
-        ctx.lineTo(-5, -5.5)
-        ctx.lineTo(-5, 5.5)
-        ctx.closePath()
-        ctx.fillStyle = '#6ee7b7'
-        ctx.fill()
-        ctx.restore()
       }
-    }
+      // Corpo
+      const radius = isActive ? 11 : 8
+      ctx.shadowColor = color
+      ctx.shadowBlur = isActive ? 14 : 6
+      ctx.beginPath()
+      ctx.arc(0, 0, radius, 0, Math.PI * 2)
+      ctx.fillStyle = isActive ? '#065f46' : '#111827'
+      ctx.fill()
+      ctx.strokeStyle = color
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.shadowBlur = 0
+      // Seta de direção
+      const tip = isActive ? 14 : 10
+      ctx.beginPath()
+      ctx.moveTo(tip, 0)
+      ctx.lineTo(-tip * 0.36, -5.5)
+      ctx.lineTo(-tip * 0.36, 5.5)
+      ctx.closePath()
+      ctx.fillStyle = color
+      ctx.fill()
+      ctx.restore()
+
+      // Rótulo com o robot_id (sem rotação, sempre legível)
+      ctx.fillStyle = color
+      ctx.font = isActive ? 'bold 11px monospace' : '10px monospace'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText(rid, c.x, c.y - radius - 6)
+    })
 
     // ── Barra de escala ───────────────────────────────────────────────────────
     if (mapMeta.current) {
@@ -269,7 +287,7 @@ function MapView({ robotId, robotPose, waypoints, onAddWaypoint }) {
       ctx.textBaseline = 'bottom'
       ctx.fillText(`${target < 1 ? target * 100 + 'cm' : target + 'm'}`, bx + barPx / 2, by - 3)
     }
-  }, [robotPose, waypoints, worldToCanvas, activeMap, showFloor, floorOpacity, floorOffset, floorScale, savedMapMeta])
+  }, [poses, robotId, waypoints, worldToCanvas, activeMap, showFloor, floorOpacity, floorOffset, floorScale, savedMapMeta])
 
   // Carrega fundo: prefere slam_map.png (guardado) > warehouse_map.png (pré-construído)
   useEffect(() => {
@@ -339,7 +357,7 @@ function MapView({ robotId, robotPose, waypoints, onAddWaypoint }) {
   }, [draw, robotId])
 
   // Redesenha quando pose ou waypoints mudam
-  useEffect(() => { draw() }, [draw, robotPose, waypoints])
+  useEffect(() => { draw() }, [draw, poses, robotId, waypoints])
 
   // Ajusta escala/pan para caber o mapa activo (SLAM ou warehouse estático)
   const fitMap = useCallback(() => {
@@ -674,6 +692,9 @@ export default function App() {
     ? cfg.robot
     : (status.robots?.[0]?.robot_id || 'tb1')
   const pose   = status.poses?.[effectiveRobotId] || status.pose || {}
+  // Todas as poses conhecidas (pro MapView desenhar os N robôs ao mesmo
+  // tempo) — cai pra { <robô> : pose } em backends antigos sem status.poses.
+  const allPoses = status.poses || (status.pose ? { [effectiveRobotId]: status.pose } : {})
   const robot  = status.robots?.find(r => r.robot_id === effectiveRobotId) || status.robots?.[0] || {}
   const nav2Ok = status.nav2_ready === true
   const isConnected = connStatus === 'connected'
@@ -866,7 +887,7 @@ export default function App() {
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           <MapView
             robotId={effectiveRobotId}
-            robotPose={pose}
+            poses={allPoses}
             waypoints={cfg.command === 'record' ? cfg.points : []}
             onAddWaypoint={handleMapAddWaypoint}
             onNavigateTo={handleMapNavigateTo}
