@@ -67,6 +67,25 @@ def _make_nav2_params(_ctx):
 
     _patch(cfg)
 
+    # Trims CPU cost per robot for the 3x multi-robot case (stock values are
+    # tuned for 1 robot with a GPU-backed lidar; here it's 3x software-
+    # rendered, no GPU — measured ~630% CPU across 3 TB4s before this).
+    # local_costmap update/publish 5/2 -> 3/1Hz cuts how often each robot's
+    # 3x3m rolling costmap gets recomputed. Global costmap already ticks at
+    # 1Hz stock, left untouched.
+    #
+    # controller_frequency was also tried at 10Hz (down from stock 20Hz) but
+    # that broke tb1's bringup: nav2_controller validates its period against
+    # the sim's physics step ("Controller period more then model dt"), so
+    # halving it isn't safe without also checking/raising the world's
+    # max_step_size — left at stock for now.
+    try:
+        lc = cfg['local_costmap']['local_costmap']['ros__parameters']
+        lc['update_frequency'] = 3.0
+        lc['publish_frequency'] = 1.0
+    except KeyError:
+        pass
+
     tmp = tempfile.NamedTemporaryFile(mode='w', suffix='_nav2_multi.yaml', delete=False)
     yaml.safe_dump(cfg, tmp)
     tmp.close()
