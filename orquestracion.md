@@ -27,34 +27,57 @@ A resposta exigiu duas peças independentes:
 
 ## Arquitetura
 
-```
-Usuário (linguagem natural)
-        │
-        ▼
-┌──────────────────────────────────────────────┐
-│  POST /api/agent/run           (1 agente)     │
-│  POST /api/agent/run_fleet     (N agentes)    │
-└──────────────────────────────────────────────┘
-        │
-        ▼
-   Planner (backend/agents/planner.py)
-        │   tool calling via Claude API
-        │   restrito a 1 robot_id quando escopado
-        ▼
-   Executor (backend/agents/executor.py)
-        │   único ponto de contato com o Fleet UI:
-        │   move_robot, start_recording, replay_route,
-        │   run_experiment, get_robot_status, ...
-        ▼
-   API HTTP do Fleet UI (backend/main.py)
-        │
-        ▼
-   fleet_orchestrator (ROS 2)  ──►  Nav2 / SLAM Toolbox  ──►  TurtleBot4 (Gazebo)
-        │
-        ▼
-   Analyst (backend/agents/analyst.py)
-        interpreta fleet_ws/runs/<run_id>/analysis/summary.json
-        (RMSE, duração, comprimento — já gerado por analyze_runs.py)
+```mermaid
+flowchart TD
+    User(["Usuário (linguagem natural)"])
+
+    subgraph FE["Frontend — React"]
+        Panel["AgentFleetPanel<br/>1 instrução por robô"]
+    end
+
+    subgraph API["Backend FastAPI — backend/main.py"]
+        RunFleet["POST /api/agent/run_fleet<br/>N agentes, 1 por robô"]
+        RunSingle["POST /api/agent/run<br/>1 agente"]
+        RunCampaign["POST /api/run_campaign<br/>baseline + N réplicas + análise"]
+        Hist["GET /api/agent/history"]
+    end
+
+    subgraph AG["Agentes — backend/agents/"]
+        Planner["Planner<br/>tool calling (Claude API)<br/>escopado por robot_id"]
+        Executor["Executor<br/>única fronteira HTTP com o Fleet UI"]
+        Analyst["Analyst<br/>lê summary.json"]
+    end
+
+    subgraph ROS["ROS 2 — fleet_ws/src"]
+        Orchestrator["fleet_orchestrator<br/>Nav2 client + TF buffer por robô"]
+        Collector["fleet_data_collector<br/>rosbag2 por robô"]
+    end
+
+    subgraph SIM["Gazebo — 3 robôs independentes"]
+        TB1["tb1 + Nav2 + SLAM"]
+        TB2["tb2 + Nav2 + SLAM"]
+        TB3["tb3 + Nav2 + SLAM"]
+    end
+
+    Runs[("fleet_ws/runs/&lt;run_id&gt;/analysis/<br/>summary.json")]
+    History[("fleet_ws/agent_runs/*.json")]
+
+    User --> Panel --> RunFleet
+    User -.opcional.-> RunSingle
+    RunFleet --> Planner
+    RunSingle --> Planner
+    RunCampaign --> Orchestrator
+    RunCampaign --> Runs
+    Planner --> Executor
+    Planner --> Analyst
+    Executor -->|move_robot, start_recording,<br/>replay_route, run_campaign...| Orchestrator
+    Orchestrator --> TB1 & TB2 & TB3
+    Orchestrator --> Collector
+    Collector -->|rosbag2| Runs
+    Analyst --> Runs
+    RunSingle -.job concluído.-> History
+    RunFleet -.job concluído.-> History
+    Hist --> History
 ```
 
 O ponto central do desenho: **o agente nunca fala com ROS 2 diretamente**.
@@ -172,12 +195,69 @@ cd frontend && npm run dev
 No frontend, o painel **"Agentes IA"** (barra de conexão, topo) permite
 escrever uma instrução por robô e disparar os 3 agentes de uma vez.
 
+## O que foi adicionado depois da primeira versão deste documento
+
+- **`/api/status`/`/api/map` por robô** — já não é mais o próximo passo
+  listado abaixo, foi feito: o backend replica o mesmo padrão de TF Buffer
+  por robô do `fleet_orchestrator` e reporta `poses`/mapas de todos os
+  robôs configurados em `FLEET_ROBOTS`.
+- **`run_campaign`** — fecha o loop planner→campanha→análise: 1 agente pede
+  "rode N repetições desta rota", o backend grava a baseline, reproduz N
+  vezes, roda `analyze_runs.py` sozinho e devolve o `run_id` pronto para
+  `analyze_experiment`/`compare_runs`.
+- **Histórico persistido dos agentes** (`fleet_ws/agent_runs/*.json`) — os
+  jobs de `/api/agent/run` e `/api/agent/run_fleet` deixaram de existir só
+  em memória; sobrevivem a um restart do backend e aparecem em
+  `GET /api/agent/history`.
+- **Docker multi-robô + suporte a Windows** (`docker-compose.windows.yml`,
+  `docker/run-all-headless-multi.sh`) — modo headless single-container que
+  contorna a descoberta DDS não convergir no Docker Desktop, com
+  `FLEET_ROBOTS` configurável (default 2 robôs, não 3 — ver próxima seção).
+
+## Qualidade de código (radon + ruff + bandit)
+
+Rodado sobre `backend/`, `fleet_ws/src/` e `fleet_ws/scripts/` (não inclui
+`frontend/`, que é JS). Ferramentas isoladas numa venv, não instaladas no
+projeto — rode você mesmo com `pip install radon ruff bandit` se quiser
+reproduzir.
+
+- **Complexidade ciclomática (radon cc)** — a maioria do código novo
+  (`backend/agents/`, `backend/main.py`) fica em A/B (complexidade baixa).
+  As funções mais complexas do repo são todas em `fleet_ws/scripts/`, no
+  código **pré-existente** de análise/experimento: `analyze_runs.py:main`
+  (E, 33) e `experiment_repeatability.py:cmd_record`/`cmd_replay` (F/E, 42
+  e 35) — scripts CLI grandes com muitos `if`/`elif` de parsing de
+  argumentos, não lógica de negócio emaranhada. Candidatos a quebrar em
+  funções menores se forem mexidos de novo, mas não é uma urgência.
+- **Índice de manutenibilidade (radon mi)** — só um arquivo em C:
+  `experiment_repeatability.py` (0.00 — arquivo grande, muitas
+  responsabilidades). Tudo em `backend/agents/` está em A com folga (49–100).
+- **ruff** — 305 achados, mas **285 são só linha > 88 colunas** (o projeto
+  não segue esse limite, não é um problema real). Dos ~20 restantes: imports
+  não usados em `turtlebot4_sim.launch.py`, `open()` sem context manager em
+  3 launch files (usam `NamedTemporaryFile(delete=False)` de propósito, pra
+  o arquivo sobreviver ao `with`), e **um bug de verdade**, corrigido nesta
+  sessão: `experiment_repeatability.py` usava `pathlib.Path` em
+  `_replicate_export_path()` (a função por trás de `replay --repeat N`) sem
+  nunca importar `Path` — `NameError` garantido sempre que alguém combinasse
+  `--repeat > 1` com `--export`.
+- **bandit** — 13 Low + 1 Medium, todos esperados para o que este projeto é:
+  os Low são "subprocess module usado" / "processo com path parcial"
+  (`ros2`, `ssh`, `xacro` — é literalmente o papel do `RosBridge`, não dá
+  pra evitar). O Medium é `uvicorn.run(host="0.0.0.0")` — bind em todas as
+  interfaces, necessário pro Docker multi-container acessar o backend, mas
+  reforça o item de autenticação abaixo se isso algum dia rodar fora da sua
+  máquina.
+
 ## Próximos passos naturais
 
-- `backend/main.py`'s `/api/status` hoje só reporta a pose de **um** robô
-  (subscrição global, sem namespace) — precisa virar por-robô para o
-  frontend mostrar as posições de tb1/tb2/tb3 simultaneamente.
+- Autenticação/rate-limit em `/api/agent/*` — hoje qualquer um que acesse
+  o backend pode disparar chamadas que gastam sua API key da Anthropic.
+  Junto com o bind em `0.0.0.0` acima, é o item de segurança mais concreto
+  da lista.
 - Servidor MCP expondo as mesmas ferramentas do `Executor` para outros
   clientes LLM (Claude Desktop, Codex), não só o Planner interno.
 - Coordenação entre agentes (hoje são independentes) para cenários onde a
   frota precisa negociar espaço/tarefas entre si.
+- Testes automatizados do lado ROS 2 (`fleet_orchestrator`, o fork do
+  xacro, os launch files) — hoje só `backend/agents/` tem cobertura.
