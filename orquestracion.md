@@ -15,9 +15,11 @@ jeito toda vez?). Isso é o núcleo da dissertação.
 
 Em cima disso foi adicionada uma camada de **agentes de IA**: em vez de você
 clicar em botões, você escreve em português o que quer, e um agente (usando a
-API da Anthropic/Claude) decide quais chamadas fazer no Fleet UI. Dá pra ter
-**até 3 agentes ao mesmo tempo**, cada um cuidando de um robô simulado
-diferente, sem um mexer no robô do outro.
+API da Anthropic/Claude) decide quais chamadas fazer no Fleet UI. A camada de
+agentes em si não tem limite de robôs (cada agente só mexe no robô dele,
+sem invadir o robô do outro) — o limite de **2 robôs simulados ao mesmo
+tempo** é da simulação (Gazebo/Nav2 nesta máquina), não dos agentes; ver
+"Limitação conhecida" mais abaixo.
 
 **O que é uma "run"** (a pasta `fleet_ws/runs/<nome>/`): quando você pede
 "grave esse percurso e repita 5 vezes", cada repetição é 1 execução, e o
@@ -255,6 +257,31 @@ beneficia de GPU (diferente da renderização do sensor lidar no Gazebo, que
 usa). Ou seja: em todo o sistema, a GPU só entra pela simulação (Gazebo);
 tudo que decide pra onde o robô vai é 100% CPU, e é aí que está o teto real
 dos 3 robôs.
+
+**Teste reprodutível dos 3 robôs simultâneos (2026-09-22) — falhou.** Subimos
+`turtlebot4_multi_sim.launch.py` com `FLEET_ROBOTS=tb1,tb2,tb3` de propósito,
+sem nenhum isolamento de CPU (sem `taskset`/cgroups), pra confirmar se dava
+pra rodar os 3 de forma controlada nesta máquina como está hoje. Resultado:
+os 3 (`tb1`, `tb2`, `tb3`) falharam ao ativar a navegação, um atrás do outro,
+todos pelo mesmo motivo:
+
+```
+[global_costmap]: Failed to activate global_costmap because transform from
+base_link to map did not become available before timeout
+[lifecycle_manager_navigation]: Failed to bring up all requested nodes. Aborting bringup.
+```
+
+Causa raiz identificada no log: cada nó de SLAM Toolbox registrou quase 300
+avisos de `Detected jump back in time. Clearing TF buffer` em menos de 2
+minutos — o relógio simulado (`/clock`) pula pra trás sob a carga de rodar
+os 3 ao mesmo tempo, o que invalida a árvore de transformações antes do Nav2
+conseguir uma leitura estável de `base_link → map` dentro do prazo interno
+dele. **Decisão: não perseguir estabilidade com 3 robôs simultâneos nesta
+máquina.** `tb1`+`tb2` (2 robôs) continuam sendo o alvo suportado e validado
+— é o default de `FLEET_ROBOTS` no código. Rodar 3 ficaria disponível via
+`FLEET_ROBOTS=tb1,tb2,tb3` pra quem quiser experimentar (ex. numa máquina com
+mais folga de CPU, ou testando os robôs em sequência em vez de simultâneos),
+mas não é mais tratado como objetivo desta linha de trabalho.
 
 `fleet_ws/src/fleet_orchestrator/config/roles.yaml` teve `tb2`/`tb3`
 temporariamente marcados como `MUUT` (móveis) para esta demonstração — o
