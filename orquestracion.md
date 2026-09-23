@@ -308,6 +308,65 @@ cd frontend && npm run dev
 No frontend, o painel **"Agentes IA"** (barra de conexão, topo) permite
 escrever uma instrução por robô e disparar os 3 agentes de uma vez.
 
+## Validação da métrica de repetibilidade (o Nav2 mede o que a gente pensa que mede?)
+
+Depois de estabilizar a simulação, surgiu uma pergunta mais importante que
+"consigo rodar 3 robôs": **os números de RMSE/erro final que saem do
+`analyze_runs.py` refletem repetibilidade real do robô, ou têm ruído
+metodológico embutido que não tem nada a ver com o robô?** Duas descobertas:
+
+### 1. Bug real, já corrigido: a análise usava a pose errada
+
+O `fleet_data_collector` sabe gravar duas fontes de posição bem diferentes:
+
+- **`pose`** — estimativa ao vivo do SLAM Toolbox, corrigida no referencial
+  do mapa (compara scans de lidar contra o mapa construído; corrige deriva).
+- **`odom`** — odometria bruta das rodas, **sem nenhuma correção**: acumula
+  erro (deriva) continuamente, tanto mais quanto mais longo/demorado for o
+  percurso.
+
+O `analyze_runs.py`, no modo `--trajectory-topic auto` (o padrão), só sabia
+procurar um tópico chamado literalmente `amcl_pose`. Como este projeto usa
+SLAM Toolbox (não AMCL com mapa fixo), esse tópico nunca existe — e o código
+caía direto pra `/odom`, **mesmo quando a pose corrigida do SLAM tinha sido
+gravada**, sem avisar ninguém. Ou seja: o RMSE/erro final calculado podia
+estar refletindo "quanto a odometria derivou nessa execução específica", não
+"quão diferente o robô se comportou de uma repetição pra outra" — um viés
+metodológico que cresceria artificialmente com rotas mais longas/demoradas,
+sem que o robô tivesse feito nada de errado.
+
+**Corrigido** (`fleet_ws/scripts/analyze_runs.py`): modo `auto` agora
+prioriza `amcl_pose` > `pose` (SLAM Toolbox) > `odom`, nessa ordem, usando a
+primeira que tiver mensagens gravadas de verdade. Também dá pra forçar
+explicitamente com `--trajectory-topic slam_pose`. Coberto por 9 testes novos
+em `tests/test_analyze_runs.py` (detecção do tópico, prioridade em `auto`,
+e os três modos explícitos). **Runs analisadas antes desta correção que
+caíram no fallback de `/odom` devem ser reconsideradas/re-analisadas** antes
+de virarem número de dissertação, se a pose do SLAM tiver sido gravada.
+
+### 2. Não é bug, é característica do algoritmo: o MPPI é estocástico
+
+O controlador usado (`nav2_mppi_controller`, ver
+`turtlebot4_navigation/config/nav2.yaml`) sorteia ruído gaussiano em cima da
+trajetória candidata a cada ciclo de controle (20 Hz), com
+`regenerate_noises: true` e desvios (`vx_std: 0.2`, `vy_std: 0.2`,
+`wz_std: 0.4`) explicitamente configurados — é assim que o algoritmo MPPI
+(Model Predictive Path Integral) funciona por definição, não é um parâmetro
+"errado". Consequência prática: **duas execuções da mesma rota, no mesmo
+robô, no mesmo ambiente, vão divergir um pouco só por causa da amostragem
+aleatória do controlador** — isso não é falha de repetibilidade do sistema,
+é ruído esperado do método de controle escolhido. Vale citar isso
+explicitamente na seção de metodologia da dissertação, como uma fonte de
+variância conhecida e não-eliminável (a menos que se troque de controlador,
+ex. para um determinístico como DWB/Regulated Pure Pursuit — não avaliado
+aqui).
+
+Também vale registrar, pra quem for interpretar os números depois: o
+`general_goal_checker` considera o robô "chegou" com até `xy_goal_tolerance:
+0.25` m e `yaw_goal_tolerance: 0.25` rad (~14°) de folga — desvios de
+endpoint dentro dessa faixa são o Nav2 funcionando como configurado, não
+necessariamente falta de precisão do sistema.
+
 ## O que foi adicionado depois da primeira versão deste documento
 
 - **`/api/status`/`/api/map` por robô** — já não é mais o próximo passo
