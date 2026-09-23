@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Pós-processamento de rosbag2 gravados pelo fleet_data_collector: extrai trajetória (AMCL no mapa
-ou /odom), calcula métricas (duração, comprimento, RMSE entre pares, erro no ponto final vs
+Pós-processamento de rosbag2 gravados pelo fleet_data_collector: extrai trajetória (AMCL no mapa,
+pose ao vivo do SLAM Toolbox, ou /odom como último recurso), calcula métricas (duração, comprimento, RMSE entre pares, erro no ponto final vs
 referência, desvio médio ponto a ponto vs referência, razão de duração), exporta CSV e gráfico.
 
 Uso (com workspace ROS 2 sourceado):
@@ -159,6 +159,19 @@ def _find_amcl_topic_name(tmap: Dict[str, str]) -> Optional[str]:
     return None
 
 
+def _find_slam_pose_topic_name(tmap: Dict[str, str]) -> Optional[str]:
+    """Pose ao vivo do SLAM Toolbox (tópico curto "pose" no fleet_data_collector,
+    ex.: /pose ou /tb1/pose) — corrigida no referencial do mapa, ao contrário de
+    /odom (odometria bruta das rodas, que acumula deriva sem correção nenhuma).
+    Não confundir com /amcl_pose: "/amcl_pose" não termina em "/pose"."""
+    if "/pose" in tmap and "PoseWithCovarianceStamped" in tmap["/pose"]:
+        return "/pose"
+    for name, typ in tmap.items():
+        if name.endswith("/pose") and "PoseWithCovarianceStamped" in typ:
+            return name
+    return None
+
+
 def _resolve_trajectory_topic(
     uri: str,
     mode: str,
@@ -169,9 +182,17 @@ def _resolve_trajectory_topic(
     tmap = tmap if tmap is not None else _topic_map(uri)
     counts = counts if counts is not None else _topic_message_counts(uri)
     if mode == "auto":
+        # Prioridade: amcl_pose > pose (SLAM Toolbox, ao vivo) > odom (deriva sem
+        # correção). Antes desta correção, "auto" nunca reconhecia o tópico "pose"
+        # e caía direto pra odom mesmo quando a pose corrigida do SLAM tinha sido
+        # gravada — RMSE/erro final acabavam refletindo deriva de odometria, não
+        # repetibilidade real do robô.
         amcl = _find_amcl_topic_name(tmap)
         if amcl is not None and counts.get(amcl, 0) > 0:
             return amcl
+        slam_pose = _find_slam_pose_topic_name(tmap)
+        if slam_pose is not None and counts.get(slam_pose, 0) > 0:
+            return slam_pose
         return _find_odom_topic_name(tmap)
     if mode == "amcl_pose":
         amcl = _find_amcl_topic_name(tmap)
@@ -187,6 +208,19 @@ def _resolve_trajectory_topic(
                 "Defina pose no RViz ou use --initial-pose antes da coleta; recompile/reinicie o collector."
             )
         return amcl
+    if mode == "slam_pose":
+        slam_pose = _find_slam_pose_topic_name(tmap)
+        if slam_pose is None:
+            raise RuntimeError(
+                "Modo slam_pose: bag sem tópico pose (geometry_msgs/PoseWithCovarianceStamped) do SLAM Toolbox. "
+                "Grave com: --topics ... pose no experiment_repeatability / enable_collection."
+            )
+        if counts.get(slam_pose, 0) == 0:
+            raise RuntimeError(
+                f"Modo slam_pose: {slam_pose} existe no bag mas tem 0 mensagens "
+                "(SLAM Toolbox sem publicar pose nesse período)."
+            )
+        return slam_pose
     if mode == "odom":
         return _find_odom_topic_name(tmap)
     raise ValueError(f"trajectory-topic inválido: {mode}")
@@ -417,9 +451,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--trajectory-topic",
-        choices=("auto", "amcl_pose", "odom"),
+        choices=("auto", "amcl_pose", "slam_pose", "odom"),
         default="auto",
-        help="Fonte da trajetória: auto=/amcl_pose se existir senão /odom; amcl_pose=obrigatório no bag",
+        help=(
+            "Fonte da trajetória: auto=amcl_pose > pose (SLAM Toolbox) > odom, na primeira "
+            "com mensagens; amcl_pose/slam_pose/odom=obrigatório existir com mensagens no bag"
+        ),
     )
     parser.add_argument(
         "--resample-mode",
