@@ -202,6 +202,25 @@ escutando `/tb{1,2,3}/tf` e consultando `map → base_link` sem prefixo.
 - Comandar `/tb1/cmd_vel` moveu **só** o tb1 — `/tb2/odom` ficou parado.
 - `ros2 service call /go_to_point ... robot_id: tb1` navegou de verdade via
   Nav2 até o alvo.
+- **Campanha completa com 2 robôs simultâneos (2026-09-23)**: subiu tb1+tb2,
+  gravou uma rota de verdade no tb1 (sensores reais: imu/odom/scan/pose
+  capturados no bag) enquanto mandava o tb2 pra outro ponto ao mesmo tempo —
+  tb2 chegou no alvo dele (~0.94, 0.40 de um alvo em 1.0, 0.5) sem mexer no
+  tb1, que ficou parado onde tinha terminado de gravar. Reproduziu a rota do
+  tb1 depois (`play_route`), sem falhas. Confirma que 2 robôs não é só
+  "Nav2 sobe" — o ciclo gravar/reproduzir funciona de ponta a ponta com os
+  dois ativos.
+  **Pegadinha operacional encontrada no processo (não é bug de código):** a
+  primeira tentativa falhou com `UNKNOWN_ROBOT` porque um `fleet_orchestrator`
+  de um teste anterior (single-robot, `robots=['']`) tinha ficado rodando em
+  paralelo ao novo (multi-robô, `robots=['tb1','tb2']`) — os dois processos
+  usam o mesmo nome de nó ROS 2 e respondem ao mesmo serviço `/go_to_point`;
+  o ROS 2 não impede dois nós com nome igual, então qual dos dois atende a
+  chamada é imprevisível. **Lição**: sempre confirmar
+  `pgrep -fa "fleet_orchestrator|sensor_collector|gz sim|nav2_|slam_toolbox"`
+  voltando vazio antes de subir uma simulação nova — matar por PID explícito
+  se `pkill -f` não confirmar limpeza (aconteceu de o `pkill` retornar sem
+  matar nada, silenciosamente, mais de uma vez nesta sessão).
 
 ### Limitação conhecida (teto de recursos ao rodar 3 robôs)
 
