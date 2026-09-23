@@ -367,6 +367,41 @@ Também vale registrar, pra quem for interpretar os números depois: o
 endpoint dentro dessa faixa são o Nav2 funcionando como configurado, não
 necessariamente falta de precisão do sistema.
 
+### 3. Campanha real (2026-09-23): "gravar" e "reproduzir" navegam diferente
+
+Rodada uma campanha de verdade — 1 gravação baseline + 3 repetições, rota
+`dissertacao_teste1` (4 waypoints, ~2m), setup single-robot — pra validar a
+correção acima com dado real, não só com teste unitário. Confirmado: as 4
+execuções usaram `/pose` (SLAM) como fonte, nenhuma caiu em `/odom`.
+Resultado (`fleet_ws/runs/dissertacao_teste1_20260923_182049/analysis/`):
+
+| Comparação | RMSE | Duração |
+|---|---|---|
+| replay₁ vs replay₂ vs replay₃ (entre si) | **~0.02 m** | ~29–30 s, consistente |
+| baseline vs cada replay | **~0.14 m** | baseline 11.7 s (2.5× mais rápida) |
+
+Investigando por que baseline diverge tanto mais que replay-entre-si, achei
+a causa no código (`experiment_repeatability.py`): **`record` e `replay` não
+navegam pelo mesmo mecanismo.** `record` manda uma sequência de `go_to_point`
+— um objetivo Nav2 de cada vez, o robô physically settling em cada waypoint
+antes do próximo goal ser enviado. `replay` manda **um único** `play_route`
+— a rota inteira como uma navegação contínua, sem parar em cada ponto
+intermediário. Isso sozinho explica a duração 2.5× maior nas repetições (via
+`play_route`) e o RMSE maior contra a baseline (via `go_to_point`): não é o
+robô "navegando pior", é que baseline e replay usam **caminhos de código
+Nav2 diferentes** pra passar pelos mesmos pontos.
+
+**Implicação pra dissertação:** a métrica de repetibilidade que representa
+o que o método realmente quer medir é **replay-vs-replay** (mesmo mecanismo
+em toda repetição, RMSE ~0.02m aqui), não **baseline-vs-replay** (que o
+`summary.json` reporta por padrão em `vs_reference`, já que `reference_run_index`
+é sempre a gravação/baseline). Ao escrever resultados, usar RMSE par-a-par
+entre repetições (matriz `pairwise_rmse_m` no `summary.json`, já calculada),
+não a coluna `vs_reference`, como métrica primária de repetibilidade —
+ou, alternativamente, gravar a baseline também via `play_route` em vez de
+`go_to_point` sequencial, se quiser comparar contra ela diretamente
+(mudança de metodologia, não avaliada ainda).
+
 ## O que foi adicionado depois da primeira versão deste documento
 
 - **`/api/status`/`/api/map` por robô** — já não é mais o próximo passo
