@@ -82,7 +82,10 @@ jobs:
             ros-jazzy-rosbag2-py \
             ros-jazzy-xacro \
             ros-jazzy-urdfdom
-          pip3 install --break-system-packages numpy httpx anthropic
+          # Mesmo esquecimento do job "checks" (fastapi faltando) também
+          # existia aqui, numa lista manual separada — corrigido do mesmo
+          # jeito: instalar de backend/requirements.txt (+ numpy).
+          pip3 install --break-system-packages -r backend/requirements.txt numpy
 
       - name: colcon build (fleet_msgs, fleet_orchestrator, fleet_data_collector)
         run: |
