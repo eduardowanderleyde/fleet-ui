@@ -87,3 +87,23 @@ export async function runAgentFleet(instructions, model) {
 export async function getAgentFleetJob(jobId) {
   return readJson(await fetch(apiPath(`/agent/fleet_job/${jobId}`)))
 }
+
+export async function getSimulationOptions() {
+  return readJson(await fetch(apiPath('/simulation/options')))
+}
+
+export async function getSimulationStatus() {
+  return readJson(await fetch(apiPath('/simulation/status')))
+}
+
+export async function startSimulation({ mode, world, robots }) {
+  return readJson(await fetch(apiPath('/simulation/start'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode, world, robots }),
+  }))
+}
+
+export async function stopSimulation() {
+  return readJson(await fetch(apiPath('/simulation/stop'), { method: 'POST' }))
+}

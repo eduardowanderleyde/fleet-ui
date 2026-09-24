@@ -8,10 +8,15 @@ import base64
 import json
 import math
 import os
+import shlex
+import signal
 import struct
 import subprocess
 import threading
+import time
 import zlib
+
+import yaml
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -138,6 +143,12 @@ class RunCampaignRequest(BaseModel):
     topics: list[str] = Field(default_factory=lambda: ["scan", "odom", "imu", "pose"])
     return_to_start: list[float] | None = None
     run_id: str | None = None  # gerado automaticamente se omitido
+
+
+class StartSimulationRequest(BaseModel):
+    mode: Literal["single", "multi"] = "single"
+    world: str = "warehouse"
+    robots: list[str] = Field(default_factory=lambda: ["tb1", "tb2"])  # ignorado se mode="single"
 
 
 def _model_dump(model: BaseModel) -> dict:
@@ -488,6 +499,159 @@ async def get_campaign_job(run_id: str):
     if not job:
         return JSONResponse({"error": "campaign not found"}, status_code=404)
     return job
+
+
+# ── Simulação (Terminais 1+2 do README, lançados pela UI) ──────────────────
+#
+# Recurso singleton (só 1 simulação por vez nesta v1) — diferente dos jobs
+# acima, que rodam até terminar; aqui o processo fica de pé indefinidamente
+# até /api/simulation/stop. `preexec_fn=os.setsid` é o que permite matar a
+# árvore de processos inteira depois (gz sim + todos os nós do Nav2/SLAM) —
+# sem isso, `pkill -f` sozinho deixou processos órfãos repetidas vezes ao
+# testar isso manualmente nesta sessão.
+_SIM_WORLDS = ["warehouse", "depot"]
+_sim_state: dict = {
+    "running": False, "ready": False, "mode": None, "world": None,
+    "robots": [], "lines": [], "error": None,
+}
+_sim_procs: list[tuple[str, subprocess.Popen]] = []
+_sim_lock = threading.Lock()
+_sim_nav_ready_count = 0
+_sim_fleet_ready = False
+
+
+def _read_configured_robots() -> list[str]:
+    """Robôs declarados em roles.yaml (fonte de verdade de quem existe,
+    diferente de /api/list_robots, que exige fleet_orchestrator já rodando)."""
+    path = Path(ROS_WS) / "src" / "fleet_orchestrator" / "config" / "roles.yaml"
+    try:
+        data = yaml.safe_load(path.read_text()) or {}
+        return list((data.get("roles") or {}).keys())
+    except Exception:
+        return []
+
+
+def _sim_append_line(tag: str, line: str) -> None:
+    with _sim_lock:
+        _sim_state["lines"].append(f"[{tag}] {line}")
+        if len(_sim_state["lines"]) > 500:
+            del _sim_state["lines"][: len(_sim_state["lines"]) - 500]
+
+
+def _sim_reader_thread(tag: str, proc: subprocess.Popen, expected_nav_ready: int) -> None:
+    global _sim_nav_ready_count, _sim_fleet_ready
+    for raw in proc.stdout:
+        line = raw.rstrip()
+        if not line:
+            continue
+        _sim_append_line(tag, line)
+        with _sim_lock:
+            if "Managed nodes are active" in line:
+                _sim_nav_ready_count += 1
+            if "fleet_orchestrator ready" in line:
+                _sim_fleet_ready = True
+            if "Aborting bringup" in line or "Failed to bring up all requested nodes" in line:
+                _sim_state["error"] = line
+            if _sim_nav_ready_count >= expected_nav_ready and _sim_fleet_ready:
+                _sim_state["ready"] = True
+
+
+def _build_sim_commands(mode: str, world: str, robots: list[str]) -> list[tuple[str, list[str], dict]]:
+    """[(tag, cmd, extra_env), ...] — mesmos dois launches do README
+    (Terminal 1 + Terminal 2), montados programaticamente."""
+    env_extra: dict = {}
+    if mode == "single":
+        # nav2_minimal_tb4_sim usa PythonExpression (eval() de verdade) pra
+        # decidir gzclient — precisa ser "True" com maiúscula (Python), não
+        # "true": com minúscula dá `NameError: name 'true' is not defined`.
+        # turtlebot4_multi_sim.launch.py não tem esse problema (usa outra
+        # condição, tolerante a minúscula) — assimetria real do vendor, não
+        # inconsistência nossa.
+        sim_cmd = ["ros2", "launch", "fleet_orchestrator", "turtlebot4_sim.launch.py",
+                   f"world:={world}", "headless:=True"]
+        fleet_cmd = ["ros2", "launch", "fleet_orchestrator", "fleet.launch.py",
+                     "single_robot_sim:=true"]
+    else:
+        env_extra["FLEET_ROBOTS"] = ",".join(robots)
+        sim_cmd = ["ros2", "launch", "fleet_orchestrator", "turtlebot4_multi_sim.launch.py",
+                   f"world:={world}", "headless:=true"]
+        fleet_cmd = ["ros2", "launch", "fleet_orchestrator", "fleet.launch.py"]
+    return [("sim", sim_cmd, env_extra), ("fleet", fleet_cmd, env_extra)]
+
+
+def _start_simulation(mode: str, world: str, robots: list[str]) -> None:
+    global _sim_nav_ready_count, _sim_fleet_ready
+    _sim_nav_ready_count = 0
+    _sim_fleet_ready = False
+    expected_nav_ready = len(robots) if mode == "multi" else 1
+    for tag, cmd, env_extra in _build_sim_commands(mode, world, robots):
+        env = {**_bridge.ros_env(), "PYTHONUNBUFFERED": "1", **env_extra}
+        shell_cmd = _bridge.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
+        proc = subprocess.Popen(
+            ["bash", "-c", shell_cmd],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, bufsize=1, cwd=ROS_WS, env=env,
+            preexec_fn=os.setsid,
+        )
+        _sim_procs.append((tag, proc))
+        threading.Thread(
+            target=_sim_reader_thread, args=(tag, proc, expected_nav_ready), daemon=True,
+        ).start()
+
+
+def _stop_simulation() -> None:
+    for _tag, proc in _sim_procs:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        except ProcessLookupError:
+            continue
+    time.sleep(3)
+    for _tag, proc in _sim_procs:
+        if proc.poll() is None:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+    _sim_procs.clear()
+    with _sim_lock:
+        _sim_state.update({
+            "running": False, "ready": False, "mode": None, "world": None,
+            "robots": [], "lines": [], "error": None,
+        })
+
+
+@app.get("/api/simulation/options")
+async def simulation_options():
+    return {"worlds": _SIM_WORLDS, "robots": _read_configured_robots()}
+
+
+@app.get("/api/simulation/status")
+async def simulation_status():
+    with _sim_lock:
+        return dict(_sim_state)
+
+
+@app.post("/api/simulation/start")
+async def simulation_start(cfg: StartSimulationRequest):
+    with _sim_lock:
+        if _sim_state["running"]:
+            return JSONResponse(
+                {"success": False, "message": "Já existe uma simulação rodando — pare antes de iniciar outra."},
+                status_code=409,
+            )
+        robots = cfg.robots if cfg.mode == "multi" else []
+        _sim_state.update({
+            "running": True, "ready": False, "mode": cfg.mode, "world": cfg.world,
+            "robots": robots, "lines": [], "error": None,
+        })
+    _start_simulation(cfg.mode, cfg.world, robots)
+    return {"success": True}
+
+
+@app.post("/api/simulation/stop")
+async def simulation_stop():
+    _stop_simulation()
+    return {"success": True}
 
 
 @app.post("/api/save_route_waypoints")

@@ -63,6 +63,8 @@ ARGUMENTS = [
     DeclareLaunchArgument('x_pose', default_value='0.0'),
     DeclareLaunchArgument('y_pose', default_value='0.0'),
     DeclareLaunchArgument('yaw',    default_value='0.0'),
+    DeclareLaunchArgument('headless', default_value='False',
+                          description='Sem GUI do Gazebo (mesmo padrão de turtlebot4_multi_sim.launch.py)'),
 ]
 
 
@@ -80,7 +82,7 @@ def generate_launch_description():
         ),
         launch_arguments=[
             ('world',   world_path),
-            ('headless', 'False'),
+            ('headless', LaunchConfiguration('headless')),
             ('x_pose',  LaunchConfiguration('x_pose')),
             ('y_pose',  LaunchConfiguration('y_pose')),
             ('yaw',     LaunchConfiguration('yaw')),
