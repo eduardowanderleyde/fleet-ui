@@ -1,6 +1,18 @@
 # Fleet UI
 
+[![CI](https://github.com/eduardowanderleyde/fleet-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/eduardowanderleyde/fleet-ui/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Web interface for operating a TurtleBot4 fleet in simulation. Record navigation routes with full sensor data, replay them, and measure trajectory repeatability.
+
+> Built on top of this: an **AI agent orchestration layer** (Claude/Anthropic) that
+> can plan and run experiments — move robots, record/replay routes, run full
+> repeatability campaigns, diagnose flagged runs — through natural-language
+> instructions instead of clicking through the UI, including one independently
+> scoped agent per robot in a multi-robot fleet. See
+> [`orquestracion.md`](orquestracion.md) (Portuguese) for the architecture, how
+> it was built, and known limitations — start with its "TL;DR" section at the
+> top for a plain-language overview.
 
 ## Architecture
 
@@ -50,10 +62,22 @@ fleet-ui/
 ```bash
 sudo apt install \
   ros-jazzy-nav2-minimal-tb4-sim \
+  ros-jazzy-nav2-minimal-tb4-description \
+  ros-jazzy-nav2-bringup \
   ros-jazzy-turtlebot4-navigation \
+  ros-jazzy-turtlebot4-simulator \
+  ros-jazzy-slam-toolbox \
+  ros-jazzy-rosbag2-py \
+  ros-jazzy-xacro \
   ros-jazzy-tf2-ros \
   ros-jazzy-tf2-py
 ```
+
+This is the same package list validated end-to-end by the `ros-checks` CI job
+(`.github/workflows/ci.yml`), which builds the workspace, validates every
+robot's URDF, and runs the ROS-dependent tests inside a fresh
+`osrf/ros:jazzy-desktop` container on every push — it's the closest thing
+this repo has to a guarantee that this list is actually sufficient.
 
 ### Python backend dependencies
 
