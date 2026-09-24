@@ -35,7 +35,13 @@ jobs:
             fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py
 
       - name: Install Python analysis dependencies
-        run: python3 -m pip install numpy httpx anthropic
+        # backend/requirements.txt tem fastapi/uvicorn/websockets/pyyaml/httpx/
+        # anthropic; numpy é só pro analyze_runs.py, não está no requirements.txt
+        # do backend. A lista antiga aqui (numpy httpx anthropic) esquecia
+        # fastapi — os testes que importam backend/main.py (test_agent_persistence,
+        # test_agents_executor, test_campaign_endpoint) vinham falhando de
+        # verdade nos últimos runs de CI por isso, não só pulando.
+        run: python3 -m pip install -r backend/requirements.txt numpy
 
       - name: Unit tests
         run: python3 -m unittest discover -s tests
