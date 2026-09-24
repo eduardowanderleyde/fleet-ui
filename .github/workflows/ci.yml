@@ -89,6 +89,15 @@ jobs:
           . /opt/ros/jazzy/setup.sh
           cd fleet_ws
           colcon build --symlink-install
+          # Nesta combinação de versões de colcon/ament_package, pacotes
+          # ament_python puros (fleet_orchestrator, fleet_data_collector) não
+          # ganham o hook ament_prefix_path automaticamente — sem ele,
+          # AMENT_PREFIX_PATH nunca inclui install/fleet_orchestrator e
+          # ament_index_python.get_package_share_directory("fleet_orchestrator")
+          # falha (mesmo com o build tendo "funcionado"). Script já existia no
+          # repo (fleet_ws/fix_ament_hooks.sh) como workaround conhecido —
+          # só faltava chamá-lo aqui.
+          bash fix_ament_hooks.sh
 
       - name: Validar xacro + URDF por robô (namespace vazio, tb1, tb2, tb3)
         # Pega exatamente o bug real desta sessão: com namespace:=tb1 os
