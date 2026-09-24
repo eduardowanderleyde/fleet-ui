@@ -308,6 +308,33 @@ valor original era `FUUT`/`SU` (sensor fixo / unidade de suporte, que não têm
 permissão de movimento). Reverter se essa semântica de papéis for necessária
 de novo.
 
+## Ambiente exato testado (snapshot para reprodutibilidade)
+
+ROS 2 tem um ciclo de vida de suporte limitado — quem reabrir este repo daqui
+a 2-3 anos pode achar o ROS Jazzy fora de suporte, com pacotes que não batem
+mais em versão com o que está documentado aqui. Registro deliberado do que
+foi usado de verdade, pra reproduzir o ambiente exato em vez de tentar
+adivinhar "qual versão era essa época":
+
+| Componente | Versão confirmada | Quando |
+|---|---|---|
+| SO | Ubuntu 24.04.4 LTS | 2026-09-24 |
+| ROS 2 | Jazzy Jalisco | — |
+| Gazebo | Harmonic (gz sim 8.11.0) | — |
+| Python | 3.12.3 | — |
+| `ros-jazzy-nav2-bringup` / `nav2-common` | 1.3.11 | — |
+| `ros-jazzy-slam-toolbox` | 2.8.4 | — |
+| `ros-jazzy-turtlebot4-navigation` | 2.1.1 | — |
+| `ros-jazzy-turtlebot4-simulator` | 2.0.2 | — |
+| `ros-jazzy-nav2-minimal-tb4-sim` / `-description` | 1.0.1 | — |
+
+Dependências Python do backend: ver `backend/requirements.lock.txt` (versões
+exatas pinadas, `backend/requirements.txt` usa `>=` solto de propósito pro
+dia-a-dia). Não existe um "lock" equivalente pros pacotes `ros-jazzy-*` —
+são resolvidos pelo apt no momento da instalação; a tabela acima é o
+registro manual disso. Se algo aqui parar de bater com o ambiente atual,
+esse é o primeiro lugar pra olhar antes de assumir que é bug de lógica.
+
 ## Como rodar
 
 ```bash
