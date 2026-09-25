@@ -124,6 +124,41 @@ odometria é gerada pelo plugin DiffDrive do Gazebo e, portanto, é menos ruidos
 que encoders físicos reais; em robôs físicos, slip de roda e condições do piso
 exigiriam uma referência externa ou comparação direta com a pose do SLAM.
 
+Um risco de validade de construto foi identificado e corrigido durante o
+desenvolvimento: o modo automático de detecção de tópico do
+\texttt{analyze\_\allowbreak runs.py} originalmente só reconhecia um tópico chamado
+literalmente \texttt{amcl\_\allowbreak pose}; como este trabalho usa SLAM Toolbox, e não
+AMCL, esse tópico nunca existe, e a análise recaía silenciosamente em
+\texttt{/\allowbreak odom} mesmo quando a pose corrigida do SLAM
+(\texttt{/\allowbreak pose}) também havia sido gravada no mesmo bag. Esse
+comportamento poderia inflar artificialmente o RMSE em rotas mais longas ou
+demoradas, já que a odometria bruta deriva continuamente enquanto a pose do
+SLAM é corrigida pelo casamento de \textit{scans} contra o mapa. O modo
+automático foi corrigido para priorizar, nessa ordem, \texttt{amcl\_\allowbreak pose}
+$>$ \texttt{pose} (SLAM Toolbox) $>$ \texttt{odom}, escolhendo a primeira opção
+com mensagens de fato gravadas; a seleção também pode ser forçada
+explicitamente. Análises realizadas antes dessa correção que tenham caído no
+\textit{fallback} de \texttt{/\allowbreak odom} deveriam, a rigor, ser
+reconsideradas caso a pose do SLAM também estivesse disponível no mesmo bag.
+
+Uma segunda fonte de viés de construto, evidenciada em execuções exploratórias
+reais (Seção~\ref{sec:res_exp_complementares}), é que a fase de gravação e a
+fase de replay não navegam pelo mesmo mecanismo: \texttt{record} envia uma
+sequência de comandos \texttt{go\_\allowbreak to\_\allowbreak point}, um objetivo Nav2 de
+cada vez, com o robô assentando em cada waypoint antes de o próximo ser
+enviado; \texttt{replay} envia uma única \texttt{play\_\allowbreak route}, percorrendo a
+rota inteira como navegação contínua. Em uma campanha exploratória com essa
+configuração (rota de quatro waypoints, $N=3$ replays), o RMSE par-a-par entre
+replays foi da ordem de 0,02\,m, contra cerca de 0,14\,m entre a baseline e
+cada replay, com a baseline durando cerca de 2,5$\times$ menos que os replays
+--- diferença explicada quase inteiramente pelo mecanismo de navegação
+distinto, não por falta de repetibilidade do robô. Por esse motivo, o RMSE
+calculado entre replays entre si (que compartilham o mesmo mecanismo de
+navegação) é a métrica mais fiel à repetibilidade que este trabalho pretende
+medir; comparações contra a gravação baseline, que usa um mecanismo de
+navegação distinto, misturam essa diferença de implementação com
+repetibilidade real e devem ser interpretadas com essa ressalva.
+
 \textbf{Validade interna.} Campanhas preliminares sem reinicialização do estado
 entre replays produziram trajetórias cujos pontos iniciais coincidiam com os
 pontos finais da execução anterior, misturando erro de repetição com erro de
@@ -133,7 +168,21 @@ ameaça ao relançar a simulação e os nós de navegação/coleta antes de cada
 fazendo com que os dez bags analisados comecem praticamente no mesmo ponto em
 \texttt{/\allowbreak odom}. Ainda assim, fatores como variação interna do controlador
 local, estado do SLAM e estabilização do costmap continuam sendo possíveis fontes
-de variabilidade residual.
+de variabilidade residual. Em particular, o controlador local usado
+(\texttt{nav2\_\allowbreak mppi\_\allowbreak controller}, algoritmo MPPI --- \textit{Model
+Predictive Path Integral}) é estocástico por projeto: a cada ciclo de controle
+(20\,Hz), com \texttt{regenerate\_\allowbreak noises: true}, ruído gaussiano é
+reamostrado sobre a trajetória candidata. Ou seja, duas execuções da mesma
+rota, no mesmo robô e no mesmo ambiente, divergem parcialmente apenas pela
+amostragem aleatória do controlador --- isso não é falha de repetibilidade do
+sistema avaliado, é ruído esperado e não-eliminável do método de controle
+escolhido (a menos que se troque por um controlador determinístico, como DWB
+ou Regulated Pure Pursuit, alternativa não avaliada nesta dissertação).
+Adicionalmente, o critério de chegada do Nav2 (\texttt{general\_\allowbreak goal\_\allowbreak
+checker}) aceita até 0,25\,m de erro de posição e 0,25\,rad (aproximadamente
+14°) de erro angular; desvios de endpoint dentro dessa faixa refletem o
+comportamento configurado do Nav2, não necessariamente imprecisão do
+framework de medição.
 
 \textbf{Validade externa.} A validação usa simulação com TurtleBot4 em um único
 ambiente (\textit{warehouse}). Hardware real introduziria slip de roda, ruído de

@@ -69,6 +69,52 @@ baixa: o erro final médio foi de 1,64\,cm, com máximo de 3,26\,cm. Isso indica
 que, além de seguir trajetórias semelhantes ao longo do percurso, o robô terminou
 consistentemente em posições próximas sob o protocolo controlado.
 
+\subsection{Validação Complementar: Efeito do Mecanismo de Navegação}
+\label{sec:res_qa2_mecanismo}
+
+Uma campanha independente e menor, executada em 23/09/2026 sobre a rota
+\texttt{dissertacao\_\allowbreak teste1} (quatro waypoints, aproximadamente
+2\,m de percurso, configuração single-robot), foi usada para investigar por
+que o RMSE contra a execução baseline tende a ser maior que o RMSE entre
+réplicas. Essa campanha consistiu de uma gravação baseline seguida de três
+réplicas
+(\texttt{fleet\_\allowbreak ws/\allowbreak runs/\allowbreak dissertacao\_\allowbreak teste1\_\allowbreak 20260923\_\allowbreak 182049/\allowbreak analysis/\allowbreak summary.json}).
+
+A Tabela~\ref{tab:mecanismo_navegacao} resume o resultado: o RMSE médio
+entre as três réplicas entre si foi de 2,00\,cm, enquanto o RMSE médio de
+cada réplica contra a baseline foi de 13,90\,cm — quase sete vezes maior.
+
+\begin{table}[H]
+\centering
+\caption{Campanha \texttt{dissertacao\_teste1} (23/09/2026): RMSE médio conforme o mecanismo de navegação comparado.}
+\label{tab:mecanismo_navegacao}
+\begin{tabular}{lccr}
+\toprule
+\textbf{Comparação} & \textbf{Mecanismo baseline} & \textbf{Mecanismo réplica} & \textbf{RMSE médio (cm)} \\
+\midrule
+Baseline vs.\ réplicas (3 pares) & \texttt{go\_to\_point} & \texttt{play\_route} & 13,90 \\
+Réplicas entre si (3 pares) & \texttt{play\_route} & \texttt{play\_route} & 2,00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A causa não é degradação de repetibilidade do robô: o script
+\texttt{experiment\_\allowbreak repeatability.py} grava a baseline enviando uma
+sequência de metas individuais (\texttt{go\_\allowbreak to\_\allowbreak point}, um
+objetivo Nav2 por vez, com o robô estabilizando em cada waypoint antes do
+próximo ser enviado), enquanto o replay envia a rota inteira como uma única
+navegação contínua (\texttt{play\_\allowbreak route}). Baseline e réplicas
+percorrem os mesmos pontos por caminhos de código do Nav2 diferentes, o que
+também explica a duração média da baseline (11,70\,s) ser cerca de 2,5 vezes
+menor que a duração média das réplicas (29,47\,s) — a mesma ordem de grandeza
+da razão \texttt{duration\_\allowbreak ratio\_\allowbreak vs\_\allowbreak ref} registrada
+no \texttt{summary.json} dessa campanha. Esse achado reforça a escolha
+metodológica adotada nesta seção: a métrica de repetibilidade que isola o
+fenômeno de interesse é o RMSE entre execuções que usam o mesmo mecanismo de
+navegação (par-a-par, matriz \texttt{pairwise\_\allowbreak rmse\_\allowbreak m} do
+\texttt{summary.json}), não o RMSE contra uma execução de referência gravada
+por um mecanismo distinto.
+
 \section{QA3 — Consistência Temporal}
 \label{sec:res_qa3}
 

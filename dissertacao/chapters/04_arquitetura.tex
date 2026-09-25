@@ -180,6 +180,80 @@ execuções de record ou replay, monitorem o estado dos sensores em tempo real e
 visualizem o overlay de trajetórias após cada execução, tudo sem necessidade
 de terminal.
 
+\subsection{A Camada de Agentes de IA}
+\label{sec:agentes}
+
+Sobre essa arquitetura de cinco camadas foi construída, posteriormente, uma
+camada de agentes de IA (\texttt{backend/\allowbreak agents/}) que permite substituir a
+interação direta com a interface web por instruções em linguagem natural. Um
+agente decide \textit{o quê} fazer; a execução em si continua passando pelos
+mesmos endpoints REST que o frontend já usa --- o agente nunca fala com
+ROS~2 diretamente, o que limita o raio de ação de uma eventual alucinação do
+modelo ao conjunto de ferramentas explicitamente exposto a ele.
+
+A camada é dividida em três componentes. O \texttt{Planner}
+(\texttt{backend/\allowbreak agents/\allowbreak planner.py}) implementa o laço de
+\textit{tool calling} da API da Anthropic: recebe uma instrução, decide uma
+sequência de chamadas de ferramenta e devolve o texto final mais o histórico
+de passos executados. O \texttt{Executor}
+(\texttt{backend/\allowbreak agents/\allowbreak executor.py}) é a única fronteira HTTP entre o
+agente e o Fleet UI --- cada um de seus métodos corresponde a um endpoint já
+existente (\texttt{/\allowbreak api/\allowbreak go\_\allowbreak to\_\allowbreak point},
+\texttt{/\allowbreak api/\allowbreak start\_\allowbreak record}, \texttt{/\allowbreak api/\allowbreak run\_\allowbreak campaign},
+entre outros), incluindo um \texttt{wait\_\allowbreak for\_\allowbreak job} que faz \textit{polling}
+de jobs assíncronos até a conclusão. O \texttt{Analyst}
+(\texttt{backend/\allowbreak agents/\allowbreak analyst.py}) não fala nem com ROS~2 nem com a
+API REST; ele lê os artefatos que \texttt{analyze\_\allowbreak runs.py} já produz
+(\texttt{summary.json}) para responder perguntas sobre uma campanha e, na
+ferramenta \texttt{diagnose\_\allowbreak experiment}, cruzar sinais já calculados
+(trajetória estática, duração muito diferente do baseline, erro concentrado
+no ponto final) em uma hipótese de causa em linguagem natural.
+
+Uma ferramenta adicional, \texttt{run\_\allowbreak campaign} (exposta também como
+\texttt{POST~/\allowbreak api/\allowbreak run\_\allowbreak campaign} no backend), fecha o ciclo
+planejamento--execução--análise: grava uma execução baseline, reproduz a
+mesma rota um número configurável de vezes e roda a análise automaticamente,
+devolvendo um \texttt{run\_id} pronto para as ferramentas de análise.
+
+O isolamento entre robôs é uma restrição estrutural, não uma convenção que
+depende do modelo "se comportar": \texttt{Planner} aceita um parâmetro
+opcional \texttt{robot\_\allowbreak id} e, quando definido, todo \texttt{tool\_\allowbreak input}
+que contém \texttt{robot\_\allowbreak id} (ou \texttt{config.\allowbreak robot}, no caso de
+\texttt{run\_\allowbreak experiment}) é reescrito à força para esse valor antes de
+qualquer chamada real, em \texttt{\_scope\_\allowbreak input()} --- mesmo que o modelo
+peça outro robô. O endpoint \texttt{POST~/\allowbreak api/\allowbreak agent/\allowbreak run\_\allowbreak fleet}
+recebe um mapa \{robô: instrução\} e roda um \texttt{Planner} escopado por robô
+para cada entrada em paralelo, como agentes independentes, sem coordenação
+entre si. O histórico dessas execuções é persistido em disco
+(\texttt{fleet\_\allowbreak ws/\allowbreak agent\_\allowbreak runs/*.json}) e consultável via
+\texttt{GET~/\allowbreak api/\allowbreak agent/\allowbreak history}, sobrevivendo a um reinício do backend.
+
+\subsection{O Painel de Simulação}
+\label{sec:painel_simulacao}
+
+Antes deste painel, subir a simulação exigia abrir dois terminais e invocar
+manualmente os \textit{launch files} do ROS~2. O painel "Simulação" do
+frontend (\texttt{frontend/\allowbreak src/\allowbreak components/\allowbreak SimulationPanel.jsx}) elimina
+essa etapa: o pesquisador escolhe o mapa, o modo (robô único ou frota) e
+quais robôs incluir, e o backend cuida de lançar os mesmos processos que
+antes seriam digitados manualmente.
+
+Os endpoints \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak options},
+\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}, \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak start} e
+\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak stop} (\texttt{backend/\allowbreak main.py}) encapsulam
+essa orquestração. Ao iniciar, o backend monta os mesmos dois comandos que já
+existiam como instruções de terminal --- \texttt{turtlebot4\_\allowbreak sim.launch.py}
+(ou \texttt{turtlebot4\_\allowbreak multi\_\allowbreak sim.launch.py}, no modo com múltiplos
+robôs) e \texttt{fleet.launch.py} --- e os executa como subprocessos
+independentes via \texttt{subprocess.\allowbreak Popen}, com \texttt{os.\allowbreak setsid} para
+permitir encerrá-los como grupo de processos ao parar a simulação. Uma
+\textit{thread} leitora por processo consome a saída padrão em tempo real e a
+expõe via \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}, detectando prontidão ao
+observar as mensagens \texttt{"Managed nodes are active"} (uma por robô) e
+\texttt{"fleet\_\allowbreak orchestrator ready"} nos logs --- o que permite ao
+frontend indicar quando a simulação está de fato pronta para receber
+comandos, em vez de apenas "processo iniciado".
+
 \section{Considerações Finais}
 \label{sec:arq_conclusao}
 
@@ -187,5 +261,9 @@ A arquitetura do Fleet UI resulta de uma série de decisões motivadas por probl
 concretos encontrados durante o desenvolvimento: o executor multithreaded para evitar
 deadlocks de action client, os buffers TF por robô para suporte multi-robô, os perfis
 de QoS diferenciados para garantir integridade dos bags, e a separação entre
-orquestrador e coletor para permitir falhas independentes. O próximo capítulo descreve
+orquestrador e coletor para permitir falhas independentes. Sobre essa base, a camada
+de agentes de IA descrita na Seção~\ref{sec:agentes} foi construída inteiramente por
+cima da API REST já existente, sem alterar o orquestrador ROS~2 ou o coletor de
+dados --- uma confirmação prática de que a separação em camadas cumpriu seu papel de
+permitir extensões futuras sem retrabalho na base. O próximo capítulo descreve
 como essa arquitetura é usada no protocolo experimental de repetibilidade.

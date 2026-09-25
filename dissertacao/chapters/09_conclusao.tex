@@ -11,7 +11,9 @@ protocolo record--replay que transforma uma prática informal e fragmentada ---
 executar um robô várias vezes e comparar os resultados ``na mão'' --- em um
 pipeline documentado, automatizável e transferível.
 
-As contribuições se organizam em três níveis:
+As contribuições se organizam em três níveis, complementados por uma extensão
+de automação construída sobre essa base depois da campanha de avaliação
+quantitativa:
 
 \textbf{Nível arquitetural}: a separação de papéis MUUT/FUUT formaliza a distinção
 entre unidades que executam tarefas e unidades que observam, permitindo designs
@@ -42,7 +44,33 @@ reais e o botão \textit{Executar record} representam uma redução perceptível
 no esforço de configuração de um experimento do zero --- uma percepção
 qualitativa dos autores, já que, como discutido na Seção~\ref{sec:limitacoes},
 nenhum estudo de usabilidade controlado foi conduzido para quantificar essa
-redução.
+redução. O Painel de Simulação (Seção~\ref{sec:painel_simulacao}), adicionado
+posteriormente, aprofunda essa mesma direção ao eliminar a necessidade de
+abrir terminais para subir a simulação: o pesquisador escolhe mapa, modo e
+robôs pela tela, e o backend lança os mesmos processos que antes eram
+digitados manualmente.
+
+\textbf{Extensão de automação e qualidade de engenharia}: sobre essa base
+arquitetural foi construída, já após a campanha de avaliação quantitativa, uma
+camada de agentes de IA (\texttt{backend/\allowbreak agents/}, Seção~\ref{sec:agentes})
+que substitui a interação direta com a interface por instruções em linguagem
+natural, sem que o agente jamais fale com ROS~2 diretamente --- ele chama os
+mesmos endpoints REST já expostos ao frontend, e o isolamento por robô é
+reforçado estruturalmente em \texttt{\_scope\_\allowbreak input()}, não deixado como
+convenção que dependa do modelo ``se comportar''. A ferramenta
+\texttt{run\_\allowbreak campaign} fecha o ciclo planejamento--execução--análise de
+ponta a ponta a partir de uma única instrução. Paralelamente, uma suíte de
+integração contínua (\texttt{.github/\allowbreak workflows/\allowbreak ci.yml}) passou a
+validar o lado ROS~2 do projeto a cada alteração --- compilação via
+\texttt{colcon}, validação de xacro/URDF por robô (incluindo os
+\textit{namespaces} multi-robô), verificação dos \textit{launch files} e
+execução da suíte de testes específicos de ROS~2 sem permitir que sejam
+pulados silenciosamente, o que evita que um ambiente ROS incompleto produza um
+selo verde enganoso. Nenhuma dessas extensões foi exercitada pela campanha
+quantitativa de repetibilidade relatada nos Capítulos~\ref{chap:avaliacao}
+e~\ref{chap:resultados}, que permanece restrita a um único robô
+(Seção~\ref{sec:limitacoes}); seu valor é ampliar a base de engenharia sobre a
+qual uma avaliação multi-robô futura pode ser construída sem retrabalho.
 
 \section{Retomada das Perguntas de Pesquisa}
 \label{sec:retomada_pp}
@@ -140,7 +168,30 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados} foi realizada com um
     único TurtleBot4 Standard. Escalabilidade e comportamento sob operação
     simultânea de múltiplos robôs --- incluindo eventuais interferências de
-    rede, DDS ou TF entre unidades --- não foram empiricamente avaliados.
+    rede, DDS ou TF entre unidades --- não foram empiricamente avaliados. Um
+    teste funcional preliminar, fora do escopo da campanha quantitativa,
+    confirmou que dois robôs simultâneos (\texttt{tb1}+\texttt{tb2}) executam
+    ciclos completos de gravação e reprodução sem interferência cruzada de
+    \texttt{cmd\_\allowbreak vel} ou odometria, enquanto três robôs simultâneos
+    falharam de forma reproduzível: a causa identificada nos logs foi
+    contenção de CPU/DDS entre três pilhas independentes de SLAM Toolbox e
+    Nav2 (o relógio simulado salta para trás sob a carga combinada, invalidando
+    o buffer de TF antes do prazo interno do Nav2), e não falta de GPU --- a
+    GPU dedicada desta máquina foi confirmada em uso real pela renderização do
+    Gazebo, e nenhum processo do SLAM Toolbox ou do Nav2 depende de GPU. Esse
+    resultado é qualitativo e não substitui a avaliação quantitativa de
+    repetibilidade sob carga multi-robô, que permanece em aberto.
+
+    \item \textbf{Estocasticidade do controlador local não isolada como fator
+    de variância.} O controlador \texttt{nav2\_\allowbreak mppi\_\allowbreak controller}
+    reamostra ruído gaussiano a cada ciclo de controle por definição do
+    algoritmo (discussão de validade interna, Seção~\ref{sec:ameacas}), de
+    modo que parte da variância
+    de RMSE observada é ruído esperado do método de controle escolhido, não
+    necessariamente falta de repetibilidade do sistema como um todo. Esta
+    dissertação não avaliou um controlador determinístico (DWB ou Regulated
+    Pure Pursuit) sob o mesmo protocolo para isolar essas duas fontes de
+    variância.
 
     \item \textbf{Escopo restrito da campanha quantitativa.} A campanha final
     utiliza $N=10$ replays, superando a limitação inicial de amostra muito
@@ -168,14 +219,27 @@ como pré-condição para aceitar uma execução de replay é um desenvolvimento
 A agenda de trabalhos futuros pode ser organizada em três horizontes.
 
 \textbf{Curto prazo}: ampliar a campanha controlada para múltiplas rotas,
-incluindo trajetórias mais longas, curvas fechadas e obstáculos dinâmicos;
-repetir o protocolo em hardware físico com TurtleBot4 real; comparar
-\texttt{/\allowbreak odom}, pose estimada por SLAM e \textit{ground truth} do
-Gazebo em uma mesma campanha para separar erro de controle, erro de localização
-e erro de medição; avaliar quantitativamente cenários multi-robô (MUUT+FUUT
-simultâneos), respondendo diretamente à limitação de escopo single-robot
-registrada na Seção~\ref{sec:limitacoes}; integrar câmera OAK-D para coleta de
-dados visuais sincronizados com trajetória.
+incluindo trajetórias mais longas, curvas fechadas e obstáculos dinâmicos, com
+$N$ de réplicas por cenário na casa de 10--20 ou mais, para reduzir a
+incerteza da estimativa de RMSE também fora da rota
+\texttt{dissertation\_\allowbreak clean01}; repetir o protocolo em hardware físico
+com TurtleBot4 real; comparar \texttt{/\allowbreak odom}, pose estimada por SLAM
+e \textit{ground truth} do Gazebo em uma mesma campanha para separar erro de
+controle, erro de localização e erro de medição; decidir e avaliar a
+metodologia de gravação de baseline --- hoje via \texttt{go\_\allowbreak to\_\allowbreak point}
+sequencial, mecanismo distinto do usado no replay (\texttt{play\_\allowbreak route},
+Seção~\ref{sec:res_qa2}) --- incluindo a alternativa de gravar a própria
+baseline via \texttt{play\_\allowbreak route} para permitir comparação direta
+baseline-vs-replay sem essa diferença de implementação; comparar o
+controlador MPPI, estocástico por projeto, com um controlador determinístico
+(DWB ou Regulated Pure Pursuit) sob o mesmo protocolo, isolando a variância do
+método de controle da variância do sistema como um todo (Seção~\ref{sec:limitacoes});
+avaliar quantitativamente cenários multi-robô (MUUT+FUUT simultâneos) com RMSE
+pairwise por robô, usando dois robôs simultâneos como alvo inicial --- teto
+validado nesta máquina por contenção de CPU/DDS, não por GPU
+(Seção~\ref{sec:limitacoes}) ---, respondendo diretamente à limitação de
+escopo single-robot registrada na mesma seção; integrar câmera OAK-D para
+coleta de dados visuais sincronizados com trajetória.
 
 \textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações
 ambientais entre execuções; interface para exportação de dados no formato Roboflow
@@ -185,12 +249,16 @@ de usabilidade controlado com participantes externos para quantificar a reduçã
 esforço de engenharia atribuída à interface web (PP4).
 
 \textbf{Longo prazo}: generalização do framework para robôs além da família
-TurtleBot, incluindo manipuladores móveis; integração com plataformas de CI/CD
-para robótica (\textit{continuous integration} de algoritmos de navegação via
-execução automatizada do protocolo de repetibilidade); publicação do framework
-no ecossistema ROS~2 como pacote instalável via \texttt{apt}; replicação
-independente do protocolo por outro laboratório, como primeiro passo em direção
-à reprodutibilidade no sentido forte discutido na Seção~\ref{sec:repro_vs_repet}.
+TurtleBot, incluindo manipuladores móveis; a integração contínua já criada
+(Seção~\ref{sec:sintese}) valida compilação, xacro/URDF e \textit{launch files}
+do lado ROS~2 a cada alteração, mas ainda não executa o próprio protocolo de
+repetibilidade automaticamente --- falta estender essa suíte para rodar uma
+campanha completa com Gazebo/Nav2 em execução e reportar regressões de RMSE
+entre versões, o que exige um executor de CI com GPU e tempo de execução maior
+que o atual; publicação do framework no ecossistema ROS~2 como pacote
+instalável via \texttt{apt}; replicação independente do protocolo por outro
+laboratório, como primeiro passo em direção à reprodutibilidade no sentido
+forte discutido na Seção~\ref{sec:repro_vs_repet}.
 
 \section{Consideração Final}
 \label{sec:final}
