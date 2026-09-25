@@ -44,6 +44,11 @@ mais abaixo):
    funcionando — pegou 2 bugs reais nesse processo).
 6. `diagnose_experiment` — quando uma repetição sai muito diferente do
    esperado, o agente tenta explicar o motivo provável.
+7. Painel "Missão Coordenada" (`SimulationPanel.jsx`): lança a simulação
+   pela própria tela (sem terminal manual) e manda 3 robôs formarem uma
+   forma (L, I, V ou \) no mapa, 1 ponto por robô, em sequência. Expõe na
+   prática o mesmo teto de 3 robôs simultâneos descrito acima — ver
+   "Reconfirmado (2026-09-25)" na seção da simulação com 3 robôs.
 
 ## Por que essa camada existe
 
@@ -307,6 +312,22 @@ temporariamente marcados como `MUUT` (móveis) para esta demonstração — o
 valor original era `FUUT`/`SU` (sensor fixo / unidade de suporte, que não têm
 permissão de movimento). Reverter se essa semântica de papéis for necessária
 de novo.
+
+**Reconfirmado (2026-09-25) via o painel "Missão Coordenada" (`SimulationPanel.jsx`
++ `/api/simulation/start`), duas tentativas seguidas:** ambas falharam com o
+mesmo padrão — `tb2.lifecycle_manager_navigation: Failed to bring up all
+requested nodes. Aborting bringup.` A limitação de CPU/DDS com 3 robôs
+simultâneos segue valendo nesta máquina, não é regressão nova; o painel só
+está expondo de forma mais visível (e honesta, com aviso na própria tela)
+um limite que já existia.
+
+O que mudou nessa rodada de testes: até então, parar uma simulação que
+falhou no meio do bringup podia deixar processos órfãos pra trás (nós do
+Nav2 de um robô que tinha subido bem sobreviviam ao `killpg` do processo
+principal — ver `_SIM_PROCESS_PATTERNS` em `backend/main.py`). Isso foi
+corrigido com uma rede de segurança (`pkill -9 -f` por padrão de nome
+depois do `killpg`) e verificado ao vivo 3 vezes reproduzindo essa mesma
+falha: `pgrep` confirmou zero processos remanescentes em todas.
 
 ## Ambiente exato testado (snapshot para reprodutibilidade)
 
