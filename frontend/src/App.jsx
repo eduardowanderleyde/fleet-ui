@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import ConfigForm from './components/ConfigForm'
 import AgentFleetPanel from './components/AgentFleetPanel'
 import SimulationPanel from './components/SimulationPanel'
@@ -61,6 +61,12 @@ const WAREHOUSE_MAP = {
 }
 
 const HOUSE_WORLD = { x0: -5.0, y0: -5.0, x1: 7.0, y1: 7.0 }
+
+// Pose de spawn de cada robô no mundo Gazebo compartilhado — tem que bater
+// com DEFAULT_POSES em turtlebot4_multi_sim.launch.py. Usado só pra alinhar
+// os marcadores de múltiplos robôs num mesmo mapa (ver allPoses); não afeta
+// navegação nem SLAM, que continuam 100% independentes por robô.
+const SPAWN_OFFSETS = { tb1: [0, 0], tb2: [0, 2], tb3: [0, 4] }
 
 // ── MapView ───────────────────────────────────────────────────────────────────
 function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
@@ -693,7 +699,25 @@ export default function App() {
   const pose   = status.poses?.[effectiveRobotId] || status.pose || {}
   // Todas as poses conhecidas (pro MapView desenhar os N robôs ao mesmo
   // tempo) — cai pra { <robô> : pose } em backends antigos sem status.poses.
-  const allPoses = status.poses || (status.pose ? { [effectiveRobotId]: status.pose } : {})
+  // Cada robô roda SLAM independente: (0,0) do mapa dele é a própria pose de
+  // spawn no Gazebo (turtlebot4_multi_sim.launch.py DEFAULT_POSES), não um
+  // referencial mundial compartilhado. Sem essa correção, o marcador de um
+  // robô B desenhado sobre o mapa do robô A cai onde as coordenadas cruas de
+  // B "por acaso" caem no sistema de A — visto ao vivo: tb2 aparecendo
+  // colado no tb1 mesmo os dois nascendo 2 m separados de verdade. Corrige
+  // somando a diferença entre o spawn de cada robô e o do robô cujo mapa
+  // está sendo mostrado.
+  const allPoses = useMemo(() => {
+    const raw = status.poses || (status.pose ? { [effectiveRobotId]: status.pose } : {})
+    const [refX, refY] = SPAWN_OFFSETS[effectiveRobotId] || [0, 0]
+    const out = {}
+    for (const [rid, p] of Object.entries(raw)) {
+      if (!p?.valid) { out[rid] = p; continue }
+      const [ox, oy] = SPAWN_OFFSETS[rid] || [0, 0]
+      out[rid] = { ...p, x: p.x + (ox - refX), y: p.y + (oy - refY) }
+    }
+    return out
+  }, [status.poses, status.pose, effectiveRobotId])
   const robot  = status.robots?.find(r => r.robot_id === effectiveRobotId) || status.robots?.[0] || {}
   const nav2Ok = status.nav2_ready === true
   const isConnected = connStatus === 'connected'
