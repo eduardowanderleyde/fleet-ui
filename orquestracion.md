@@ -329,6 +329,41 @@ corrigido com uma rede de segurança (`pkill -9 -f` por padrão de nome
 depois do `killpg`) e verificado ao vivo 3 vezes reproduzindo essa mesma
 falha: `pgrep` confirmou zero processos remanescentes em todas.
 
+**Achado novo (2026-09-25): o mesmo padrão de falha apareceu com só 2
+robôs**, sob carga alta da máquina. Depois de várias rodadas de
+start/stop de simulação na mesma sessão (cada uma sobe Gazebo+Nav2+SLAM do
+zero), com `load average` em ~3,8 (bem acima do normal desta máquina),
+mandamos `tb1` e `tb2` pra pontos de formação (`/api/go_to_point`) — `tb1`
+"chegou" (mas o alvo dele coincidia com a posição inicial, não prova
+deslocamento real), e o objetivo de `tb2` (1,5 m de distância) foi
+**rejeitado pelo Nav2** com o mesmo erro documentado acima pra 3 robôs:
+
+```
+[tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[tb2.controller_server]: Exception in transformPose: Lookup would require
+extrapolation into the past.
+[tb2.controller_server]: Unable to transform goal pose into costmap frame
+[tb2.bt_navigator]: Goal failed
+```
+
+Hipótese mais provável: não é regressão de código, é pressão real de CPU
+acumulada por várias simulações seguidas na mesma sessão de trabalho —
+2 robôs continua sendo o par validado em condições normais (ver testes
+anteriores desta seção), mas o teto de estabilidade parece mais sensível à
+carga do sistema no momento do teste do que se pensava antes. Não
+investigado a fundo ainda (não repetido com a máquina "descansada"); fica
+registrado como um ponto de atenção pra próximas campanhas — rodar com o
+mínimo de outros processos pesados abertos, e se possível medir/reportar
+o load average junto com os resultados de repetibilidade.
+
+Nota lateral do mesmo teste: o subscriber ROS interno do backend (que lê
+pose via TF pra `/api/status`) ficou sem funcionar a sessão inteira antes
+disso, por falta do pacote `numpy` no ambiente Python isolado usado pra
+rodar o backend nesta máquina — sintoma era log silencioso `ROS subscriber
+not started (source workspace?): No module named 'numpy'`. Não é um bug de
+código do projeto, é dependência de ambiente faltando; corrigido
+instalando `numpy` nesse ambiente.
+
 ## Ambiente exato testado (snapshot para reprodutibilidade)
 
 ROS 2 tem um ciclo de vida de suporte limitado — quem reabrir este repo daqui
