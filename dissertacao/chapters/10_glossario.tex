@@ -1,0 +1,192 @@
+\chapter*{GLOSSÁRIO}
+\addcontentsline{toc}{chapter}{GLOSSÁRIO}
+\label{chap:glossario}
+
+\begin{description}
+
+\item[\textbf{Action (ROS~2)}]
+Protocolo de comunicação assíncrono que permite enviar uma meta (\textit{goal})
+a um servidor, receber atualizações periódicas de progresso (\textit{feedback})
+e um resultado final (\textit{result}). Adequado para operações de longa duração,
+como navegação autônoma. Difere de serviços (síncronos) e tópicos (sem garantia
+de resultado).
+
+\item[\textbf{AMCL} (\textit{Adaptive Monte Carlo Localization})]
+Algoritmo de localização probabilística baseado em filtro de partículas que estima
+a pose do robô em um mapa pré-construído. Cada partícula representa uma hipótese
+de pose; as partículas são reponderadas e reamostradas a cada observação do LiDAR.
+Diferente do SLAM, o AMCL pressupõe que o mapa é fixo e conhecido.
+
+\item[\textbf{Artefato de Pesquisa} (\textit{Research Artifact})]
+Código, dados, configurações e demais materiais que, publicados junto a um
+estudo empírico, permitem que terceiros reproduzam ou repliquem seus
+resultados. A política de \textit{badges} da ACM (\textit{Artifacts
+Available}, \textit{Evaluated -- Functional}, \textit{Results Replicated})
+formaliza níveis crescentes de rigor nesse processo \cite{guevaravega2024}.
+
+\item[\textbf{Bag (rosbag2 / MCAP)}]
+Arquivo de gravação de mensagens ROS~2 ao longo do tempo. O formato MCAP
+(\textit{Multi-Channel Autonomous Perception}) é o padrão a partir do ROS~2 Humble,
+oferecendo indexação eficiente, busca por timestamp e suporte a múltiplos tipos de
+mensagem. Bags são a fonte primária de dados para análise offline de experimentos.
+
+\item[\textbf{Behavior Tree (BT)}]
+Estrutura de controle hierárquica que organiza comportamentos de um agente autônomo
+em nós de ação, condição, sequência e seleção. O Nav2 utiliza BTs para orquestrar
+o planejamento de trajetória, controle local e recuperação de falhas. Definidos em
+arquivos XML, os BTs são facilmente modificáveis sem recompilação.
+
+\item[\textbf{BEST\_EFFORT (QoS)}]
+Política de QoS que prioriza latência mínima em detrimento de garantias de entrega.
+Adequada para sensores de alta frequência (LiDAR, IMU) onde uma mensagem perdida
+é aceitável se a próxima chegar em seguida. Incompatível com subscribers RELIABLE.
+
+\item[\textbf{CDR} (\textit{Common Data Representation})]
+Formato binário de serialização usado pelo DDS (e, por extensão, pelo ROS~2)
+para codificar mensagens trocadas entre nós e armazenadas em \textit{bags}.
+A leitura de um \textit{bag} sem o pacote de mensagens correspondente
+instalado exige desserialização manual do CDR contra o tipo esperado.
+
+\item[\textbf{Dead Reckoning}]
+Estimativa de pose de um veículo por integração de velocidade e direção a partir
+de uma pose inicial conhecida, sem observações externas. Em robótica móvel, é
+realizado via odometria de roda. Acumula erro ao longo do tempo.
+
+\item[\textbf{DDS} (\textit{Data Distribution Service})]
+Middleware de comunicação publicar-subscrever que serve de base ao ROS~2.
+Define políticas de QoS, descoberta automática de participantes na rede e
+comunicação ponto-a-ponto sem broker central.
+
+\item[\textbf{DiffDrive} (\textit{Differential Drive})]
+Plugin do Gazebo que simula o acionamento diferencial de um robô com duas rodas
+independentes. Publica odometria e transforma comandos de velocidade linear/angular
+em velocidades individuais de roda via cinemática inversa.
+
+\item[\textbf{Endpoint Error}]
+Ver \textbf{Erro de Endpoint}.
+
+\item[\textbf{Erro de Endpoint}]
+Distância euclidiana entre as posições finais de duas execuções do mesmo percurso.
+Complementa o RMSE ao focar no destino final em vez de toda a trajetória.
+Um erro de endpoint pequeno com RMSE grande indica caminhos diferentes chegando
+ao mesmo destino.
+
+\item[\textbf{Filtro de Partículas}]
+Técnica de estimação bayesiana que aproxima uma distribuição de probabilidade
+--- por exemplo, a pose de um robô --- por um conjunto finito de amostras
+ponderadas (partículas), reponderadas e reamostradas a cada nova observação.
+Base algorítmica do AMCL.
+
+\item[\textbf{FUUT} (\textit{Fixed Unit Under Test/Tasking})]
+Papel experimental definido no framework Fleet UI. Uma unidade robótica em posição
+fixa durante o experimento, responsável por observar o ambiente e coletar dados
+de perspectiva externa. Não recebe comandos de navegação.
+
+\item[\textbf{Gazebo Harmonic}]
+Simulador robótico 3D com física rígida, versão \textit{harmonic} (GZ 8.x),
+que é a versão de suporte estendido pareada com ROS~2 Jazzy. Successor do
+Gazebo Classic, usa arquitetura modular e mensagens \texttt{gz.msgs}.
+
+\item[\textbf{Goal Handle}]
+Objeto retornado por um cliente de \textit{action} ROS~2 ao ter uma meta
+aceita por um servidor, usado para consultar o status da execução, obter o
+resultado final de forma assíncrona ou solicitar cancelamento. Ver também
+\textbf{Action (ROS~2)}.
+
+\item[\textbf{IMU} (\textit{Inertial Measurement Unit})]
+Sensor que mede aceleração linear (acelerômetro) e velocidade angular (giroscópio)
+em três eixos. Utilizado para estimativa de atitude e fusão com odometria de roda
+para redução de deriva.
+
+\item[\textbf{Lifecycle (nó ROS~2)}]
+Modelo de gerenciamento de estado para nós ROS~2 que requerem inicialização
+estruturada. Estados: \textit{unconfigured} $\to$ \textit{inactive} $\to$
+\textit{active} $\to$ \textit{finalized}. O Nav2 usa lifecycle extensivamente
+para garantir que todos os recursos estejam alocados antes do início da navegação.
+
+\item[\textbf{LiDAR} (\textit{Light Detection and Ranging})]
+Sensor que emite pulsos de laser e mede o tempo de retorno para determinar
+distâncias. O RPLIDAR S2 utilizado nesta dissertação é um sensor 2D de varredura
+rotativa com alcance de até 30\,m e frequência de 10\,Hz.
+
+\item[\textbf{MCAP}]
+Ver \textbf{Bag}.
+
+\item[\textbf{MPPI} (\textit{Model Predictive Path Integral Control})]
+Algoritmo de controle ótimo por amostragem. A cada ciclo, gera $K$ trajetórias
+candidatas com ruído gaussiano, avalia seus custos, e retorna a média ponderada
+como controle ótimo. É o controlador local padrão do Nav2 na versão Jazzy.
+
+\item[\textbf{MUUT} (\textit{Mobile Unit Under Test/Tasking})]
+Papel experimental definido no framework Fleet UI. A unidade robótica que executa
+e grava percursos experimentais. Recebe comandos de navegação do orquestrador.
+Pode haver múltiplas unidades MUUT por experimento.
+
+\item[\textbf{Nav2}]
+Navigation2 --- a pilha de navegação autônoma padrão para ROS~2, introduzida
+pelo \textit{Marathon 2} \cite{macenski2020marathon}. Composta por servidores
+de planejamento global, controle local, comportamentos de recuperação e um
+orquestrador por Behavior Trees.
+
+\item[\textbf{OccupancyGrid}]
+Representação de mapa 2D como grade de células, onde cada célula armazena a
+probabilidade de ocupação (0--100, onde -1 indica desconhecido). Formato padrão
+em ROS~2 para mapas de navegação.
+
+\item[\textbf{Odometria}]
+Estimativa de pose de um robô derivada de sensores de movimento internos
+(encoders de roda, IMU). Publicada como \texttt{nav\_\allowbreak msgs/\allowbreak msg/\allowbreak Odometry} no ROS~2.
+
+\item[\textbf{QoS} (\textit{Quality of Service})]
+Conjunto de políticas que controlam o comportamento da comunicação entre nós
+ROS~2, incluindo confiabilidade (\textit{reliability}), durabilidade e histórico
+de mensagens. Incompatibilidades de QoS entre publicador e subscritor são
+silenciosas --- nenhuma mensagem é entregue sem aviso de erro.
+
+\item[\textbf{Record--Replay}]
+Protocolo experimental do framework Fleet UI composto por duas fases:
+\textit{record} (gravação do percurso baseline por navegação sequencial de waypoints)
+e \textit{replay} (reprodução automática do percurso via \texttt{FollowWaypoints}).
+
+\item[\textbf{RMSE} (\textit{Root Mean Square Error})]
+Métrica de distância média entre dois conjuntos de pontos, calculada como a raiz
+da média dos quadrados das distâncias euclidianas ponto a ponto. Amplamente
+utilizada para avaliar repetibilidade de trajetórias em robótica experimental.
+
+\item[\textbf{ROS~2}]
+Robot Operating System 2 --- middleware de código aberto para desenvolvimento
+de aplicações robóticas, construído sobre o protocolo DDS. Versão Jazzy Jalisco
+(LTS) utilizada nesta dissertação.
+
+\item[\textbf{SLAM} (\textit{Simultaneous Localization and Mapping})]
+Processo pelo qual um robô constrói um mapa do ambiente e, simultaneamente,
+estima sua posição dentro desse mapa, sem conhecimento prévio de nenhum dos dois.
+Ver também \textbf{SLAM Toolbox}.
+
+\item[\textbf{SLAM Toolbox}]
+Implementação de SLAM 2D baseada em grafos de poses para ROS~2
+\cite{macenski2021slam}. Suporta mapeamento lifelong e modos síncrono/assíncrono.
+É a implementação recomendada para uso com Nav2.
+
+\item[\textbf{SU} (\textit{Support Unit})]
+Papel experimental definido no framework Fleet UI. Unidade de infraestrutura
+que monitora a rede ou apoia a execução do experimento sem participar diretamente
+da navegação ou coleta de dados.
+
+\item[\textbf{TF2} (\textit{Transform Library 2})]
+Biblioteca do ROS~2 para gerenciamento de transformações geométricas entre
+referenciais. Mantém um grafo temporal de transformações que permite calcular a
+posição de qualquer referencial em relação a qualquer outro em qualquer instante
+de tempo dentro do buffer de cache.
+
+\item[\textbf{TRANSIENT\_LOCAL (QoS)}]
+Política de durabilidade que mantém a última mensagem publicada em cache, entregando-a
+imediatamente a novos subscritores. Necessária para tópicos como \texttt{/\allowbreak amcl\_\allowbreak pose},
+onde o estado mais recente deve estar disponível para nós que ingressam após a publicação.
+
+\item[\textbf{Waypoint}]
+Ponto intermediário ou destino em uma rota de navegação, especificado como pose
+$(x, y, \theta)$ no referencial do mapa. O Nav2 aceita listas de waypoints via
+a ação \texttt{FollowWaypoints}.
+
+\end{description}

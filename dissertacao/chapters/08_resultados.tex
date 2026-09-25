@@ -1,0 +1,157 @@
+\chapter{Resultados}
+\label{chap:resultados}
+
+\section{QA1 — Automatização do Protocolo}
+\label{sec:res_qa1}
+
+O protocolo record--replay foi executado de forma automática em duas etapas.
+Primeiro, uma baseline limpa foi gravada na rota
+\texttt{dissertation\_\allowbreak clean01}, gerando o arquivo YAML de rota e um
+bag MCAP com \texttt{/\allowbreak scan}, \texttt{/\allowbreak odom},
+\texttt{/\allowbreak imu} e \texttt{/\allowbreak pose}. Em seguida, foram
+executados dez replays independentes dessa rota. Para cada replay, um script de
+campanha relançou completamente a simulação, a pilha Nav2, o orquestrador e o
+coletor de dados, aguardou a ativação dos nós lifecycle do Nav2 e então iniciou
+a coleta e a reprodução da rota.
+
+A campanha final foi concluída com dez replays válidos, todos com
+\texttt{success: true}. Os artefatos principais foram armazenados em
+\texttt{fleet\_\allowbreak ws/\allowbreak runs/\allowbreak dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual/},
+incluindo o manifesto da campanha, os exports individuais de cada replay, os
+bags MCAP, os CSVs de trajetória, o gráfico de sobreposição das trajetórias e o
+arquivo \texttt{summary.json} consolidado.
+
+\section{QA2 — RMSE de Repetibilidade}
+\label{sec:res_qa2}
+
+A Tabela~\ref{tab:campanha_final} apresenta as métricas por replay da campanha
+final. O primeiro replay é usado como execução de referência; por isso, seu RMSE
+e erro final contra a referência são iguais a zero e não entram no cálculo das
+médias de erro.
+
+\begin{table}[H]
+\centering
+\caption{Campanha final controlada: duração, comprimento, RMSE e erro final por replay.}
+\label{tab:campanha_final}
+\footnotesize
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Execução} & \textbf{Duração (s)} & \textbf{Comprimento (m)} & \textbf{RMSE vs.\ ref. (cm)} & \textbf{Erro final (cm)} \\
+\midrule
+Replay 01 & 17,96 & 0,840 & 0,00 & 0,00 \\
+Replay 02 & 17,64 & 0,807 & 2,57 & 3,26 \\
+Replay 03 & 18,11 & 0,823 & 2,01 & 1,64 \\
+Replay 04 & 17,57 & 0,824 & 2,58 & 1,56 \\
+Replay 05 & 17,42 & 0,825 & 3,77 & 1,47 \\
+Replay 06 & 17,32 & 0,847 & 4,58 & 0,67 \\
+Replay 07 & 17,28 & 0,826 & 4,19 & 1,36 \\
+Replay 08 & 17,32 & 0,825 & 4,76 & 1,50 \\
+Replay 09 & 17,71 & 0,830 & 1,65 & 1,00 \\
+Replay 10 & 16,78 & 0,817 & 4,08 & 2,26 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Considerando os nove replays comparados à referência, o RMSE médio foi de
+3,35\,cm, com desvio-padrão de 1,10\,cm. O menor RMSE observado foi de
+1,65\,cm e o maior foi de 4,76\,cm. Todos os valores ficaram substancialmente
+abaixo da tolerância padrão de objetivo do Nav2 de 25\,cm.
+
+O resultado é metodologicamente mais forte que as campanhas preliminares porque
+os pontos iniciais foram controlados. No \texttt{summary.json}, todos os dez
+replays apresentam \texttt{start\_\allowbreak xy} praticamente igual a $(0,0)$,
+com desvio máximo da ordem de $10^{-18}$\,m em relação ao primeiro replay.
+Portanto, o RMSE medido não está misturando diferenças progressivas de pose
+inicial com erro de repetição da trajetória.
+
+A distância final em relação ao \texttt{replay\_\allowbreak 01} também permaneceu
+baixa: o erro final médio foi de 1,64\,cm, com máximo de 3,26\,cm. Isso indica
+que, além de seguir trajetórias semelhantes ao longo do percurso, o robô terminou
+consistentemente em posições próximas sob o protocolo controlado.
+
+\section{QA3 — Consistência Temporal}
+\label{sec:res_qa3}
+
+A duração média dos dez replays foi de 17,51\,s, com desvio-padrão de
+0,36\,s. O comprimento médio estimado por \texttt{/\allowbreak odom} foi de
+0,826\,m, com desvio-padrão de 0,010\,m. A variação temporal observada é
+pequena para o objetivo da análise e compatível com o uso de reamostragem em
+tempo normalizado.
+
+Esses valores mostram que as execuções foram não apenas espacialmente próximas,
+mas também temporalmente consistentes. A combinação de baixo RMSE, baixo erro
+final e baixa dispersão de duração sustenta a interpretação de que o framework
+reproduziu a rota de forma repetível sob condições controladas.
+
+\section{Integridade dos Bags de Sensores}
+\label{sec:res_bags}
+
+Os dez bags da campanha final contêm os tópicos planejados:
+\texttt{/\allowbreak scan}, \texttt{/\allowbreak odom}, \texttt{/\allowbreak imu}
+e \texttt{/\allowbreak pose}. A Tabela~\ref{tab:sensor_bags} resume as
+contagens médias de mensagens e as frequências efetivas estimadas por tópico.
+
+\begin{table}[H]
+\centering
+\caption{Frequências efetivas médias de coleta de sensores na campanha final.}
+\label{tab:sensor_bags}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Tópico} & \textbf{Msgs/exec. média} & \textbf{Faixa de msgs} & \textbf{Freq. efetiva média (Hz)} \\
+\midrule
+\texttt{/\allowbreak scan} & 175,4 & 168--181 & 10,0 \\
+\texttt{/\allowbreak odom} & 487,4 & 467--504 & 27,8 \\
+\texttt{/\allowbreak imu}  & 3504,7 & 3364--3630 & 199,7 \\
+\texttt{/\allowbreak pose} & 4,9 & 4--7 & 0,3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A trajetória principal da análise foi extraída de \texttt{/\allowbreak odom};
+\texttt{/\allowbreak pose} foi preservado como dado auxiliar. A presença
+consistente desses tópicos nos dez bags confirma que a coleta em MCAP permaneceu
+operacional mesmo com o relançamento completo da simulação entre replays.
+
+\section{Experimentos Complementares: Variabilidade Fora do Protocolo Controlado}
+\label{sec:res_exp_complementares}
+
+Antes da campanha final controlada, foram executadas campanhas exploratórias nas
+quais os replays não eram reinicializados a partir do mesmo estado. Esses dados
+foram úteis para diagnosticar uma ameaça metodológica: o início de uma execução
+podia coincidir com o fim da anterior, especialmente quando
+\texttt{return\_\allowbreak to\_\allowbreak start=false}. Nesses casos, a abertura
+entre curvas não pode ser interpretada diretamente como erro puro de
+repetibilidade, pois mistura repetição da trajetória com variação de pose inicial.
+
+Um exemplo desse problema apareceu em campanhas nas quais o \texttt{start\_\allowbreak xy}
+de um replay era praticamente igual ao \texttt{end\_\allowbreak xy} do replay
+anterior. O efeito visual era uma separação progressiva entre trajetórias, mas
+essa separação não media apenas a variabilidade do controlador ou do SLAM; media
+também a consequência de iniciar cada nova execução a partir de uma pose diferente.
+
+Por essa razão, os resultados exploratórios são mantidos como evidência
+diagnóstica e motivação do protocolo final, mas não substituem a campanha
+\texttt{dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual}, na qual
+o estado inicial foi efetivamente controlado. O principal valor desses dados é
+mostrar empiricamente que a infraestrutura de coleta não basta: para que o RMSE
+seja interpretável como repetibilidade de trajetória, o protocolo precisa impor
+mesma rota, mesma ação de navegação, mesma condição inicial e coleta padronizada.
+
+\section{Considerações Finais}
+\label{sec:res_conclusao}
+
+Os resultados respondem afirmativamente às três primeiras questões de avaliação.
+QA1 é respondida pela execução automatizada da baseline e dos dez replays, com
+geração automática de bags, CSVs, gráfico e \texttt{summary.json}. QA2 é
+respondida pelo RMSE médio de 3,35\,cm e máximo de 4,76\,cm contra a execução de
+referência, ambos muito abaixo da tolerância de 25\,cm do Nav2. QA3 é respondida
+pela baixa variabilidade temporal observada nos dez replays, com duração média
+de 17,51\,s e desvio-padrão de 0,36\,s.
+
+A análise também reforça uma lição metodológica central: a pose inicial precisa
+ser controlada explicitamente. Campanhas preliminares sem reinicialização entre
+replays produziram métricas contaminadas por deslocamentos iniciais progressivos.
+A campanha final evita essa ameaça ao relançar a simulação e a pilha de navegação
+antes de cada replay, fazendo com que as dez trajetórias analisadas partam do
+mesmo estado em \texttt{/\allowbreak odom}. O capítulo seguinte conclui a
+dissertação, discutindo implicações, limitações e trabalhos futuros.

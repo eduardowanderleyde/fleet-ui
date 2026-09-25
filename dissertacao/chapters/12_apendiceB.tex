@@ -1,0 +1,93 @@
+\chapter{Referência de Linha de Comando: \texttt{experiment\_\allowbreak repeatability.py}}
+\label{ap:cli_reference}
+
+Este apêndice documenta, com base no código-fonte publicado do projeto, os dois
+subcomandos de \texttt{experiment\_\allowbreak repeatability.py} (Seção~\ref{sec:impl_pipeline})
+--- \texttt{record} e \texttt{replay} --- e seus parâmetros de linha de comando.
+Trata-se do mesmo script que a interface web invoca internamente por meio da
+função \texttt{\_\allowbreak build\_\allowbreak cmd} do backend (Seção~\ref{sec:impl_backend_ponte}); a
+documentação aqui serve tanto para uso direto via terminal quanto para leitura
+do código do backend, que monta esses mesmos argumentos a partir da configuração
+recebida da UI.
+
+\section{Subcomando \texttt{record}}
+
+\begin{table}[H]
+\centering
+\caption{Parâmetros do subcomando \texttt{record}.}
+\begin{tabularx}{\textwidth}{lcX}
+\toprule
+\textbf{Parâmetro} & \textbf{Padrão} & \textbf{Descrição} \\
+\midrule
+\texttt{--robot} & \texttt{tb1} & \texttt{robot\_\allowbreak id} do robô a comandar. \\
+\texttt{--single-robot} & desativado & Força \texttt{robot\_\allowbreak id} vazio (simulação sem \textit{namespace}; rotas/bags em \texttt{routes/\allowbreak default}, \texttt{collections/\allowbreak default}). \\
+\texttt{--route} & \texttt{percurso1\_\allowbreak tb1} & Nome da rota YAML a salvar (sem extensão). \\
+\texttt{--points} & \texttt{0.5,0,0;1.0,0,0;\allowbreak 1.5,0.5,0;2.0,0.5,0} & Lista de pontos \texttt{x,y,yaw} (metros, radianos) separados por \texttt{;}. \\
+\texttt{--topics} & \texttt{scan odom imu pose} & Tópicos de sensor a gravar, relativos ao \textit{namespace} do robô. \\
+\texttt{--wait-goal} & 300.0 s & \textit{Timeout} de espera por goal individual. \\
+\texttt{--no-use-sim-time} & desativado & Usa relógio de parede em vez de \texttt{/\allowbreak clock} (omitida em uso normal com Gazebo). \\
+\texttt{--require-motion} & desativado & Falha antecipadamente se não houver deslocamento mínimo detectado em \texttt{/\allowbreak odom} após o início da navegação. \\
+\texttt{--motion-min-dist} & 0.10 m & Deslocamento mínimo exigido por \texttt{--require-motion}. \\
+\texttt{--motion-timeout} & 10.0 s & Janela de tempo para detectar o deslocamento mínimo. \\
+\texttt{--skip-collection} & desativado & Executa apenas \texttt{record}/\texttt{play}, sem gravação de \textit{rosbag}. \\
+\texttt{--export} & --- & Caminho de um arquivo \texttt{.json} de metadados da execução (rota, pontos, sucesso, caminho do \textit{bag}). \\
+\texttt{--initial-pose} & --- & Publica \texttt{/\allowbreak initialpose} (AMCL) em \texttt{map} antes da coleta, no formato \texttt{x,y,yaw}; equivalente ao \textit{2D Pose Estimate} do RViz. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+O fluxo interno de \texttt{cmd\_\allowbreak record} --- habilitar coleta, chamar
+\texttt{start\_\allowbreak record}, aguardar disponibilidade de TF (\texttt{map} $\to$
+\texttt{base\_\allowbreak link}) e do costmap, então iterar sobre os pontos chamando
+\texttt{go\_\allowbreak to\_\allowbreak point} sequencialmente antes de finalmente chamar
+\texttt{stop\_\allowbreak record} e \texttt{disable\_\allowbreak collection} --- é o que garante que
+cada rota gravada corresponda a uma sequência de navegações efetivamente
+concluídas, e não apenas a metas enviadas: a espera pelo estado
+\texttt{navigating} e, em seguida, pelo retorno a \texttt{recording} após cada
+\textit{waypoint} (Seção~\ref{sec:action_lifecycle}) é o mecanismo que
+sincroniza o script com o ciclo de vida assíncrono das \textit{actions} do Nav2.
+
+\section{Subcomando \texttt{replay}}
+
+\begin{table}[H]
+\centering
+\caption{Parâmetros do subcomando \texttt{replay}.}
+\begin{tabularx}{\textwidth}{lcX}
+\toprule
+\textbf{Parâmetro} & \textbf{Padrão} & \textbf{Descrição} \\
+\midrule
+\texttt{--robot} & \texttt{tb1} & \texttt{robot\_\allowbreak id} do robô a comandar. \\
+\texttt{--single-robot} & desativado & Força \texttt{robot\_\allowbreak id} vazio. \\
+\texttt{--route} & \texttt{percurso1\_\allowbreak tb1} & Nome da rota YAML previamente gravada a reproduzir. \\
+\texttt{--topics} & \texttt{scan odom imu pose} & Tópicos de sensor a gravar durante o replay. \\
+\texttt{--wait-goal} & 300.0 s & \textit{Timeout} de espera pela conclusão da rota completa. \\
+\texttt{--replay-nav-start-timeout} & 45.0 s & Tempo máximo para observar \texttt{nav\_\allowbreak state = navigating} após \texttt{play\_\allowbreak route}. \\
+\texttt{--replay-nav-settle-sec} & 0.35 s & Janela de \textit{fallback}: se \texttt{navigating} não for observado a tempo (replay muito rápido ou \texttt{/\allowbreak fleet/\allowbreak status} a apenas $\sim$1\,Hz), aguarda esse intervalo e infere o estado a partir da leitura seguinte. \\
+\texttt{--no-use-sim-time} & desativado & Idêntico ao subcomando \texttt{record}. \\
+\texttt{--require-motion} & desativado & Idêntico ao subcomando \texttt{record}, mas medido por deslocamento \texttt{odom} entre início e fim do replay. \\
+\texttt{--motion-min-dist} / \texttt{--motion-timeout} & 0.10\,m / 10.0\,s & Idênticos ao subcomando \texttt{record}. \\
+\texttt{--skip-collection} & desativado & Idêntico ao subcomando \texttt{record}. \\
+\texttt{--export} & --- & Idêntico ao subcomando \texttt{record}. \\
+\texttt{--initial-pose} & --- & Idêntico ao subcomando \texttt{record}. \\
+\texttt{--return-to-start} & --- & Antes da coleta, navega para a pose \texttt{x,y,yaw} informada via \texttt{go\_\allowbreak to\_\allowbreak point} --- o mecanismo que implementa o retorno ao ponto de partida entre execuções de replay mencionado na Seção~\ref{sec:met_conclusao}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Uma Nuance Sobre Detecção de Movimento e o Filtro de Saltos}
+
+A leitura do código-fonte revela uma distinção importante, não evidente a partir
+apenas da descrição textual do protocolo (Seção~\ref{sec:record_replay}): a
+validação de deslocamento mínimo ativada por \texttt{--require-motion} ocorre
+\emph{durante a coleta}, como critério de sucesso/falha da execução (via
+\texttt{wait\_\allowbreak motion\_\allowbreak detected} e a comparação de posição \texttt{odom} entre
+início e fim do replay), e não como um filtro de pós-processamento sobre a
+trajetória já gravada. O filtro de saltos impossíveis mencionado na
+Seção~\ref{sec:impl_pipeline} e a interpolação temporal da
+Seção~\ref{sec:interpolacao}, por sua vez, dizem respeito à etapa de
+\emph{análise} (\texttt{analyze\_\allowbreak runs.py}), não à etapa de \emph{coleta}
+documentada neste apêndice --- são portanto dois mecanismos de garantia de
+qualidade distintos, atuando em estágios diferentes do pipeline, e a nota de
+implementação da Seção~\ref{sec:impl_pipeline} refere-se especificamente ao
+segundo, não ao primeiro (que está de fato implementado e ativo sempre que
+\texttt{--require-motion} é usado).

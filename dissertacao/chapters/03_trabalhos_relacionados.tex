@@ -1,0 +1,343 @@
+\chapter{Trabalhos Relacionados}
+\label{chap:relacionados}
+
+\epigraph{\itshape ``Se eu vi mais longe, foi por estar sobre ombros de gigantes.''}
+{\normalfont --- Isaac Newton, carta a Robert Hooke, 1675}
+
+A revisão da literatura organiza-se em sete eixos que convergem para o problema
+central desta dissertação: (i) frameworks de navegação autônoma em ROS~2, (ii)
+avaliação e comparação de algoritmos de SLAM, (iii) metodologias de avaliação
+de repetibilidade em robótica, (iv) sistemas de orquestração para frotas de
+robôs, (v) interfaces web para operação de robôs, (vi) Engenharia de Software
+aplicada a sistemas robóticos baseados em ROS, e (vii) a crise de reprodutibilidade
+em pesquisa empírica de Engenharia de Software e o papel dos artefatos de pesquisa.
+A análise de cada eixo identifica contribuições relevantes e lacunas que esta
+dissertação pretende preencher.
+
+\section{Frameworks de Navegação Autônoma em ROS~2}
+\label{sec:rel_nav}
+
+\subsection{Navigation2 (Nav2) e o Marathon 2}
+
+O trabalho mais diretamente relacionado a esta dissertação é a introdução do
+Nav2 no contexto do \textit{Marathon 2} \cite{macenski2020marathon}. O artigo
+descreve a arquitetura do Nav2 --- servidores de planejamento, controle e
+comportamento orquestrados por Behavior Trees --- e valida a pilha em mais de
+60\,km (37,4 milhas) de navegação autônoma acumulada em um campus universitário
+dinâmico e povoado por pessoas, usando dois robôs profissionais (Tiago e RB-1),
+sem nenhuma colisão registrada ao longo de quase 23 horas de operação.
+
+A contribuição é fundamental: demonstra que o Nav2 é maduro o suficiente para
+uso contínuo em ambientes não estruturados. No entanto, o critério de avaliação
+é agregado (distância total percorrida, número de intervenções humanas) e não
+inclui análise de consistência entre execuções individuais. O framework proposto
+nesta dissertação não questiona a qualidade do Nav2 --- constrói sobre ela para
+responder perguntas que o Marathon 2 não se propôs a responder.
+
+\subsection{O Controlador Regulated Pure Pursuit}
+
+\citeonline{macenski2023survey} apresentam o controlador Regulated Pure Pursuit para
+ROS~2, uma adaptação do clássico Pure Pursuit \cite{coulter1992} com regulação
+de velocidade adaptativa. O artigo demonstra rastreamento de trajetória com
+erro lateral médio abaixo de 5\,cm em curvas acentuadas --- uma métrica diretamente
+relacionada à repetibilidade de percurso.
+
+A diferença em relação a esta dissertação é de escopo: o artigo avalia o desempenho
+de rastreamento de um controlador específico, enquanto esta dissertação avalia a
+repetibilidade do sistema completo (SLAM + Nav2 + odometria) como um pipeline
+integrado. O erro de rastreamento do controlador é apenas uma das contribuições
+para o RMSE total observado.
+
+\subsection{O Ecossistema ROS~2 em Aplicações Reais}
+
+\citeonline{macenski2022ros2} realizam uma análise abrangente do ROS~2 cerca de
+cinco anos após seu primeiro lançamento estável (Ardent Apalone, dezembro de 2017).
+O artigo documenta cinco estudos de caso reais --- um robô terrestre com pernas
+(Ghost Robotics), uma embarcação de superfície autônoma para missões marinhas
+(Mission Robotics), um sistema de drones aéreos (Auterion), o rover lunar VIPER
+da NASA, e a orquestração de frotas industriais em larga escala (OTTO Motors)
+--- demonstrando que o middleware escalou de um framework experimental para
+infraestrutura de produção em domínios críticos e heterogêneos. Para esta
+dissertação, o artigo é a referência primária para o modelo de QoS, o protocolo
+de lifecycle e a arquitetura do DDS.
+
+\section{Avaliação de Algoritmos de SLAM}
+\label{sec:rel_slam}
+
+\subsection{A Taxonomia do SLAM}
+
+O tutorial em duas partes de \citeonline{durrantwhyte2006} e \citeonline{bailey2006}
+consolidou e popularizou a taxonomia do problema SLAM --- cuja estrutura, resultado
+de convergência e nomenclatura haviam sido propostos originalmente por Durrant-Whyte,
+Rye e Nebot em 1996 --- e forneceu uma análise sistemática abrangente das abordagens
+então existentes. Vinte anos depois, essa taxonomia permanece válida: filtros
+de partículas (Gmapping, AMCL), filtros de Kalman estendidos (EKF-SLAM), e grafos
+de poses (SLAM Toolbox, Cartographer) ainda são as três famílias algorítmicas
+dominantes \cite{thrun2005}.
+
+\subsection{Avaliação Empírica de SLAM em ROS}
+
+\citeonline{hamer2025} realizam uma avaliação empírica rigorosa de quatro algoritmos
+de SLAM 2D (Cartographer, Gmapping, Hector SLAM \cite{kohlbrecher2011} e Karto) em
+sistemas baseados em ROS, medindo consumo de energia, utilização de CPU e acurácia de mapa ao longo de
+múltiplas execuções em que o mesmo robô alterna entre algoritmos em cenários
+ponto-a-ponto e circulares. O ponto metodológico mais relevante para esta
+dissertação é a utilização de múltiplas execuções do mesmo cenário, com análise
+de variabilidade entre execuções --- um embrião de análise de repetibilidade,
+embora sem um protocolo formal de record--replay nem métricas de RMSE entre
+trajetórias.
+
+O estudo é publicado no \textit{Journal of the Brazilian Computer Society}, reforçando
+esse periódico como veículo relevante para avaliações empíricas rigorosas de sistemas
+baseados em ROS e a comparação empírica como metodologia científica consolidada na área.
+
+\subsection{Repetibilidade em Mapeamento 3D}
+
+\citeonline{maset2022} avaliam a repetibilidade de um sistema robótico de mapeamento
+3D (scanner a laser Velodyne acoplado a uma unidade de medição inercial sobre uma
+plataforma móvel), comparando três aquisições robóticas repetidas do mesmo ambiente
+entre si, com três aquisições manuais (\textit{handheld}) e com um levantamento a
+laser terrestre usado como referência. As métricas principais são a distância
+\textit{cloud-to-cloud} entre nuvens de pontos e o RMSE posicional; a distância
+média entre nuvens da mesma modalidade fica na casa de 2\,cm, com o modo robótico
+apresentando ruído ligeiramente menor que o modo manual.
+
+Embora focado em mapeamento 3D com hardware de custo elevado, o artigo estabelece
+um conceito metodológico que esta dissertação adapta para navegação 2D: avaliar
+repetibilidade por comparação direta entre execuções nominalmente idênticas do
+mesmo percurso, em vez de comparar cada execução apenas contra um valor de
+referência único --- e a importância de reportar não apenas a média dos erros,
+mas também o desvio-padrão entre execuções.
+
+\section{Avaliação de Repetibilidade em Robótica}
+\label{sec:rel_repeticao}
+
+\subsection{Boas Práticas Metodológicas}
+
+\citeonline{amigoni2014} realizam um levantamento sistemático de como experimentos são
+conduzidos em artigos de robótica autônoma publicados na \textit{International Conference
+on Autonomous Agents and Multiagent Systems} (AAMAS) entre 2002 e 2012. Os resultados
+mostram que boa parte dos trabalhos ainda carece de rigor científico --- comparação
+estatística fraca (presente em pouco mais de um terço dos artigos que reportam apenas
+médias), baixa disponibilidade de código e dados publicados (a maioria dos links
+fornecidos está quebrada) e uso predominante de comparações apenas com variantes do
+próprio sistema proposto, não com sistemas alternativos. Esse diagnóstico, publicado
+em 2014, permanece pertinente em 2026: a ausência de protocolos padronizados de
+avaliação continua sendo um obstáculo para o progresso cumulativo da área.
+
+\citeonline{amigoni2010} também propõem que simulação e experimentação física devem ser
+tratadas como complementares, não excludentes: a simulação permite controle completo
+das variáveis, enquanto o hardware real captura fenômenos físicos irreplicáveis em
+simulação. Esta dissertação adota essa visão ao focar em simulação para validação
+do framework, identificando hardware real como extensão natural.
+
+\subsection{Fundamentos Probabilísticos da Avaliação de Navegação}
+
+\citeonline{thrun2005}, em seu tratado sobre robótica probabilística, não dedicam um
+capítulo isolado à avaliação de navegação, mas tratam a incerteza de localização e a
+convergência de estimativas como tema central ao longo dos capítulos sobre filtros de
+Bayes, filtros de Kalman, filtros de partículas e SLAM (incluindo o FastSLAM). Essa
+formalização recorrente do erro de localização esperado e da convergência de
+estimativas fornece o embasamento teórico para as métricas de RMSE utilizadas nesta
+dissertação. O livro, embora publicado em 2005, permanece a referência mais citada em
+robótica probabilística e sua relevância para avaliar navegação com SLAM é
+indiscutível.
+
+\section{Sistemas de Orquestração para Frotas}
+\label{sec:rel_frota}
+
+\subsection{Arquiteturas de Frota em ROS~2}
+
+O ROS~2 provê os primitivos de comunicação necessários para sistemas multi-robô,
+mas não uma camada de orquestração de alto nível \cite{macenski2022ros2}. Propostas
+como o Fleet Management do Open RMF (Open Robotics Middleware Framework) abordam o
+problema de despacho de tarefas em frotas com múltiplos robôs, mas com foco em
+planejamento de missões e otimização de rotas, não em repetibilidade experimental.
+
+A distinção é fundamental e define o posicionamento desta dissertação: um sistema
+de gestão de frota maximiza a eficiência operacional; o framework proposto aqui
+garante que cada robô execute exatamente o que foi solicitado, nas mesmas condições,
+toda vez. Os dois objetivos são ortogonais e complementares.
+
+\subsection{Comportamento Determinístico em Sistemas Multi-Robô}
+
+A dificuldade de garantir comportamento determinístico em sistemas multi-robô
+com ROS~2 é documentada em trabalhos de pesquisa de tempo-real. A não-determinismo
+no scheduling do sistema operacional, o jitter do DDS e as variações de tempo de
+processamento entre execuções contribuem para a variabilidade observada em
+experimentos de navegação \cite{macenski2022ros2}.
+
+O framework proposto mitiga esse problema com estratégias de software --- espera
+explícita pela ativação do Nav2, cooldown entre fases do experimento, e filtro de
+saltos impossíveis na odometria --- mas não elimina a fonte fundamental do
+não-determinismo, que reside no sistema operacional de tempo compartilhado.
+
+\section{Interfaces Web para Robótica}
+\label{sec:rel_web}
+
+A maioria das interfaces de operação para robôs autônomos é baseada no RViz2,
+uma ferramenta de visualização que requer instalação local do ROS~2 e não oferece
+acesso remoto nativo. Alternativas web existem --- Foxglove Studio, Robot Web
+Tools \cite{toris2015} --- mas requerem o ROSBridge WebSocket server, adicionando
+uma camada de configuração e um ponto de falha ao sistema. O próprio Robot Web
+Tools, na origem do protocolo rosbridge amplamente adotado por essas alternativas,
+foi projetado como uma arquitetura cliente-servidor voltada à robótica em nuvem e
+à interoperabilidade entre navegadores e múltiplos robôs \cite{toris2015}, um
+objetivo mais amplo do que a interface de operação local e single-robot proposta
+nesta dissertação.
+
+A abordagem adotada nesta dissertação --- FastAPI como bridge REST sem ROSBridge,
+com canvas HTML5 para visualização do mapa --- representa uma solução de menor
+peso de configuração. A ausência de trabalhos publicados que adotem especificamente
+essa combinação (FastAPI + canvas + Nav2 sem ROSBridge) reforça a originalidade
+da contribuição de interface.
+
+\section{Engenharia de Software em Sistemas Robóticos Baseados em ROS}
+\label{sec:rel_es}
+
+Embora os eixos anteriores situem esta dissertação no espaço técnico da robótica
+autônoma, sua motivação central --- infraestrutura reprodutível, verificável e
+auditável para experimentos --- é, antes de tudo, um problema de Engenharia de
+Software aplicado a um domínio físico. Esta seção situa o trabalho nessa literatura.
+
+\citeonline{albonico2023} conduzem um mapeamento sistemático sobre pesquisa em
+Engenharia de Software voltada ao ROS, cobrindo 63 estudos primários. Os autores
+identificam que a relevância industrial das avaliações propostas na literatura é
+predominantemente baixa (47 dos 63 estudos) e que o rigor metodológico falha
+sobretudo no relato de ameaças à validade (46 dos 63 estudos não discutem esse
+aspecto), enquanto 19 estudos reconhecem explicitamente a necessidade de validação
+adicional e 15 relatam falta de generalização de seus próprios resultados. Os
+autores apontam ainda que o ROS~2 permanece pouco explorado tanto na pesquisa
+(apenas 8 dos 63 estudos) quanto na adoção industrial, que segue limitada apesar
+do fim do suporte de longo prazo ao ROS~1 previsto para 2025. Esse mapeamento
+fundamenta diretamente o problema central desta dissertação: a crise de
+orquestração experimental (Seção~\ref{sec:problema}) é, na taxonomia de
+\citeauthor{albonico2023}, um sintoma da ausência de infraestrutura de teste,
+validação e reprodutibilidade madura para sistemas ROS.
+
+\citeonline{timperley2024} apresentam o ROBUST, um levantamento empírico de 221 bugs
+reais coletados de sete sistemas de software baseados em ROS~1 (kobuki, mavros,
+geometry, turtlebot, motoman, entre outros), catalogando causas-raiz que incluem
+falhas de concorrência (ausência ou uso incorreto de primitivas de sincronização
+entre nós), configuração incorreta de comunicação em rede (tamanhos de fila de
+publicador mal configurados, causando bloqueios não intencionais) e uma classe
+ampla de erros de programação geral. Embora o dataset seja anterior ao ROS~2 e,
+portanto, não trate diretamente de conceitos específicos dessa geração do
+middleware --- como QoS ou o modelo de \textit{executor} --- as categorias de
+falha de concorrência e má configuração de comunicação identificadas por
+\citeauthor{timperley2024} são análogas, em espírito, a problemas de
+compatibilidade enfrentados durante o desenvolvimento do framework proposto
+(Seção~\ref{sec:impl_orquestrador}), como o mismatch de QoS entre o coletor de
+dados e o SLAM Toolbox e os deadlocks do executor de serviço único frente ao
+\texttt{wait\_\allowbreak for\_\allowbreak server} do Nav2 --- manifestações específicas do ROS~2 da
+mesma classe geral de defeito de concorrência/comunicação já documentada no
+ecossistema ROS~1. Isso reforça que tais problemas não são peculiaridades de
+uma implementação isolada, mas uma classe de defeito recorrente e não-trivial
+que atravessa gerações do middleware.
+
+\citeonline{santos2024} discutem a integração de práticas de monitoramento de
+Integração Contínua (CI) em pipelines de engenharia de software, com o Holter
+como ferramenta de observabilidade de builds. Embora o domínio de aplicação seja
+distinto (CI de software convencional, não robótica), o princípio de tornar
+comportamentos regressivos observáveis automaticamente --- em vez de depender de
+inspeção manual --- é o mesmo princípio que motiva o protocolo record--replay com
+análise RMSE automatizada proposto nesta dissertação: cada execução do protocolo
+gera um oráculo quantitativo (o relatório de repetibilidade) que pode, em
+princípio, ser incorporado a um pipeline de CI/CD para navegação autônoma, tal
+como sugerido na agenda de trabalhos futuros (Seção~\ref{sec:futuros}).
+
+Em conjunto, esses três trabalhos deslocam o enquadramento desta dissertação: o
+framework proposto não deve ser lido apenas como uma ferramenta de robótica que
+incidentalmente automatiza tarefas repetitivas, mas como uma resposta direta a uma
+lacuna documentada na literatura de Engenharia de Software sobre sistemas ROS ---
+a ausência de infraestrutura reutilizável de teste, observabilidade e
+reprodutibilidade experimental.
+
+
+\section{A Crise de Reprodutibilidade e o Papel dos Artefatos de Pesquisa}
+\label{sec:rel_reprodutibilidade}
+
+Um último eixo, transversal aos anteriores, situa esta dissertação no debate mais
+amplo sobre reprodutibilidade em pesquisa empírica de Engenharia de Software.
+\citeonline{guevaravega2024} analisam 106 estudos primários envolvendo experimentos
+orientados a humanos e propõem uma estrutura de artefato de pesquisa alinhada à
+política de \textit{badges} da ACM (\textit{Artifacts Available},
+\textit{Artifacts Evaluated -- Functional} e \textit{Results Replicated}), com o
+objetivo de tornar experimentos publicados de fato reexecutáveis por terceiros ---
+não apenas descritos em texto. Os autores relatam que uma fração substancial dos
+artefatos de pesquisa disponibilizados por autores de estudos empíricos está
+incompleta ou imprecisa o suficiente para impedir a reprodução direta dos
+resultados, mesmo quando código e dados estão nominalmente publicados.
+
+O framework proposto nesta dissertação pode ser lido, sob essa lente, como uma
+tentativa de aplicar o princípio dos \textit{badges} ACM \emph{durante a coleta
+dos dados}, e não apenas na publicação posterior do artefato: cada execução do
+protocolo record--replay (Capítulo~\ref{chap:metodologia}) produz, automaticamente,
+um \texttt{summary.json} com as métricas RMSE pairwise, os CSVs de trajetória por
+execução e o gráfico de sobreposição (\texttt{trajectory\_\allowbreak overlay.png}) descritos
+na Seção~\ref{sec:impl_pipeline} --- artefatos estruturados o suficiente para que
+outro pesquisador, de posse do mesmo \textit{workspace} ROS~2 e do mesmo mundo de
+simulação, consiga reexecutar o experimento e comparar diretamente os resultados,
+sem depender de reconstrução manual do protocolo a partir da prosa do artigo.
+Essa característica é precisamente o tipo de lacuna que motivou a rejeição do
+artigo original submetido à trilha de ferramentas da SBES (Apêndice~\ref{ap:fleet_msgs}
+documenta a interface que viabiliza essa automação): a contribuição de
+Engenharia de Software do framework não está nos algoritmos de navegação em si
+--- que são reaproveitados do Nav2 e do SLAM Toolbox sem modificação --- mas na
+infraestrutura que torna cada execução um artefato de pesquisa autocontido.
+
+\section{Síntese Comparativa}
+\label{sec:rel_sintese}
+
+A Tabela~\ref{tab:comparacao_relacionados} resume os trabalhos discutidos e
+compara suas características com o framework proposto nesta dissertação.
+
+\begin{table}[H]
+\centering
+\caption{Comparação do framework proposto com trabalhos relacionados}
+\label{tab:comparacao_relacionados}
+\footnotesize
+\begin{tabularx}{\textwidth}{lXccccc}
+\toprule
+\textbf{Trabalho} & \textbf{Foco principal} & \rotatebox{90}{\textbf{Record-Replay}} & \rotatebox{90}{\textbf{Multi-robô}} & \rotatebox{90}{\textbf{Web UI}} & \rotatebox{90}{\textbf{Métricas RMSE}} & \rotatebox{90}{\textbf{Open-source}} \\
+\midrule
+\citeonline{macenski2020marathon}  & Navegação longa distância & $\times$ & $\times$ & $\times$ & $\times$ & \checkmark \\
+\citeonline{macenski2023survey}    & Controlador Pure Pursuit  & $\times$ & $\times$ & $\times$ & Parcial  & \checkmark \\
+\citeonline{macenski2022ros2}      & Plataforma ROS~2          & $\times$ & Parcial  & $\times$ & $\times$ & \checkmark \\
+\citeonline{hamer2025}             & Avaliação de SLAM         & Parcial  & $\times$ & $\times$ & \checkmark & $\times$ \\
+\citeonline{maset2022}       & Repetibilidade 3D         & \checkmark & $\times$ & $\times$ & \checkmark & $\times$ \\
+\citeonline{amigoni2010}           & Metodologia experimental  & $\times$ & $\times$ & $\times$ & Parcial  & N/A \\
+\citeonline{guevaravega2024}       & Artefatos de pesquisa (ES) & $\times$ & N/A & $\times$ & N/A & N/A \\
+\textbf{Esta dissertação}     & Framework experimental    & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabularx}
+{\footnotesize \checkmark = presente; $\times$ = ausente; Parcial = presente com limitações}
+\end{table}
+
+\section{Lacuna Identificada}
+\label{sec:rel_lacuna}
+
+A revisão da literatura conduzida nesta dissertação (Seções~\ref{sec:rel_nav}
+a~\ref{sec:rel_reprodutibilidade}) não identificou, nos trabalhos analisados, a
+combinação específica de características do framework proposto --- protocolo
+formal de record--replay, suporte a papéis experimentais em frota, coleta
+síncrona de sensores heterogêneos com QoS diferenciada, análise RMSE pairwise
+automatizada e interface web sem ROSBridge. Essa afirmação reflete o escopo da
+revisão narrativa/comparativa realizada neste capítulo, não uma revisão
+sistemática com protocolo de busca formal; não é, portanto, uma alegação de
+ineditismo absoluto, mas um relato preciso do que a bibliografia examinada
+cobre ou deixa de cobrir.
+
+Essa lacuna não é acidental. Ela reflete uma escolha implícita da comunidade de
+robótica experimental: priorizar a contribuição algorítmica (um novo controlador,
+um novo algoritmo de SLAM) sobre a infraestrutura de avaliação. Esta dissertação
+inverte essa prioridade: a infraestrutura de avaliação \textit{é} a contribuição.
+
+\section{Considerações Finais}
+\label{sec:rel_conclusao}
+
+A revisão confirma que os componentes técnicos necessários existem e são maduros
+--- Nav2, SLAM Toolbox, bags ROS~2 --- mas não estão integrados de forma coerente
+em um framework orientado a experimentos reprodutíveis. O próximo capítulo apresenta
+a arquitetura que realiza essa integração, com decisões de design motivadas pelos
+problemas identificados na literatura.

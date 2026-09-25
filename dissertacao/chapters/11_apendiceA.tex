@@ -1,0 +1,181 @@
+\chapter{Interface Completa do Pacote \texttt{fleet\_\allowbreak msgs}}
+\label{ap:fleet_msgs}
+
+Este apêndice documenta, na íntegra e sem alterações em relação ao repositório
+público do projeto (pacote \texttt{fleet\_\allowbreak msgs}, versão 0.1.0), as duas mensagens
+e os dez serviços que compõem a interface de comunicação entre o orquestrador de
+frota, o coletor de dados e os demais clientes ROS~2 do framework --- incluindo o
+backend REST descrito na Seção~\ref{sec:impl_backend_ponte}. Do total de dez
+serviços, sete (\texttt{start\_\allowbreak record}, \texttt{stop\_\allowbreak record}, \texttt{play\_\allowbreak route},
+\texttt{go\_\allowbreak to\_\allowbreak point}, \texttt{cancel}, \texttt{list\_\allowbreak robots} e \texttt{list\_\allowbreak routes})
+são providos pelo nó \texttt{fleet\_\allowbreak orchestrator} (Seção~\ref{sec:orquestrador});
+os três restantes (\texttt{enable\_\allowbreak collection}, \texttt{disable\_\allowbreak collection} e
+\texttt{collection\_\allowbreak status}) são de responsabilidade do coletor de dados
+(Seção~\ref{sec:coletor}). A convenção de retorno é uniforme em todos os serviços
+que representam comandos (em oposição a consultas): um campo \texttt{success}
+booleano, uma \texttt{message} textual para depuração e um \texttt{error\_\allowbreak code}
+vazio em caso de sucesso ou preenchido com um identificador estável (e.g.
+\texttt{UNKNOWN\_\allowbreak ROBOT}, \texttt{ALREADY\_\allowbreak NAVIGATING}) em caso de falha, permitindo
+que clientes automatizados (como os \textit{scripts} de experimento) tratem erros
+programaticamente sem depender de \textit{parsing} de texto livre.
+
+\section{Mensagens}
+
+\subsection{\texttt{RobotState.msg}}
+
+Representa o estado agregado de um único robô, tal como publicado no tópico
+\texttt{fleet/\allowbreak status} a 1\,Hz pelo orquestrador (Seção~\ref{sec:impl_orquestrador}).
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{msg/\allowbreak RobotState.msg}}]
+# Estado agregado de um robo para /fleet/status (UI)
+string robot_id
+string role           # MUUT | FUUT | SU (papel no experimento)
+string nav_state      # idle | recording | navigating | failed
+string current_route  # nome da rota em execucao ou vazio
+bool collection_on
+string collection_file
+string last_error     # ultimo erro (TF, Nav2, etc.) ou vazio
+uint64 bytes_written   # bytes no bag atual (0 se nao coletando)
+\end{lstlisting}
+
+\subsection{\texttt{FleetStatus.msg}}
+
+Envelope publicado no tópico \texttt{fleet/\allowbreak status}: um vetor de \texttt{RobotState},
+um por robô conhecido pelo orquestrador.
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{msg/\allowbreak FleetStatus.msg}}]
+# Status agregado da frota (1 topico para a UI)
+RobotState[] robots
+\end{lstlisting}
+
+\section{Serviços do Orquestrador}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak StartRecord.srv}}]
+# Start recording a route for one robot
+string robot_id
+string route_name
+---
+bool success
+string message
+string error_code   # vazio se ok; UNKNOWN_ROBOT, ALREADY_NAVIGATING
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak StopRecord.srv}}]
+# Stop recording and save route for one robot
+string robot_id
+---
+bool success
+string message
+string error_code
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak PlayRoute.srv}}]
+# Play (navigate) a saved route for one robot
+string robot_id
+string route_name
+---
+bool success
+string message
+string error_code   # ROUTE_NOT_FOUND, NAV2_UNAVAILABLE, ALREADY_RECORDING, ALREADY_NAVIGATING
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak GoToPoint.srv}}]
+# Manda o robo ir para um unico ponto (x, y) no mapa. UI: "mandar um ponto".
+string robot_id
+float64 x
+float64 y
+float64 yaw   # orientacao no goal (rad). 0 = manter direcao padrao
+---
+bool success
+string message
+string error_code   # NAV2_UNAVAILABLE, ALREADY_RECORDING, ALREADY_NAVIGATING
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak Cancel.srv}}]
+# Cancel current navigation for one robot
+string robot_id
+---
+bool success
+string message
+string error_code
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak ListRobots.srv}}]
+# List registered robot IDs (for UI)
+---
+string[] robot_ids
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak ListRoutes.srv}}]
+# List saved route names for one robot
+string robot_id
+---
+string[] route_names
+\end{lstlisting}
+
+\section{Serviços do Coletor de Dados}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak EnableCollection.srv}}]
+# Enable sensor data collection for one robot
+# topics: e.g. ["scan", "odom", "imu"] (relative to robot namespace)
+# output_mode: "rosbag2" or "csv"
+string robot_id
+string[] topics
+string output_mode
+---
+bool success
+string message
+string error_code   # ALREADY_COLLECTING, UNKNOWN_ROBOT, UNKNOWN_TOPIC
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak DisableCollection.srv}}]
+# Disable sensor data collection for one robot
+string robot_id
+---
+bool success
+string message
+string error_code
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, language=, caption={\texttt{srv/\allowbreak CollectionStatus.srv}}]
+# Status of data collection for one robot (for UI)
+string robot_id
+---
+bool is_collecting
+string current_file
+uint64 bytes_written
+string message
+\end{lstlisting}
+
+\section{Síntese}
+
+A Tabela~\ref{tab:fleet_msgs_sintese} resume as dez interfaces de serviço por
+domínio de responsabilidade e presença de campos de identificação de robô,
+evidenciando que \texttt{robot\_\allowbreak id} é o único parâmetro obrigatório comum a
+praticamente toda a interface --- um reflexo direto da decisão de design de
+tratar cada robô como um sujeito experimental endereçável independentemente
+(Seção~\ref{sec:papeis}), inclusive no caso especial \texttt{robot\_\allowbreak id = ""},
+usado para o robô \textit{default} em execuções de um único MUUT sem
+\textit{namespace}.
+
+\begin{table}[H]
+\centering
+\caption{Síntese dos serviços de \texttt{fleet\_\allowbreak msgs} por nó provedor.}
+\label{tab:fleet_msgs_sintese}
+\begin{tabular}{lll}
+\toprule
+Serviço & Nó provedor & Requer \texttt{robot\_\allowbreak id} \\
+\midrule
+start\_record & fleet\_orchestrator & sim \\
+stop\_record & fleet\_orchestrator & sim \\
+play\_route & fleet\_orchestrator & sim \\
+go\_to\_point & fleet\_orchestrator & sim \\
+cancel & fleet\_orchestrator & sim \\
+list\_robots & fleet\_orchestrator & não \\
+list\_routes & fleet\_orchestrator & sim \\
+enable\_collection & fleet\_data\_collector & sim \\
+disable\_collection & fleet\_data\_collector & sim \\
+collection\_status & fleet\_data\_collector & sim \\
+\bottomrule
+\end{tabular}
+\end{table}

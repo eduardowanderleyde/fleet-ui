@@ -1,0 +1,223 @@
+\chapter{Metodologia Experimental}
+\label{chap:metodologia}
+
+\section{O Protocolo Record--Replay}
+\label{sec:record_replay}
+
+O protocolo experimental é composto por três fases sequenciais que garantem
+comparabilidade entre execuções: gravação do baseline, execuções de replay e
+análise offline.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{protocolo_record_replay.pdf}
+\caption{Fluxo do protocolo record--replay: cada fase produz um artefato
+explícito (rota YAML ou bag MCAP) consumido pela fase seguinte, permitindo
+reexecução e auditoria independentes de cada etapa.}
+\label{fig:protocolo_record_replay}
+\end{figure}
+
+
+\subsection{Fase 1 — Gravação do Baseline}
+
+A gravação do baseline define a rota de referência. O pesquisador especifica um
+conjunto de waypoints $\{w_1, w_2, \ldots, w_k\}$ no referencial do mapa SLAM.
+O sistema ativa a coleta de sensores, aciona o \texttt{start\_\allowbreak record} no orquestrador
+e comanda o robô via \texttt{NavigateToPose} sequencial para cada waypoint. Ao atingir
+cada ponto, a pose real do robô é registrada no arquivo de rota YAML ---
+não a pose solicitada, mas a pose efetivamente atingida conforme estimada pela
+cadeia TF \texttt{map} $\to$ \texttt{base\_\allowbreak link}. Ao final, \texttt{stop\_\allowbreak record}
+persiste o arquivo e \texttt{disable\_\allowbreak collection} fecha o bag.
+
+A distinção entre waypoints solicitados e poses atingidas é essencial: o Nav2 para
+quando a pose está dentro da tolerância configurada (tipicamente 25\,cm em posição
+e 25\,cm em ângulo), não necessariamente no ponto exato. Gravar a pose atingida,
+e não a solicitada, garante que o replay reproduza o que o robô \textit{fez},
+não o que foi \textit{pedido} --- uma distinção relevante quando a análise de
+repetibilidade compara execuções entre si.
+
+\subsection{Fase 2 — Execuções de Replay}
+
+As execuções de replay reproduzem a rota gravada. O orquestrador lê o arquivo
+YAML do baseline e envia todas as poses como lista para o action
+\texttt{FollowWaypoints}, que o Nav2 percorre de forma contínua. A diferença de
+action em relação ao baseline (\texttt{NavigateToPose} sequencial vs.
+\texttt{FollowWaypoints}) foi identificada como uma fonte de variação sistemática:
+o segundo não para completamente em cada waypoint antes de planejar para o próximo,
+produzindo trajetórias ligeiramente mais suaves e de menor duração. Para análises
+de repetibilidade pura entre replays, essa diferença é irrelevante; para comparação
+replay vs. baseline, deve ser documentada.
+
+Antes de cada replay, o robô retorna ao ponto de partida via \texttt{go\_\allowbreak to\_\allowbreak point}
+(opcional, configurável). Esse retorno é necessário quando o experimento exige que
+o robô parta da mesma pose inicial em todas as execuções --- requisito fundamental
+para isolamento de variáveis.
+
+\subsection{Fase 3 — Análise Offline}
+
+A análise é realizada offline sobre os bags coletados. Para cada bag, o script
+\texttt{analyze\_\allowbreak runs.py} extrai a trajetória via odometria a 50\,Hz, filtra
+saltos impossíveis (variações acima de 0,12\,m entre amostras a 50\,Hz),
+e interpola todas as trajetórias para uma grade de tempo normalizada $\{t_1, t_2, \ldots, t_n\}$.
+O RMSE pairwise é calculado conforme a Equação~\ref{eq:rmse_pairwise}.
+
+Adicionalmente, o script gera: (i) CSV com as trajetórias interpoladas para
+visualização externa; (ii) PNG de overlay das trajetórias com codificação visual
+por execução; (iii) JSON de sumário com todas as métricas calculadas por par de
+execuções.
+
+\section{Métricas Adotadas}
+\label{sec:metricas}
+
+Quatro métricas quantificam a repetibilidade de navegação neste trabalho:
+
+\begin{enumerate}
+    \item \textbf{RMSE inter-replay}: RMSE pairwise entre as execuções de replay,
+    excluindo o baseline. Mede a repetibilidade \textit{pura} do sistema de
+    navegação quando operado nas mesmas condições.
+
+    \item \textbf{RMSE replay vs. baseline}: RMSE entre cada replay e o baseline.
+    Captura tanto a variabilidade de navegação quanto o eventual gap de estratégia
+    entre os actions utilizados.
+
+    \item \textbf{Erro de endpoint}: distância euclidiana entre as posições finais
+    de dois percursos. Mede se o robô termina no mesmo lugar, independente do
+    caminho percorrido.
+
+    \item \textbf{Consistência temporal}: desvio padrão das durações entre execuções
+    equivalentes. Um desvio pequeno indica que o controlador opera a velocidades
+    estáveis e não encontra obstáculos que forcem replanejamentos.
+\end{enumerate}
+
+\subsection{Intervalo de Confiança para $N \geq 5$}
+\label{sec:ic_estatistico}
+
+Para cenários com cinco ou mais réplicas, o RMSE inter-replay é reportado como
+média $\pm$ intervalo de confiança de 95\%, calculado via distribuição $t$ de
+Student:
+
+\begin{equation}
+\text{IC}_{95\%} = \overline{\text{RMSE}} \pm t_{0{,}025,\, N-1} \cdot \frac{s}{\sqrt{N}}
+\label{eq:ic_95}
+\end{equation}
+
+\noindent onde $\overline{\text{RMSE}}$ é a média das distâncias RMSE pairwise entre
+replays, $s$ o desvio padrão amostral e $t_{0{,}025,\,N-1}$ o quantil da
+distribuição $t$ de Student com $N-1$ graus de liberdade. A distribuição $t$,
+em vez da normal, é usada por ser mais apropriada para amostras pequenas
+($N < 30$), onde a variância populacional é desconhecida e estimada a partir
+da própria amostra. Na campanha final desta dissertação, $N=10$ replays
+fornecem uma estimativa descritiva mais estável da variabilidade observada; o
+intervalo de confiança, contudo, deve ser interpretado no escopo estreito da
+rota e do ambiente avaliados, não como generalização para outras configurações.
+
+\section{Design dos Experimentos de Validação}
+\label{sec:design_experimentos}
+
+Um cenário controlado foi definido para validar o framework em simulação:
+
+\textbf{Campanha dissertation\_clean01}: rota curta, aproximadamente retilínea,
+executada no mundo \textit{warehouse} com TurtleBot4 Standard. A rota foi
+escolhida para isolar a capacidade do framework de registrar, reproduzir e medir
+uma trajetória sob condições rigorosamente controladas, antes de estender o
+protocolo para percursos mais longos, curvas acentuadas ou obstáculos dinâmicos.
+
+O protocolo executa uma baseline limpa e dez replays independentes. Diferentemente
+das campanhas exploratórias iniciais, cada replay da campanha final é iniciado
+após relançamento completo da simulação, da pilha Nav2 e dos nós de coleta. Essa
+decisão metodológica garante que a pose inicial medida em \texttt{/\allowbreak odom}
+seja praticamente a mesma em todas as execuções, evitando que o RMSE misture erro
+de repetição da trajetória com diferença de condição inicial.
+
+
+\section{Ambiente Experimental}
+\label{sec:ambiente_hw}
+
+A Tabela~\ref{tab:ambiente_hw} descreve o ambiente de hardware e software
+utilizado em todas as execuções reportadas neste trabalho. A escolha de manter
+todos os experimentos em um único ambiente controlado --- em vez de distribuí-los
+entre máquinas com configurações distintas --- é deliberada: o objetivo desta
+dissertação é isolar a variabilidade intrínseca ao pipeline de navegação
+(SLAM, controlador, executor ROS~2), e não introduzir uma segunda fonte de
+variação decorrente de diferenças de hardware entre execuções.
+
+\begin{table}[H]
+\centering
+\caption{Ambiente experimental utilizado nas validações reportadas nesta dissertação.}
+\label{tab:ambiente_hw}
+\begin{tabular}{ll}
+\toprule
+\textbf{Componente} & \textbf{Especificação} \\
+\midrule
+Sistema operacional & Ubuntu 24.04 LTS \\
+Middleware ROS & ROS~2 Jazzy Jalisco (instalação \textit{desktop}) \\
+Simulador & Gazebo Harmonic \\
+Pacote de simulação & \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} \\
+Modelo de robô & TurtleBot4 Standard \\
+Sensor LiDAR & RPLIDAR S2 (2D, 360°) \\
+Sensor de imagem & Câmera OAK-D \\
+Mundo de simulação & \textit{warehouse} (\texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim}) \\
+Pilha de navegação & Navigation2 (Nav2), controlador MPPI \\
+SLAM & SLAM Toolbox, modo síncrono \\
+Formato de gravação & rosbag2 / MCAP \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Fluxo de Execução do Protocolo}
+\label{sec:fluxo_protocolo}
+
+Na prática operacional, o protocolo descrito na Seção~\ref{sec:record_replay}
+é executado como uma sequência ordenada de comandos, seja diretamente pela
+linha de comando (via \texttt{experiment\_\allowbreak repeatability.py}), seja pela
+interface web, que internamente dispara os mesmos comandos como um subprocesso
+gerenciado pelo backend (Seção~\ref{sec:impl_backend_ponte}). O fluxo completo,
+do ambiente limpo ao relatório de repetibilidade, compreende:
+
+\begin{enumerate}
+    \item \textbf{Inicialização da simulação}: subida do Gazebo, SLAM Toolbox
+    (após um atraso de 8\,s para permitir que o \textit{bridge} de tópicos
+    estabilize) e Nav2 (após 12\,s), aguardando a mensagem de log
+    \texttt{All BT navigator servers are active} antes de prosseguir --- uma
+    barreira de sincronização que evita o início prematuro de comandos de
+    navegação contra um Nav2 ainda não pronto.
+
+    \item \textbf{Inicialização dos nós de frota}: subida do
+    \texttt{fleet\_\allowbreak orchestrator} e do \texttt{sensor\_\allowbreak collector}, aguardando as
+    mensagens de prontidão \texttt{fleet\_\allowbreak orchestrator ready} e
+    \texttt{sensor\_\allowbreak collector ready}.
+
+    \item \textbf{Gravação do baseline}: definição de waypoints (via clique no
+    mapa SLAM ao vivo, na interface web, ou via lista de coordenadas, na CLI) e
+    execução do subcomando \texttt{record}, que invoca sequencialmente
+    \texttt{start\_\allowbreak record}, uma série de \texttt{go\_\allowbreak to\_\allowbreak point} e
+    \texttt{stop\_\allowbreak record} (Seção~\ref{sec:impl_servicos_exemplo}).
+
+    \item \textbf{Execuções de replay}: repetição do subcomando \texttt{replay}
+    $N$ vezes, cada uma invocando \texttt{play\_\allowbreak route} sobre a rota gravada no
+    passo anterior, com retorno opcional ao ponto de partida
+    (\texttt{--return-to-start}) entre execuções.
+
+    \item \textbf{Exportação e análise offline}: ao final de cada execução, o
+    \texttt{experiment\_\allowbreak repeatability.py} exporta um JSON de resumo por execução
+    (via \texttt{--export}); posteriormente, \texttt{analyze\_\allowbreak runs.py} processa
+    o conjunto de bags MCAP e produz o \texttt{summary.json} consolidado com as
+    métricas de RMSE pairwise, o \texttt{trajectory\_\allowbreak overlay.png} e os CSVs por
+    execução (Seção~\ref{sec:impl_pipeline}).
+\end{enumerate}
+
+Esse fluxo é o mesmo, independentemente de o pesquisador operar via terminal ou
+via interface web: a Seção~\ref{sec:impl_backend_ponte} descreve como o backend
+traduz a interação da UI para exatamente essa sequência de subcomandos, o que
+garante que resultados obtidos por qualquer uma das duas vias sejam diretamente
+comparáveis.
+
+\section{Considerações Finais}
+\label{sec:met_conclusao}
+
+O protocolo record--replay formaliza o que muitos experimentos de robótica fazem
+informalmente, adicionando precisão nos pontos críticos: a gravação da pose atingida
+(não solicitada), o filtro de saltos impossíveis na odometria, a interpolação para
+grade de tempo comum antes do cálculo de RMSE e o retorno explícito ao ponto de
+partida entre execuções. O próximo capítulo descreve como esses procedimentos foram
+implementados no código do framework.

@@ -1,0 +1,43 @@
+\chapter*{ABSTRACT}
+\addcontentsline{toc}{chapter}{ABSTRACT}
+
+Reproducibility is a cornerstone of experimental science, yet mobile robotics research
+has long struggled to establish it in practice. Setting up a navigation experiment,
+recording sensor data across multiple runs, and comparing the resulting trajectories
+quantitatively demands a level of infrastructure that most robotics labs build informally,
+once per project, with no reuse in mind. This dissertation presents a framework that
+makes those steps explicit, automated, and transferable.
+
+The proposed system — called \textit{Fleet UI} — orchestrates autonomous navigation
+experiments with one or more mobile robots running ROS~2 Jazzy and the Nav2 navigation
+stack. A role-based architecture separates units into \textit{MUUT} (Mobile Unit Under
+Test), which executes and records routes, and \textit{FUUT} (Fixed Unit Under Test),
+which observes from a fixed position. This separation allows the same physical testbed
+to serve fundamentally different experimental designs without changing the software layer.
+
+The record--replay protocol forms the experimental nucleus: a baseline route is defined
+by navigating a set of waypoints; the orchestrator stores the visited poses; subsequent
+replay runs reproduce those poses using Nav2's \texttt{FollowWaypoints} action.
+Sensor bags in MCAP format capture LiDAR, wheel odometry, IMU, and SLAM-estimated pose
+at each run. Offline analysis computes pairwise Root Mean Square Error (RMSE) between
+trajectories resampled on a normalized time grid, producing trajectory overlays and
+repeatability metrics.
+
+Quantitative validation, carried out in Gazebo Harmonic simulation with a single
+TurtleBot4 Standard unit, used a clean baseline and ten independent replay executions.
+Each replay was started from the same initial state by fully relaunching the simulator,
+the Nav2 stack, and the data collection nodes, ensuring that recorded odometry started
+at practically the same point in every run. The campaign achieved a mean RMSE of
+3.35\,cm between each replay and the reference run, with a maximum of 4.76\,cm, over
+trajectories with a mean length of 0.826\,m. The mean final endpoint error was
+1.64\,cm (maximum 3.26\,cm), and the mean duration was 17.51\,s with a standard
+deviation of 0.36\,s. These results are comfortably below Nav2's default 25\,cm goal
+tolerance; the architecture supports multiple units, but empirical evaluation of
+simultaneous multi-robot fleet scenarios was not conducted in this dissertation. A web
+interface built on React and FastAPI allows researchers to define experiments, monitor
+sensor state, and visualise trajectories on the SLAM map without direct exposure to the
+ROS~2 command line.
+
+\vspace{0.5cm}
+\noindent\textbf{Keywords}: autonomous navigation; path repeatability; mobile robot fleet;
+ROS~2; Nav2; SLAM; sensor data collection; experimental framework.

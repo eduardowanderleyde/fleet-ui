@@ -1,0 +1,166 @@
+\chapter{Avaliação}
+\label{chap:avaliacao}
+
+\section{Arranjo Experimental}
+\label{sec:arranjo}
+
+A avaliação do framework foi conduzida em simulação Gazebo Harmonic com um robô
+TurtleBot4 Standard no mundo \textit{warehouse}. O ambiente de simulação garante
+condições perfeitamente repetíveis dentro do mesmo laboratório --- sem variação de iluminação, temperatura
+ou tráfego de outros agentes --- o que permite isolar a variabilidade introduzida
+pelos algoritmos de navegação e SLAM da variabilidade ambiental. Experimentos em
+hardware real, com sua camada adicional de incerteza, constituem trabalho futuro.
+
+A configuração da pilha de software é:
+
+\begin{itemize}
+    \item \textbf{Sistema operacional}: Ubuntu 24.04 LTS (Noble Numbat)
+    \item \textbf{ROS~2}: Jazzy Jalisco (LTS)
+    \item \textbf{Simulador}: Gazebo Harmonic 8.x
+    \item \textbf{Navegação}: Nav2 (pacotes \texttt{ros-jazzy-nav2-*})
+    \item \textbf{SLAM}: SLAM Toolbox (modo síncrono)
+    \item \textbf{Plataforma}: TurtleBot4 Standard (via \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim})
+\end{itemize}
+
+\section{Questões de Avaliação}
+\label{sec:questoes}
+
+Três questões orientam a avaliação:
+
+\begin{description}
+    \item[QA1] O framework consegue executar o protocolo record--replay de forma
+    automática e sem intervenção manual entre as fases?
+
+    \item[QA2] Qual é o RMSE inter-replay observado em uma campanha controlada
+    com dez execuções independentes iniciadas a partir do mesmo estado? Os
+    valores ficam abaixo da tolerância padrão do Nav2 (25\,cm)?
+
+    \item[QA3] A consistência temporal entre execuções equivalentes é suficiente
+    para justificar comparações de trajetória baseadas em reamostragem temporal
+    normalizada?
+
+    \item[QA4] A repetibilidade observada sob o protocolo controlado (QA2, QA3)
+    se mantém quando as execuções ocorrem fora desse regime controlado --- sem
+    a mesma ação de navegação, pose inicial fixa ou retorno explícito ao ponto
+    de partida entre réplicas? Esta questão foi adicionada durante a execução
+    do trabalho, motivada pela disponibilidade de três conjuntos de dados
+    exploratórios adicionais no repositório do projeto
+    (Seção~\ref{sec:res_exp_complementares}), e por isso é tratada como
+    evidência diagnóstica, não como conclusão causal principal.
+\end{description}
+
+QA1 corresponde à hipótese H1; QA2 e QA3, em conjunto, correspondem a H2; QA4
+corresponde a H3 (Seção~\ref{sec:perguntas_pesquisa}). Não há uma questão de
+avaliação dedicada a H4 (custo de engenharia): como discutido na
+Seção~\ref{sec:retomada_pp}, essa hipótese é avaliada apenas qualitativamente,
+não por um critério mensurável como QA1--QA4.
+
+\section{Procedimento}
+\label{sec:procedimento}
+
+Para a campanha final de avaliação, o procedimento é:
+
+\begin{enumerate}
+    \item Iniciar uma sessão limpa de simulação Gazebo Harmonic com TurtleBot4
+    Standard.
+    \item Aguardar ativação completa do Nav2, SLAM Toolbox, sensores e serviços
+    do orquestrador.
+    \item Gravar uma baseline limpa (\texttt{dissertation\_\allowbreak clean01}) por
+    navegação sequencial pelos waypoints definidos para a rota curta de validação.
+    \item Armazenar a rota resultante em YAML e o bag MCAP da baseline.
+    \item Executar dez replays independentes da rota gravada.
+    \item Antes de cada replay, relançar completamente a simulação, a pilha Nav2,
+    o orquestrador e o coletor de sensores, garantindo que a odometria inicie no
+    mesmo estado em todas as execuções.
+    \item Em cada replay, aguardar explicitamente o mapa do SLAM, a estabilização
+    do costmap e o estado \texttt{active} dos nós lifecycle do Nav2 antes de enviar
+    a rota.
+    \item Coletar \texttt{/\allowbreak scan}, \texttt{/\allowbreak odom}, \texttt{/\allowbreak imu} e
+    \texttt{/\allowbreak pose} em formato MCAP.
+    \item Executar \texttt{analyze\_\allowbreak runs.py} sobre os dez bags, usando
+    \texttt{/\allowbreak odom} como fonte da trajetória e reamostragem temporal
+    normalizada.
+\end{enumerate}
+
+\section{Critérios de Validação}
+\label{sec:criterios}
+
+O framework é considerado válido se:
+
+\begin{enumerate}
+    \item O protocolo completo (baseline, dez replays e análise) for executado
+    com orquestração automática das fases principais (\textbf{QA1}).
+
+    \item Todos os replays válidos começarem do mesmo estado inicial medido em
+    \texttt{/\allowbreak odom}.
+
+    \item O RMSE médio e máximo contra a execução de referência forem inferiores
+    a 25\,cm (\textbf{QA2}).
+
+    \item O erro final médio e máximo permanecerem inferiores a 25\,cm.
+
+    \item O desvio de duração entre execuções equivalentes for inferior a 10\%
+    da duração média (\textbf{QA3}).
+\end{enumerate}
+
+O limiar de 10\% acima é usado como critério mínimo de aceitação para QA3. Ele
+não significa que durações diferentes sejam desejáveis, apenas que variações
+abaixo desse patamar são pequenas o suficiente para sustentar a comparação por
+tempo normalizado no cenário controlado. A campanha final ficou abaixo desse
+limiar, como apresentado na Seção~\ref{sec:res_qa3}.
+
+\section{Ameaças à Validade}
+\label{sec:ameacas}
+
+Seguindo a prática de reportar ameaças à validade em pesquisa empírica de
+Engenharia de Software \cite{amigoni2010}, esta seção examina os limites da
+avaliação nas quatro dimensões clássicas.
+
+\textbf{Validade de construto.} O RMSE foi calculado a partir do tópico
+\texttt{/\allowbreak odom}, não de um sistema de captura de movimento externo. Tanto a
+odometria quanto a pose estimada pelo SLAM são gravadas nos bags, o que permite
+comparações cruzadas futuras com uma referência externa. Em simulação, a
+odometria é gerada pelo plugin DiffDrive do Gazebo e, portanto, é menos ruidosa
+que encoders físicos reais; em robôs físicos, slip de roda e condições do piso
+exigiriam uma referência externa ou comparação direta com a pose do SLAM.
+
+\textbf{Validade interna.} Campanhas preliminares sem reinicialização do estado
+entre replays produziram trajetórias cujos pontos iniciais coincidiam com os
+pontos finais da execução anterior, misturando erro de repetição com erro de
+inicialização. Por esse motivo, tais campanhas foram tratadas como diagnósticas,
+e não como resultado final. A campanha reportada nesta dissertação corrige essa
+ameaça ao relançar a simulação e os nós de navegação/coleta antes de cada replay,
+fazendo com que os dez bags analisados comecem praticamente no mesmo ponto em
+\texttt{/\allowbreak odom}. Ainda assim, fatores como variação interna do controlador
+local, estado do SLAM e estabilização do costmap continuam sendo possíveis fontes
+de variabilidade residual.
+
+\textbf{Validade externa.} A validação usa simulação com TurtleBot4 em um único
+ambiente (\textit{warehouse}). Hardware real introduziria slip de roda, ruído de
+sensores, erro de calibração e efeitos de superfície não modelados pelo Gazebo.
+Ainda assim, a arquitetura foi projetada para minimizar dependências
+específicas de plataforma: o orquestrador depende de actions, tópicos e
+transforms padrão do ROS~2/Nav2 --- não de interfaces proprietárias do
+TurtleBot4 --- o que favorece, em princípio, a generalização para outras
+plataformas com a mesma pilha de navegação. Essa generalização não foi
+testada empiricamente nesta dissertação com nenhuma outra plataforma.
+
+\textbf{Validade de conclusão.} A campanha final controlada utiliza $N=10$
+replays, o que melhora substancialmente a estimativa de variabilidade em relação
+às execuções exploratórias iniciais. Ainda assim, os resultados permanecem
+restritos a um único cenário, uma única rota curta, um único robô simulado e uma
+única configuração de Nav2. Portanto, embora a campanha seja suficiente para
+demonstrar a capacidade do framework de automatizar e medir repetibilidade sob
+condições controladas, ela não deve ser interpretada como caracterização
+estatística geral do comportamento do TurtleBot4, do Nav2 ou do SLAM Toolbox em
+qualquer ambiente.
+
+\section{Considerações Finais}
+\label{sec:aval_conclusao}
+
+O arranjo de avaliação foi concebido para responder às questões de forma direta e
+verificável. A escolha por simulação sacrifica o realismo físico em favor do controle
+experimental --- uma troca razoável para uma primeira validação de framework,
+onde o objetivo é demonstrar que o sistema funciona como projetado, não que o
+hardware físico se comporta de determinada forma. Os resultados são apresentados
+no capítulo seguinte.

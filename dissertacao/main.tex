@@ -1,0 +1,176 @@
+%% Dissertação de Mestrado — UFPE / CIn
+%% Programa de Pós-Graduação em Ciência da Computação
+%% Padrão baseado no modelo oficial (versão 07.10.2020 v1.3)
+
+\documentclass[12pt, a4paper, oneside]{report}
+
+%% Pacotes básicos
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage[expansion=false]{microtype} % expansion disabled to cut Overleaf free-tier compile time
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{{figuras/}}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{pycode}{
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!60!black}\bfseries,
+  commentstyle=\color{gray},
+  stringstyle=\color{orange!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=6pt,
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  language=Python,
+  tabsize=2,
+  captionpos=b
+}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage{hyperref}
+\usepackage[alf]{abntex2/abntex2cite}
+\providecommand{\abntnextkey}{}
+\usepackage{fancyhdr}
+\usepackage{emptypage}
+\usepackage{epigraph}
+\setlength{\epigraphwidth}{0.62\textwidth}
+\renewcommand{\epigraphflush}{flushright}
+\renewcommand{\epigraphrule}{0pt}
+
+%% Margens ABNT
+\geometry{
+  top=3cm, bottom=2cm,
+  left=3cm, right=2cm
+}
+
+%% Espaçamento 1.5
+\onehalfspacing
+
+%% Numeração de página no topo direito
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+%% Formatação de capítulos: negrito, caixa alta
+\usepackage{titlesec}
+\titleformat{\chapter}[block]
+  {\normalfont\bfseries\large}
+  {\thechapter}
+  {1em}
+  {\MakeUppercase}
+
+\titleformat{\section}[block]
+  {\normalfont\normalsize}
+  {\thesection}
+  {1em}
+  {\MakeUppercase}
+
+\titleformat{\subsection}[block]
+  {\normalfont\normalsize\bfseries}
+  {\thesubsection}
+  {1em}
+  {}
+
+%% Profundidade do sumário
+\setcounter{tocdepth}{2}
+
+%% Hiperlinks discretos
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=black
+}
+
+%% ──────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+%% Elementos pré-textuais
+\pagenumbering{roman}
+\pagestyle{empty}
+
+\input{frontmatter/capa}
+\input{frontmatter/folha_rosto}
+
+\cleardoublepage
+\centerline{\textbf{FICHA CATALOGRÁFICA}}
+\vspace{2cm}
+\noindent [A ser preenchida pela Biblioteca Central — após aprovação]
+
+\cleardoublepage
+\centerline{\textbf{FOLHA DE APROVAÇÃO}}
+\vspace{2cm}
+\noindent [A ser inserida pela Secretaria do Programa de Pós-Graduação]
+
+\cleardoublepage
+\input{frontmatter/dedicatoria}
+
+\cleardoublepage
+\input{frontmatter/agradecimentos}
+
+\cleardoublepage
+\input{frontmatter/epigrafe}
+
+\cleardoublepage
+\input{frontmatter/abstract}
+
+\cleardoublepage
+\input{frontmatter/resumo}
+
+\cleardoublepage
+\listoffigures
+\addcontentsline{toc}{chapter}{LISTA DE FIGURAS}
+
+\cleardoublepage
+\listoftables
+\addcontentsline{toc}{chapter}{LISTA DE TABELAS}
+
+\cleardoublepage
+\tableofcontents
+
+%% Elementos textuais
+\cleardoublepage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+\input{chapters/01_introducao}
+\input{chapters/02_fundamentacao}
+\input{chapters/03_trabalhos_relacionados}
+\input{chapters/04_arquitetura}
+\input{chapters/05_metodologia}
+\input{chapters/06_implementacao}
+\input{chapters/07_avaliacao}
+\input{chapters/08_resultados}
+\input{chapters/09_conclusao}
+
+%% Glossário
+\cleardoublepage
+\input{chapters/10_glossario}
+
+%% Referências
+\cleardoublepage
+\bibliographystyle{abntex2/abntex2-alf}
+\bibliography{referencias}
+
+%% Apêndices
+\cleardoublepage
+\appendix
+\input{chapters/11_apendiceA}
+
+\cleardoublepage
+\input{chapters/12_apendiceB}
+
+\end{document}

@@ -1,0 +1,44 @@
+\chapter*{RESUMO}
+\addcontentsline{toc}{chapter}{RESUMO}
+
+A reprodutibilidade é um pilar do método científico, mas a pesquisa em robótica móvel
+raramente a alcança de forma sistemática. Configurar um experimento de navegação,
+registrar dados sensoriais ao longo de múltiplas execuções e comparar as trajetórias
+resultantes com rigor quantitativo exige uma infraestrutura que a maioria dos laboratórios
+constrói de forma improvisada, específica para cada projeto, sem possibilidade de reuso.
+Esta dissertação apresenta um framework que torna essas etapas explícitas, automatizadas
+e transferíveis.
+
+O sistema proposto --- denominado \textit{Fleet UI} --- orquestra experimentos de navegação
+autônoma com um ou mais robôs móveis operando sob ROS~2 Jazzy e a pilha de navegação Nav2.
+Uma arquitetura baseada em papéis separa as unidades em \textit{MUUT} (Mobile Unit Under
+Test), responsável pela execução e gravação das rotas, e \textit{FUUT} (Fixed Unit Under
+Test), que observa o cenário de uma posição fixa. Essa separação permite que o mesmo
+testbed físico sirva a diferentes desenhos experimentais sem modificação da camada de software.
+
+O protocolo de gravação--reprodução constitui o núcleo experimental: uma rota é definida
+por navegação sequencial de waypoints; o orquestrador armazena as poses atingidas; as
+execuções subsequentes de replay reproduzem essas poses via a ação \texttt{FollowWaypoints}
+do Nav2. Bags de sensores no formato MCAP capturam LiDAR, odometria de roda, IMU e
+pose estimada pelo SLAM em cada execução. A análise \textit{offline} calcula o
+\textit{Root Mean Square Error} (RMSE) entre trajetórias reamostradas em tempo
+normalizado, gerando sobreposições visuais e métricas de repetibilidade.
+
+A validação quantitativa, realizada em simulação Gazebo Harmonic com uma única
+unidade TurtleBot4 Standard, utilizou uma baseline limpa e dez execuções independentes
+de replay. Cada replay foi iniciado a partir do mesmo estado por relançamento completo
+da simulação, da pilha Nav2 e dos nós de coleta, garantindo que a odometria registrada
+começasse praticamente no mesmo ponto em todas as execuções. A campanha obteve RMSE
+médio de 3,35\,cm entre cada replay e a execução de referência, com máximo de
+4,76\,cm, em trajetórias com comprimento médio de 0,826\,m. O erro final médio foi de
+1,64\,cm (máximo de 3,26\,cm), e a duração média foi de 17,51\,s com desvio-padrão de
+0,36\,s. Esses resultados ficam confortavelmente abaixo da tolerância padrão do Nav2 de
+25\,cm; a arquitetura suporta múltiplas unidades, mas a avaliação empírica de cenários
+com frota simultânea não foi conduzida nesta dissertação. Uma interface web em React e
+FastAPI permite que pesquisadores definam experimentos, monitorem o estado dos sensores
+e visualizem trajetórias sobre o mapa SLAM sem exposição direta à linha de comando do
+ROS~2.
+
+\vspace{0.5cm}
+\noindent\textbf{Palavras-chave}: navegação autônoma; repetibilidade de trajetórias;
+frota de robôs móveis; ROS~2; Nav2; SLAM; coleta de dados sensoriais; framework experimental.

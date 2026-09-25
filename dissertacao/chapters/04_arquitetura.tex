@@ -1,0 +1,191 @@
+\chapter{Arquitetura do Framework}
+\label{chap:arquitetura}
+
+O framework proposto, denominado \textit{Fleet UI}, é organizado em cinco camadas
+que separando responsabilidades claras: a camada de simulação, o orquestrador de
+frota, o coletor de dados, o backend REST e a interface web. A Figura~\ref{fig:arquitetura}
+ilustra essa estrutura.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, minimum width=3.6cm, minimum height=1.2cm, align=center, font=\small, inner sep=6pt},
+  simbox/.style={box, fill=orange!15},
+  modbox/.style={box, fill=gray!12},
+  msgbox/.style={box, fill=blue!8, dashed, minimum width=3.0cm, minimum height=1.0cm, font=\scriptsize, inner sep=4pt},
+  arr/.style={-{Latex[length=2.5mm]}, thick},
+  lbl/.style={font=\scriptsize, align=center, fill=white, inner sep=2pt}
+]
+
+\node[simbox] (sim) {Gazebo Harmonic\\Nav2 \& SLAM Toolbox};
+
+\node[msgbox, below=3.6cm of sim] (msgs) {\texttt{fleet\_msgs}\\N services / M msgs};
+\node[modbox, left=1.4cm of msgs] (orch) {\texttt{fleet\_orchestrator}\\\scriptsize record/replay, papéis};
+\node[modbox, right=1.4cm of msgs] (coll) {\texttt{sensor\_data\_collector}\\\scriptsize bags MCAP por robô};
+
+\begin{scope}[on background layer]
+\node[draw, dashed, rounded corners, fit=(orch)(msgs)(coll), inner sep=0.4cm] (orchlayer) {};
+\end{scope}
+\node[font=\small, above=0.25cm of orchlayer.north] (orchlbl) {Camada de orquestração e coleta};
+
+\node[modbox, below=2.2cm of msgs] (backend) {Backend FastAPI\\\scriptsize bridge REST, sem ROSBridge};
+\node[modbox, below=1.8cm of backend] (frontend) {Frontend React\\\scriptsize mapa SLAM, waypoints};
+
+\draw[arr] (sim.south) -- (orchlayer.north)
+  node[lbl, pos=0.22, right=0.25cm] {tópicos ROS~2};
+\draw[arr] (orchlayer.south) -- (backend.north)
+  node[lbl, pos=0.5, right=0.3cm] {REST};
+\draw[arr] (backend.south) -- (frontend.north)
+  node[lbl, pos=0.5, right=0.3cm] {HTTP + WebSocket};
+
+\end{tikzpicture}%
+}
+\caption{Arquitetura em camadas do Fleet UI. Módulos do framework em cinza,
+interface de mensagens ROS~2 (\texttt{fleet\_\allowbreak msgs}) em azul tracejado, e stack
+externa de simulação/navegação em laranja.}
+\label{fig:arquitetura}
+\end{figure}
+
+\section{Papéis Experimentais: MUUT e FUUT}
+\label{sec:papeis}
+
+A decisão de design mais importante do framework é a formalização de papéis
+experimentais. Cada robô na frota é classificado em um de três papéis:
+
+\begin{itemize}
+    \item \textbf{MUUT} (\textit{Mobile Unit Under Test/Tasking}): a unidade que
+    executa o percurso experimental. Pode gravar rotas, reproduzi-las e ter dados
+    sensoriais coletados. Há uma ou mais unidades MUUT por experimento.
+
+    \item \textbf{FUUT} (\textit{Fixed Unit Under Test/Tasking}): uma unidade em
+    posição fixa que observa o ambiente durante a passagem do MUUT. Pode coletar
+    dados sensoriais de perspectiva externa, mas não recebe comandos de navegação.
+
+    \item \textbf{SU} (\textit{Support Unit}): infraestrutura de rede e monitoramento,
+    sem participação direta na navegação ou coleta.
+\end{itemize}
+
+Essa distinção tem consequências diretas na implementação: o orquestrador verifica
+o papel de cada robô antes de processar qualquer requisição de movimento, rejeitando
+comandos de navegação para FUUTs. Isso evita que erros de configuração comprometam
+o design experimental --- um robô fixo que inadvertidamente recebe um comando de
+navegação poderia invalidar todo um conjunto de execuções.
+
+\section{O Orquestrador de Frota}
+\label{sec:orquestrador}
+
+O orquestrador é um nó ROS~2 que expõe sete serviços de alto nível:
+\texttt{start\_\allowbreak record}, \texttt{stop\_\allowbreak record}, \texttt{play\_\allowbreak route},
+\texttt{go\_\allowbreak to\_\allowbreak point}, \texttt{cancel}, \texttt{list\_\allowbreak robots} e
+\texttt{list\_\allowbreak routes}. Cada serviço abstrai uma sequência de operações ROS~2
+que seria custosa de implementar manualmente: \texttt{start\_\allowbreak record}, por exemplo,
+limpa o buffer de poses, ativa o estado de gravação e registra o timestamp de início
+--- tudo de forma atômica, sem expor esses detalhes ao chamador.
+
+A gestão de múltiplos robôs em modo paralelo requereu uma solução não trivial para
+o TF: o SLAM de cada robô publica sua cadeia de transformações em um tópico
+namespaceado (\texttt{/\allowbreak tb1/\allowbreak tf}, \texttt{/\allowbreak tb2/\allowbreak tf}), não no \texttt{/\allowbreak tf} global.
+O orquestrador mantém um \texttt{tf2\_\allowbreak ros.Buffer} dedicado por robô, subscrito ao
+tópico correto, o que permite lookups simultâneos e independentes da cadeia
+\texttt{map} $\to$ \texttt{base\_\allowbreak link} de cada unidade sem interferência cruzada.
+
+A execução do orquestrador em um \texttt{MultiThreadedExecutor} é fundamental para
+evitar deadlocks: os callbacks de serviço que invocam \texttt{wait\_\allowbreak for\_\allowbreak server}
+do action client Nav2 precisam ocorrer em threads separadas das que processam
+as respostas de discovery do DDS. A versão inicial com executor single-thread
+manifestava timeouts intermitentes em chamadas de \texttt{go\_\allowbreak to\_\allowbreak point}
+exatamente por esse motivo.
+
+
+A Tabela~\ref{tab:nav_state_transicoes} formaliza as transições do campo
+\texttt{nav\_\allowbreak state} de \texttt{RobotRuntime} (Apêndice~\ref{ap:fleet_msgs}, mensagem
+\texttt{RobotState}), derivadas diretamente dos \textit{callbacks} de serviço e de
+resultado de \textit{action} descritos na Seção~\ref{sec:impl_orquestrador}. O
+detalhe mais sutil dessa máquina de estados --- e a razão pela qual a gravação
+de rota funciona corretamente mesmo quando o robô precisa navegar até cada
+\textit{waypoint} durante o \texttt{record} --- é que o estado \texttt{navigating}
+é sempre transitório: ao final de qualquer navegação, o orquestrador retorna a
+\texttt{recording} em vez de \texttt{idle} sempre que \texttt{is\_\allowbreak recording} ainda
+for verdadeiro, preservando a informação de que uma gravação está em curso mesmo
+enquanto o robô se desloca entre pontos.
+
+\begin{table}[H]
+\centering
+\caption{Transições de \texttt{nav\_\allowbreak state} no orquestrador de frota.}
+\label{tab:nav_state_transicoes}
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+\textbf{Estado de origem} & \textbf{Evento} & \textbf{Estado de destino} \\
+\midrule
+\texttt{idle} & \texttt{start\_\allowbreak record} aceito & \texttt{recording} \\
+\texttt{idle} / \texttt{recording} & \texttt{go\_\allowbreak to\_\allowbreak point}/\texttt{play\_\allowbreak route} aceito & \texttt{navigating} \\
+\texttt{navigating} & meta Nav2 \texttt{SUCCEEDED}, \texttt{is\_\allowbreak recording=False} & \texttt{idle} \\
+\texttt{navigating} & meta Nav2 \texttt{SUCCEEDED}, \texttt{is\_\allowbreak recording=True} & \texttt{recording} \\
+\texttt{navigating} & meta Nav2 rejeitada/abortada, \texttt{is\_\allowbreak recording=False} & \texttt{failed} \\
+\texttt{navigating} & meta Nav2 rejeitada/abortada, \texttt{is\_\allowbreak recording=True} & \texttt{recording} \\
+\texttt{recording} & \texttt{stop\_\allowbreak record} & \texttt{idle} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Note-se que uma falha de navegação durante uma gravação em curso não interrompe
+a gravação --- o robô retorna a \texttt{recording} e o próximo comando do
+\textit{script} de experimento pode prosseguir ou abortar de acordo com sua
+própria lógica de contagem de falhas (\texttt{fails}, Apêndice~\ref{ap:cli_reference}).
+Essa escolha de design isola a responsabilidade de decidir se uma falha de
+navegação invalida o experimento inteiro na camada de orquestração de mais alto
+nível (o \textit{script} ou a UI), não no orquestrador ROS~2 em si, que apenas
+reporta o estado fielmente.
+
+\section{O Coletor de Dados}
+\label{sec:coletor}
+
+O coletor de dados é um nó separado que gerencia a gravação de bags por robô.
+A separação em relação ao orquestrador é uma escolha arquitetural deliberada:
+coleta e navegação são responsabilidades distintas e podem falhar independentemente.
+Serviços de \texttt{enable\_\allowbreak collection} e \texttt{disable\_\allowbreak collection} permitem
+controlar o início e fim da gravação com granularidade por robô, retornando o
+caminho do arquivo bag gerado na resposta --- o que elimina a necessidade de
+inferência posterior sobre qual arquivo corresponde a qual execução.
+
+A camada de QoS do coletor é a sua parte mais delicada. Tópicos de sensores
+em simulação Gazebo usam \texttt{BEST\_\allowbreak EFFORT}, enquanto o SLAM Toolbox usa
+\texttt{RELIABLE + VOLATILE} e o AMCL usa \texttt{RELIABLE + TRANSIENT\_\allowbreak LOCAL}.
+Assinar um tópico \texttt{RELIABLE} com um subscriber \texttt{BEST\_\allowbreak EFFORT}
+resulta em incompatibilidade silenciosa de QoS --- o subscriber nunca recebe
+mensagens, mas nenhum erro é reportado. A implementação cria perfis de QoS
+distintos por categoria de tópico, eliminando essa fonte de dados ausentes.
+
+\section{O Backend REST e a Interface Web}
+\label{sec:backend_web}
+
+O backend FastAPI expõe os serviços ROS~2 como endpoints HTTP, permitindo que a
+interface web opere sem exposição direta ao DDS. A decisão de não usar ROSBridge
+foi motivada pela simplicidade: um backend FastAPI com chamadas subprocess ao
+\texttt{ros2 service call} elimina a dependência de um servidor de WebSocket e
+reduz a superfície de configuração para novos usuários.
+
+O backend também mantém um subscriber ROS~2 nativo para os tópicos de status
+(\texttt{/\allowbreak fleet/\allowbreak status}), mapa (\texttt{/\allowbreak map}) e pose (\texttt{/\allowbreak tf}), que são
+servidos diretamente via REST a 300\,ms de intervalo de polling. O mapa
+\texttt{OccupancyGrid} é convertido para PNG RGBA em memória --- células livres
+em creme, ocupadas em azul-escuro, desconhecidas em azul-cinza --- e retornado
+como base64 ao frontend, que o renderiza em um canvas HTML5.
+
+A interface web permite que pesquisadores definam waypoints clicando no mapa SLAM
+ao vivo, selecionem percursos predefinidos para testes padronizados, iniciem
+execuções de record ou replay, monitorem o estado dos sensores em tempo real e
+visualizem o overlay de trajetórias após cada execução, tudo sem necessidade
+de terminal.
+
+\section{Considerações Finais}
+\label{sec:arq_conclusao}
+
+A arquitetura do Fleet UI resulta de uma série de decisões motivadas por problemas
+concretos encontrados durante o desenvolvimento: o executor multithreaded para evitar
+deadlocks de action client, os buffers TF por robô para suporte multi-robô, os perfis
+de QoS diferenciados para garantir integridade dos bags, e a separação entre
+orquestrador e coletor para permitir falhas independentes. O próximo capítulo descreve
+como essa arquitetura é usada no protocolo experimental de repetibilidade.

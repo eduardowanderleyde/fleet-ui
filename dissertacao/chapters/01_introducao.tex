@@ -1,0 +1,319 @@
+\chapter{Introdução}
+\label{chap:introducao}
+
+\epigraph{\itshape ``A ciência avança um funeral de cada vez --- não porque os cientistas
+mudam de ideia, mas porque as práticas experimentais que permitiam verificar isso
+finalmente chegam ao alcance de todos.''}{\normalfont --- adaptado de Max Planck}
+
+\section{Contexto e Motivação}
+\label{sec:motivacao}
+
+A robótica autônoma atravessa um momento singular em sua história. A convergência de
+plataformas de software maduras --- especialmente o ROS~2 \cite{macenski2022ros2}
+--- com hardware acessível e simuladores de alta fidelidade tornou possível, pela
+primeira vez, que grupos de pesquisa sem grandes laboratórios físicos conduzam
+experimentos de navegação com rigor comparável ao de instituições bem equipadas.
+O que antes exigia uma sala climatizada, técnicos especializados e robôs industriais
+de alto custo hoje pode ser realizado com um TurtleBot4, um computador convencional
+e software inteiramente open-source.
+
+Esse nivelamento de acesso, porém, não veio acompanhado de um nivelamento
+metodológico equivalente. Enquanto os componentes técnicos se tornaram mais acessíveis,
+os procedimentos que tornam um experimento reprodutível permaneceram informais,
+específicos por equipe, raramente documentados e quase nunca transferíveis. A questão
+não é mais \textit{se} um pesquisador consegue fazer um robô navegar --- é se consegue
+fazer isso de uma forma que outro pesquisador possa verificar.
+
+A comunidade de robótica reconhece essa lacuna metodológica há mais de uma
+década \cite{bonsignorio2015}. Esta dissertação distingue, desde este parágrafo
+em diante, dois conceitos que a literatura de ciência experimental frequentemente
+trata como sinônimos, mas que não o são \cite{acm2020badging}. \textbf{Repetibilidade} é a capacidade do
+mesmo sistema, no mesmo ambiente, sob as mesmas condições, de produzir
+resultados equivalentes em execuções sucessivas. \textbf{Reprodutibilidade}, em
+sentido mais forte, é a capacidade de um investigador independente, em outro
+ambiente, obter resultados equivalentes a partir do mesmo artefato de pesquisa
+--- código, dados e protocolo publicados \cite{amigoni2010}. Repetibilidade é
+condição necessária, mas não suficiente, para reprodutibilidade: um sistema
+pode ser perfeitamente repetível em um único laboratório e, ainda assim, nunca
+ter sido reproduzido por ninguém fora dele.
+
+Na prática, em robótica móvel, garantir repetibilidade significa assegurar que
+o robô: (i) parta da mesma pose inicial em todas as execuções; (ii) percorra o
+mesmo trajeto usando a mesma estratégia de navegação; (iii) tenha os dados de
+todos os sensores coletados de forma síncrona e com a mesma configuração; e
+(iv) tenha as trajetórias resultantes comparadas por um método que não
+introduza vieses de análise. Cada um desses requisitos, isoladamente, é
+simples. Satisfazê-los simultaneamente, de forma automática e reutilizável, é
+onde a literatura apresenta uma lacuna persistente --- e é precisamente
+repetibilidade, nesse sentido preciso, o que esta dissertação avalia
+empiricamente (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados}). O
+framework proposto busca \emph{favorecer} reprodutibilidade --- por meio de
+código aberto, protocolo documentado e artefatos de saída estruturados
+(Seção~\ref{sec:rel_reprodutibilidade}) --- mas essa dissertação não conduziu
+nem observou replicação independente por outro pesquisador ou laboratório;
+a Seção~\ref{sec:repro_vs_repet} retoma essa distinção à luz dos resultados
+obtidos.
+
+Essa lacuna tem custos concretos. Quando um artigo reporta que ``o robô navegou com
+erro médio de 8\,cm'', sem especificar se essa é a média de 3 ou 30 execuções, se o
+desvio padrão foi medido, ou se a comparação com trabalhos anteriores usa a mesma
+métrica, a contribuição científica se torna não verificável. A acumulação de
+resultados não reprodutíveis na literatura não é apenas um problema acadêmico
+--- é um obstáculo para a transferência de tecnologia para aplicações industriais
+que dependem de garantias comportamentais precisas.
+
+\section{O Problema Central: Crise de Orquestração Experimental}
+\label{sec:problema}
+
+Esta dissertação identifica e nomeia um problema específico que perpassa a robótica
+experimental contemporânea: a \textbf{crise de orquestração experimental}. Trata-se
+da dificuldade estrutural em coordenar, de forma automática e repetível, as múltiplas
+camadas de um experimento de navegação autônoma --- inicialização do ambiente de
+simulação, ativação da pilha de navegação com tempo de espera correto, definição e
+execução de rotas, coleta síncrona de múltiplos sensores com políticas de QoS adequadas,
+e análise quantitativa comparável entre execuções.
+
+Cada uma dessas camadas possui sua própria curva de aprendizado. O modelo de lifecycle
+do ROS~2 \cite{macenski2022ros2} exige que os nós de navegação sejam ativados na
+sequência correta antes que qualquer comando seja enviado. As políticas de QoS de
+tópicos como \texttt{/\allowbreak scan} (BEST\_EFFORT), \texttt{/\allowbreak pose} (RELIABLE) e
+\texttt{/\allowbreak amcl\_\allowbreak pose} (TRANSIENT\_LOCAL) determinam se os dados serão efetivamente
+gravados nos bags ou silenciosamente descartados. O protocolo de ações do Nav2
+\cite{macenski2020marathon} opera de forma assíncrona, e uma chamada prematura ao
+servidor de ações resulta em timeout sem mensagem de erro clara. O SLAM Toolbox
+\cite{macenski2021slam} precisa de scans suficientes antes de publicar uma estimativa
+confiável de mapa, e o intervalo correto varia com o ambiente.
+
+Nenhum desses problemas é intratável. Todos são resolvidos por equipes experientes,
+individualmente, a cada novo experimento. O problema é que essa solução acontece
+de forma invisível, em scripts não publicados, em notebooks Jupyter apagados ao fim
+do projeto, em conversas de corredor que nunca entram na seção de metodologia do artigo.
+O conhecimento que torna um experimento bem-feito permanece tácito e não transferível.
+
+\section{O Papel da Robótica de Frota nos Experimentos Modernos}
+\label{sec:frota}
+
+A tendência recente em robótica de serviço e logística autônoma é operar não um
+robô isolado, mas frotas de agentes coordenados \cite{macenski2022ros2}. Em um
+testbed experimental, isso cria possibilidades metodológicas que um único robô
+não oferece: enquanto uma Unidade Móvel sob Teste (MUUT) percorre sua rota, uma
+Unidade Fixa sob Teste (FUUT) pode observar a mesma cena de um ângulo externo,
+coletando dados independentes que funcionam como fonte de verdade alternativa.
+
+Essa dualidade de perspectivas --- endógena (o que o robô vê de si mesmo) e exógena
+(o que um observador fixo vê do robô) --- enriquece substancialmente a análise de
+repetibilidade. Pequenas variações de trajetória que seriam invisíveis à odometria
+interna do MUUT podem ser capturadas pelos scans do FUUT como variações na posição
+relativa do robô ao passar em frente ao sensor.
+
+O framework proposto nesta dissertação formaliza esse design experimental com uma
+arquitetura de papéis explícita, garantindo que as regras de cada tipo de unidade
+sejam verificadas em software --- não apenas documentadas no protocolo.
+
+\section{Escopo e Restrições}
+\label{sec:escopo}
+
+Esta dissertação foca na navegação 2D de robôs diferenciais em ambientes fechados,
+usando o TurtleBot4 Standard com RPLIDAR S2 como plataforma de referência. Todos
+os experimentos de validação foram conduzidos em simulação Gazebo Harmonic, o que
+garante condições perfeitamente controladas mas abstrai os fenômenos físicos de
+superfícies reais, slip de roda e variação de calibração de sensores ao longo do
+tempo.
+
+As métricas adotadas --- RMSE, erro de endpoint e consistência temporal --- são
+métricas espaciotemporais clássicas para avaliação de navegação \cite{amigoni2010},
+mas não capturam aspectos como consumo energético, desgaste mecânico ou robustez
+a falhas de comunicação. Essas dimensões constituem extensões naturais do trabalho,
+identificadas na seção de trabalhos futuros.
+
+\section{Objetivos}
+\label{sec:objetivos}
+
+O objetivo geral desta dissertação é projetar e implementar um framework
+open-source de orquestração de experimentos de repetibilidade de navegação
+autônoma para frotas de robôs móveis em ROS~2, e avaliar empiricamente sua
+capacidade de produzir execuções repetíveis --- avaliação que, como detalhado
+no Capítulo~\ref{chap:avaliacao}, foi conduzida com uma única unidade móvel; a
+extensão dessa avaliação para operação simultânea de múltiplos robôs é tratada
+como trabalho futuro (Seção~\ref{sec:futuros}).
+
+Os objetivos específicos são:
+
+\begin{enumerate}
+    \item Definir formalmente uma arquitetura de papéis experimentais (MUUT/FUUT/SU)
+    que separe responsabilidades entre unidades móveis e fixas de forma explícita e
+    verificável em software.
+
+    \item Implementar serviços ROS~2 que abstraiam as ações Nav2 e a coleta síncrona
+    de sensores em uma interface de alto nível, sem expor ao pesquisador os detalhes
+    de QoS, lifecycle ou protocolo de ações.
+
+    \item Desenvolver um protocolo de gravação--reprodução (record--replay) com
+    garantias de consistência entre execuções, incluindo retorno automático ao ponto
+    de partida e gravação de poses efetivamente atingidas.
+
+    \item Construir uma interface web que permita configuração, execução e visualização
+    de experimentos com waypoints clicáveis sobre o mapa SLAM ao vivo, sem necessidade
+    de linha de comando.
+
+    \item Validar o framework em dois cenários de simulação e reportar métricas de
+    repetibilidade (RMSE inter-replay, RMSE vs. baseline, erro de endpoint e
+    consistência temporal) como baseline empírico para trabalhos futuros.
+\end{enumerate}
+
+
+\section{Perguntas de Pesquisa e Hipóteses}
+\label{sec:perguntas_pesquisa}
+
+A partir dos objetivos específicos listados na Seção~\ref{sec:objetivos}, esta
+dissertação formaliza quatro perguntas de pesquisa (PP), cada uma associada a
+uma hipótese de trabalho (H) verificada empiricamente nos capítulos de
+Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados}).
+
+\begin{description}
+    \item[PP1 --- Automação de protocolo.] É possível automatizar integralmente
+    o protocolo de gravação--reprodução de rotas em uma frota heterogênea de
+    robôs ROS~2, sem intervenção manual entre fases, preservando a semântica
+    de papéis experimentais (MUUT/FUUT/SU)?
+    \textbf{H1}: um conjunto reduzido de serviços ROS~2 de alto nível
+    (Seção~\ref{sec:orquestrador}), combinado a um script orquestrador de
+    linha de comando, é suficiente para expressar qualquer protocolo de
+    record--replay sem código adicional por experimento.
+
+    \item[PP2 --- Repetibilidade mensurável.] Qual é o grau de repetibilidade
+    espacial (RMSE) e temporal (CV$_t$) de execuções de replay sucessivas sobre
+    a mesma rota, sob controlador e SLAM padrão do Nav2/SLAM Toolbox?
+    \textbf{H2}: em condições de simulação controlada, o RMSE inter-replay é
+    inferior a 30\,cm e o CV$_t$ é inferior a 10\%. Com $N=10$ replays na
+    campanha final, esta dissertação caracteriza a variabilidade observada no
+    cenário avaliado, sem generalizar esse comportamento para todas as rotas,
+    ambientes ou configurações do Nav2 (Seção~\ref{sec:mppi}).
+
+    \item[PP3 --- Persistência da repetibilidade fora do regime estritamente
+    controlado.] A baixa variabilidade observada sob o protocolo controlado
+    (mesma ação de navegação, pose inicial fixa, $N=10$ na campanha final) se
+    mantém quando as condições de execução são menos controladas?
+    \textbf{H3}: espera-se que execuções fora do protocolo formal --- sem
+    controle explícito de ação de navegação, pose inicial e retorno ao ponto
+    de partida entre réplicas --- apresentem RMSE e variabilidade de duração
+    substancialmente maiores que a campanha controlada final. Esta dissertação não
+    hipotetiza, a priori, uma causa única para essa diferença; a Seção
+    ~\ref{sec:res_exp_complementares} discute evidência exploratória
+    compatível com H3, mas insuficiente para atribuir causalidade específica,
+    e a Seção~\ref{sec:ameacas} trata essa limitação como ameaça à validade
+    de conclusão.
+
+    \item[PP4 --- Custo de engenharia para o pesquisador.] O framework reduz
+    o esforço de engenharia necessário para configurar e executar um
+    experimento de repetibilidade, em comparação com a composição manual de
+    chamadas Nav2/rosbag2 descrita informalmente na literatura correlata
+    (Capítulo~\ref{chap:relacionados})?
+    \textbf{H4}: a interface web e a camada de serviços ROS~2
+    (Seção~\ref{sec:backend_web}) eliminam a necessidade de escrever código
+    Python ou lançar comandos \texttt{ros2} manualmente para configurar,
+    executar e analisar um experimento completo.
+\end{description}
+
+Este trabalho não formaliza PP2--PP4 como hipóteses estatísticas testadas por
+inferência formal com poder amostral pré-calculado. Embora a campanha final
+tenha $N=10$ replays, ela permanece restrita a uma única rota curta, uma única
+plataforma simulada e uma única configuração de navegação, limitação reconhecida
+explicitamente na Seção~\ref{sec:ameacas}. As hipóteses acima são tratadas,
+portanto, como proposições descritivas a serem corroboradas ou refutadas pela
+evidência empírica coletada, no espírito de um estudo exploratório de engenharia
+de software experimental \cite{amigoni2010}, não de um experimento controlado
+com validação estatística confirmatória.
+
+\section{Contribuições}
+\label{sec:contribuicoes}
+
+As contribuições desta dissertação podem ser organizadas em três dimensões:
+
+\subsection{Contribuições de Engenharia}
+
+\begin{itemize}
+    \item Implementação de \textbf{buffers TF por robô} para suporte a SLAM multi-robô
+    em ROS~2, resolvendo o problema de namespace de tópicos \texttt{/\allowbreak tf} em frotas.
+
+    \item Integração de \textbf{executor multithreaded} no orquestrador para evitar
+    deadlocks entre callbacks de serviço e discovery de action servers.
+
+    \item Desenvolvimento de \textbf{perfis de QoS diferenciados} no coletor de dados,
+    garantindo que tópicos BEST\_EFFORT (sensores) e RELIABLE/TRANSIENT\_LOCAL
+    (localização) sejam corretamente subscritos.
+
+    \item Patch em tempo de launch do \textbf{Nav2 YAML} para ajuste de parâmetros
+    de tipo de \texttt{cmd\_\allowbreak vel}, resolvendo incompatibilidade entre versões de
+    simulação e navegação.
+
+    \item Backend REST em FastAPI que expõe serviços ROS~2 sem dependência de
+    ROSBridge, reduzindo a configuração necessária para novos usuários.
+\end{itemize}
+
+\subsection{Contribuições Científicas}
+
+\begin{itemize}
+    \item Formalização de uma \textbf{arquitetura de papéis experimentais}
+    (MUUT/FUUT/SU) para testbeds de robótica com frota, não identificada nos
+    trabalhos analisados nesta dissertação (Capítulo~\ref{chap:relacionados}).
+
+    \item Definição e implementação de um \textbf{pipeline end-to-end} para
+    experimentos de repetibilidade de navegação, do waypoint ao relatório RMSE.
+
+    \item Resultados empíricos de repetibilidade com Nav2 e SLAM Toolbox em
+    simulação Gazebo Harmonic, servindo como baseline para trabalhos futuros
+    com hardware real e outros algoritmos de controle.
+
+    \item Evidência exploratória de que execuções fora do protocolo controlado
+    de record--replay (Seção~\ref{sec:res_exp_complementares}) podem produzir
+    métricas contaminadas por variação de pose inicial --- achado que motiva,
+    mas não confirma, hipóteses específicas como drift cumulativo de localização
+    do SLAM, e que é reportado nesta dissertação como questão em aberto, não
+    como resultado conclusivo.
+\end{itemize}
+
+\subsection{Contribuições para a Comunidade}
+
+\begin{itemize}
+    \item Código-fonte open-source publicado com documentação suficiente para
+    adoção por outros grupos de pesquisa.
+
+    \item Interface web acessível que democratiza o acesso a experimentos de
+    repetibilidade, reduzindo a barreira de entrada para pesquisadores sem
+    formação específica em ROS~2.
+\end{itemize}
+
+\section{Organização da Dissertação}
+\label{sec:organizacao}
+
+O restante desta dissertação está organizado da seguinte forma.
+
+O \textbf{Capítulo~\ref{chap:fundamentacao}} apresenta o embasamento teórico sobre
+navegação autônoma, cinemática diferencial, SLAM, o ecossistema ROS~2 e Nav2,
+e as métricas clássicas de avaliação de repetibilidade de trajetórias.
+
+O \textbf{Capítulo~\ref{chap:relacionados}} discute trabalhos relacionados em
+frameworks de navegação, avaliação de SLAM e metodologias de teste em robótica,
+posicionando a proposta em relação ao estado da arte.
+
+O \textbf{Capítulo~\ref{chap:arquitetura}} descreve a arquitetura do framework
+proposto, incluindo a formalização dos papéis experimentais, o orquestrador de frota,
+o coletor de dados e a interface web.
+
+O \textbf{Capítulo~\ref{chap:metodologia}} detalha o protocolo record--replay,
+as métricas adotadas e o procedimento de análise de repetibilidade.
+
+O \textbf{Capítulo~\ref{chap:implementacao}} apresenta decisões de implementação,
+integração com o ambiente de simulação Gazebo Harmonic e a interface web desenvolvida.
+
+O \textbf{Capítulo~\ref{chap:avaliacao}} descreve o arranjo experimental, as
+questões de avaliação e os critérios de validação adotados.
+
+O \textbf{Capítulo~\ref{chap:resultados}} analisa os resultados obtidos nos dois
+cenários de validação e discute suas implicações.
+
+O \textbf{Capítulo~\ref{chap:conclusao}} conclui com um resumo das contribuições,
+limitações identificadas e a agenda de trabalhos futuros.
+
+O \textbf{Glossário} reúne os termos técnicos centrais utilizados ao longo da
+dissertação com suas definições precisas.

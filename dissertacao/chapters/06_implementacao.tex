@@ -1,0 +1,266 @@
+\chapter{Implementação}
+\label{chap:implementacao}
+
+\section{Ambiente de Simulação}
+\label{sec:simulacao}
+
+Seguindo a prática estabelecida de validar algoritmos de navegação em simulação
+ROS~+~Gazebo antes de sua implantação no robô físico \cite{takaya2016}, o
+ambiente de simulação utiliza o Gazebo Harmonic --- versão de suporte estendido
+pareada com o ROS~2 Jazzy --- e o modelo TurtleBot4 Standard com RPLIDAR S2 (LiDAR
+2D de 360°) e câmera OAK-D. O mundo \textit{warehouse} disponível no pacote
+\texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} representa um armazém industrial com prateleiras,
+barreiras e espaços abertos, oferecendo diversidade de geometria para testar o SLAM
+em diferentes condições de observabilidade.
+
+A escolha do \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} em detrimento do
+\texttt{turtlebot4\_\allowbreak gz\_\allowbreak bringup} resultou de problemas de compatibilidade entre os
+plugins \texttt{irobot\_\allowbreak create\_\allowbreak gz\_\allowbreak plugins} --- projetados para Ignition Fortress ---
+e o Gazebo Harmonic, que renomeou a API de mensagens de \texttt{ignition.msgs} para
+\texttt{gz.msgs}. A versão minimal contorna esse problema utilizando o plugin de
+DiffDrive nativo do Gazebo Harmonic com bridges corretos, incluindo o topic
+\texttt{cmd\_\allowbreak vel} como \texttt{geometry\_\allowbreak msgs/\allowbreak msg/\allowbreak Twist} (não \texttt{TwistStamped}).
+Essa distinção exigiu que os parâmetros de navegação do Nav2 fossem gerados em tempo
+de launch com \texttt{enable\_\allowbreak stamped\_\allowbreak cmd\_\allowbreak vel: false} em todos os onze nós afetados,
+via leitura e patch programático do arquivo \texttt{nav2.yaml} padrão.
+
+\section{O Orquestrador em Detalhe}
+\label{sec:impl_orquestrador}
+
+O orquestrador (\texttt{fleet\_\allowbreak orchestrator}) é implementado como um nó ROS~2 em Python
+com \texttt{MultiThreadedExecutor}. A estrutura de estado por robô, \texttt{RobotRuntime},
+mantém seis campos: \texttt{nav\_\allowbreak state}, \texttt{is\_\allowbreak recording}, \texttt{is\_\allowbreak navigating},
+\texttt{route\_\allowbreak poses}, \texttt{last\_\allowbreak saved} e \texttt{pending\_\allowbreak goal\_\allowbreak pose}. Este último
+é o mais crítico para a gravação: ao receber o callback de resultado do action Nav2,
+se o status for \texttt{STATUS\_\allowbreak SUCCEEDED} e o robô estiver em modo de gravação,
+a pose enviada como meta é imediatamente appendada à lista de rotas --- pois a pose
+real confirmada pelo Nav2 é a melhor estimativa disponível da posição atingida.
+
+A lógica de gravação baseada em polling de TF (\texttt{\_\allowbreak record\_\allowbreak tick}) funciona em
+paralelo para ambientes onde o Nav2 não reporta SUCCEEDED (e.g., quando o controlador
+para dentro da tolerância antes de publicar o callback). O tick a 5\,Hz consulta a
+cadeia TF e adiciona a pose ao buffer se o robô deslocou ao menos 10\,cm ou girou
+mais de 5° desde a última amostra, evitando redundância em trechos estacionários.
+
+
+\subsection{Exemplo: os Serviços \texttt{start\_\allowbreak record} e \texttt{stop\_\allowbreak record}}
+\label{sec:impl_servicos_exemplo}
+
+Para tornar concreta a discussão anterior, o Código~\ref{lst:start_stop_record}
+reproduz, tal como publicado no repositório público do projeto, os \textit{callbacks}
+que implementam o início e o fim de uma gravação de rota. Note-se a rejeição explícita
+de requisições inconsistentes com o estado corrente do robô (\texttt{ALREADY\_\allowbreak NAVIGATING})
+e a limpeza do buffer de poses e do último ponto salvo (\texttt{last\_\allowbreak saved = None}) a
+cada novo início de gravação --- sem essa limpeza, uma segunda gravação herdaria pontos
+da anterior, corrompendo silenciosamente o arquivo de rota resultante.
+
+\begin{lstlisting}[style=pycode, caption={Callbacks \texttt{\_\allowbreak cb\_\allowbreak start\_\allowbreak record} e \texttt{\_\allowbreak cb\_\allowbreak stop\_\allowbreak record} (\texttt{fleet\_\allowbreak orchestrator/\allowbreak main.py}).}, label={lst:start_stop_record}]
+def _cb_start_record(self, req, resp):
+    rid = req.robot_id
+    if not self._known_robot(rid):
+        resp.success = False
+        resp.message = f"Unknown robot {rid!r}"
+        resp.error_code = "UNKNOWN_ROBOT"
+        return resp
+    st = self._state[rid]
+    if st.is_navigating:
+        resp.success = False
+        resp.message = "Cannot start recording while navigating"
+        resp.error_code = "ALREADY_NAVIGATING"
+        return resp
+    st.route_poses.clear()
+    st.last_saved = None
+    st.is_recording = True
+    st.nav_state = "recording"
+    st.current_route = req.route_name
+    st.last_error = ""
+    resp.success = True
+    resp.message = "Recording started"
+    resp.error_code = ""
+    return resp
+
+def _cb_stop_record(self, req, resp):
+    rid = req.robot_id
+    if not self._known_robot(rid):
+        resp.success = False
+        resp.message = f"Unknown robot {rid!r}"
+        resp.error_code = "UNKNOWN_ROBOT"
+        return resp
+    st = self._state[rid]
+    route_name = st.current_route
+    st.is_recording = False
+    n = len(st.route_poses)
+    if n == 0:
+        st.nav_state = "idle"
+        st.current_route = ""
+        resp.success = True
+        resp.message = "Route length: 0"
+        resp.error_code = ""
+        return resp
+    path = self._save_route_yaml(rid, route_name, st.route_poses)
+    st.route_poses.clear()
+    st.last_saved = None
+    st.nav_state = "idle"
+    st.current_route = ""
+    resp.success = True
+    resp.message = f"Saved {n} poses to {path}"
+    resp.error_code = ""
+    return resp
+\end{lstlisting}
+
+Um segundo aspecto relevante do orquestrador é a separação entre os papéis
+experimentais e a permissão de movimento, aplicada em \texttt{\_\allowbreak cb\_\allowbreak play\_\allowbreak route}
+e \texttt{\_\allowbreak cb\_\allowbreak go\_\allowbreak to\_\allowbreak point} por meio do método \texttt{\_\allowbreak motion\_\allowbreak allowed},
+que consulta o mapa de papéis carregado de \texttt{roles.yaml} e retorna
+\texttt{False} para qualquer robô que não seja \texttt{MUUT}. Requisições de
+movimento para um FUUT recebem o código de erro \texttt{ROLE\_\allowbreak NOT\_\allowbreak ALLOWED}
+antes mesmo de qualquer tentativa de contato com o action server do Nav2,
+evitando gastar o \textit{timeout} de \texttt{wait\_\allowbreak for\_\allowbreak server} em uma
+requisição que já se sabe inválida por construção.
+
+\subsection{A Ponte REST--ROS~2 no Backend}
+\label{sec:impl_backend_ponte}
+
+O backend não utiliza um cliente ROS~2 nativo para encaminhar comandos de
+serviço vindos da interface web: em vez disso, cada endpoint HTTP dispara
+um processo \texttt{ros2 service call} via \texttt{subprocess}, como mostra
+o Código~\ref{lst:backend_bridge}. A justificativa para essa escolha, aparentemente
+pouco ortodoxa, está detalhada na Seção~\ref{sec:backend_web}: evitar que o
+processo do backend precise ele mesmo inicializar um nó \texttt{rclpy} completo
+só para chamadas pontuais de serviço, mantendo essa inicialização (via
+\texttt{rclpy.init()} em uma \textit{thread} dedicada) restrita à publicação
+contínua de status, mapa e pose, que de fato exige um nó ROS~2 residente.
+
+\begin{lstlisting}[style=pycode, caption={Função \texttt{\_\allowbreak run\_\allowbreak ros2\_\allowbreak service}, usada por todos os endpoints \texttt{/\allowbreak api/\allowbreak *} que encaminham comandos ao orquestrador (\texttt{backend/\allowbreak main.py}).}, label={lst:backend_bridge}]
+def _run_ros2_service(srv, srv_type, request_json, timeout=10):
+    cmd = (
+        f"source /opt/ros/jazzy/setup.bash 2>/dev/null; "
+        f"source {ROS_WS}/install/setup.bash 2>/dev/null; "
+        f"ros2 service call {srv} {srv_type} '{request_json}'"
+    )
+    try:
+        r = subprocess.run(
+            ["bash", "-c", cmd],
+            env=_ros_env(),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=ROS_WS,
+        )
+        out = (r.stdout or "").strip() + (r.stderr or "").strip()
+        if r.returncode != 0:
+            return False, out or "ros2 service call failed"
+        return True, out
+    except subprocess.TimeoutExpired:
+        return False, "timeout"
+    except Exception as e:
+        return False, str(e)
+\end{lstlisting}
+
+Essa abordagem tem um custo mensurável: cada chamada paga o overhead de
+inicializar um processo \texttt{ros2 service call} (tipicamente
+50--150\,ms na máquina de desenvolvimento), o que a torna inadequada para
+comandos de alta frequência, mas aceitável para o padrão de uso da interface
+--- cliques esparsos do pesquisador, não um laço de controle. O preço em
+latência é trocado por uma superfície de acoplamento mínima entre o backend
+e o \textit{workspace} ROS~2: o backend só precisa saber o nome e o tipo do
+serviço, nunca importar diretamente os módulos gerados de \texttt{fleet\_\allowbreak msgs}
+para essas chamadas específicas.
+
+\section{Pipeline de Coleta e Análise}
+\label{sec:impl_pipeline}
+
+O script \texttt{experiment\_\allowbreak repeatability.py} implementa o protocolo descrito no
+Capítulo~\ref{chap:metodologia} como uma sequência de chamadas a serviços ROS~2.
+Sua estrutura em dois subcomandos (\texttt{record} e \texttt{replay}) permite compor
+qualquer protocolo experimental a partir de blocos elementares, seja pela linha de
+comando ou pela interface web.
+
+A análise offline em \texttt{analyze\_\allowbreak runs.py} lê os bags via \texttt{rosbag2\_\allowbreak py},
+desserializando diretamente as mensagens de tipos conhecidos
+(\texttt{nav\_\allowbreak msgs/\allowbreak Odometry}, \texttt{geometry\_\allowbreak msgs/\allowbreak PoseWithCovarianceStamped})
+a partir do formato CDR armazenado no MCAP. A versão do script utilizada na
+campanha final desta dissertação calcula o RMSE pairwise após reamostragem em
+tempo normalizado: cada trajetória é projetada para uma grade comum no intervalo
+$[0,1]$, e as coordenadas $x$ e $y$ são interpoladas nessa grade antes do cálculo
+do erro quadrático médio. Essa escolha evita associar pontos apenas pelo índice
+da amostra, o que poderia introduzir artefatos quando duas execuções percorrem
+a mesma rota com pequenas diferenças de velocidade.
+
+Para fins de auditoria, o próprio \texttt{summary.json} produzido pela análise
+registra o modo de reamostragem usado. Na campanha final
+\texttt{dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual}, o campo
+\texttt{resampling.mode} indica \texttt{time}, com 100 amostras na grade
+normalizada.
+
+
+\subsection{Reamostragem e RMSE: o Código que Sustenta a Métrica}
+\label{sec:impl_rmse_codigo}
+
+O Código~\ref{lst:rmse_impl} reproduz as funções centrais de reamostragem e
+cálculo de RMSE em \texttt{analyze\_\allowbreak runs.py}. A função
+\texttt{\_\allowbreak normalised\_\allowbreak time\_\allowbreak grid} converte o vetor temporal de cada bag
+para o intervalo $[0,1]$; em seguida, \texttt{numpy.interp} calcula posições
+homólogas na mesma grade normalizada. A implementação por índice permanece
+disponível como opção de compatibilidade (\texttt{--resample-mode index}), mas
+não foi usada na campanha final reportada no Capítulo~\ref{chap:resultados}.
+
+\begin{lstlisting}[style=pycode, caption={Reamostragem temporal normalizada e RMSE pairwise (\texttt{scripts/\allowbreak analyze\_\allowbreak runs.py}).}, label={lst:rmse_impl}]
+def _normalised_time_grid(t):
+    if len(t) < 2:
+        return np.zeros(len(t), dtype=np.float64)
+    duration = float(t[-1] - t[0])
+    if duration <= 1e-9:
+        return np.linspace(0.0, 1.0, len(t), dtype=np.float64)
+    return (t - t[0]) / duration
+
+def _resample_xy_by_time(t, xy, samples):
+    if len(xy) < 2 or samples < 2:
+        return xy
+    tn = _normalised_time_grid(t)
+    unique_t, unique_idx = np.unique(tn, return_index=True)
+    unique_xy = xy[unique_idx]
+    grid = np.linspace(0.0, 1.0, samples, dtype=np.float64)
+    return np.column_stack([
+        np.interp(grid, unique_t, unique_xy[:, 0]),
+        np.interp(grid, unique_t, unique_xy[:, 1]),
+    ])
+
+def _rmse(a, b):
+    return float(np.sqrt(np.mean(np.sum((a - b) ** 2, axis=1))))
+\end{lstlisting}
+
+A consequência prática dessa escolha é que duas trajetórias percorridas em
+velocidades ligeiramente distintas continuam comparáveis, pois os pontos
+homólogos representam a mesma fração normalizada do percurso temporal de cada
+execução. Essa formulação não elimina todas as ameaças à validade --- diferenças
+muito grandes de duração ainda podem indicar que as execuções não são
+experimentalmente equivalentes ---, mas reduz o artefato geométrico introduzido
+pela reamostragem puramente por índice.
+
+\section{Interface Web}
+\label{sec:impl_web}
+
+A interface web é uma aplicação React com backend FastAPI. O mapa SLAM é renderizado
+em um canvas HTML5 com coordenadas alinhadas ao sistema de referência ROS: a origem
+do canvas corresponde ao canto inferior esquerdo do mapa, e o eixo Y é invertido
+(positivo para cima em ROS, negativo no canvas). A conversão utiliza os metadados
+do \texttt{OccupancyGrid} \cite{elfes1989} (\texttt{resolution}, \texttt{origin\_\allowbreak x}, \texttt{origin\_\allowbreak y})
+publicados pelo SLAM Toolbox.
+
+O mapa pré-construído do \textit{warehouse} (\texttt{warehouse.pgm} +
+\texttt{warehouse.yaml}) é utilizado como fundo estático com alinhamento perfeito:
+como ambos o mapa SLAM ao vivo e o PGM utilizam o mesmo sistema de coordenadas
+do mundo Gazebo, a sobreposição é pixel-a-pixel. O pesquisador vê paredes, prateleiras
+e o robô em tempo real, podendo clicar para definir waypoints diretamente na planta.
+
+\section{Considerações Finais}
+\label{sec:impl_conclusao}
+
+As decisões de implementação descritas neste capítulo --- o patch runtime do
+\texttt{nav2.yaml}, o \texttt{MultiThreadedExecutor} para evitar deadlocks, a
+desserialização CDR sem tipo registrado, a conversão de coordenadas canvas--mundo
+--- resultaram de problemas concretos encontrados durante o desenvolvimento.
+Cada uma representa uma contribuição de engenharia que outros grupos de pesquisa
+que adotarem o framework não precisarão replicar. O próximo capítulo apresenta
+o arranjo de avaliação que valida o sistema resultante.

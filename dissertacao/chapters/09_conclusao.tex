@@ -1,0 +1,206 @@
+\chapter{Conclusão}
+\label{chap:conclusao}
+
+\section{Síntese das Contribuições}
+\label{sec:sintese}
+
+Esta dissertação apresentou o Fleet UI, um framework open-source de orquestração
+de experimentos de repetibilidade de navegação autônoma para robôs móveis em
+ROS~2, com arquitetura preparada para operação em frota. O sistema formaliza um
+protocolo record--replay que transforma uma prática informal e fragmentada ---
+executar um robô várias vezes e comparar os resultados ``na mão'' --- em um
+pipeline documentado, automatizável e transferível.
+
+As contribuições se organizam em três níveis:
+
+\textbf{Nível arquitetural}: a separação de papéis MUUT/FUUT formaliza a distinção
+entre unidades que executam tarefas e unidades que observam, permitindo designs
+experimentais heterogêneos sem modificação do core do sistema. Os buffers TF por
+robô, o executor multithreaded e os perfis de QoS diferenciados resolvem problemas
+concretos de compatibilidade que qualquer equipe que adotar ROS~2 em modo multi-robô
+enfrentará --- ainda que, como reconhecido na Seção~\ref{sec:limitacoes}, a
+avaliação quantitativa desta dissertação não tenha exercitado esses mecanismos
+sob operação simultânea de múltiplos robôs.
+
+\textbf{Nível experimental}: o protocolo record--replay com análise RMSE pairwise
+por reamostragem temporal normalizada constitui uma metodologia de avaliação que
+pode ser adotada por outros grupos sem modificação. A campanha final em
+simulação, composta por uma baseline limpa e $N=10$ replays independentes da
+rota \texttt{dissertation\_\allowbreak clean01}, obteve RMSE médio de
+3,35\,cm contra a execução de referência, RMSE máximo de 4,76\,cm, erro final
+médio de 1,64\,cm e duração média de 17,51\,s. Esses resultados fornecem um
+baseline empírico controlado para comparação com hardware real e com outras
+pilhas de navegação. Campanhas exploratórias executadas antes do controle
+rigoroso de pose inicial são reportadas apenas como achados diagnósticos, pois
+demonstraram que não reinicializar o estado entre replays pode contaminar
+diretamente a interpretação do RMSE.
+
+\textbf{Nível de acessibilidade}: a interface web reduz a necessidade de
+interação direta com a linha de comando do ROS~2 para configurar, executar e
+monitorar experimentos. A visualização do mapa SLAM ao vivo com coordenadas
+reais e o botão \textit{Executar record} representam uma redução perceptível
+no esforço de configuração de um experimento do zero --- uma percepção
+qualitativa dos autores, já que, como discutido na Seção~\ref{sec:limitacoes},
+nenhum estudo de usabilidade controlado foi conduzido para quantificar essa
+redução.
+
+\section{Retomada das Perguntas de Pesquisa}
+\label{sec:retomada_pp}
+
+A Seção~\ref{sec:perguntas_pesquisa} formalizou quatro perguntas de pesquisa
+(PP1--PP4), cada uma associada a uma hipótese (H1--H4) e avaliada por meio de
+uma ou mais questões de avaliação (QA1--QA4, Seção~\ref{sec:questoes}). A
+Tabela~\ref{tab:pp_h_qa_sintese} consolida essa correspondência e o resultado
+de cada uma; o texto que segue detalha cada linha.
+
+\begin{table}[H]
+\centering
+\caption{Correspondência entre perguntas de pesquisa, hipóteses, questões de avaliação e resultado.}
+\label{tab:pp_h_qa_sintese}
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{PP} & \textbf{Hipótese} & \textbf{Avaliada por} & \textbf{Resultado} \\
+\midrule
+PP1 & H1 & QA1 & Corroborada \\
+PP2 & H2 & QA2, QA3 & Corroborada (campanha final, $N=10$) \\
+PP3 & H3 & QA4 & Evidência exploratória compatível, causalidade não estabelecida \\
+PP4 & H4 & --- (qualitativa) & Evidência funcional apenas; esforço percebido não avaliado \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{PP1 (automação de protocolo)}: corroborada. Os sete serviços do
+orquestrador (Seção~\ref{sec:orquestrador}), o script
+\texttt{experiment\_\allowbreak repeatability.py} (Seção~\ref{sec:impl_pipeline}) e o script de
+campanha com relançamento do stack expressam a sessão de validação final sem
+código adicional específico de experimento --- apenas parâmetros de linha de
+comando (rota, número de réplicas, tópicos de coleta e diretório de saída).
+
+\textbf{PP2 (repetibilidade mensurável)}: corroborada no cenário controlado
+final. A campanha \texttt{dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual},
+com $N=10$ replays independentes iniciados do mesmo estado, apresentou RMSE
+médio de 3,35\,cm e máximo de 4,76\,cm contra a execução de referência, além de
+erro final médio de 1,64\,cm. Esses valores ficam abaixo do limiar prático de
+25\,cm definido pela tolerância padrão de objetivo do Nav2.
+
+\textbf{PP3 (persistência fora do regime controlado)}: nem corroborada nem
+refutada de forma conclusiva. As campanhas exploratórias discutidas na
+Seção~\ref{sec:res_exp_complementares} mostram que execuções sem controle de
+pose inicial podem produzir métricas contaminadas por deslocamentos acumulados,
+mas esses dados não permitem atribuir a variabilidade a uma causa única. PP3
+permanece uma questão em aberto, a ser respondida por desenhos experimentais
+dedicados com variação controlada de pose inicial, ação de navegação e estado do
+SLAM.
+
+\textbf{PP4 (custo de engenharia)}: há evidência funcional de redução da
+interação manual, mas a redução de esforço percebido ou mensurável não foi
+empiricamente avaliada. Nenhuma das execuções reportadas neste trabalho exigiu
+escrever ou modificar código Python além dos parâmetros de linha de comando do
+protocolo; a interface web descrita na Seção~\ref{sec:impl_web} permite o mesmo
+fluxo sem terminal --- isso é verificável diretamente no código e nos fluxos
+descritos no Apêndice~\ref{ap:cli_reference}. O que não foi medido é se essa
+redução de interação manual se traduz em menor esforço percebido pelo
+pesquisador: nenhum estudo de usabilidade com participantes externos (tempo de
+configuração, número de erros, SUS, NASA-TLX ou instrumento equivalente) foi
+conduzido --- uma lacuna explicitamente reconhecida na Seção~\ref{sec:limitacoes}
+e retomada como trabalho futuro.
+
+\section{Reprodutibilidade vs.\ Repetibilidade: Retomada}
+\label{sec:repro_vs_repet}
+
+A Seção~\ref{sec:motivacao} distinguiu repetibilidade (o mesmo sistema, no
+mesmo ambiente, produzindo resultados equivalentes em execuções sucessivas) de
+reprodutibilidade (um investigador independente, em outro ambiente, obtendo
+resultados equivalentes a partir do artefato publicado). Essa distinção se
+confirma, e não se dilui, à luz dos resultados apresentados: os dados da
+campanha final controlada (Capítulo~\ref{chap:resultados}) medem repetibilidade
+--- nenhum deles envolveu replicação por outro pesquisador ou laboratório. O
+framework favorece reprodutibilidade por construção (código aberto, protocolo
+documentado, artefatos estruturados de saída, Seção~\ref{sec:rel_reprodutibilidade}),
+mas essa é uma propriedade de \emph{desenho}, não um resultado
+\emph{demonstrado} nesta dissertação. Essa distinção não invalida a
+contribuição do trabalho; delimita, com precisão, o que foi de fato
+demonstrado empiricamente, em contraste com o que é apenas facilitado pelo
+desenho do sistema --- e é por isso que a replicação independente do protocolo
+por outro laboratório aparece explicitamente como primeiro passo de trabalho
+futuro (Seção~\ref{sec:futuros}).
+
+\section{Limitações}
+\label{sec:limitacoes}
+
+Além das limitações de validação em simulação e de ambiente estático discutidas
+a seguir, as seguintes limitações adicionais merecem registro explícito por
+afetarem diretamente a interpretação dos resultados desta dissertação:
+
+\begin{itemize}
+    \item \textbf{Avaliação quantitativa restrita a uma única unidade móvel.}
+    Embora a arquitetura do Fleet UI suporte múltiplas unidades operando
+    simultaneamente sob papéis distintos (MUUT/FUUT/SU, Seção~\ref{sec:papeis}),
+    toda a avaliação quantitativa de repetibilidade reportada nos
+    Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados} foi realizada com um
+    único TurtleBot4 Standard. Escalabilidade e comportamento sob operação
+    simultânea de múltiplos robôs --- incluindo eventuais interferências de
+    rede, DDS ou TF entre unidades --- não foram empiricamente avaliados.
+
+    \item \textbf{Escopo restrito da campanha quantitativa.} A campanha final
+    utiliza $N=10$ replays, superando a limitação inicial de amostra muito
+    pequena para o cenário controlado. No entanto, esse $N$ maior foi aplicado a
+    uma única rota curta, em um único ambiente e com uma única plataforma
+    simulada. Assim, a estimativa de variabilidade é mais robusta para o cenário
+    \texttt{dissertation\_\allowbreak clean01}, mas não generaliza automaticamente
+    para rotas longas, curvas acentuadas, obstáculos dinâmicos, múltiplos robôs
+    ou hardware real.
+\end{itemize}
+
+A validação em simulação, embora controlada, não captura todos os fenômenos
+relevantes em ambientes físicos: slip de roda em superfícies irregulares, variação
+de temperatura e umidade que afeta a calibração do LiDAR, e deriva de IMU de longo
+prazo. Experimentos em hardware real são a extensão mais urgente deste trabalho.
+
+O protocolo atual assume que o ambiente permanece estático entre as execuções.
+Qualquer variação --- um objeto movido, uma pessoa cruzando o campo do LiDAR ---
+invalida a comparação entre execuções. A integração de detecção de mudanças ambientais
+como pré-condição para aceitar uma execução de replay é um desenvolvimento natural.
+
+\section{Trabalhos Futuros}
+\label{sec:futuros}
+
+A agenda de trabalhos futuros pode ser organizada em três horizontes.
+
+\textbf{Curto prazo}: ampliar a campanha controlada para múltiplas rotas,
+incluindo trajetórias mais longas, curvas fechadas e obstáculos dinâmicos;
+repetir o protocolo em hardware físico com TurtleBot4 real; comparar
+\texttt{/\allowbreak odom}, pose estimada por SLAM e \textit{ground truth} do
+Gazebo em uma mesma campanha para separar erro de controle, erro de localização
+e erro de medição; avaliar quantitativamente cenários multi-robô (MUUT+FUUT
+simultâneos), respondendo diretamente à limitação de escopo single-robot
+registrada na Seção~\ref{sec:limitacoes}; integrar câmera OAK-D para coleta de
+dados visuais sincronizados com trajetória.
+
+\textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações
+ambientais entre execuções; interface para exportação de dados no formato Roboflow
+ou HuggingFace, facilitando o uso dos bags como dataset para treinamento de modelos
+de navegação; suporte a experimentos com obstáculos dinâmicos programáveis; estudo
+de usabilidade controlado com participantes externos para quantificar a redução de
+esforço de engenharia atribuída à interface web (PP4).
+
+\textbf{Longo prazo}: generalização do framework para robôs além da família
+TurtleBot, incluindo manipuladores móveis; integração com plataformas de CI/CD
+para robótica (\textit{continuous integration} de algoritmos de navegação via
+execução automatizada do protocolo de repetibilidade); publicação do framework
+no ecossistema ROS~2 como pacote instalável via \texttt{apt}; replicação
+independente do protocolo por outro laboratório, como primeiro passo em direção
+à reprodutibilidade no sentido forte discutido na Seção~\ref{sec:repro_vs_repet}.
+
+\section{Consideração Final}
+\label{sec:final}
+
+A repetibilidade em robótica experimental não depende apenas de executar o mesmo
+comando várias vezes; depende de controlar cuidadosamente o estado inicial, a
+pilha de navegação, a coleta de dados e o método de comparação. A campanha final
+desta dissertação mostra que, com infraestrutura adequada, é possível executar
+dez replays independentes em simulação, todos partindo praticamente do mesmo
+estado em \texttt{/\allowbreak odom}, e obter RMSE médio de 3,35\,cm em relação
+à execução de referência. Mais importante que o número isolado é o protocolo que
+o torna interpretável: baseline limpa, relançamento controlado entre replays,
+coleta padronizada em MCAP e análise automatizada.

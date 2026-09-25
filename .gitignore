@@ -21,3 +21,14 @@ __pycache__/
 .vscode/
 *.swp
 *~
+
+# Dissertação (LaTeX) — artefatos de build
+dissertacao/**/*.aux
+dissertacao/**/*.log
+dissertacao/**/*.out
+dissertacao/**/*.toc
+dissertacao/**/*.bbl
+dissertacao/**/*.blg
+dissertacao/**/*.synctex.gz
+dissertacao/**/*.fdb_latexmk
+dissertacao/**/*.fls
