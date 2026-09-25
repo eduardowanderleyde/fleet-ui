@@ -37,8 +37,8 @@ export default function SimulationPanel({ sim }) {
       )}
 
       {!status.running && (
-        <div style={{ fontSize: '0.68rem', color: '#fbbf24' }}>
-          3 robôs simultâneos: bringup da simulação pode falhar nesta máquina (teto de CPU/DDS).
+        <div style={{ fontSize: '0.68rem', color: '#8b92a8' }}>
+          {ROBOTS.length} robôs ({ROBOTS.join('+')}) — par validado como estável nesta máquina.
         </div>
       )}
 

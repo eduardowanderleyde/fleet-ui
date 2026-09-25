@@ -11,7 +11,12 @@ export const SHAPES = {
   V:  { label: 'V',  points: [[0, 1.5, 0], [0.75, 0, 0], [1.5, 1.5, 0]] },
   '\\': { label: '\\', points: [[0, 0, 0], [0.75, -0.75, 0], [1.5, -1.5, 0]] },
 }
-export const ROBOTS = ['tb1', 'tb2', 'tb3']
+// 2 robôs por padrão — mesmo par validado como estável no resto do app
+// (FLEET_ROBOTS). 3 robôs sobrecarrega o Nav2/DDS nesta máquina: testado ao
+// vivo em 2026-09-25, tb2 e tb3 ficaram presos indefinidamente esperando
+// serviços do lifecycle_manager que nunca respondem. SHAPES já tem um ponto
+// a mais que isso (pensadas pra até 3), o dispatch só usa os N primeiros.
+export const ROBOTS = ['tb1', 'tb2']
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
 export function useSimulation(intervalMs = 2000) {
