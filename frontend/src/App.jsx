@@ -436,9 +436,10 @@ function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
   const onMouseLeave = () => { dragRef.current = null; setHoverCoord(null) }
   const onMouseUp    = () => { dragRef.current = null }
 
-  // Clique → sempre adiciona waypoint
+  // Clique → adiciona waypoint (só quando a função for passada — desligado
+  // por padrão pra não acumular pontos sem querer em cima do mapa).
   const onClick = e => {
-    if (dragRef.current) return
+    if (dragRef.current || !onAddWaypoint) return
     const rect = canvasRef.current.getBoundingClientRect()
     const world = canvasToWorld(e.clientX - rect.left, e.clientY - rect.top)
     if (!world) return
@@ -598,11 +599,6 @@ export default function App() {
   useEffect(() => {
     if (job && !job.running && job.exit_code === 0) refreshRoutes()
   }, [job?.running, job?.exit_code, refreshRoutes])
-
-  // Adiciona waypoint vindo do clique no mapa
-  const handleMapAddWaypoint = useCallback((x, y) => {
-    setCfg(prev => ({ ...prev, points: [...prev.points, [x, y, 0]] }))
-  }, [])
 
   // Navega pela rota definida sem gravar (teste rápido de percurso)
   const [navigating, setNavigating] = useState(false)
@@ -894,7 +890,6 @@ export default function App() {
             robotId={effectiveRobotId}
             poses={allPoses}
             waypoints={cfg.command === 'record' ? cfg.points : []}
-            onAddWaypoint={handleMapAddWaypoint}
             onNavigateTo={handleMapNavigateTo}
           />
         </div>
