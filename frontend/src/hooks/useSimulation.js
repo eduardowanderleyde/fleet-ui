@@ -45,7 +45,8 @@ export function useSimulation(intervalMs = 2000) {
         const [x, y, yaw] = points[i] || [0, 0, 0]
         setDispatch(d => ({ ...d, [robotId]: 'pending' }))
         try {
-          await goToPoint({ robotId, x, y, yaw })
+          const result = await goToPoint({ robotId, x, y, yaw })
+          if (!result.success) throw new Error(result.message || 'falhou sem detalhe')
           setDispatch(d => ({ ...d, [robotId]: 'ok' }))
         } catch (e) {
           setDispatch(d => ({ ...d, [robotId]: `error: ${e.message}` }))
