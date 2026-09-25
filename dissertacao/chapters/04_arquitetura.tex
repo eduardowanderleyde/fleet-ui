@@ -22,7 +22,7 @@ ilustra essa estrutura.
 
 \node[msgbox, below=3.6cm of sim] (msgs) {\texttt{fleet\_msgs}\\N services / M msgs};
 \node[modbox, left=1.4cm of msgs] (orch) {\texttt{fleet\_orchestrator}\\\scriptsize record/replay, papéis};
-\node[modbox, right=1.4cm of msgs] (coll) {\texttt{sensor\_data\_collector}\\\scriptsize bags MCAP por robô};
+\node[modbox, right=1.4cm of msgs] (coll) {\texttt{fleet\_data\_collector}\\\scriptsize bags MCAP por robô};
 
 \begin{scope}[on background layer]
 \node[draw, dashed, rounded corners, fit=(orch)(msgs)(coll), inner sep=0.4cm] (orchlayer) {};
@@ -93,9 +93,12 @@ tópico correto, o que permite lookups simultâneos e independentes da cadeia
 A execução do orquestrador em um \texttt{MultiThreadedExecutor} é fundamental para
 evitar deadlocks: os callbacks de serviço que invocam \texttt{wait\_\allowbreak for\_\allowbreak server}
 do action client Nav2 precisam ocorrer em threads separadas das que processam
-as respostas de discovery do DDS. A versão inicial com executor single-thread
-manifestava timeouts intermitentes em chamadas de \texttt{go\_\allowbreak to\_\allowbreak point}
-exatamente por esse motivo.
+as respostas de descoberta automática de nós do DDS \cite{macenski2022ros2}. A
+versão inicial com executor single-thread manifestava timeouts intermitentes em
+chamadas de \texttt{go\_\allowbreak to\_\allowbreak point} exatamente por esse motivo --- uma
+manifestação específica do ROS~2 da mesma classe geral de defeitos de
+concorrência e comunicação já documentada em sistemas ROS~1 por
+\citeonline{timperley2024}.
 
 
 A Tabela~\ref{tab:nav_state_transicoes} formaliza as transições do campo
@@ -151,26 +154,30 @@ caminho do arquivo bag gerado na resposta --- o que elimina a necessidade de
 inferência posterior sobre qual arquivo corresponde a qual execução.
 
 A camada de QoS do coletor é a sua parte mais delicada. Tópicos de sensores
-em simulação Gazebo usam \texttt{BEST\_\allowbreak EFFORT}, enquanto o SLAM Toolbox usa
-\texttt{RELIABLE + VOLATILE} e o AMCL usa \texttt{RELIABLE + TRANSIENT\_\allowbreak LOCAL}.
-Assinar um tópico \texttt{RELIABLE} com um subscriber \texttt{BEST\_\allowbreak EFFORT}
-resulta em incompatibilidade silenciosa de QoS --- o subscriber nunca recebe
-mensagens, mas nenhum erro é reportado. A implementação cria perfis de QoS
-distintos por categoria de tópico, eliminando essa fonte de dados ausentes.
+em simulação Gazebo usam \texttt{BEST\_\allowbreak EFFORT}, enquanto o SLAM Toolbox
+\cite{macenski2021slam} usa \texttt{RELIABLE + VOLATILE} e o AMCL usa
+\texttt{RELIABLE + TRANSIENT\_\allowbreak LOCAL}. Assinar um tópico \texttt{RELIABLE} com
+um subscriber \texttt{BEST\_\allowbreak EFFORT} resulta em incompatibilidade silenciosa de
+QoS --- o subscriber nunca recebe mensagens, mas nenhum erro é reportado
+\cite{macenski2022ros2}. A implementação cria perfis de QoS distintos por
+categoria de tópico, eliminando essa fonte de dados ausentes.
 
 \section{O Backend REST e a Interface Web}
 \label{sec:backend_web}
 
 O backend FastAPI expõe os serviços ROS~2 como endpoints HTTP, permitindo que a
-interface web opere sem exposição direta ao DDS. A decisão de não usar ROSBridge
-foi motivada pela simplicidade: um backend FastAPI com chamadas subprocess ao
-\texttt{ros2 service call} elimina a dependência de um servidor de WebSocket e
-reduz a superfície de configuração para novos usuários.
+interface web opere sem exposição direta ao DDS. A decisão de não usar o
+protocolo rosbridge \cite{toris2015} foi motivada pela simplicidade: um backend
+FastAPI com chamadas subprocess ao \texttt{ros2 service call} elimina a
+dependência de um servidor de WebSocket e reduz a superfície de configuração
+para novos usuários.
 
 O backend também mantém um subscriber ROS~2 nativo para os tópicos de status
 (\texttt{/\allowbreak fleet/\allowbreak status}), mapa (\texttt{/\allowbreak map}) e pose (\texttt{/\allowbreak tf}), que são
-servidos diretamente via REST a 300\,ms de intervalo de polling. O mapa
-\texttt{OccupancyGrid} é convertido para PNG RGBA em memória --- células livres
+servidos diretamente via REST --- o frontend faz polling de status e pose a
+300\,ms de intervalo e do mapa a 1500\,ms, intervalos mais espaçados por ser
+um payload maior e variar com menor frequência. O mapa
+\texttt{OccupancyGrid} \cite{elfes1989} é convertido para PNG RGBA em memória --- células livres
 em creme, ocupadas em azul-escuro, desconhecidas em azul-cinza --- e retornado
 como base64 ao frontend, que o renderiza em um canvas HTML5.
 

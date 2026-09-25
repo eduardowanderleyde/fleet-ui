@@ -42,7 +42,7 @@ original quando o namespace é vazio, validado isoladamente com
 \texttt{xacro ... namespace:=tb1} sem necessidade de subir o Gazebo. Cada robô
 (\texttt{tb1}, \texttt{tb2}, \texttt{tb3}) é então \textit{spawnado} com seu próprio bridge
 ROS↔Gazebo, gerado dinamicamente por \texttt{spawn\_\allowbreak multi\_\allowbreak tb4.\allowbreak launch.\allowbreak py},
-enquanto SLAM~Toolbox e Nav2 seguem rodando a partir dos launch files
+enquanto SLAM~Toolbox \cite{macenski2021slam} e Nav2 seguem rodando a partir dos launch files
 originais e intocados de \texttt{turtlebot4\_\allowbreak navigation}, que já suportam
 namespace de fábrica segundo a convenção padrão do Nav2 para multi-robô:
 tópicos de TF por robô (\texttt{/tb1/\allowbreak tf}), com \texttt{frame\_\allowbreak id}s sem prefixo
@@ -70,7 +70,7 @@ regressões que a simples leitura do arquivo xacro não detectaria.
 \label{sec:impl_orquestrador}
 
 O orquestrador (\texttt{fleet\_\allowbreak orchestrator}) é implementado como um nó ROS~2 em Python
-com \texttt{MultiThreadedExecutor}. A estrutura de estado por robô, \texttt{RobotRuntime},
+com \texttt{MultiThreadedExecutor} \cite{macenski2022ros2}. A estrutura de estado por robô, \texttt{RobotRuntime},
 mantém seis campos: \texttt{nav\_\allowbreak state}, \texttt{is\_\allowbreak recording}, \texttt{is\_\allowbreak navigating},
 \texttt{route\_\allowbreak poses}, \texttt{last\_\allowbreak saved} e \texttt{pending\_\allowbreak goal\_\allowbreak pose}. Este último
 é o mais crítico para a gravação: ao receber o callback de resultado do action Nav2,
@@ -270,7 +270,7 @@ desserializando diretamente as mensagens de tipos conhecidos
 (\texttt{nav\_\allowbreak msgs/\allowbreak Odometry}, \texttt{geometry\_\allowbreak msgs/\allowbreak PoseWithCovarianceStamped})
 a partir do formato CDR armazenado no MCAP. A versão do script utilizada na
 campanha final desta dissertação calcula o RMSE pairwise após reamostragem em
-tempo normalizado: cada trajetória é projetada para uma grade comum no intervalo
+tempo normalizado \cite{amigoni2010}: cada trajetória é projetada para uma grade comum no intervalo
 $[0,1]$, e as coordenadas $x$ e $y$ são interpoladas nessa grade antes do cálculo
 do erro quadrático médio. Essa escolha evita associar pontos apenas pelo índice
 da amostra, o que poderia introduzir artefatos quando duas execuções percorrem
@@ -284,7 +284,7 @@ normalizada.
 
 Uma segunda fonte de tópico precisou ser tratada com o mesmo cuidado: o
 \texttt{fleet\_\allowbreak data\_\allowbreak collector} grava, para cada execução, tanto a pose ao vivo
-do SLAM~Toolbox (tópico curto \texttt{pose}, corrigida no referencial do mapa por
+do SLAM~Toolbox \cite{macenski2021slam} (tópico curto \texttt{pose}, corrigida no referencial do mapa por
 \textit{scan matching} contra os \textit{scans} de lidar) quanto a odometria
 bruta das rodas (\texttt{odom}), que acumula deriva sem nenhuma correção. Em uma
 versão anterior do script, o modo \texttt{--\allowbreak trajectory-\allowbreak topic auto} só
@@ -310,19 +310,19 @@ o \texttt{nav2\_\allowbreak mppi\_\allowbreak controller} sorteia ruído gaussia
 candidata a cada ciclo de controle, com \texttt{regenerate\_\allowbreak noises: true} e
 desvios-padrão explicitamente configurados (\texttt{vx\_\allowbreak std}, \texttt{vy\_\allowbreak std},
 \texttt{wz\_\allowbreak std}) --- é assim que o MPPI (\textit{Model Predictive Path Integral})
-funciona por definição, não um parâmetro mal ajustado. A consequência direta
+\cite{williams2016} funciona por definição, não um parâmetro mal ajustado. A consequência direta
 é que duas execuções da mesma rota, no mesmo robô e no mesmo ambiente,
 divergem um pouco apenas pela amostragem aleatória do controlador: uma fonte
 de variância esperada e não eliminável, a menos que se troque de controlador
---- por exemplo, para um determinístico como DWB ou Regulated Pure Pursuit,
-alternativa não avaliada nesta dissertação.
+--- por exemplo, para um determinístico como DWB \cite{fox1997} ou Regulated Pure Pursuit
+\cite{macenski2023survey}, alternativa não avaliada nesta dissertação.
 
 
 \subsection{Reamostragem e RMSE: o Código que Sustenta a Métrica}
 \label{sec:impl_rmse_codigo}
 
 O Código~\ref{lst:rmse_impl} reproduz as funções centrais de reamostragem e
-cálculo de RMSE em \texttt{analyze\_\allowbreak runs.py}. A função
+cálculo de RMSE \cite{thrun2005} em \texttt{analyze\_\allowbreak runs.py}. A função
 \texttt{\_\allowbreak normalised\_\allowbreak time\_\allowbreak grid} converte o vetor temporal de cada bag
 para o intervalo $[0,1]$; em seguida, \texttt{numpy.interp} calcula posições
 homólogas na mesma grade normalizada. A implementação por índice permanece
@@ -376,7 +376,7 @@ em um canvas HTML5 com coordenadas alinhadas ao sistema de referência ROS: a or
 do canvas corresponde ao canto inferior esquerdo do mapa, e o eixo Y é invertido
 (positivo para cima em ROS, negativo no canvas). A conversão utiliza os metadados
 do \texttt{OccupancyGrid} \cite{elfes1989} (\texttt{resolution}, \texttt{origin\_\allowbreak x}, \texttt{origin\_\allowbreak y})
-publicados pelo SLAM Toolbox.
+publicados pelo SLAM Toolbox \cite{macenski2021slam}.
 
 O mapa pré-construído do \textit{warehouse} (\texttt{warehouse.pgm} +
 \texttt{warehouse.yaml}) é utilizado como fundo estático com alinhamento perfeito:

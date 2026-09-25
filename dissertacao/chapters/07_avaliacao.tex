@@ -113,8 +113,13 @@ limiar, como apresentado na Seção~\ref{sec:res_qa3}.
 \label{sec:ameacas}
 
 Seguindo a prática de reportar ameaças à validade em pesquisa empírica de
-Engenharia de Software \cite{amigoni2010}, esta seção examina os limites da
-avaliação nas quatro dimensões clássicas.
+Engenharia de Software \cite{amigoni2010}, e em resposta ao diagnóstico de
+rigor metodológico limitado --- comparação estatística fraca, baixa
+disponibilidade de artefatos --- identificado em experimentos de robótica
+autônoma publicados \cite{amigoni2014}, esta seção examina os limites da
+avaliação nas quatro dimensões clássicas, na linha do que
+\citeonline{bonsignorio2015} defendem como pesquisa em robótica replicável e
+mensurável.
 
 \textbf{Validade de construto.} O RMSE foi calculado a partir do tópico
 \texttt{/\allowbreak odom}, não de um sistema de captura de movimento externo. Tanto a
@@ -155,7 +160,11 @@ cada replay, com a baseline durando cerca de 2,5$\times$ menos que os replays
 distinto, não por falta de repetibilidade do robô. Por esse motivo, o RMSE
 calculado entre replays entre si (que compartilham o mesmo mecanismo de
 navegação) é a métrica mais fiel à repetibilidade que este trabalho pretende
-medir; comparações contra a gravação baseline, que usa um mecanismo de
+medir --- seguindo a mesma lógica metodológica adotada por
+\citeonline{maset2022} para repetibilidade em mapeamento 3D, de comparar
+execuções nominalmente idênticas diretamente entre si em vez de cada uma
+isoladamente contra um único valor de referência; comparações contra a
+gravação baseline, que usa um mecanismo de
 navegação distinto, misturam essa diferença de implementação com
 repetibilidade real e devem ser interpretadas com essa ressalva.
 
@@ -170,7 +179,8 @@ fazendo com que os dez bags analisados comecem praticamente no mesmo ponto em
 local, estado do SLAM e estabilização do costmap continuam sendo possíveis fontes
 de variabilidade residual. Em particular, o controlador local usado
 (\texttt{nav2\_\allowbreak mppi\_\allowbreak controller}, algoritmo MPPI --- \textit{Model
-Predictive Path Integral}) é estocástico por projeto: a cada ciclo de controle
+Predictive Path Integral} \cite{williams2016}) é estocástico por projeto: a
+cada ciclo de controle
 (20\,Hz), com \texttt{regenerate\_\allowbreak noises: true}, ruído gaussiano é
 reamostrado sobre a trajetória candidata. Ou seja, duas execuções da mesma
 rota, no mesmo robô e no mesmo ambiente, divergem parcialmente apenas pela
@@ -202,7 +212,13 @@ restritos a um único cenário, uma única rota curta, um único robô simulado 
 demonstrar a capacidade do framework de automatizar e medir repetibilidade sob
 condições controladas, ela não deve ser interpretada como caracterização
 estatística geral do comportamento do TurtleBot4, do Nav2 ou do SLAM Toolbox em
-qualquer ambiente.
+qualquer ambiente. A opção é, portanto, pela profundidade de análise por
+execução em detrimento da amplitude de cenários: ao contrário de validações
+agregadas de longa distância como o Marathon~2 \cite{macenski2020marathon},
+que percorrem dezenas de quilômetros em ambientes variados mas reportam
+critérios agregados (distância total, intervenções humanas) sem análise de
+consistência entre execuções individuais, esta dissertação restringe o
+escopo ambiental para poder medir exatamente essa consistência.
 
 \section{Considerações Finais}
 \label{sec:aval_conclusao}

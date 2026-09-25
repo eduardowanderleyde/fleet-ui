@@ -26,7 +26,12 @@ sob operação simultânea de múltiplos robôs.
 
 \textbf{Nível experimental}: o protocolo record--replay com análise RMSE pairwise
 por reamostragem temporal normalizada constitui uma metodologia de avaliação que
-pode ser adotada por outros grupos sem modificação. A campanha final em
+pode ser adotada por outros grupos sem modificação --- formalizando, para
+navegação 2D, o tipo de comparação direta entre execuções nominalmente
+idênticas que \citeonline{maset2022} empregam em mapeamento 3D, e preenchendo a
+lacuna de protocolo formal de record--replay e de métricas de RMSE entre
+trajetórias que \citeonline{hamer2025} deixam em aberto ao comparar algoritmos
+de SLAM por variabilidade entre execuções. A campanha final em
 simulação, composta por uma baseline limpa e $N=10$ replays independentes da
 rota \texttt{dissertation\_\allowbreak clean01}, obteve RMSE médio de
 3,35\,cm contra a execução de referência, RMSE máximo de 4,76\,cm, erro final
@@ -139,19 +144,23 @@ e retomada como trabalho futuro.
 A Seção~\ref{sec:motivacao} distinguiu repetibilidade (o mesmo sistema, no
 mesmo ambiente, produzindo resultados equivalentes em execuções sucessivas) de
 reprodutibilidade (um investigador independente, em outro ambiente, obtendo
-resultados equivalentes a partir do artefato publicado). Essa distinção se
+resultados equivalentes a partir do artefato publicado) --- dois conceitos que
+a literatura de ciência experimental frequentemente trata como sinônimos, mas
+que não o são \cite{acm2020badging, bonsignorio2015}. Essa distinção se
 confirma, e não se dilui, à luz dos resultados apresentados: os dados da
 campanha final controlada (Capítulo~\ref{chap:resultados}) medem repetibilidade
 --- nenhum deles envolveu replicação por outro pesquisador ou laboratório. O
 framework favorece reprodutibilidade por construção (código aberto, protocolo
 documentado, artefatos estruturados de saída, Seção~\ref{sec:rel_reprodutibilidade}),
-mas essa é uma propriedade de \emph{desenho}, não um resultado
-\emph{demonstrado} nesta dissertação. Essa distinção não invalida a
-contribuição do trabalho; delimita, com precisão, o que foi de fato
-demonstrado empiricamente, em contraste com o que é apenas facilitado pelo
-desenho do sistema --- e é por isso que a replicação independente do protocolo
-por outro laboratório aparece explicitamente como primeiro passo de trabalho
-futuro (Seção~\ref{sec:futuros}).
+no espírito da estrutura de artefatos de pesquisa orientada pelos
+\textit{badges} da ACM que \citeonline{guevaravega2024} propõem para tornar
+experimentos de fato reexecutáveis por terceiros, mas essa é uma propriedade
+de \emph{desenho}, não um resultado \emph{demonstrado} nesta dissertação. Essa
+distinção não invalida a contribuição do trabalho; delimita, com precisão, o
+que foi de fato demonstrado empiricamente, em contraste com o que é apenas
+facilitado pelo desenho do sistema --- e é por isso que a replicação
+independente do protocolo por outro laboratório aparece explicitamente como
+primeiro passo de trabalho futuro (Seção~\ref{sec:futuros}).
 
 \section{Limitações}
 \label{sec:limitacoes}
@@ -200,13 +209,21 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     simulada. Assim, a estimativa de variabilidade é mais robusta para o cenário
     \texttt{dissertation\_\allowbreak clean01}, mas não generaliza automaticamente
     para rotas longas, curvas acentuadas, obstáculos dinâmicos, múltiplos robôs
-    ou hardware real.
+    ou hardware real. Essa restrição de escopo é precisamente o tipo de
+    limitação que a literatura de metodologia experimental em robótica já
+    identificou como recorrente --- comparação estatística concentrada em
+    poucos cenários e pouca variação de condições experimentais
+    \cite{amigoni2014} --- e que esta dissertação buscou mitigar, sem
+    eliminar, ao elevar $N$ de poucas unidades para dez réplicas independentes
+    em um cenário controlado.
 \end{itemize}
 
 A validação em simulação, embora controlada, não captura todos os fenômenos
 relevantes em ambientes físicos: slip de roda em superfícies irregulares, variação
 de temperatura e umidade que afeta a calibração do LiDAR, e deriva de IMU de longo
-prazo. Experimentos em hardware real são a extensão mais urgente deste trabalho.
+prazo --- a mesma complementaridade entre simulação e experimentação física
+defendida por \citeonline{amigoni2010} (Seção~\ref{sec:rel_repeticao}).
+Experimentos em hardware real são a extensão mais urgente deste trabalho.
 
 O protocolo atual assume que o ambiente permanece estático entre as execuções.
 Qualquer variação --- um objeto movido, uma pessoa cruzando o campo do LiDAR ---
@@ -258,7 +275,9 @@ entre versões, o que exige um executor de CI com GPU e tempo de execução maio
 que o atual; publicação do framework no ecossistema ROS~2 como pacote
 instalável via \texttt{apt}; replicação independente do protocolo por outro
 laboratório, como primeiro passo em direção à reprodutibilidade no sentido
-forte discutido na Seção~\ref{sec:repro_vs_repet}.
+forte discutido na Seção~\ref{sec:repro_vs_repet}, na linha do que
+\citeonline{bonsignorio2015} defendem como pesquisa em robótica replicável e
+mensurável.
 
 \section{Consideração Final}
 \label{sec:final}

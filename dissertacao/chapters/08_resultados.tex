@@ -53,9 +53,12 @@ Replay 10 & 16,78 & 0,817 & 4,08 & 2,26 \\
 \end{table}
 
 Considerando os nove replays comparados à referência, o RMSE médio foi de
-3,35\,cm, com desvio-padrão de 1,10\,cm. O menor RMSE observado foi de
-1,65\,cm e o maior foi de 4,76\,cm. Todos os valores ficaram substancialmente
-abaixo da tolerância padrão de objetivo do Nav2 de 25\,cm.
+3,35\,cm, com desvio-padrão de 1,10\,cm — seguindo a prática, adotada por
+\citeonline{maset2022} na avaliação de repetibilidade de sistemas robóticos,
+de reportar a dispersão entre execuções e não apenas um valor médio isolado.
+O menor RMSE observado foi de 1,65\,cm e o maior foi de 4,76\,cm. Todos os
+valores ficaram substancialmente abaixo da tolerância padrão de objetivo do
+Nav2 de 25\,cm.
 
 O resultado é metodologicamente mais forte que as campanhas preliminares porque
 os pontos iniciais foram controlados. No \texttt{summary.json}, todos os dez
@@ -113,7 +116,20 @@ metodológica adotada nesta seção: a métrica de repetibilidade que isola o
 fenômeno de interesse é o RMSE entre execuções que usam o mesmo mecanismo de
 navegação (par-a-par, matriz \texttt{pairwise\_\allowbreak rmse\_\allowbreak m} do
 \texttt{summary.json}), não o RMSE contra uma execução de referência gravada
-por um mecanismo distinto.
+por um mecanismo distinto — escolha alinhada à recomendação de
+\citeonline{maset2022} de comparar execuções nominalmente idênticas entre si
+como medida primária de repetibilidade, em vez de depender exclusivamente de
+uma referência única, e ao diagnóstico de \citeonline{amigoni2014} de que
+parte expressiva da literatura de robótica autônoma se limita a reportar
+médias sem uma comparação estatística mais rigorosa entre execuções.
+
+O RMSE residual de 2,00\,cm observado entre réplicas que compartilham o mesmo
+mecanismo de navegação não é atribuível a falha de repetibilidade do sistema:
+o controlador padrão do Nav2 utilizado, o MPPI (\textit{Model Predictive Path
+Integral}, Seção~\ref{sec:mppi}), amostra ruído gaussiano sobre a sequência de
+controles a cada ciclo \cite{williams2016}. Alguma variação entre execuções
+nominalmente idênticas é, portanto, esperada por construção do próprio método
+de controle, não um indício de degradação do protocolo de replay.
 
 \section{QA3 — Consistência Temporal}
 \label{sec:res_qa3}
@@ -154,7 +170,8 @@ contagens médias de mensagens e as frequências efetivas estimadas por tópico.
 \end{table}
 
 A trajetória principal da análise foi extraída de \texttt{/\allowbreak odom};
-\texttt{/\allowbreak pose} foi preservado como dado auxiliar. A presença
+\texttt{/\allowbreak pose}, publicado pelo SLAM Toolbox \cite{macenski2021slam},
+foi preservado como dado auxiliar. A presença
 consistente desses tópicos nos dez bags confirma que a coleta em MCAP permaneceu
 operacional mesmo com o relançamento completo da simulação entre replays.
 
@@ -181,7 +198,11 @@ diagnóstica e motivação do protocolo final, mas não substituem a campanha
 o estado inicial foi efetivamente controlado. O principal valor desses dados é
 mostrar empiricamente que a infraestrutura de coleta não basta: para que o RMSE
 seja interpretável como repetibilidade de trajetória, o protocolo precisa impor
-mesma rota, mesma ação de navegação, mesma condição inicial e coleta padronizada.
+mesma rota, mesma ação de navegação, mesma condição inicial e coleta padronizada
+— o tipo de controle completo de variáveis que \citeonline{amigoni2010}
+identifica como vantagem da simulação sobre o hardware real, e uma
+pré-condição, segundo \citeonline{bonsignorio2015}, para que resultados de
+robótica autônoma sejam replicáveis e mensuráveis.
 
 \section{Considerações Finais}
 \label{sec:res_conclusao}
