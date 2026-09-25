@@ -1,5 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSimulation } from '../hooks/useSimulation'
+import { goToPoint } from '../api/fleetApi'
+
+// Formação em L: 3 pontos, um por robô — o clássico "pixel voador" de show de
+// drone, só que com 3 pontos em vez de milhares.
+const PRESET_L = [[0, 0, 0], [0, 1.5, 0], [1.5, 1.5, 0]]
+const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
 const S = {
   panel: {
@@ -32,16 +38,66 @@ export default function SimulationPanel() {
   const [mode, setMode] = useState('single')
   const [world, setWorld] = useState('warehouse')
   const [robots, setRobots] = useState(['tb1', 'tb2'])
+  // Formação: 1 ponto (x,y,yaw) por robô, na mesma ordem de `robots` —
+  // cada robô é "um pixel" da formação, ideia de show de drone com 2-3
+  // robôs em vez de milhares.
+  const [formation, setFormation] = useState(PRESET_L.slice(0, 2))
+  const [dispatch, setDispatch] = useState({})  // robotId -> 'pending' | 'ok' | 'error: ...'
+  const dispatchedRef = useRef(false)
 
   const toggleRobot = (id) => {
-    setRobots(r => r.includes(id) ? r.filter(x => x !== id) : [...r, id])
+    setRobots(r => {
+      const next = r.includes(id) ? r.filter(x => x !== id) : [...r, id]
+      setFormation(f => next.map((_, i) => f[i] || PRESET_L[i] || [0, 0, 0]))
+      return next
+    })
   }
+
+  const applyPresetL = () => setFormation(robots.map((_, i) => PRESET_L[i] || [0, 0, 0]))
+
+  const setPoint = (i, axis, val) => {
+    setFormation(f => f.map((p, pi) => pi === i ? [
+      axis === 'x' ? parseFloat(val) || 0 : p[0],
+      axis === 'y' ? parseFloat(val) || 0 : p[1],
+      axis === 'yaw' ? parseFloat(val) || 0 : p[2],
+    ] : p))
+  }
+
+  // Assim que a simulação fica pronta, manda cada robô pro seu ponto da
+  // formação, em sequência (um de cada vez, com uma pequena pausa entre —
+  // "mesmo que sequencial" é aceitável, não precisa ser simultâneo) — só
+  // uma vez por sessão de simulação (dispatchedRef reseta quando ela para).
+  useEffect(() => {
+    if (!status.running) {
+      dispatchedRef.current = false
+      setDispatch({})
+      return
+    }
+    if (mode !== 'multi' || !status.ready || dispatchedRef.current) return
+    dispatchedRef.current = true
+
+    ;(async () => {
+      for (let i = 0; i < robots.length; i++) {
+        const robotId = robots[i]
+        const [x, y, yaw] = formation[i] || [0, 0, 0]
+        setDispatch(d => ({ ...d, [robotId]: 'pending' }))
+        try {
+          await goToPoint({ robotId, x, y, yaw })
+          setDispatch(d => ({ ...d, [robotId]: 'ok' }))
+        } catch (e) {
+          setDispatch(d => ({ ...d, [robotId]: `error: ${e.message}` }))
+        }
+        await sleep(1500)  // dá tempo do robô sair antes do próximo — mais fácil de ver na tela
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status.running, status.ready, mode])
 
   const badge = statusBadge(status)
 
   return (
     <div style={S.panel}>
-      <div style={S.title}>Simulação (Gazebo + Nav2 + frota)</div>
+      <div style={S.title}>Missão Coordenada — Planejar → Validar → Executar</div>
 
       {status.running ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -53,6 +109,26 @@ export default function SimulationPanel() {
             <span style={{ color: '#a0aec0' }}>{status.world}</span>
           </div>
           {status.error && <div style={{ fontSize: '0.75rem', color: '#f87171' }}>{status.error}</div>}
+
+          {mode === 'multi' && status.ready && (
+            <div>
+              <span style={S.label}>Formação — dispatch</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                {robots.map(id => {
+                  const st = dispatch[id]
+                  const color = st === 'ok' ? '#6ee7b7' : st === 'pending' ? '#fbbf24' : st?.startsWith('error') ? '#f87171' : '#4b5563'
+                  const label = st === 'ok' ? '✓ chegou no ponto' : st === 'pending' ? '⏳ indo…' : st?.startsWith('error') ? `✗ ${st}` : '— aguardando'
+                  return (
+                    <div key={id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontFamily: 'monospace' }}>
+                      <span style={{ color: '#a0aec0' }}>{id}</span>
+                      <span style={{ color }}>{label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div style={S.log}>
             {status.lines.slice(-15).map((l, i) => <div key={i}>{l}</div>)}
           </div>
@@ -99,6 +175,37 @@ export default function SimulationPanel() {
                   3 robôs simultâneos é instável nesta máquina (teto de CPU) — 2 é o validado.
                 </div>
               )}
+            </div>
+          )}
+
+          {mode === 'multi' && robots.length >= 2 && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={S.label}>Formação — 1 ponto por robô</span>
+                <button onClick={applyPresetL} style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: '0.72rem', padding: 0 }}>
+                  ⬛ Formação em L
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {robots.map((id, i) => {
+                  const [x, y, yaw] = formation[i] || [0, 0, 0]
+                  return (
+                    <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#6366f1', width: '32px', fontFamily: 'monospace', fontWeight: 700 }}>{id}</span>
+                      {[['x', x], ['y', y], ['yaw', yaw]].map(([axis, val]) => (
+                        <div key={axis} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
+                          <span style={{ fontSize: '0.6rem', color: '#4b5563' }}>{axis}</span>
+                          <input type="number" step="0.1" value={val} onChange={e => setPoint(i, axis, e.target.value)}
+                            style={{ ...S.select, width: '64px', padding: '0.25rem 0.3rem', textAlign: 'center' }} />
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#4b5563', marginTop: '0.3rem' }}>
+                Assim que a simulação ficar pronta, cada robô vai pro seu ponto em sequência.
+              </div>
             </div>
           )}
 
