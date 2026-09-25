@@ -46,6 +46,7 @@ export default function SimulationPanel() {
   const [shape, setShape] = useState('L')
   const [robotCount, setRobotCount] = useState(2)
   const [dispatch, setDispatch] = useState({})  // robotId -> 'pending' | 'ok' | 'error: ...'
+  const [showLog, setShowLog] = useState(false)
   const dispatchedRef = useRef(false)
 
   const robots = ALL_ROBOTS.slice(0, robotCount)
@@ -118,9 +119,14 @@ export default function SimulationPanel() {
             </div>
           )}
 
-          <div style={S.log}>
-            {status.lines.slice(-15).map((l, i) => <div key={i}>{l}</div>)}
-          </div>
+          <button onClick={() => setShowLog(v => !v)} style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: '0.72rem', padding: 0, alignSelf: 'flex-start' }}>
+            {showLog ? '▲ esconder log técnico' : '▼ ver log técnico'}
+          </button>
+          {showLog && (
+            <div style={S.log}>
+              {status.lines.slice(-15).map((l, i) => <div key={i}>{l}</div>)}
+            </div>
+          )}
           <button onClick={stop} style={{ ...btn('#3a1a1a', '#f87171'), alignSelf: 'flex-start' }}>
             ■ Parar simulação
           </button>
