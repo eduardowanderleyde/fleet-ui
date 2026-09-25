@@ -3,7 +3,10 @@ import { SHAPES } from '../hooks/useSimulation'
 
 const S = {
   panel: {
-    position: 'absolute', top: '2.5rem', left: 0, zIndex: 100,
+    // Fixo no canto superior direito da tela — longe do mapa (coluna
+    // central), em vez de flutuar logo abaixo do botão "Simulação" e
+    // cobrir parte dele.
+    position: 'fixed', top: '3.2rem', right: '1rem', zIndex: 100,
     background: '#161a22', border: '1px solid #2a3142', borderRadius: '10px',
     padding: '1rem', width: '320px',
     boxShadow: '0 8px 32px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '0.75rem',
