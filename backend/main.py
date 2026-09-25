@@ -285,7 +285,12 @@ async def lifespan(app: FastAPI):
             for _rid in _ROBOTS:
                 _setup_robot(_rid)
 
-            # Verifica Nav2 periodicamente via ros2 action list (mais confiável que ActionClient)
+            # Verifica Nav2 periodicamente via ros2 action list (mais confiável que ActionClient).
+            # Guarda também QUAIS robôs têm /navigate_to_pose de verdade (não só
+            # "existe pelo menos um") — /api/simulation/status usa isso pra decidir
+            # "ready" de forma confiável, em vez de vasculhar log bruto por uma
+            # frase exata (ver _sim_reader_thread: frágil, já vimos ao vivo ficar
+            # travado em "ready": false com a simulação genuinamente funcional).
             def nav2_check_cb():
                 try:
                     env = {**os.environ}
@@ -293,11 +298,15 @@ async def lifespan(app: FastAPI):
                         ["bash", "-c", "source /opt/ros/jazzy/setup.bash 2>/dev/null; ros2 action list 2>/dev/null"],
                         capture_output=True, text=True, timeout=3, env=env,
                     )
-                    ready = "/navigate_to_pose" in r.stdout
+                    stdout = r.stdout
                 except Exception:
-                    ready = False
+                    stdout = ""
+                ready_robots = [rid for rid in _ROBOTS if f"/{rid}/navigate_to_pose" in stdout] if _ROBOTS else (
+                    [""] if "/navigate_to_pose" in stdout else []
+                )
                 with _status_lock:
-                    _fleet_status["nav2_ready"] = ready
+                    _fleet_status["nav2_ready"] = "/navigate_to_pose" in stdout
+                    _fleet_status["nav2_ready_robots"] = ready_robots
 
             node.create_timer(3.0, nav2_check_cb)
 
@@ -648,7 +657,23 @@ async def simulation_options():
 @app.get("/api/simulation/status")
 async def simulation_status():
     with _sim_lock:
-        return dict(_sim_state)
+        state = dict(_sim_state)
+    # Cross-check contra o estado real do ROS (nav2_check_cb + fleet_cb, já
+    # rodando independente disso) em vez de confiar só no scraping de log de
+    # _sim_reader_thread — visto ao vivo ficando preso em ready=False com a
+    # simulação genuinamente pronta (tb1+tb2 navegando, nav2_ready global
+    # true). Não substitui o parsing de log (continua útil pra "error"), só
+    # dá um segundo caminho pra "ready" virar true quando o estado real bate.
+    if state["running"] and not state["ready"]:
+        expected = set(state.get("robots") or [])
+        with _status_lock:
+            nav_robots = set(_fleet_status.get("nav2_ready_robots", []))
+            fleet_robots = {r["robot_id"] for r in _fleet_status.get("robots", [])}
+        if expected and expected.issubset(nav_robots) and expected.issubset(fleet_robots):
+            with _sim_lock:
+                _sim_state["ready"] = True
+            state["ready"] = True
+    return state
 
 
 @app.post("/api/simulation/start")
