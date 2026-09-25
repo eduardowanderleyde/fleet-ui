@@ -15,6 +15,7 @@ import {
 import { useFleetStatus } from './hooks/useFleetStatus'
 import { useJobPolling } from './hooks/useJobPolling'
 import { useRoutes } from './hooks/useRoutes'
+import { useSimulation } from './hooks/useSimulation'
 
 const ROBOT_PROFILES = [
   { id: 'custom', label: 'Custom (simulação local)', type: 'local' },
@@ -558,6 +559,8 @@ export default function App() {
   const { routes, loading: routesLoading, error: routesError, refreshRoutes } = useRoutes(cfg.robot)
   const [resetMsg, setResetMsg]     = useState(null)
   const [resetting, setResetting]   = useState(false)
+  const [showSimLog, setShowSimLog] = useState(false)
+  const sim                         = useSimulation()
 
   const [connPanel, setConnPanel]             = useState(false)
   const [selectedProfile, setSelectedProfile] = useState('custom')
@@ -833,7 +836,7 @@ export default function App() {
             style={{ ...btn('#161a22', '#34d399'), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             ▶ Simulação <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>{simPanel ? '▲' : '▼'}</span>
           </button>
-          {simPanel && <SimulationPanel />}
+          {simPanel && <SimulationPanel sim={sim} />}
         </div>
 
         {isConnected && <span style={{ fontSize: '0.8rem', color: '#6ee7b7', fontFamily: 'monospace' }}>● Conectado — {[...ROBOT_PROFILES, ...extraProfiles].find(p => p.id === selectedProfile)?.label}</span>}
@@ -918,6 +921,36 @@ export default function App() {
               </span>
             )}
           </div>
+
+          {sim.status.running && (
+            <div style={{ background: '#161a22', border: '1px solid #2a3142', borderRadius: '8px', padding: '0.6rem 0.85rem', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div style={{ fontSize: '0.68rem', color: '#8b92a8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Missão Coordenada — {sim.status.ready ? '✓ pronta' : sim.status.error ? '✗ erro' : '⏳ subindo…'}
+              </div>
+              {sim.status.error && <div style={{ fontSize: '0.75rem', color: '#f87171' }}>{sim.status.error}</div>}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                {(sim.status.robots?.length ? sim.status.robots : sim.robots).map(id => {
+                  const st = sim.dispatch[id]
+                  const color = st === 'ok' ? '#6ee7b7' : st === 'pending' ? '#fbbf24' : st?.startsWith('error') ? '#f87171' : '#4b5563'
+                  const label = st === 'ok' ? '✓ chegou no ponto' : st === 'pending' ? '⏳ indo…' : st?.startsWith('error') ? `✗ ${st}` : '— aguardando'
+                  return (
+                    <div key={id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                      <span style={{ color: '#a0aec0' }}>{id}</span>
+                      <span style={{ color }}>{label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <button onClick={() => setShowSimLog(v => !v)} style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: '0.7rem', padding: 0, alignSelf: 'flex-start' }}>
+                {showSimLog ? '▲ esconder log técnico' : '▼ ver log técnico'}
+              </button>
+              {showSimLog && (
+                <div style={{ maxHeight: '160px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.68rem', color: '#8b92a8', whiteSpace: 'pre-wrap' }}>
+                  {sim.status.lines.slice(-20).map((l, i) => <div key={i}>{l}</div>)}
+                </div>
+              )}
+            </div>
+          )}
 
           <div ref={outputRef} style={{ flex: 1, background: '#161a22', border: '1px solid #2a3142', borderRadius: '8px', padding: '0.6rem 0.85rem', overflowY: 'auto', fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: '0.75rem', lineHeight: 1.6 }}>
             {!job && !running && <span style={{ color: '#8b92a8' }}>Aguardando execução…</span>}

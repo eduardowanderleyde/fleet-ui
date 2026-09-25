@@ -1,13 +1,61 @@
-import { useCallback, useEffect, useState } from 'react'
-import { getSimulationOptions, getSimulationStatus, startSimulation, stopSimulation } from '../api/fleetApi'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { getSimulationOptions, getSimulationStatus, goToPoint, startSimulation, stopSimulation } from '../api/fleetApi'
 
 const EMPTY_STATUS = { running: false, ready: false, mode: null, world: null, robots: [], lines: [], error: null }
+
+// Formações: 1 ponto por robô, até 3 — o clássico "pixel voador" de show de
+// drone, só que com 2-3 pontos em vez de milhares.
+export const SHAPES = {
+  L:         { label: 'L',         points: [[0, 0, 0], [0, 1.5, 0], [1.5, 1.5, 0]] },
+  linha:     { label: 'Linha',     points: [[0, 0, 0], [1.5, 0, 0], [3.0, 0, 0]] },
+  triangulo: { label: 'Triângulo', points: [[0, 0, 0], [1.5, 0, 0], [0.75, 1.3, 0]] },
+}
+const ALL_ROBOTS = ['tb1', 'tb2', 'tb3']
+const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
 export function useSimulation(intervalMs = 2000) {
   const [options, setOptions] = useState({ worlds: [], robots: [] })
   const [status, setStatus] = useState(EMPTY_STATUS)
   const [actionError, setActionError] = useState(null)
   const [starting, setStarting] = useState(false)
+  const [shape, setShape] = useState('L')
+  const [robotCount, setRobotCount] = useState(2)
+  const [dispatch, setDispatch] = useState({})  // robotId -> 'pending' | 'ok' | 'error: ...'
+  const dispatchedRef = useRef(false)
+
+  const robots = ALL_ROBOTS.slice(0, robotCount)
+  const points = SHAPES[shape].points
+
+  // Assim que a simulação fica pronta, manda cada robô pro seu ponto da
+  // formação, em sequência (um de cada vez, com uma pequena pausa entre —
+  // não precisa ser simultâneo) — só uma vez por sessão de simulação
+  // (dispatchedRef reseta quando ela para).
+  useEffect(() => {
+    if (!status.running) {
+      dispatchedRef.current = false
+      setDispatch({})
+      return
+    }
+    if (!status.ready || dispatchedRef.current) return
+    dispatchedRef.current = true
+    const activeRobots = status.robots?.length ? status.robots : robots
+
+    ;(async () => {
+      for (let i = 0; i < activeRobots.length; i++) {
+        const robotId = activeRobots[i]
+        const [x, y, yaw] = points[i] || [0, 0, 0]
+        setDispatch(d => ({ ...d, [robotId]: 'pending' }))
+        try {
+          await goToPoint({ robotId, x, y, yaw })
+          setDispatch(d => ({ ...d, [robotId]: 'ok' }))
+        } catch (e) {
+          setDispatch(d => ({ ...d, [robotId]: `error: ${e.message}` }))
+        }
+        await sleep(1500)  // dá tempo do robô sair antes do próximo — mais fácil de ver na tela
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status.running, status.ready])
 
   useEffect(() => {
     getSimulationOptions().then(setOptions).catch(() => {})
@@ -52,5 +100,8 @@ export function useSimulation(intervalMs = 2000) {
     }
   }, [])
 
-  return { options, status, actionError, starting, start, stop }
+  return {
+    options, status, actionError, starting, start, stop,
+    shape, setShape, robotCount, setRobotCount, robots, dispatch,
+  }
 }
