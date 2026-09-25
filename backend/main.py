@@ -599,6 +599,20 @@ def _start_simulation(mode: str, world: str, robots: list[str]) -> None:
         ).start()
 
 
+# Padrões de processo da simulação — usados como rede de segurança no stop.
+# Achado ao vivo: quando um robô aborta o bringup do Nav2 no meio do
+# caminho (lifecycle_manager falhando), a árvore de processos do
+# `ros2 launch` fica num estado irregular e alguns nós (ex.: route_server,
+# waypoint_follower de outro robô que tinha subido bem) sobrevivem ao
+# killpg do processo-grupo principal — supõe-se que ficam num
+# processo-grupo próprio nesse cenário. killpg continua sendo a via
+# principal (mais rápida, mais limpa); isto aqui só garante que nada some.
+_SIM_PROCESS_PATTERNS = [
+    "gz sim -r -s", "nav2_", "slam_toolbox", "fleet_orchestrator",
+    "sensor_collector", "ros_gz_bridge/parameter_bridge", "robot_state_publisher",
+]
+
+
 def _stop_simulation() -> None:
     for _tag, proc in _sim_procs:
         try:
@@ -613,6 +627,12 @@ def _stop_simulation() -> None:
             except ProcessLookupError:
                 pass
     _sim_procs.clear()
+
+    # Rede de segurança: mata por padrão de nome qualquer coisa que o
+    # killpg não tenha alcançado (ver comentário acima).
+    for pattern in _SIM_PROCESS_PATTERNS:
+        subprocess.run(["pkill", "-9", "-f", pattern], capture_output=True)
+
     with _sim_lock:
         _sim_state.update({
             "running": False, "ready": False, "mode": None, "world": None,
