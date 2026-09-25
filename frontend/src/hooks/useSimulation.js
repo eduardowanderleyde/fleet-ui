@@ -3,14 +3,15 @@ import { getSimulationOptions, getSimulationStatus, goToPoint, startSimulation, 
 
 const EMPTY_STATUS = { running: false, ready: false, mode: null, world: null, robots: [], lines: [], error: null }
 
-// Formações: 1 ponto por robô, até 3 — o clássico "pixel voador" de show de
-// drone, só que com 2-3 pontos em vez de milhares.
+// Formações: 1 ponto por robô, 3 robôs fixos — o clássico "pixel voador"
+// de show de drone, só que com 3 pontos em vez de milhares.
 export const SHAPES = {
-  L:         { label: 'L',         points: [[0, 0, 0], [0, 1.5, 0], [1.5, 1.5, 0]] },
-  linha:     { label: 'Linha',     points: [[0, 0, 0], [1.5, 0, 0], [3.0, 0, 0]] },
-  triangulo: { label: 'Triângulo', points: [[0, 0, 0], [1.5, 0, 0], [0.75, 1.3, 0]] },
+  L:  { label: 'L',  points: [[0, 0, 0], [0, 1.5, 0], [1.5, 1.5, 0]] },
+  I:  { label: 'I',  points: [[0, 0, 0], [0, 1.5, 0], [0, 3.0, 0]] },
+  V:  { label: 'V',  points: [[0, 1.5, 0], [0.75, 0, 0], [1.5, 1.5, 0]] },
+  '\\': { label: '\\', points: [[0, 0, 0], [0.75, -0.75, 0], [1.5, -1.5, 0]] },
 }
-const ALL_ROBOTS = ['tb1', 'tb2', 'tb3']
+export const ROBOTS = ['tb1', 'tb2', 'tb3']
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
 export function useSimulation(intervalMs = 2000) {
@@ -19,11 +20,9 @@ export function useSimulation(intervalMs = 2000) {
   const [actionError, setActionError] = useState(null)
   const [starting, setStarting] = useState(false)
   const [shape, setShape] = useState('L')
-  const [robotCount, setRobotCount] = useState(2)
   const [dispatch, setDispatch] = useState({})  // robotId -> 'pending' | 'ok' | 'error: ...'
   const dispatchedRef = useRef(false)
 
-  const robots = ALL_ROBOTS.slice(0, robotCount)
   const points = SHAPES[shape].points
 
   // Assim que a simulação fica pronta, manda cada robô pro seu ponto da
@@ -38,7 +37,7 @@ export function useSimulation(intervalMs = 2000) {
     }
     if (!status.ready || dispatchedRef.current) return
     dispatchedRef.current = true
-    const activeRobots = status.robots?.length ? status.robots : robots
+    const activeRobots = status.robots?.length ? status.robots : ROBOTS
 
     ;(async () => {
       for (let i = 0; i < activeRobots.length; i++) {
@@ -102,6 +101,6 @@ export function useSimulation(intervalMs = 2000) {
 
   return {
     options, status, actionError, starting, start, stop,
-    shape, setShape, robotCount, setRobotCount, robots, dispatch,
+    shape, setShape, dispatch,
   }
 }
