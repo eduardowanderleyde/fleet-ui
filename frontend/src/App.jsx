@@ -693,9 +693,13 @@ export default function App() {
   // Robô cujo mapa/pose/status são exibidos: o selecionado no dropdown
   // "Robô" (cfg.robot), com fallback pro primeiro robô da frota reportado
   // por /api/status quando "único"/nenhum estiver selecionado ainda.
+  // "??", não "||": robot_id="" é válido (modo single-robot, tópicos sem
+  // prefixo) — "||" trataria essa string vazia como falsy e sempre cairia
+  // em 'tb1', escondendo o robô único mesmo com pose/mapa já chegando do
+  // backend.
   const effectiveRobotId = (cfg.robot && cfg.robot !== 'default')
     ? cfg.robot
-    : (status.robots?.[0]?.robot_id || 'tb1')
+    : (status.robots?.[0]?.robot_id ?? 'tb1')
   const pose   = status.poses?.[effectiveRobotId] || status.pose || {}
   // Todas as poses conhecidas (pro MapView desenhar os N robôs ao mesmo
   // tempo) — cai pra { <robô> : pose } em backends antigos sem status.poses.

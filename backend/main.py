@@ -284,6 +284,10 @@ async def lifespan(app: FastAPI):
 
             for _rid in _ROBOTS:
                 _setup_robot(_rid)
+            # modo single usa robot_id="" (tópicos sem prefixo, ex. /tf em
+            # vez de /tb1/tf) — sem isso, pose/mapa do robô único nunca
+            # ficam disponíveis via /api/status e /api/map.
+            _setup_robot("")
 
             # Verifica Nav2 periodicamente via ros2 action list (mais confiável que ActionClient).
             # Guarda também QUAIS robôs têm /navigate_to_pose de verdade (não só
@@ -331,12 +335,25 @@ app.add_middleware(CORSMiddleware, allow_origins=_cors_origins(), allow_methods=
 _EMPTY_POSE = {"x": 0.0, "y": 0.0, "yaw": 0.0, "valid": False}
 
 
+def _default_robot_id() -> str:
+    """modo single roda com robot_id="" (tópicos sem prefixo); multi usa
+    _STATUS_ROBOT_ID (primeiro robô de FLEET_ROBOTS). Deriva de
+    _fleet_status["robots"] (populado ao vivo via tópico /fleet/status) em
+    vez de _sim_state["mode"]: _sim_state é só memória do processo do
+    backend e zera se ele reiniciar, mesmo com a simulação (processo
+    separado) continuando rodando — /fleet/status não tem esse problema."""
+    robots = _fleet_status.get("robots") or []
+    if len(robots) == 1:
+        return robots[0].get("robot_id", "")
+    return _STATUS_ROBOT_ID
+
+
 def _status_payload() -> dict:
     # "pose" (singular) fica de compat com quem ainda não sabe que existe
     # mais de um robô; "poses" traz todos, é o que a UI multi-robô usa.
     return {
         **_fleet_status,
-        "pose": _robot_poses.get(_STATUS_ROBOT_ID, _EMPTY_POSE),
+        "pose": _robot_poses.get(_default_robot_id(), _EMPTY_POSE),
         "poses": _robot_poses,
     }
 
@@ -726,7 +743,7 @@ async def save_route_waypoints(body: SaveRouteWaypointsRequest):
 
 @app.get("/api/map")
 async def get_map(robot_id: str = ""):
-    rid = robot_id or _STATUS_ROBOT_ID
+    rid = robot_id or _default_robot_id()
     with _status_lock:
         meta = _map_metas.get(rid)
         if not meta:
@@ -738,7 +755,7 @@ async def get_map(robot_id: str = ""):
 async def save_background_map(robot_id: str = ""):
     """Guarda o mapa SLAM actual como fundo persistente em public/slam_map.png + slam_map.json."""
     import base64 as _b64
-    rid = robot_id or _STATUS_ROBOT_ID
+    rid = robot_id or _default_robot_id()
     with _status_lock:
         meta = _map_metas.get(rid)
         if not meta or not meta.get("png_b64"):
