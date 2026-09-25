@@ -391,6 +391,33 @@ são resolvidos pelo apt no momento da instalação; a tabela acima é o
 registro manual disso. Se algo aqui parar de bater com o ambiente atual,
 esse é o primeiro lugar pra olhar antes de assumir que é bug de lógica.
 
+### Duas máquinas de teste diferentes — não misturar os números
+
+A seção "Limitação conhecida" acima (CPU AMD Ryzen 7 5800XT, 46 GB RAM, GPU
+dedicada RX 9060 XT) descreve uma máquina Linux nativa. **Os testes do modo
+Docker/Windows (2026-09-25) rodaram numa máquina bem mais fraca**, confirmado
+via PowerShell (`Get-CimInstance Win32_Processor`/`Win32_VideoController`):
+
+| | Máquina Linux nativa (seção acima) | Máquina Docker/Windows (2026-09-25) |
+|---|---|---|
+| CPU | Ryzen 7 5800XT — 8 núcleos / 16 threads | **Ryzen 3 PRO 4350G — 4 núcleos / 8 threads** |
+| RAM | 46 GB | **~16 GB** |
+| GPU | RX 9060 XT dedicada, 8 GB | **só gráfico integrado (Vega, parte do APU)** |
+
+Isso muda a leitura de qualquer `%CPU` relatado no modo Docker/Windows: um
+container em ~666% (visto ao vivo hoje, testando o painel "Missão
+Coordenada") está usando 6,7 de **8** threads — a máquina quase inteira. O
+mesmo 666% na máquina de 16 threads seria só ~42%, outra categoria de
+situação. As falhas de Nav2 vistas hoje nesse modo (`NAV2_ABORTED`,
+`NAV2_UNAVAILABLE`, `NAV2_REJECTED` — três variantes do mesmo sintoma,
+aparecendo em execuções diferentes) são consistentes com essa máquina sendo
+o gargalo, não com regressão de código: os fixes aplicados hoje (`ready` do
+painel, alinhamento dos marcadores de múltiplos robôs no mapa, remoção do
+conflito de boot automático) foram todos verificados funcionando
+corretamente — é só o "andar de verdade" com 2 robôs que segue instável
+*nesta máquina específica*. Não assumir que "2 robôs" deixou de ser estável
+em geral sem re-testar na máquina Linux nativa mais forte.
+
 ## Como rodar
 
 ```bash
