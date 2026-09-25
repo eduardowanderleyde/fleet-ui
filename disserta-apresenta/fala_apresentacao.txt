@@ -1,0 +1,191 @@
+FALA DA APRESENTAÇÃO — Seminário de Andamento
+Framework para Experimentos de Repetibilidade em Robótica Móvel com ROS 2 (Fleet UI)
+Eduardo Wanderley — Mestrado em Robótica, 2026
+
+Revisado em 2026-09-25 para bater com a versão atual da dissertação (campanha
+dissertation_clean01, 10 réplicas) em vez dos números antigos de Val01/Val02.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 1 — Título
+────────────────────────────────────────────────────────────────────────────
+Boa tarde. Meu trabalho é sobre um framework para experimentos de
+repetibilidade em robótica móvel usando ROS 2 — o Fleet UI. O objetivo é
+permitir que qualquer pesquisador grave um percurso com um robô, reproduza
+esse percurso quantas vezes for preciso, e meça o quão repetível o sistema é,
+sem precisar dominar a complexidade do ROS 2 por baixo.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 2 — Agenda
+────────────────────────────────────────────────────────────────────────────
+Vou seguir essa ordem: começo pela motivação e pelos objetivos; depois mostro
+a arquitetura do sistema, incluindo a camada de agentes de IA que construí
+por cima; explico os papéis experimentais que defini para os robôs; apresento
+a metodologia de record/replay/análise; mostro os resultados de
+repetibilidade; falo dos desafios técnicos que precisei resolver; e fecho com
+trabalho futuro e conclusão.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 3 — Motivação
+────────────────────────────────────────────────────────────────────────────
+Reprodutibilidade é um pilar da ciência experimental em robótica — um
+resultado só tem validade científica se puder ser replicado. E sistemas
+multi-robô adicionam complexidade real: sincronização, sensores
+heterogêneos, coordenação. Ao olhar o que existia, identifiquei uma lacuna:
+faltam frameworks open-source que integrem controle de frota, coleta síncrona
+de dados e análise de repetibilidade num pacote só — e as interfaces nativas
+do ROS 2 são complexas demais pro dia a dia de um pesquisador. A proposta é
+um framework completo — orquestração, coleta, análise — com uma interface
+web que abstrai essa complexidade, e uma arquitetura de papéis pensada pra
+testbeds distribuídos.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 4 — Objetivos
+────────────────────────────────────────────────────────────────────────────
+O objetivo geral é desenvolver e validar um framework de orquestração
+multi-robô voltado a experimentos reprodutíveis de navegação autônoma com
+ROS 2. Isso se desdobra em cinco objetivos específicos: um orquestrador ROS 2
+com serviços de record, replay e go_to_point, mais controle de papéis; coleta
+síncrona de dados sensoriais em MCAP — scan, odometria, IMU, pose; um
+pipeline de análise que calcula RMSE par a par, comprimento de percurso e
+gera overlay visual; uma interface web que controla o experimento sem expor
+o pesquisador ao ROS 2; e validação em simulação Gazebo, já preparando o
+caminho para hardware real.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 5 — Arquitetura do Sistema
+────────────────────────────────────────────────────────────────────────────
+O framework é organizado em camadas. No topo, a interface web — o Fleet UI —
+em React e Vite, com backend em FastAPI, um editor de configuração em JSON,
+painel multi-robô e o painel de agentes de IA que vou detalhar no próximo
+slide. Abaixo, o orquestrador — fleet_orchestrator — expõe 7 serviços ROS 2
+pra record, replay, e chama as actions do Nav2; suporta até 3 robôs
+simultâneos por design, embora o par validado como estável nesta máquina
+sejam 2. Em seguida, a coleta de dados grava bags MCAP por robô, com QoS
+adaptado pros tópicos scan, odom, imu e pose. A navegação usa Nav2 com SLAM
+Toolbox, com TF namespaceado por robô. E na base, a simulação roda no Gazebo
+Harmonic, com TurtleBots4, usando um xacro namespaceado e tópicos
+gz-transport prefixados por robô — vou explicar por que isso foi necessário
+mais adiante.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 6 — Camada de Agentes de IA
+────────────────────────────────────────────────────────────────────────────
+Em cima dessa base eu construí uma camada de agentes de IA, usando a API da
+Anthropic/Claude, pra planejar, executar e analisar experimentos a partir de
+linguagem natural. São três peças: o Planner interpreta o pedido em
+português e decide quais ferramentas chamar — record, replay, go_to_point,
+campanha inteira; o Executor é quem realmente fala com o Fleet UI, chamando
+os mesmos endpoints REST que a própria interface web usa — ele não tem
+acesso direto ao ROS 2, e cada agente fica escopado a um robô só; e o Analyst
+só lê o summary.json gerado pela análise — RMSE, duração — e aponta quando
+uma execução saiu fora do esperado; é leitura pura, nunca executa nada. O
+ponto central: cada agente só atua no próprio robô — um agente nunca move o
+robô de outro.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 7 — Papéis Experimentais (MUUT / FUUT / SU)
+────────────────────────────────────────────────────────────────────────────
+Pra testbeds distribuídos, defini três papéis. MUUT — Mobile Unit Under
+Test/Tasking — é o robô que navega autonomamente, grava e reproduz rotas, e
+coleta seus próprios sensores. FUUT — Fixed Unit Under Test/Tasking — tem
+posição fixa no ambiente, funciona como infraestrutura de rede ou relay ROS
+2, e não participa da navegação. SU — Support Unit — só coleta dados
+sensoriais, sem navegar nem gravar rotas; é fonte de trajetória repetível
+pra monitoramento ambiental ou do próprio sistema. E isso não é só
+documentação: pedidos de navegação vindos de um FUUT ou de um SU são
+bloqueados no nível do orquestrador — a restrição é estrutural, não uma
+convenção que dá pra ignorar.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 8 — Metodologia
+────────────────────────────────────────────────────────────────────────────
+O protocolo segue quatro etapas. Primeiro, o Record: waypoints são enviados
+via Nav2, e a TF vira um YAML de rota mais um bag MCAP — essa é a baseline.
+Depois, Replay ×N: a mesma rota é reproduzida N vezes via FollowWaypoints,
+gerando um bag MCAP por repetição. Em seguida, a Análise: a odometria dos
+bags vira RMSE par a par e um overlay visual em PNG. E por fim, o Resultado:
+um summary.json consolidado com RMSE, duração e erro de endpoint. Um detalhe
+metodológico importante: entre repetições, o robô volta explicitamente ao
+ponto de partida via go_to_point — isso é condição necessária pra poder
+comparar as trajetórias de forma justa.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 9 — Resultados: Validação em Simulação
+────────────────────────────────────────────────────────────────────────────
+Esses são os resultados da campanha final, controlada: dez réplicas
+independentes de uma única rota — dissertation_clean01 — com a simulação, o
+Nav2, o orquestrador e o coletor de dados relançados do zero antes de cada
+réplica, pra garantir que todas partem exatamente do mesmo estado inicial.
+O percurso tem cerca de 0,826 metro, com RMSE médio de 3,35 centímetros
+contra a execução de referência — máximo de 4,76 — e erro final médio de
+1,64 centímetro. A duração média foi de 17,51 segundos, com desvio de só
+0,36. Do lado direito está uma validação complementar que fiz separadamente,
+com a rota dissertacao_teste1: comparando réplicas que usam o mesmo
+mecanismo de navegação entre si, o RMSE cai pra 2 centímetros; mas comparando
+contra uma baseline gravada com um mecanismo diferente — go_to_point em vez
+de play_route — o RMSE sobe pra quase 14 centímetros, quase sete vezes mais.
+Isso não é falha de repetibilidade do robô — é a prova de que a métrica
+certa precisa comparar execuções que usam o mesmo mecanismo de navegação.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 10 — Distribuição do RMSE (10 Réplicas)
+────────────────────────────────────────────────────────────────────────────
+Aqui está o detalhe réplica por réplica da campanha final, todas comparadas
+contra o replay 01 como referência: os valores vão de 1,65 até 4,76
+centímetros, com média de 3,35 e desvio-padrão de 1,10. Todos, sem exceção,
+ficaram bem abaixo da tolerância padrão de objetivo do Nav2, que é de 25
+centímetros — ou seja, o sistema reproduz a trajetória com precisão
+sub-decimétrica de forma consistente. O gráfico de overlay completo dessa
+campanha está disponível no repositório, na pasta de runs do
+dissertation_clean01.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 11 — Desafios Técnicos Superados
+────────────────────────────────────────────────────────────────────────────
+Quatro problemas técnicos reais que precisei resolver. Primeiro, TF
+namespaceado: o SLAM publicava em /tb1/tf, mas o buffer TF global só
+escutava /tf — o lookup falhava silenciosamente. Resolvi com um buffer TF
+dedicado por robô, subscrito no tópico certo. Segundo, cmd_vel por robô: o
+SDF do DiffDrive do TurtleBot4 usava /cmd_vel global — os dois robôs
+respondiam ao mesmo comando. Resolvi gerando o SDF em runtime com o tópico
+prefixado por robô. Terceiro, timing entre SLAM e scan: o scan chegava antes
+do TF estar populado, e a fila enchia infinitamente — resolvi atrasando o
+bridge do scan em 2 segundos depois do SLAM. E quarto, um bug bem sutil de
+argparse: passar um ponto negativo tipo -1.0,0,0 era interpretado como uma
+flag e derrubava o programa — resolvi exigindo a sintaxe --points=VALOR, sem
+ambiguidade.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 12 — Desafios Recentes: Multi-Robô, CI e Confiabilidade
+────────────────────────────────────────────────────────────────────────────
+Mais quatro desafios, esses mais recentes. O xacro multi-robô: o DiffDrive
+original do TurtleBot4 publicava /cmd_vel de forma global — um comando movia
+todos os robôs ao mesmo tempo — resolvido com um fork do xacro prefixando
+todo tópico gz-transport pelo robot_id. O CI não testava a parte ROS de
+verdade: testes que dependiam de ROS eram pulados em silêncio, e o badge
+verde não provava nada — criei um job de CI novo que roda ROS 2 de verdade e
+falha se qualquer teste for pulado. Repetibilidade mal-medida: a análise
+usava odometria bruta em vez da pose corrigida do SLAM, o que inflava o RMSE
+por deriva de odometria, não por falta de repetibilidade real — corrigi
+priorizando a pose do SLAM, e documentei o MPPI como fonte de variância
+conhecida e esperada do próprio algoritmo de controle. E processos órfãos: a
+simulação antiga às vezes continuava rodando junto com uma nova, causando
+falhas imprevisíveis — resolvido com os.setsid mais os.killpg no painel de
+simulação, que mata a árvore de processos inteira, sem deixar nada pra trás.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 13 — Trabalho Futuro e Conclusão
+────────────────────────────────────────────────────────────────────────────
+Pra fechar: o framework está funcional em simulação, com RMSE médio de 3,35
+centímetros — máximo de 4,76 — entre réplicas, muito abaixo da tolerância do
+Nav2. O modo multi-robô está operacional com 2 robôs simultâneos validados,
+mais a camada de agentes de IA por cima. O CI agora valida a parte ROS de
+verdade a cada push, não só um badge verde vazio. Como próximos passos:
+definir uma metodologia de baseline via play_route em vez de só go_to_point
+sequencial, pra eliminar de vez o viés de mecanismo que mostrei nos
+resultados; migrar o backend pra falar ROS 2 nativamente em vez de depender
+de subprocess; rodar uma campanha com N maior — de 10 a 20 réplicas — pra
+significância estatística; validar em hardware real, com um TurtleBot4
+físico; implementar conexão SSH real pra robôs na rede; e fazer uma análise
+estatística multi-sessão, olhando variabilidade entre dias diferentes.
+Obrigado — fico à disposição pra perguntas.
