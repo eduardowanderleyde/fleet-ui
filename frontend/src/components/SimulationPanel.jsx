@@ -57,8 +57,8 @@ export default function SimulationPanel({ sim }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
             {activeRobots.map(id => {
               const d = dispatch[id]
-              const color = d === 'ok' ? '#6ee7b7' : d === 'pending' ? '#fbbf24' : d?.startsWith('error') ? '#f87171' : '#4b5563'
-              const label = d === 'ok' ? '✓ chegou' : d === 'pending' ? '⏳ indo…' : d?.startsWith('error') ? '✗ erro' : '— aguardando'
+              const color = d === 'ok' ? '#6ee7b7' : d === 'pending' ? '#fbbf24' : d?.startsWith('error') ? '#f87171' : d?.startsWith('skip') ? '#8b92a8' : '#4b5563'
+              const label = d === 'ok' ? '✓ chegou' : d === 'pending' ? '⏳ indo…' : d?.startsWith('error') ? '✗ erro' : d?.startsWith('skip') ? '○ não-móvel' : '— aguardando'
               return (
                 <div key={id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontFamily: 'monospace' }}>
                   <span style={{ color: '#a0aec0' }}>{id}</span>

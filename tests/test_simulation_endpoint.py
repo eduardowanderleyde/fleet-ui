@@ -70,13 +70,23 @@ class SimulationEndpointTests(unittest.IsolatedAsyncioTestCase):
         self._getpgid_patch.start()
         self._sleep_patch = patch.object(backend_main.time, "sleep", lambda *_: None)
         self._sleep_patch.start()
+        # _stop_simulation() também roda um pkill de segurança via
+        # subprocess.run (não Popen) — sem isso, herdaria o fake_popen acima
+        # (que devolve um FakeProc sem suporte a "with", quebrando o
+        # subprocess.run real por dentro).
+        self.pkill_calls: list[list[str]] = []
+        self._run_patch = patch.object(
+            backend_main.subprocess, "run",
+            side_effect=lambda argv, **kwargs: self.pkill_calls.append(argv),
+        )
+        self._run_patch.start()
 
         transport = httpx.ASGITransport(app=backend_main.app)
         self.client = httpx.AsyncClient(transport=transport, base_url="http://test")
 
     async def asyncTearDown(self):
         backend_main._stop_simulation()
-        for p in (self._popen_patch, self._killpg_patch, self._getpgid_patch, self._sleep_patch):
+        for p in (self._popen_patch, self._killpg_patch, self._getpgid_patch, self._sleep_patch, self._run_patch):
             p.stop()
         await self.client.aclose()
 
@@ -93,6 +103,8 @@ class SimulationEndpointTests(unittest.IsolatedAsyncioTestCase):
         data = resp.json()
         self.assertEqual(data["worlds"], ["warehouse", "depot"])
         self.assertIn("tb1", data["robots"])
+        self.assertIn("tb1", data["roles"])
+        self.assertEqual(data["roles"]["tb1"], "MUUT")
 
     async def test_single_mode_becomes_ready_after_markers_from_both_processes(self):
         self._pending_lines = [

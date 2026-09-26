@@ -20,7 +20,7 @@ export const ROBOTS = ['tb1', 'tb2']
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
 export function useSimulation(intervalMs = 2000) {
-  const [options, setOptions] = useState({ worlds: [], robots: [] })
+  const [options, setOptions] = useState({ worlds: [], robots: [], roles: {} })
   const [status, setStatus] = useState(EMPTY_STATUS)
   const [actionError, setActionError] = useState(null)
   const [starting, setStarting] = useState(false)
@@ -44,9 +44,25 @@ export function useSimulation(intervalMs = 2000) {
     dispatchedRef.current = true
     const activeRobots = status.robots?.length ? status.robots : ROBOTS
 
+    // Só robôs com papel MUUT (Mobile Unit Under Tasking) em roles.yaml
+    // aceitam comando de movimento — FUUT (sensor fixo) e SU (unidade de
+    // suporte) ficam de fora, mesmo que estejam na simulação. Papel
+    // desconhecido (roles.yaml não carregou ainda) trata como móvel, pra
+    // não quebrar o comportamento de quem não tem essa config.
+    const roles = options.roles || {}
+    const movable = activeRobots.filter(id => (roles[id] || 'MUUT') === 'MUUT')
+    const skipped = activeRobots.filter(id => !movable.includes(id))
+    if (skipped.length) {
+      setDispatch(d => {
+        const next = { ...d }
+        skipped.forEach(id => { next[id] = `skip: papel ${roles[id]} não é móvel` })
+        return next
+      })
+    }
+
     ;(async () => {
-      for (let i = 0; i < activeRobots.length; i++) {
-        const robotId = activeRobots[i]
+      for (let i = 0; i < movable.length; i++) {
+        const robotId = movable[i]
         const [x, y, yaw] = points[i] || [0, 0, 0]
         setDispatch(d => ({ ...d, [robotId]: 'pending' }))
         try {

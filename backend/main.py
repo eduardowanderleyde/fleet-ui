@@ -546,15 +546,21 @@ _sim_nav_ready_count = 0
 _sim_fleet_ready = False
 
 
-def _read_configured_robots() -> list[str]:
-    """Robôs declarados em roles.yaml (fonte de verdade de quem existe,
-    diferente de /api/list_robots, que exige fleet_orchestrator já rodando)."""
+def _read_robot_roles() -> dict[str, str]:
+    """robot_id -> papel (MUUT/FUUT/SU) declarado em roles.yaml. Fonte de
+    verdade de quem existe e do que cada um pode fazer — só MUUT (Mobile
+    Unit Under Tasking) aceita comandos de movimento; FUUT (sensor fixo) e
+    SU (unidade de suporte/infra) não têm permissão de deslocamento."""
     path = Path(ROS_WS) / "src" / "fleet_orchestrator" / "config" / "roles.yaml"
     try:
         data = yaml.safe_load(path.read_text()) or {}
-        return list((data.get("roles") or {}).keys())
+        return dict(data.get("roles") or {})
     except Exception:
-        return []
+        return {}
+
+
+def _read_configured_robots() -> list[str]:
+    return list(_read_robot_roles().keys())
 
 
 def _sim_append_line(tag: str, line: str) -> None:
@@ -668,7 +674,8 @@ def _stop_simulation() -> None:
 
 @app.get("/api/simulation/options")
 async def simulation_options():
-    return {"worlds": _SIM_WORLDS, "robots": _read_configured_robots()}
+    roles = _read_robot_roles()
+    return {"worlds": _SIM_WORLDS, "robots": list(roles.keys()), "roles": roles}
 
 
 @app.get("/api/simulation/status")
