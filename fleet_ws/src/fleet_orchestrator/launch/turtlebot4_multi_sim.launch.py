@@ -33,7 +33,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     TimerAction,
 )
-from launch.conditions import UnlessCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -108,6 +108,15 @@ ARGUMENTS = [
         description="Sem GUI do gzclient por padrão — stack 3x mais pesada que o modo 1-robô.",
     ),
     DeclareLaunchArgument("enable_camera_bridge", default_value="false"),
+    DeclareLaunchArgument(
+        "bringup_nav", default_value="true",
+        description="Sobe SLAM+Nav2 de todos os robôs junto com o mundo. "
+                    "bringup_nav:=false deixa só Gazebo + modelos spawnados "
+                    "(visíveis, parados) — pra ligar a navegação de 1 robô "
+                    "por vez depois via activate_robot_nav.launch.py, evitando "
+                    "rodar N pilhas de Nav2 completas ao mesmo tempo (ver "
+                    "'Detected jump back in time' em orquestracion.md).",
+    ),
 ]
 for rid, (x, y, yaw) in DEFAULT_POSES.items():
     ARGUMENTS += [
@@ -196,10 +205,12 @@ def generate_launch_description():
     # boot já causou 1 timeout real de lifecycle (change_state) numa corrida
     # mais apertada (8s) — 12s dá folga suficiente pra cada uma estabilizar
     # antes da próxima competir por CPU.
+    bringup_nav = LaunchConfiguration('bringup_nav')
     for i, rid in enumerate(ROBOTS):
         slam = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(pkg_nav4, 'launch', 'slam.launch.py')),
             launch_arguments=[('namespace', rid), ('use_sim_time', 'true'), ('sync', 'true')],
+            condition=IfCondition(bringup_nav),
         )
         ld.add_action(TimerAction(period=10.0 + float(i) * 12.0, actions=[slam]))
 
@@ -213,6 +224,7 @@ def generate_launch_description():
                 ('use_sim_time', 'true'),
                 ('params_file', nav2_params_file),
             ],
+            condition=IfCondition(bringup_nav),
         )
         ld.add_action(TimerAction(period=50.0 + float(i) * 12.0, actions=[nav2]))
 
