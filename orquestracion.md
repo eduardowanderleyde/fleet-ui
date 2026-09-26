@@ -349,15 +349,26 @@ extrapolation into the past.
 [tb2.bt_navigator]: Goal failed
 ```
 
-Hipótese mais provável: não é regressão de código, é pressão real de CPU
-acumulada por várias simulações seguidas na mesma sessão de trabalho —
-2 robôs continua sendo o par validado em condições normais (ver testes
-anteriores desta seção), mas o teto de estabilidade parece mais sensível à
-carga do sistema no momento do teste do que se pensava antes. Não
-investigado a fundo ainda (não repetido com a máquina "descansada"); fica
-registrado como um ponto de atenção pra próximas campanhas — rodar com o
-mínimo de outros processos pesados abertos, e se possível medir/reportar
-o load average junto com os resultados de repetibilidade.
+Hipótese original (na hora): pressão de CPU acumulada por várias
+simulações seguidas na mesma sessão de trabalho (`load average` ~3,8) —
+**refutada** pelo teste seguinte.
+
+**Reteste na mesma noite, máquina recém-reiniciada (`uptime` 8 min,
+`load average` ~0,3 — praticamente ociosa):** o mesmo padrão de falha
+reapareceu com `tb2` no modo 2 robôs, idêntico ao de cima (`Detected jump
+back in time` → `Extrapolation Error` → `Robot pose is not available` →
+`Goal failed`), depois de o robô já ter girado e andado um pouco em
+direção ao alvo (não foi rejeição imediata). Ou seja: **a hipótese de
+"carga acumulada da sessão" não se sustenta** — o mesmo teto aparece até
+com a máquina descansada. É mais provável que seja algo estrutural do
+timing DDS/TF com 2 robôs simultâneos nesta máquina (2 SLAM Toolbox + 2
+Nav2 completos competindo pelo mesmo `/clock` simulado), não um efeito de
+sessão longa. Single-robot, em contraste, rodou 11 vezes seguidas sem falha nenhuma na
+mesma noite, na mesma máquina, no mesmo intervalo de tempo (campanha de
+verificação de RMSE pra dissertação, documentada em
+`dissertacao/TODO_REVISAO.md` na branch `dissertacao`, não nesta branch)
+— o teto real parece ser especificamente "mais de 1 robô simultâneo", não
+"CPU cansada".
 
 Nota lateral do mesmo teste: o subscriber ROS interno do backend (que lê
 pose via TF pra `/api/status`) ficou sem funcionar a sessão inteira antes
