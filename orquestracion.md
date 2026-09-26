@@ -49,6 +49,9 @@ mais abaixo):
    forma (L, I, V ou \) no mapa, 1 ponto por robô, em sequência. Expõe na
    prática o mesmo teto de 3 robôs simultâneos descrito acima — ver
    "Reconfirmado (2026-09-25)" na seção da simulação com 3 robôs.
+8. Dispatch da Missão Coordenada passou a alocar por papel (`roles.yaml`:
+   MUUT/FUUT/SU), não por índice fixo na lista de robôs — ver "Pesquisa de
+   mercado/acadêmica e aprendizados pros agentes" mais abaixo.
 
 ## Por que essa camada existe
 
@@ -549,6 +552,66 @@ ou, alternativamente, gravar a baseline também via `play_route` em vez de
   `docker/run-all-headless-multi.sh`) — modo headless single-container que
   contorna a descoberta DDS não convergir no Docker Desktop, com
   `FLEET_ROBOTS` configurável (default 2 robôs, não 3 — ver próxima seção).
+
+## Pesquisa acadêmica sobre missão multi-robô e aprendizados pros agentes (2026-09-25)
+
+Pesquisa de literatura atual sobre planejamento/execução de missão
+multi-robô, pra comparar com a arquitetura de `backend/agents/`
+(Planner → Executor → Analyst) e o painel "Missão Coordenada". Achados
+principais, com fonte:
+
+- **RobotFleet** (arXiv 2510.10379, out/2025) — framework open-source
+  recente que também usa LLM pra decidir a sequência de tarefas a partir
+  de linguagem natural (igual ao papel do Planner aqui), e trata cada robô
+  como abstração isolada atrás de uma interface estável (deles: serviço
+  containerizado; aqui: `robot_id` + API REST via `Executor`). Diferença:
+  eles mantêm um **estado de mundo centralizado e compartilhado** entre
+  componentes, e têm um ciclo explícito de detectar falha → atualizar
+  estado → replanejar. Os agentes daqui não têm nenhum dos dois — cada
+  chamada de ferramenta busca o estado na hora (sem cache/visão
+  compartilhada entre agentes de robôs diferentes rodando em paralelo via
+  `AgentFleetRunRequest`), e uma falha de ferramenta só vira texto na
+  conversa pro modelo reagir, sem um passo formal de replanejamento.
+- **Generic Framework for Heterogeneous Multi-Robot Missions**
+  (Sensors/MDPI, 2024, PMC11548481) — especifica missão em YAML com
+  tarefas, dependências e **capacidades exigidas**, casadas
+  automaticamente contra os robôs disponíveis. O módulo deles ("Oracle",
+  agrega estado individual de cada robô num estado global único) é
+  arquiteturalmente igual ao que `_fleet_status`/`_robot_poses` já fazem
+  em `backend/main.py` — valida esse design contra a literatura, não é
+  invenção isolada. Diferença que motivou uma mudança real: a alocação de
+  robô por tarefa deles é por capacidade declarada; a Missão Coordenada
+  fazia `SHAPES.points[i] → activeRobots[i]` por índice fixo, sem checar
+  se aquele robô tinha permissão de se mover.
+
+**Aplicado:** `/api/simulation/options` agora expõe `roles.yaml` inteiro
+(`robot_id → MUUT/FUUT/SU`), não só a lista de ids. `useSimulation.js`
+filtra o dispatch pra só mandar `go_to_point` pros robôs com papel `MUUT`
+(Mobile Unit Under Tasking) — `FUUT` (sensor fixo) e `SU` (unidade de
+suporte) aparecem no painel como "○ não-móvel" em vez de receber um
+comando de movimento que não deveriam aceitar. Papel desconhecido
+(`roles.yaml` não carregado ainda) trata como móvel, pra não quebrar quem
+não tem essa config. Relevante porque `roles.yaml` já documenta que
+`tb2`/`tb3` foram marcados `MUUT` só temporariamente pra demo (original:
+`FUUT`/`SU`) — com essa mudança, reverter esse papel não quebra mais o
+painel silenciosamente.
+
+**Ainda não aplicado** (maior escopo, fica pra depois se for retomado):
+formalizar "missão" como artefato YAML reutilizável (tarefas + dependência
++ papel exigido) que o Planner consiga carregar e rodar, generalizando o
+painel pra além das 4 formas hardcoded; e um estado compartilhado leve
+entre os N agentes de `AgentFleetRunRequest`, pro agente do `tb1` saber o
+que o agente do `tb2` está fazendo.
+
+**Bug real achado de graça ao rodar a suíte de testes depois dessa
+mudança:** a rede de segurança `pkill` adicionada mais cedo hoje em
+`_stop_simulation()` (ver seção "A correção" acima) usa
+`subprocess.run()`, que caía no mesmo mock de `subprocess.Popen` que
+`tests/test_simulation_endpoint.py` usa pros processos de simulação —
+`FakeProc` não suporta `with`, quebrando `subprocess.run()` por dentro e
+derrubando 6 dos 6 testes daquele arquivo. Só apareceu agora porque aquele
+fix foi validado ao vivo, nunca contra a suíte de testes. Corrigido com um
+mock próprio pro `pkill`, isolado do mock de `Popen`.
 
 ## Qualidade de código (radon + ruff + bandit)
 
