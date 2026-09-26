@@ -199,6 +199,51 @@ class SimulationEndpointTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(backend_main._sim_state["running"])
         self.assertEqual(backend_main._sim_state["lines"], [])
 
+    async def test_activate_robot_rejected_without_running_simulation(self):
+        resp = await self.client.post("/api/simulation/activate_robot", params={"robot_id": "tb1"})
+        self.assertEqual(resp.status_code, 409)
+
+    async def test_activate_robot_rejected_for_robot_outside_current_simulation(self):
+        self._pending_lines = [[], []]
+        await self.client.post(
+            "/api/simulation/start",
+            json={"mode": "multi", "world": "warehouse", "robots": ["tb1", "tb2"]},
+        )
+        resp = await self.client.post("/api/simulation/activate_robot", params={"robot_id": "tb3"})
+        self.assertEqual(resp.status_code, 400)
+
+    async def test_activate_then_deactivate_robot_launches_and_kills_process_group(self):
+        self._pending_lines = [[], [], []]  # sim, fleet, activate_robot_nav
+        await self.client.post(
+            "/api/simulation/start",
+            json={"mode": "multi", "world": "warehouse", "robots": ["tb1", "tb2"], "sequential_nav": True},
+        )
+        self.assertIn("bringup_nav:=false", self.popen_calls[0][-1])
+
+        resp = await self.client.post("/api/simulation/activate_robot", params={"robot_id": "tb1"})
+        self.assertEqual(resp.status_code, 200)
+        await asyncio.sleep(0.05)
+        self.assertIn("tb1", backend_main._robot_nav_procs)
+        self.assertIn("namespace:=tb1", self.popen_calls[-1][-1])
+
+        resp = await self.client.post("/api/simulation/deactivate_robot", params={"robot_id": "tb1"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn("tb1", backend_main._robot_nav_procs)
+        self.assertIn(self.fake_procs[-1].pid, self.killpg_calls)
+
+    async def test_stop_simulation_also_cleans_up_active_robot_nav(self):
+        self._pending_lines = [[], [], []]
+        await self.client.post(
+            "/api/simulation/start",
+            json={"mode": "multi", "world": "warehouse", "robots": ["tb1", "tb2"], "sequential_nav": True},
+        )
+        await self.client.post("/api/simulation/activate_robot", params={"robot_id": "tb1"})
+        await asyncio.sleep(0.05)
+        self.assertIn("tb1", backend_main._robot_nav_procs)
+
+        await self.client.post("/api/simulation/stop")
+        self.assertEqual(backend_main._robot_nav_procs, {})
+
 
 if __name__ == "__main__":
     unittest.main()

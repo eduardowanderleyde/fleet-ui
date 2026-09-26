@@ -149,6 +149,13 @@ class StartSimulationRequest(BaseModel):
     mode: Literal["single", "multi"] = "single"
     world: str = "warehouse"
     robots: list[str] = Field(default_factory=lambda: ["tb1", "tb2"])  # ignorado se mode="single"
+    # Só válido com mode="multi": sobe Gazebo + robôs spawnados SEM SLAM/Nav2
+    # de ninguém (bringup_nav:=false no launch file) — a navegação de cada
+    # robô liga sob demanda via /api/simulation/activate_robot. Existe pra
+    # evitar rodar N pilhas de Nav2 completas ao mesmo tempo (teto real de
+    # /clock confirmado com 2+ robôs simultâneos, ver orquestracion.md),
+    # mantendo todos os robôs visíveis juntos na cena.
+    sequential_nav: bool = False
 
 
 def _model_dump(model: BaseModel) -> dict:
@@ -639,7 +646,9 @@ def _sim_reader_thread(tag: str, proc: subprocess.Popen, expected_nav_ready: int
                 _sim_state["ready"] = True
 
 
-def _build_sim_commands(mode: str, world: str, robots: list[str]) -> list[tuple[str, list[str], dict]]:
+def _build_sim_commands(
+    mode: str, world: str, robots: list[str], sequential_nav: bool = False,
+) -> list[tuple[str, list[str], dict]]:
     """[(tag, cmd, extra_env), ...] — mesmos dois launches do README
     (Terminal 1 + Terminal 2), montados programaticamente."""
     env_extra: dict = {}
@@ -658,16 +667,21 @@ def _build_sim_commands(mode: str, world: str, robots: list[str]) -> list[tuple[
         env_extra["FLEET_ROBOTS"] = ",".join(robots)
         sim_cmd = ["ros2", "launch", "fleet_orchestrator", "turtlebot4_multi_sim.launch.py",
                    f"world:={world}", "headless:=true"]
+        if sequential_nav:
+            sim_cmd += ["bringup_nav:=false"]
         fleet_cmd = ["ros2", "launch", "fleet_orchestrator", "fleet.launch.py"]
     return [("sim", sim_cmd, env_extra), ("fleet", fleet_cmd, env_extra)]
 
 
-def _start_simulation(mode: str, world: str, robots: list[str]) -> None:
+def _start_simulation(mode: str, world: str, robots: list[str], sequential_nav: bool = False) -> None:
     global _sim_nav_ready_count, _sim_fleet_ready
     _sim_nav_ready_count = 0
     _sim_fleet_ready = False
-    expected_nav_ready = len(robots) if mode == "multi" else 1
-    for tag, cmd, env_extra in _build_sim_commands(mode, world, robots):
+    # Com sequential_nav, ninguém sobe Nav2 no bringup inicial — "pronto"
+    # significa só "Gazebo + robôs spawnados + fleet_orchestrator no ar",
+    # a navegação de cada um liga depois via activate_robot.
+    expected_nav_ready = 0 if sequential_nav else (len(robots) if mode == "multi" else 1)
+    for tag, cmd, env_extra in _build_sim_commands(mode, world, robots, sequential_nav):
         env = {**_bridge.ros_env(), "PYTHONUNBUFFERED": "1", **env_extra}
         shell_cmd = _bridge.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
         proc = subprocess.Popen(
@@ -697,6 +711,11 @@ _SIM_PROCESS_PATTERNS = [
 
 
 def _stop_simulation() -> None:
+    with _robot_nav_lock:
+        active_robot_ids = list(_robot_nav_procs.keys())
+    for rid in active_robot_ids:
+        _deactivate_robot_nav(rid)
+
     for _tag, proc in _sim_procs:
         try:
             os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
@@ -780,13 +799,77 @@ async def simulation_start(cfg: StartSimulationRequest):
             "running": True, "ready": False, "mode": cfg.mode, "world": cfg.world,
             "robots": robots, "lines": [], "error": None, "started_at": time.monotonic(),
         })
-    _start_simulation(cfg.mode, cfg.world, robots)
+    _start_simulation(cfg.mode, cfg.world, robots, cfg.sequential_nav)
     return {"success": True}
 
 
 @app.post("/api/simulation/stop")
 async def simulation_stop():
     _stop_simulation()
+    return {"success": True}
+
+
+# Navegação por robô, ligada/desligada sob demanda (modo sequential_nav) —
+# processos à parte de _sim_procs (que é só Gazebo+fleet_orchestrator).
+_robot_nav_procs: dict[str, subprocess.Popen] = {}
+_robot_nav_lock = threading.Lock()
+
+
+def _deactivate_robot_nav(robot_id: str) -> None:
+    with _robot_nav_lock:
+        proc = _robot_nav_procs.pop(robot_id, None)
+    if proc is None:
+        return
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+    except ProcessLookupError:
+        return
+    time.sleep(2)
+    if proc.poll() is None:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+
+
+@app.post("/api/simulation/activate_robot")
+async def activate_robot(robot_id: str):
+    with _sim_lock:
+        running = _sim_state["running"]
+        sim_robots = list(_sim_state.get("robots") or [])
+    if not running:
+        return JSONResponse({"success": False, "message": "Nenhuma simulação rodando."}, status_code=409)
+    if robot_id not in sim_robots:
+        return JSONResponse(
+            {"success": False, "message": f"'{robot_id}' não faz parte desta simulação ({sim_robots})."},
+            status_code=400,
+        )
+    with _robot_nav_lock:
+        if robot_id in _robot_nav_procs and _robot_nav_procs[robot_id].poll() is None:
+            return {"success": True, "message": f"Navegação de '{robot_id}' já estava ativa."}
+
+    cmd = ["ros2", "launch", "fleet_orchestrator", "activate_robot_nav.launch.py", f"namespace:={robot_id}"]
+    env = {**_bridge.ros_env(), "PYTHONUNBUFFERED": "1"}
+    shell_cmd = _bridge.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
+    proc = subprocess.Popen(
+        ["bash", "-c", shell_cmd],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True, bufsize=1, cwd=ROS_WS, env=env,
+        preexec_fn=os.setsid,
+    )
+    with _robot_nav_lock:
+        _robot_nav_procs[robot_id] = proc
+    tag = f"nav-{robot_id}"
+    threading.Thread(
+        target=lambda: [_sim_append_line(tag, line.rstrip()) for line in proc.stdout if line.rstrip()],
+        daemon=True,
+    ).start()
+    return {"success": True}
+
+
+@app.post("/api/simulation/deactivate_robot")
+async def deactivate_robot(robot_id: str):
+    _deactivate_robot_nav(robot_id)
     return {"success": True}
 
 
