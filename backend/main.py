@@ -192,6 +192,7 @@ async def lifespan(app: FastAPI):
                         }
                         for r in msg.robots
                     ]
+                    _fleet_status["robots_at"] = time.monotonic()
 
             # TF lookup: map -> base_link por robô (fallback contínuo; /pose
             # do slam_toolbox só publica esporadicamente, não dá pose ao
@@ -311,6 +312,7 @@ async def lifespan(app: FastAPI):
                 with _status_lock:
                     _fleet_status["nav2_ready"] = "/navigate_to_pose" in stdout
                     _fleet_status["nav2_ready_robots"] = ready_robots
+                    _fleet_status["nav2_ready_robots_at"] = time.monotonic()
 
             node.create_timer(3.0, nav2_check_cb)
 
@@ -538,7 +540,7 @@ async def get_campaign_job(run_id: str):
 _SIM_WORLDS = ["warehouse", "depot"]
 _sim_state: dict = {
     "running": False, "ready": False, "mode": None, "world": None,
-    "robots": [], "lines": [], "error": None,
+    "robots": [], "lines": [], "error": None, "started_at": None,
 }
 _sim_procs: list[tuple[str, subprocess.Popen]] = []
 _sim_lock = threading.Lock()
@@ -668,7 +670,7 @@ def _stop_simulation() -> None:
     with _sim_lock:
         _sim_state.update({
             "running": False, "ready": False, "mode": None, "world": None,
-            "robots": [], "lines": [], "error": None,
+            "robots": [], "lines": [], "error": None, "started_at": None,
         })
 
 
@@ -688,12 +690,28 @@ async def simulation_status():
     # simulação genuinamente pronta (tb1+tb2 navegando, nav2_ready global
     # true). Não substitui o parsing de log (continua útil pra "error"), só
     # dá um segundo caminho pra "ready" virar true quando o estado real bate.
-    if state["running"] and not state["ready"]:
+    #
+    # Bug real achado ao vivo (2026-09-25): nav2_ready_robots/robots são
+    # escritos por timers/subscrições de longa duração que nunca são
+    # resetados entre sessões de simulação — se uma sessão anterior tinha
+    # deixado tb1+tb2 nav2_ready antes de ser parada, esse cross-check
+    # reportava "ready": true pra uma sessão NOVA em t=+0s, antes de
+    # qualquer processo da simulação atual sequer ter subido (confirmado
+    # cronometrando: ready=True no primeiro poll, instantaneamente após o
+    # POST /api/simulation/start). Um agente/painel que dispara comandos de
+    # navegação assim que vê "ready" acaba mandando o robô pra dentro de
+    # uma simulação que ainda nem começou a existir. Corrigido exigindo que
+    # os dois sinais tenham sido atualizados DEPOIS do início desta sessão
+    # (started_at) — dado stale de uma sessão anterior não conta mais.
+    if state["running"] and not state["ready"] and state.get("started_at") is not None:
         expected = set(state.get("robots") or [])
+        started_at = state["started_at"]
         with _status_lock:
             nav_robots = set(_fleet_status.get("nav2_ready_robots", []))
+            nav_fresh = _fleet_status.get("nav2_ready_robots_at", 0) > started_at
             fleet_robots = {r["robot_id"] for r in _fleet_status.get("robots", [])}
-        if expected and expected.issubset(nav_robots) and expected.issubset(fleet_robots):
+            fleet_fresh = _fleet_status.get("robots_at", 0) > started_at
+        if expected and nav_fresh and fleet_fresh and expected.issubset(nav_robots) and expected.issubset(fleet_robots):
             with _sim_lock:
                 _sim_state["ready"] = True
             state["ready"] = True
@@ -711,7 +729,7 @@ async def simulation_start(cfg: StartSimulationRequest):
         robots = cfg.robots if cfg.mode == "multi" else []
         _sim_state.update({
             "running": True, "ready": False, "mode": cfg.mode, "world": cfg.world,
-            "robots": robots, "lines": [], "error": None,
+            "robots": robots, "lines": [], "error": None, "started_at": time.monotonic(),
         })
     _start_simulation(cfg.mode, cfg.world, robots)
     return {"success": True}

@@ -136,6 +136,38 @@ class SimulationEndpointTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(backend_main._sim_state["ready"])  # só 1 de 2 robôs sinalizou pronto
         self.assertEqual(self.popen_envs[0].get("FLEET_ROBOTS"), "tb1,tb2")
 
+    async def test_stale_nav2_state_from_previous_session_does_not_fake_ready(self):
+        """Achado ao vivo: nav2_ready_robots/robots (escritos por nav2_check_cb/
+        fleet_cb, timers de longa duração que nunca são resetados) sobreviviam
+        de uma sessão anterior e faziam o cross-check de /api/simulation/status
+        reportar ready=true pra uma sessão NOVA em t=+0s, antes de qualquer
+        processo da simulação atual sequer ter subido."""
+        import time as _time
+        # Estado deixado por uma sessão ANTERIOR já encerrada — tb1/tb2 nav2_ready
+        # de verdade, só que antes de existir qualquer sessão nova.
+        with backend_main._status_lock:
+            backend_main._fleet_status["nav2_ready_robots"] = ["tb1", "tb2"]
+            backend_main._fleet_status["nav2_ready_robots_at"] = _time.monotonic()
+            backend_main._fleet_status["robots"] = [{"robot_id": "tb1"}, {"robot_id": "tb2"}]
+            backend_main._fleet_status["robots_at"] = _time.monotonic()
+
+        self._pending_lines = [[], []]  # nada de "Managed nodes are active" — só o cross-check poderia marcar ready
+        resp = await self.client.post(
+            "/api/simulation/start",
+            json={"mode": "multi", "world": "warehouse", "robots": ["tb1", "tb2"]},
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        status = (await self.client.get("/api/simulation/status")).json()
+        self.assertFalse(status["ready"], "dado stale de sessão anterior não deveria contar como pronto")
+
+        # Agora simula nav2_check_cb/fleet_cb rodando de verdade, DEPOIS do início desta sessão.
+        with backend_main._status_lock:
+            backend_main._fleet_status["nav2_ready_robots_at"] = _time.monotonic()
+            backend_main._fleet_status["robots_at"] = _time.monotonic()
+        status = (await self.client.get("/api/simulation/status")).json()
+        self.assertTrue(status["ready"], "dado fresco pós-início da sessão deveria marcar ready")
+
     async def test_bringup_failure_sets_error_without_stopping(self):
         self._pending_lines = [
             ["Failed to activate global_costmap...", "Aborting bringup"],
