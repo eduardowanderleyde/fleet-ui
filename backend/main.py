@@ -304,23 +304,64 @@ async def lifespan(app: FastAPI):
             # "Managed nodes are active" — só conta como pronto quando o estado
             # é literalmente "active" (não "inactive"/"configuring"/etc).
             def _bt_navigator_is_active(rid: str) -> bool:
+                # `timeout` (o comando shell, não o parâmetro do subprocess.run)
+                # de propósito: `ros2 lifecycle get` num nó que não existe
+                # ainda fica esperando descoberta DDS sem limite próprio.
+                # subprocess.run(timeout=) só mata o processo direto (o
+                # `bash -c`), não o `ros2` que ele lança por baixo — achado ao
+                # vivo virando zumbi de verdade (processos `ros2 lifecycle get`
+                # sobrevivendo minutos, competindo por CPU/DDS com o bringup
+                # real). O comando `timeout` do coreutils mata quem ELE lança
+                # diretamente, então funciona onde o parâmetro do Python não
+                # funcionava.
                 node_name = f"/{rid}/bt_navigator" if rid else "/bt_navigator"
                 try:
                     r = subprocess.run(
-                        ["bash", "-c", f"source /opt/ros/jazzy/setup.bash 2>/dev/null; ros2 lifecycle get {shlex.quote(node_name)} 2>/dev/null"],
-                        capture_output=True, text=True, timeout=2,
+                        ["bash", "-c", f"source /opt/ros/jazzy/setup.bash 2>/dev/null; timeout 2 ros2 lifecycle get {shlex.quote(node_name)} 2>/dev/null"],
+                        capture_output=True, text=True, timeout=4,
                     )
                     return r.stdout.strip().lower().startswith("active")
                 except Exception:
                     return False
 
+            # Bug real achado ao vivo (2026-09-25): `ros2 lifecycle get` num nó
+            # que ainda não existe (ex.: checando /tb1/bt_navigator durante uma
+            # simulação single-robot, sem namespace nenhum — _ROBOTS é fixo,
+            # lido 1x na subida do backend, não sabe o modo da simulação atual)
+            # não falha rápido, ele espera o timeout inteiro de descoberta DDS.
+            # Como o timer roda a cada 3s independente do tick anterior ter
+            # terminado, isso empilhava dezenas de processos `ros2 lifecycle
+            # get` concorrentes disputando CPU/DDS com o bringup de verdade —
+            # confirmado ao vivo: 2 bringups single-robot seguidos travaram em
+            # timeouts de lifecycle (`change_state`) com o pgrep mostrando
+            # vários `ros2 lifecycle get` acumulados. Corrigido com (1) trava
+            # simples pra nunca ter 2 ticks em voo ao mesmo tempo e (2) checar
+            # só os robôs da simulação ATUAL (via _sim_state), não a lista fixa
+            # de env var — pra single-robot isso é [""] (sem namespace), nunca
+            # tb1/tb2 fantasma.
+            _nav2_check_busy = threading.Lock()
+
             def nav2_check_cb():
-                robots_to_check = _ROBOTS if _ROBOTS else [""]
-                ready_robots = [rid for rid in robots_to_check if _bt_navigator_is_active(rid)]
-                with _status_lock:
-                    _fleet_status["nav2_ready"] = bool(ready_robots)
-                    _fleet_status["nav2_ready_robots"] = ready_robots
-                    _fleet_status["nav2_ready_robots_at"] = time.monotonic()
+                if not _nav2_check_busy.acquire(blocking=False):
+                    return
+                try:
+                    with _sim_lock:
+                        running = _sim_state["running"]
+                        mode = _sim_state["mode"]
+                        sim_robots = list(_sim_state.get("robots") or [])
+                    if not running:
+                        robots_to_check: list[str] = []
+                    elif mode == "multi":
+                        robots_to_check = sim_robots
+                    else:
+                        robots_to_check = [""]
+                    ready_robots = [rid for rid in robots_to_check if _bt_navigator_is_active(rid)]
+                    with _status_lock:
+                        _fleet_status["nav2_ready"] = bool(ready_robots)
+                        _fleet_status["nav2_ready_robots"] = ready_robots
+                        _fleet_status["nav2_ready_robots_at"] = time.monotonic()
+                finally:
+                    _nav2_check_busy.release()
 
             node.create_timer(3.0, nav2_check_cb)
 

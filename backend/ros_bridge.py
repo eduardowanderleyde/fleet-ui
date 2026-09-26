@@ -24,10 +24,26 @@ class RosBridge:
             "ROS_DOMAIN_ID": os.environ.get("ROS_DOMAIN_ID", "0"),
         }
 
+    # Pacotes ament_python deste workspace (setup.py, não ament_cmake) — o
+    # colcon-core instalado nesta máquina (0.20.1) não gera hook de
+    # AMENT_PREFIX_PATH pra esse tipo de pacote (só pythonpath.dsv), então
+    # install/setup.bash sozinho nunca inclui esses diretórios no path,
+    # mesmo depois de `colcon build` — `ros2 launch fleet_orchestrator ...`
+    # falha com "Package not found" apesar do pacote existir e estar
+    # buildado. fleet_msgs (ament_cmake, gera mensagem) não tem esse
+    # problema, só os pacotes 100% Python. Achado ao vivo reconstruindo o
+    # workspace pra testar um launch file novo — sem isso, a simulação
+    # inteira (não só a novidade) para de subir.
+    _AMENT_PYTHON_PACKAGES = ["fleet_orchestrator", "fleet_data_collector"]
+
     def ros_setup_prefix(self) -> str:
+        extra_ament_path = ":".join(
+            f"{shlex.quote(self.ros_ws)}/install/{pkg}" for pkg in self._AMENT_PYTHON_PACKAGES
+        )
         return (
             f"source /opt/ros/{shlex.quote(self.ros_distro)}/setup.bash 2>/dev/null; "
             f"source {shlex.quote(self.ros_ws)}/install/setup.bash 2>/dev/null; "
+            f"export AMENT_PREFIX_PATH=\"{extra_ament_path}:$AMENT_PREFIX_PATH\"; "
         )
 
     def run_service(self, service: str, service_type: str, request: dict | str, timeout: int = 10) -> tuple[bool, str]:
