@@ -370,6 +370,58 @@ verificação de RMSE pra dissertação, documentada em
 — o teto real parece ser especificamente "mais de 1 robô simultâneo", não
 "CPU cansada".
 
+**Investigação mais a fundo, mesma noite — 2 bugs reais de detecção de
+"ready" encontrados e corrigidos, mas o teto de fundo se confirma
+estrutural.** Pedido explícito de investigar a causa raiz. Cronometrando
+com precisão (`date +%s` antes do `POST /api/simulation/start`, comparado
+com os timestamps reais do log), dois falsos-positivos genuínos foram
+achados e corrigidos, um depois do outro:
+
+1. **Estado stale entre sessões** — `nav2_ready_robots`/`robots` são
+   escritos por timers/subscrições que rodam a vida inteira do processo
+   backend, nunca resetados entre sessões de simulação. Se uma sessão
+   anterior tinha deixado tb1+tb2 nav2_ready, esse dado sobrevivia e uma
+   sessão NOVA aparecia "ready" em t=+0s. Corrigido com timestamps
+   (`started_at` vs `nav2_ready_robots_at`/`robots_at`) — só conta dado
+   escrito DEPOIS do início da sessão atual. Teste de regressão adicionado
+   (`test_stale_nav2_state_from_previous_session_does_not_fake_ready`),
+   confirmado falhando sem o fix e passando com ele.
+2. **Ação existe ≠ lifecycle ativo** — mesmo sem dado stale, `ready`
+   continuava chegando cedo demais (t=+7-12s). Causa: a checagem usava
+   `ros2 action list`, que mostra `/tb/navigate_to_pose` assim que o
+   bt_navigator CRIA o action server, durante a fase "Configuring" do
+   lifecycle — bem antes do `lifecycle_manager` terminar de ativar a
+   pilha inteira (confirmado: bringup staggered real de 2 robôs leva
+   ~72s até o log dizer "Managed nodes are active", mas a ação já existia
+   uns 60s antes disso). Um `go_to_point` mandado nessa janela falsa era
+   descartado silenciosamente pelo bt_navigator (ainda não `Active`) —
+   zero log do lado do robô, ele simplesmente não se move; foi
+   reproduzido ao vivo assim (`tb2` recebendo `success: true` do serviço,
+   mas nunca aparecendo "Begin navigating" no log). Corrigido trocando por
+   `ros2 lifecycle get <robot>/bt_navigator`, o mesmo sinal que o
+   `lifecycle_manager` usa de verdade — `ready` agora leva os ~72s reais
+   pra virar `true`.
+
+**Depois dos dois fixes, com ambiente 100% limpo (1 única instância de
+simulação confirmada, sem processos órfãos) e `ready` genuinamente
+verdadeiro:** o teto de 2 robôs **se manteve**. `tb2` recebeu o objetivo,
+girou e andou um pouco, e então **todos os nós de AMBOS os robôs**
+(`controller_server`, `planner_server`, `bt_navigator`,
+`collision_monitor`, `smoother_server`, `route_server`,
+`opennav_docking`, de `tb1` E `tb2`) reportaram "Detected jump back in
+time" no mesmíssimo instante — não é mais um problema de detecção de
+prontidão nem de sessão contaminada, é uma descontinuidade real e global
+no `/clock` simulado sob a carga de 2 robôs completos (2× SLAM Toolbox +
+2× Nav2 inteiro) rodando ao mesmo tempo num único Gazebo nesta máquina.
+**Conclusão:** os 2 bugs de detecção de "ready" eram reais e valiam a
+correção (evitam mandar comando pra uma simulação que ainda não existe ou
+não está pronta), mas não são a causa da instabilidade de fundo com 2+
+robôs — essa parece ser mesmo um limite de desempenho da simulação (passo
+de física + volume de `/tf` de 2 robôs completos) nesta máquina
+específica, não um bug de código corrigível sem reduzir a carga por robô
+(ex.: taxa de scan/costmap mais baixa, física mais simples, ou GPU real
+pro Gazebo).
+
 Nota lateral do mesmo teste: o subscriber ROS interno do backend (que lê
 pose via TF pra `/api/status`) ficou sem funcionar a sessão inteira antes
 disso, por falta do pacote `numpy` no ambiente Python isolado usado pra
