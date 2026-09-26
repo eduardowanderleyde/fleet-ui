@@ -711,6 +711,52 @@ reproduzir.
   reforça o item de autenticação abaixo se isso algum dia rodar fora da sua
   máquina.
 
+## Missão Coordenada — opção B: 1 robô com Nav2 ativo por vez (2026-09-25)
+
+Depois de confirmar que 2+ robôs com Nav2 completo simultâneo batem num
+teto estrutural de `/clock` (seção acima), a decisão foi: manter todos os
+robôs visíveis juntos na mesma simulação, mas ligar SLAM+Nav2 de **1 robô
+por vez**, sequencialmente — evita 2 pilhas de Nav2 competindo, sem perder
+a visão de todos os robôs na cena.
+
+**Implementado:**
+- `turtlebot4_multi_sim.launch.py` ganhou `bringup_nav:=false` — sobe só
+  Gazebo + modelos spawnados (leve, não é isso que causa o salto de
+  tempo), sem SLAM/Nav2 de ninguém.
+- `activate_robot_nav.launch.py` (novo) liga SLAM+Nav2 de 1 robô contra
+  essa base já de pé.
+- `/api/simulation/activate_robot` e `/deactivate_robot` (novos, com
+  `sequential_nav: bool` em `StartSimulationRequest`) — rastreiam o
+  processo de nav por robô (`_robot_nav_procs`), matam via killpg (mesmo
+  padrão de `_stop_simulation`); `_stop_simulation` também limpa qualquer
+  nav ativa antes de derrubar a base. 4 testes novos cobrindo rejeição sem
+  simulação, robô fora da lista, ativa/mata processo, e limpeza no stop.
+
+**Verificado ao vivo, achado real:** ativei `tb1` primeiro — ficou pronto
+em 10s (bem mais rápido que o bringup staggered de 2 robôs juntos, ~72s,
+porque agora só 1 pilha de Nav2 sobe de cada vez), navegou até o alvo
+corretamente. Desativei `tb1`, ativei `tb2` — travou: `tb2.local_costmap`
+nunca conseguiu a transformada `base_link -> odom` ("Invalid frame ID
+'odom' ... frame does not exist"), `Failed to bring up all requested
+nodes`. Investigando mais, **não é bug do tb2 especificamente** — refiz o
+teste ativando `tb2` primeiro (sem ativar `tb1` antes) e funcionou
+perfeitamente (pronto em 3s, `/tb2/odom` publicando a ~27,8Hz). **O
+problema é especificamente com o SEGUNDO robô ativado na sequência**,
+independente de qual seja — o processo `parameter_bridge` dele existe
+(confirmado via `pgrep`), mas o tópico `/odom` correspondente nunca emite
+nada. Hipótese (não confirmada): alguma negociação de descoberta do
+gz-transport, ou efeito colateral do `killpg` ao desativar o primeiro
+robô, atrapalha o bridge do segundo — precisa de mais investigação
+(comparar logs do `parameter_bridge` do robô que falha vs. o que funciona,
+checar se `ros2 topic hz` no lado Gazebo/gz-transport, não só ROS, mostra
+a mesma ausência).
+
+**Estado atual:** groundwork (launch files + endpoints + testes) commitado
+e funcional pra 1 robô isolado; o fluxo sequencial completo (2º robô em
+diante) ainda não funciona de ponta a ponta. Frontend (`useSimulation.js`)
+ainda não foi adaptado pra chamar activate/deactivate em sequência — não
+faz sentido fazer isso antes de resolver o bug do segundo robô.
+
 ## Próximos passos naturais
 
 - Autenticação/rate-limit em `/api/agent/*` — hoje qualquer um que acesse
