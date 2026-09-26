@@ -34,3 +34,27 @@ que resolve, com referência a ele).
   resultante com os 3,35 cm atuais. Se o número mudar, atualizar
   `08_resultados.tex`, `09_conclusao.tex` e `disserta-apresenta/` (deck +
   fala) juntos, já que os três citam o mesmo valor.
+
+- **Resolução (2026-09-25):** os bags MCAP originais de `dissertation_clean01`
+  não foram localizados nesta máquina (buscado em `fleet_ws/runs/`,
+  `~/Documentos/ros2_ws` e em outras branches — só o arquivo de rota
+  `dissertation_clean01.yaml` sobrevive, sem os bags). Como verificação
+  independente, foi reconstruída uma campanha nova (1 baseline + 10
+  réplicas, restart completo da simulação antes de cada uma, mesmos
+  waypoints do arquivo de rota salvo) usando o `analyze_runs.py` já
+  corrigido — confirmado que os 10 replays usaram `/pose` (SLAM) em 100%
+  dos casos, não caíram no fallback `/odom`. A duração média resultante
+  (17,55 s, desvio 0,36 s, via métrica de alta taxa `/odom`) bateu quase
+  exatamente com os 17,51 s / 0,36 s citados no capítulo, indicando que é
+  fisicamente a mesma rota. O RMSE médio dessa campanha nova ficou em
+  6,79 cm (desvio 0,96 cm, mín 4,50 cm, máx 8,20 cm) — quase o dobro dos
+  3,35 cm citados.
+  Consultada, a autoria decidiu **manter 3,35 cm como está** — o valor se
+  refere à gravação/bag inicial (baseline) daquela campanha específica, e
+  o ambiente foi reiniciado depois dela para outros trabalhos (sessão de
+  hoje incluiu retrabalho considerável no orquestrador multi-robô e no
+  painel de simulação); a divergência é mais provavelmente explicada por
+  essa diferença de estado do sistema entre as duas campanhas do que por
+  contaminação de `/odom`. Fica registrado aqui como contexto e não como
+  pendência: nenhuma alteração foi feita em `08_resultados.tex`,
+  `09_conclusao.tex` ou `disserta-apresenta/`.
