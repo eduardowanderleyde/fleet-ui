@@ -290,27 +290,35 @@ async def lifespan(app: FastAPI):
             # ficam disponíveis via /api/status e /api/map.
             _setup_robot("")
 
-            # Verifica Nav2 periodicamente via ros2 action list (mais confiável que ActionClient).
-            # Guarda também QUAIS robôs têm /navigate_to_pose de verdade (não só
-            # "existe pelo menos um") — /api/simulation/status usa isso pra decidir
-            # "ready" de forma confiável, em vez de vasculhar log bruto por uma
-            # frase exata (ver _sim_reader_thread: frágil, já vimos ao vivo ficar
-            # travado em "ready": false com a simulação genuinamente funcional).
-            def nav2_check_cb():
+            # Verifica Nav2 periodicamente. Usava `ros2 action list` e considerava
+            # pronto assim que o nome da ação aparecesse no grafo — achado ao vivo
+            # (2026-09-25): o action server do bt_navigator é criado durante
+            # "Configuring", bem antes do lifecycle_manager terminar de ativar a
+            # pilha inteira (confirmado cronometrando: ação aparecia ~1min antes
+            # do log real dizer "Managed nodes are active"). Ou seja, media
+            # "o server existe", não "o server aceita objetivos de verdade" — um
+            # goToPoint mandado nessa janela falsa era descartado silenciosamente
+            # (bt_navigator ainda não Active), sem log nenhum do lado do robô.
+            # Agora confere o ESTADO REAL do lifecycle node via `ros2 lifecycle
+            # get`, o mesmo sinal que o lifecycle_manager usa pra decidir
+            # "Managed nodes are active" — só conta como pronto quando o estado
+            # é literalmente "active" (não "inactive"/"configuring"/etc).
+            def _bt_navigator_is_active(rid: str) -> bool:
+                node_name = f"/{rid}/bt_navigator" if rid else "/bt_navigator"
                 try:
-                    env = {**os.environ}
                     r = subprocess.run(
-                        ["bash", "-c", "source /opt/ros/jazzy/setup.bash 2>/dev/null; ros2 action list 2>/dev/null"],
-                        capture_output=True, text=True, timeout=3, env=env,
+                        ["bash", "-c", f"source /opt/ros/jazzy/setup.bash 2>/dev/null; ros2 lifecycle get {shlex.quote(node_name)} 2>/dev/null"],
+                        capture_output=True, text=True, timeout=2,
                     )
-                    stdout = r.stdout
+                    return r.stdout.strip().lower().startswith("active")
                 except Exception:
-                    stdout = ""
-                ready_robots = [rid for rid in _ROBOTS if f"/{rid}/navigate_to_pose" in stdout] if _ROBOTS else (
-                    [""] if "/navigate_to_pose" in stdout else []
-                )
+                    return False
+
+            def nav2_check_cb():
+                robots_to_check = _ROBOTS if _ROBOTS else [""]
+                ready_robots = [rid for rid in robots_to_check if _bt_navigator_is_active(rid)]
                 with _status_lock:
-                    _fleet_status["nav2_ready"] = "/navigate_to_pose" in stdout
+                    _fleet_status["nav2_ready"] = bool(ready_robots)
                     _fleet_status["nav2_ready_robots"] = ready_robots
                     _fleet_status["nav2_ready_robots_at"] = time.monotonic()
 
