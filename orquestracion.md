@@ -757,6 +757,65 @@ diante) ainda não funciona de ponta a ponta. Frontend (`useSimulation.js`)
 ainda não foi adaptado pra chamar activate/deactivate em sequência — não
 faz sentido fazer isso antes de resolver o bug do segundo robô.
 
+### Investigação continuada na máquina Windows/Docker (2026-09-29) — hipótese refutada, achado redirecionado
+
+Retomando o bug do 2º robô (seção acima), mas na máquina Windows via Docker
+Desktop (a mais fraca das duas usadas neste projeto — ver "Duas máquinas de
+teste diferentes" em "Ambiente exato testado"). Sequência de testes ao
+vivo, com a imagem Docker reconstruída pra pegar o código desta seção:
+
+1. **Confirmado: a ponte não nasce quebrada.** Com a simulação de base de
+   pé (`bringup_nav:=false`, nenhum Nav2 tocado ainda), `/tb1/odom` e
+   `/tb2/odom` fluem normalmente (12-15 Hz cada) via `ros2 topic hz`. O
+   lado Gazebo (`gz topic echo /tb1/odom`, `/tb2/odom`) também tem dado
+   real dos dois robôs o tempo todo. Refuta a hipótese de que o bridge do
+   tb2 já nasceria defeituoso.
+2. **Reproduzido o bug original:** ativar tb1 (funciona, pose válida) e
+   depois tb2 (sem desativar tb1 antes) — `/tb2/odom` fica com **zero
+   mensagens** por 5s+ (`ros2 topic hz` não imprime taxa nenhuma), mesmo
+   com `bridge_ros_gz_tb2` vivo e `ros2 topic info -v` mostrando
+   publisher+subscribers corretamente casados via DDS. Isso descarta a
+   hipótese de ontem de que seria efeito colateral do `killpg` ao
+   desativar o robô anterior (aqui tb1 nunca foi desativado).
+3. **Achado a correlação:** no instante em que o Nav2/SLAM do tb2 é
+   ativado, o `sync_slam_toolbox_node` dele é imediatamente inundado com
+   dezenas de `[tf2_buffer]: Detected jump back in time. Clearing TF
+   buffer` — o mesmo sintoma já documentado como causa do teto estrutural
+   de 2 robôs (seção "Missão Coordenada — opção B" acima). Hipótese
+   levantada: a explosão de ~15-18 nós novos que o Nav2+SLAM de um robô
+   cria de uma vez (todos assinando `/clock`/`/tf`) sobrecarrega a entrega
+   DDS o bastante pra também travar o pipeline interno do
+   `bridge_ros_gz_tb2` (que também roda com `use_sim_time: true`), sem
+   crashar nem logar erro nenhum do lado da ponte.
+4. **Teste decisivo, hipótese refutada:** desativei tb1 e tb2, confirmei
+   os dois Nav2 totalmente fora (`ros2 node list` sem `bt_navigator`
+   nenhum), e ativei **só o tb2, sozinho, sem nenhum outro Nav2 rodando**.
+   Mesmo assim: **356 avisos de "jump back in time"** durante o boot dele.
+   Ou seja, **não é sobreposição de 2 robôs** — a simples explosão de nós
+   de **um único** Nav2+SLAM já é demais pra esta máquina Windows/Docker.
+   Isso contradiz o achado de ontem na máquina Linux nativa ("tb2 sozinho
+   funciona, pronto em 3s") — mas é esperado: são máquinas com quase 3×
+   de diferença de núcleos/RAM e sem GPU dedicada na Windows (ver "Duas
+   máquinas de teste diferentes"). Nesse mesmo teste, até um `ros2 topic
+   hz` novo (ferramenta de diagnóstico, não código do projeto) falhou ao
+   inicializar (`RTPS_TRANSPORT_SHM Error: Failed init_port ... 
+   open_and_lock_file failed`) — sinal de que o DDS/shared-memory do
+   container estava genuinamente saturado, não só o sintoma isolado do
+   bridge.
+
+**Conclusão:** o que parecia um bug específico de "2º robô ativado"
+ontem, ao ser re-testado na máquina mais fraca, se revelou como o mesmo
+limite de capacidade de nós/DDS simultâneos por robô, só que com um piso
+ainda mais baixo aqui (1 robô já basta). **Não misturar os dois achados**:
+o teto estrutural de 2 robôs (Linux nativo, seção acima) e esta saturação
+de DDS com 1 robô só (Windows/Docker) são o mesmo tipo de fenômeno
+(sobrecarga de descoberta DDS sob rajada de nós), mas em máquinas
+diferentes com limiares diferentes — qualquer investigação de causa raiz
+de verdade (ex.: reduzir nós por robô, throttle de criação de nós,
+`ROS_STATIC_PEERS` em vez de multicast) precisa ser validada na máquina
+Linux nativa, não aqui, senão o resultado fica contaminado pela fraqueza
+específica desta máquina.
+
 ## Próximos passos naturais
 
 - Autenticação/rate-limit em `/api/agent/*` — hoje qualquer um que acesse
