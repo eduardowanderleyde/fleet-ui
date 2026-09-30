@@ -815,6 +815,17 @@ _robot_nav_procs: dict[str, subprocess.Popen] = {}
 _robot_nav_lock = threading.Lock()
 
 
+# Achado ao vivo (2026-09-27/30): ativar o robô seguinte logo depois de
+# desligar o anterior faz a rajada de ~15-18 nós novos do Nav2+SLAM disputar
+# recursos com o que quer que o SO/DDS ainda esteja limpando da ativação
+# anterior — mesmo com os processos 100% mortos (confirmado via pgrep). Sem
+# pausa: 484 avisos de "jump back in time", nunca fica pronto (75s+, timeout).
+# Com 15s de pausa depois de matar o processo anterior: 9 avisos (menos que
+# a primeira ativação da sessão), pronto em ~6s, navegação funcionando de
+# verdade (confirmado pelo log do próprio Nav2: "Reached the goal!").
+_ROBOT_NAV_SETTLE_SECONDS = 15
+
+
 def _deactivate_robot_nav(robot_id: str) -> None:
     with _robot_nav_lock:
         proc = _robot_nav_procs.pop(robot_id, None)
@@ -830,6 +841,7 @@ def _deactivate_robot_nav(robot_id: str) -> None:
             os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
         except ProcessLookupError:
             pass
+    time.sleep(_ROBOT_NAV_SETTLE_SECONDS)
 
 
 @app.post("/api/simulation/activate_robot")
