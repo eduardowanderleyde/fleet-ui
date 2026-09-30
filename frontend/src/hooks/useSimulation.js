@@ -27,9 +27,15 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 // tempo faz o /clock simulado saltar pra trás sob a carga combinada. Testado
 // ao vivo: o robô ATIVADO leva até ~12s pra ficar pronto (rajada de ~15-18
 // nós), e depois de ativar/desativar precisa de ~15s de assentamento no
-// backend (_ROBOT_NAV_SETTLE_SECONDS) antes do próximo — por isso o timeout
-// de espera aqui é generoso.
-const NAV_READY_TIMEOUT_MS = 40000
+// backend (_ROBOT_NAV_SETTLE_SECONDS) antes do próximo.
+//
+// Timeout deliberadamente curto, não generoso: testado ao vivo que os
+// casos que travam (484 avisos de jump-back, ou sob carga alta da
+// máquina) não parecem se resolver esperando mais — ou converge rápido
+// (6-12s) ou fica preso mesmo, sem meio-termo visto. Preferível falhar
+// rápido e deixar tentar de novo do que o usuário olhando pra tela parada
+// por minutos sem essa espera extra realmente ajudar.
+const NAV_READY_TIMEOUT_MS = 60000
 const NAV_READY_POLL_MS = 2000
 const TRAVEL_DWELL_MS = 18000  // tempo pro robô realmente percorrer o trecho antes de desativar
 
