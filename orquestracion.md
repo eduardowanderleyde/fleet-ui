@@ -816,6 +816,51 @@ de verdade (ex.: reduzir nós por robô, throttle de criação de nós,
 Linux nativa, não aqui, senão o resultado fica contaminado pela fraqueza
 específica desta máquina.
 
+### Resolvido na máquina Linux nativa (2026-09-30) — pausa de assentamento, sem precisar de broker
+
+Antes de desenhar um módulo novo (cogitado: um "broker" que sequenciasse
+as ativações), testada a hipótese mais barata primeiro: será que falta só
+uma pausa entre desativar um robô e ativar o próximo? Confirmado ao vivo,
+máquina descansada (reboot recente, load baixo):
+
+- **tb1 sozinho, do zero:** 97 avisos de "jump back in time", mas
+  recupera e fica pronto em ~12s — mesmo 1 robô só já gera uma rajada
+  grande de nós (~15-18) que estressa a descoberta DDS momentaneamente.
+- **tb2 ativado logo depois de tb1 ser desativado, sem pausa:** 484
+  avisos, nunca fica pronto (75s+, timeout) — reproduz o bug original
+  desta seção, confirmando que ele também existe na máquina boa, só que
+  com limiar mais alto que a Windows/Docker.
+- **tb2 ativado com 15s de pausa depois do processo anterior morrer:**
+  9 avisos (menos que a primeira ativação da sessão!), pronto em ~6s,
+  navegação funcionando de ponta a ponta (log do próprio Nav2: "Begin
+  navigating... Reached the goal! Goal succeeded").
+
+**Conclusão:** não precisa de um módulo broker — um delay simples
+resolve. Implementado como `_ROBOT_NAV_SETTLE_SECONDS = 15` dentro de
+`_deactivate_robot_nav()` em `backend/main.py`. Hipótese de causa: mesmo
+com os processos anteriores 100% mortos (confirmado via `pgrep`), sobra
+algo pro SO/DDS limpar (cache de descoberta, memória compartilhada) que a
+rajada de nós do próximo robô acaba disputando — 15s dá tempo disso
+assentar.
+
+**Achado colateral, também corrigido:** depois desse ciclo desativa/ativa,
+`/api/status` parava de refletir a posição real do robô reativado (ele
+navegava e chegava no alvo de verdade, confirmado no log do Nav2, mas a
+pose reportada ficava travada no último valor de antes da desativação).
+Causa: o `tf2_ros.Buffer` de cada robô é criado 1x na subida do backend e
+nunca resetado — quando o SLAM religa do zero, os timestamps de sim-time
+dele recomeçam mais baixos que os já guardados no buffer velho, e o tf2
+rejeita silenciosamente como "dados antigos". Corrigido limpando o buffer
+(`_reset_robot_pose_tracking()`) no início de `activate_robot`, antes do
+processo novo subir. Verificado ao vivo: pose do robô reativado atualizou
+em tempo real (0.026 → 0.441 indo em direção ao alvo).
+
+**Estado atual:** os dois bugs que bloqueavam a opção B estão resolvidos
+e verificados ao vivo (commits `7263898` e `249262d`). Falta só o
+frontend (`useSimulation.js`/`SimulationPanel.jsx`) chamar
+activate/deactivate em sequência em vez do disparo simultâneo atual — é
+o próximo passo natural agora que o backend segura o fluxo completo.
+
 ## Próximos passos naturais
 
 - Autenticação/rate-limit em `/api/agent/*` — hoje qualquer um que acesse
