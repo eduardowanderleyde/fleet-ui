@@ -907,6 +907,24 @@ possível pro futuro (não implementada): reiniciar a simulação inteira
 uma sessão troca antes de sugerir "reinicie a simulação". Por ora, fica
 documentado como limite conhecido, não pendência de bug.
 
+### Mitigação implementada: corta 3 servidores Nav2 não usados (commit `9a83aa9`)
+
+Antes de partir pra algo mais invasivo (reiniciar a simulação inteira),
+implementada a opção mais barata discutida: `go_to_point` usa só
+`NavigateToPose` com 1 pose — conferido contra a árvore de comportamento
+padrão do Nav2 que `route_server`, `waypoint_follower` e `docking_server`
+nunca são chamados nesse fluxo. Escrito `nav2_minimal.launch.py` próprio
+(réplica enxuta do `navigation_launch.py` do vendor, que não expõe
+nenhum jeito de desligar servidor individual via argumento) cortando os
+3, mantendo os que a árvore realmente chama (`smoother_server` via
+`SmoothPath`, `behavior_server` via recuperação).
+
+**Resultado ao vivo:** no mesmo cenário que antes falhava (2º robô, load
+subindo durante o teste), tb2 ficou pronto em ~39s e navegou
+corretamente — dentro do timeout de 60s, diferente do teste equivalente
+sem o corte (200s+ sem convergir). É melhoria real, não solução
+completa — ainda sensível a carga da máquina, só que com mais margem.
+
 ## Próximos passos naturais
 
 - Autenticação/rate-limit em `/api/agent/*` — hoje qualquer um que acesse
