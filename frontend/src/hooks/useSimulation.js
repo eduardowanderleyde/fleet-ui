@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getSimulationOptions, getSimulationStatus, goToPoint, startSimulation, stopSimulation } from '../api/fleetApi'
+import {
+  activateRobot, deactivateRobot, getSimulationOptions, getSimulationStatus,
+  getStatus, goToPoint, startSimulation, stopSimulation,
+} from '../api/fleetApi'
 
 const EMPTY_STATUS = { running: false, ready: false, mode: null, world: null, robots: [], lines: [], error: null }
 
@@ -18,6 +21,27 @@ export const SHAPES = {
 // a mais que isso (pensadas pra até 3), o dispatch só usa os N primeiros.
 export const ROBOTS = ['tb1', 'tb2']
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+
+// Navegação de 1 robô por vez (ver "Opção B" / "Resolvido na máquina Linux
+// nativa" no orquestracion.md) — rodar N pilhas de Nav2 completas ao mesmo
+// tempo faz o /clock simulado saltar pra trás sob a carga combinada. Testado
+// ao vivo: o robô ATIVADO leva até ~12s pra ficar pronto (rajada de ~15-18
+// nós), e depois de ativar/desativar precisa de ~15s de assentamento no
+// backend (_ROBOT_NAV_SETTLE_SECONDS) antes do próximo — por isso o timeout
+// de espera aqui é generoso.
+const NAV_READY_TIMEOUT_MS = 40000
+const NAV_READY_POLL_MS = 2000
+const TRAVEL_DWELL_MS = 18000  // tempo pro robô realmente percorrer o trecho antes de desativar
+
+async function waitForRobotNavReady(robotId) {
+  const deadline = Date.now() + NAV_READY_TIMEOUT_MS
+  while (Date.now() < deadline) {
+    const s = await getStatus().catch(() => null)
+    if (s?.nav2_ready_robots?.includes(robotId)) return true
+    await sleep(NAV_READY_POLL_MS)
+  }
+  return false
+}
 
 export function useSimulation(intervalMs = 2000) {
   const [options, setOptions] = useState({ worlds: [], robots: [], roles: {} })
@@ -64,15 +88,24 @@ export function useSimulation(intervalMs = 2000) {
       for (let i = 0; i < movable.length; i++) {
         const robotId = movable[i]
         const [x, y, yaw] = points[i] || [0, 0, 0]
-        setDispatch(d => ({ ...d, [robotId]: 'pending' }))
         try {
+          setDispatch(d => ({ ...d, [robotId]: 'ativando navegação…' }))
+          const actRes = await activateRobot(robotId)
+          if (!actRes.success) throw new Error(actRes.message || 'falha ao ativar navegação')
+
+          const gotReady = await waitForRobotNavReady(robotId)
+          if (!gotReady) throw new Error('navegação não ficou pronta a tempo')
+
+          setDispatch(d => ({ ...d, [robotId]: 'pending' }))
           const result = await goToPoint({ robotId, x, y, yaw })
           if (!result.success) throw new Error(result.message || 'falhou sem detalhe')
           setDispatch(d => ({ ...d, [robotId]: 'ok' }))
+          await sleep(TRAVEL_DWELL_MS)  // dá tempo dele percorrer o trecho antes de desligar a navegação dele
         } catch (e) {
           setDispatch(d => ({ ...d, [robotId]: `error: ${e.message}` }))
+        } finally {
+          await deactivateRobot(robotId).catch(() => {})  // sempre libera o robô, mesmo se algo acima falhou
         }
-        await sleep(1500)  // dá tempo do robô sair antes do próximo — mais fácil de ver na tela
       }
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,7 +134,10 @@ export function useSimulation(intervalMs = 2000) {
     setActionError(null)
     setStarting(true)
     try {
-      await startSimulation({ mode, world, robots })
+      // sequentialNav sempre ligado no modo multi: sobe só Gazebo + robôs
+      // spawnados, sem Nav2 de ninguém — a navegação de cada um liga sob
+      // demanda no loop de dispatch acima, 1 por vez.
+      await startSimulation({ mode, world, robots, sequentialNav: mode === 'multi' })
       const data = await getSimulationStatus()
       setStatus(data)
     } catch (e) {

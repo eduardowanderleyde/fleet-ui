@@ -96,14 +96,24 @@ export async function getSimulationStatus() {
   return readJson(await fetch(apiPath('/simulation/status')))
 }
 
-export async function startSimulation({ mode, world, robots }) {
+export async function startSimulation({ mode, world, robots, sequentialNav = false }) {
   return readJson(await fetch(apiPath('/simulation/start'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ mode, world, robots }),
+    body: JSON.stringify({ mode, world, robots, sequential_nav: sequentialNav }),
   }))
 }
 
 export async function stopSimulation() {
   return readJson(await fetch(apiPath('/simulation/stop'), { method: 'POST' }))
+}
+
+export async function activateRobot(robotId) {
+  const params = new URLSearchParams({ robot_id: robotId })
+  return readJson(await fetch(apiPath(`/simulation/activate_robot?${params.toString()}`), { method: 'POST' }))
+}
+
+export async function deactivateRobot(robotId) {
+  const params = new URLSearchParams({ robot_id: robotId })
+  return readJson(await fetch(apiPath(`/simulation/deactivate_robot?${params.toString()}`), { method: 'POST' }))
 }
