@@ -856,10 +856,35 @@ processo novo subir. Verificado ao vivo: pose do robô reativado atualizou
 em tempo real (0.026 → 0.441 indo em direção ao alvo).
 
 **Estado atual:** os dois bugs que bloqueavam a opção B estão resolvidos
-e verificados ao vivo (commits `7263898` e `249262d`). Falta só o
-frontend (`useSimulation.js`/`SimulationPanel.jsx`) chamar
-activate/deactivate em sequência em vez do disparo simultâneo atual — é
-o próximo passo natural agora que o backend segura o fluxo completo.
+e verificados ao vivo (commits `7263898` e `249262d`).
+
+### Frontend ligado ao fluxo sequencial (2026-09-30) — funciona, mas continua sensível à carga da máquina
+
+`useSimulation.js`/`SimulationPanel.jsx` ligados ao fluxo completo
+(commit `fff22bf`): `start()` sempre pede `sequentialNav:true` no modo
+multi, e o dispatch por robô agora é `activateRobot` → espera
+`nav2_ready_robots` incluir esse robô (até 40s) → `go_to_point` → 18s de
+margem pra percorrer o trecho → `deactivateRobot` (sempre, mesmo se algo
+falhar antes, via `finally`) → próximo robô.
+
+Dois testes ao vivo na mesma sessão, resultados diferentes:
+- **Máquina recém-reiniciada (load ~0,9):** tb1 e tb2 navegaram em
+  sequência sem problema, pose atualizando em tempo real pros dois.
+- **~25 min depois, mesma sessão de testes seguidos (load subiu pra
+  ~2,2):** tb1 (1º robô) ficou pronto normal (~9s), mas tb2 (2º, mesmo
+  com os 15s de assentamento) não ficou pronto dentro de 40s — nem depois
+  de esperar mais de 200s manualmente. Não é regressão de código: o
+  comportamento do painel está correto (o timeout dispara, o robô aparece
+  com erro, `deactivateRobot` roda de qualquer jeito) — é a mesma
+  sensibilidade a carga da máquina já documentada nesta seção o tempo
+  todo, só que agora afetando até o caso de sucesso que tínhamos acabado
+  de confirmar.
+
+**Não resolvido, decisão pendente:** vale aumentar o timeout de 40s (dá
+mais chance de recuperar sob carga alta, mas o usuário espera mais antes
+de ver erro), ou aceitar que "geralmente rápido, ocasionalmente lento/
+precisa tentar de novo" é o comportamento esperado deste recurso nesta
+máquina? Não decidido ainda — registrado aqui pra não se perder.
 
 ## Próximos passos naturais
 
