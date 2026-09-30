@@ -68,6 +68,9 @@ ARGUMENTS = [
 
 def generate_launch_description():
     pkg_nav4 = get_package_share_directory('turtlebot4_navigation')
+    orchestrator_launch_dir = os.path.join(
+        get_package_share_directory('fleet_orchestrator'), 'launch'
+    )
     namespace = LaunchConfiguration('namespace')
     nav2_params_file = _make_nav2_params(None)
 
@@ -75,8 +78,11 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(pkg_nav4, 'launch', 'slam.launch.py')),
         launch_arguments=[('namespace', namespace), ('use_sim_time', 'true'), ('sync', 'true')],
     )
+    # nav2_minimal.launch.py (nosso, não o nav2.launch.py do vendor) — sobe só
+    # os servidores que go_to_point usa de verdade, cortando ~30% da rajada
+    # de nós por robô (ver docstring do arquivo pro porquê).
     nav2 = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_nav4, 'launch', 'nav2.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(orchestrator_launch_dir, 'nav2_minimal.launch.py')),
         launch_arguments=[
             ('namespace', namespace),
             ('use_sim_time', 'true'),
