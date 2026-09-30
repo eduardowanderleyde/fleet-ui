@@ -880,11 +880,32 @@ Dois testes ao vivo na mesma sessão, resultados diferentes:
   todo, só que agora afetando até o caso de sucesso que tínhamos acabado
   de confirmar.
 
-**Não resolvido, decisão pendente:** vale aumentar o timeout de 40s (dá
-mais chance de recuperar sob carga alta, mas o usuário espera mais antes
-de ver erro), ou aceitar que "geralmente rápido, ocasionalmente lento/
-precisa tentar de novo" é o comportamento esperado deste recurso nesta
-máquina? Não decidido ainda — registrado aqui pra não se perder.
+**Decisão tomada (2026-09-30):** timeout ajustado de 40s pra 60s (commit
+`d26c66a`) — não mais que isso, porque os casos que travam não parecem se
+resolver esperando mais (ver abaixo).
+
+### Causa mais precisa encontrada: não é "sessão cansada", é o Gazebo rodando
+
+Teste final decisivo (máquina descansada, load 0,16 no início): ativei
+tb1, deixei ele navegar, desativei — só isso já levou o load de **0,16
+pra 2,27 em ~2 minutos**. O Gazebo base (spawnado 1x, nunca reiniciado
+entre trocas de robô) fica rodando o tempo inteiro da sessão, consumindo
+CPU continuamente; cada robô que passa por ele (SLAM+Nav2 subindo e
+descendo) deixa a carga um pouco mais alta pro próximo. Não é acúmulo de
+sujeira de sessões anteriores — é o custo real, current, de ter a
+simulação de pé. Por isso tb2 (2º robô) falhou de novo nesse mesmo teste
+final, mesmo com os 15s de assentamento: `Failed to activate global_costmap
+because transform from base_link to map did not become available before
+timeout` → `Failed to bring up all requested nodes`.
+
+**Implicação prática, sem solução de código simples:** quanto mais tempo
+uma sessão da Missão Coordenada fica de pé (mais robôs trocando, mais
+minutos), maior a chance de um robô novo falhar ao ativar — não por bug,
+por custo real de CPU do Gazebo acumulando ao longo da sessão. Mitigação
+possível pro futuro (não implementada): reiniciar a simulação inteira
+(não só a navegação) a cada N trocas de robô, ou limitar quantos robôs
+uma sessão troca antes de sugerir "reinicie a simulação". Por ora, fica
+documentado como limite conhecido, não pendência de bug.
 
 ## Próximos passos naturais
 
