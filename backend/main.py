@@ -51,6 +51,30 @@ _fleet_status: dict = {"robots": []}
 _robot_poses: dict[str, dict] = {rid: {"x": 0.0, "y": 0.0, "yaw": 0.0, "valid": False} for rid in _ROBOTS}
 _map_metas: dict[str, dict] = {}  # robot_id -> {resolution, origin_x, origin_y, width, height, png_b64}
 _status_lock = threading.Lock()
+# robot_id -> tf2_ros.Buffer, preenchido por _setup_robot() dentro do
+# lifespan — usado por _reset_robot_pose_tracking() pra limpar o buffer
+# quando a navegação sequencial desliga/religa um robô (ver comentário lá).
+_robot_tf_buffers: dict[str, object] = {}
+
+
+def _reset_robot_pose_tracking(robot_id: str) -> None:
+    """Achado ao vivo (2026-09-30): depois de desativar e reativar a
+    navegação sequencial de um robô, /api/status parava de refletir a
+    posição real dele — o robô navegava e chegava no alvo de verdade
+    (confirmado no log do Nav2), mas a pose reportada ficava travada no
+    último valor antes da desativação. Causa: o tf2_ros.Buffer de cada robô
+    é criado 1x na subida do backend e nunca é resetado; quando o SLAM é
+    religado do zero, ele publica /tf com timestamps de sim-time que
+    recomeçam mais baixos que os já guardados no buffer velho — o tf2
+    silenciosamente rejeita essas atualizações como "dados antigos"
+    (mesma classe do aviso TF_OLD_DATA já filtrado como ruído noutro lugar
+    deste arquivo). Chamado no início de activate_robot, antes do processo
+    novo subir, pra não ter dado velho competindo com o novo."""
+    buf = _robot_tf_buffers.get(robot_id)
+    if buf is not None:
+        buf.clear()
+    with _status_lock:
+        _robot_poses[robot_id] = {"x": 0.0, "y": 0.0, "yaw": 0.0, "valid": False}
 _ws_clients: list[WebSocket] = []
 
 
@@ -218,6 +242,7 @@ async def lifespan(app: FastAPI):
             def _setup_robot(rid: str) -> None:
                 prefix = f"/{rid}" if rid else ""
                 tf_buffer = tf2_ros.Buffer()
+                _robot_tf_buffers[rid] = tf_buffer
 
                 def _tf_dynamic_cb(msg):
                     for t in msg.transforms:
@@ -860,6 +885,7 @@ async def activate_robot(robot_id: str):
         if robot_id in _robot_nav_procs and _robot_nav_procs[robot_id].poll() is None:
             return {"success": True, "message": f"Navegação de '{robot_id}' já estava ativa."}
 
+    _reset_robot_pose_tracking(robot_id)
     cmd = ["ros2", "launch", "fleet_orchestrator", "activate_robot_nav.launch.py", f"namespace:={robot_id}"]
     env = {**_bridge.ros_env(), "PYTHONUNBUFFERED": "1"}
     shell_cmd = _bridge.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
