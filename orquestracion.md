@@ -925,6 +925,25 @@ corretamente — dentro do timeout de 60s, diferente do teste equivalente
 sem o corte (200s+ sem convergir). É melhoria real, não solução
 completa — ainda sensível a carga da máquina, só que com mais margem.
 
+### Nuance importante (2026-09-30): o corte ajuda a FICAR PRONTO, não garante terminar a navegação
+
+Teste de ponta a ponta (formação L completa, tb1 + tb2): tb1 funcionou
+perfeito. tb2 ficou pronto em ~18s (bom sinal, corte ajudando) e o
+`go_to_point` foi aceito — mas o objetivo **falhou no meio da navegação**,
+não na hora de ficar pronto: `bt_navigator`/`collision_monitor` pegaram o
+mesmo "jump back in time" / "Extrapolation Error" / "Robot pose is not
+available" → `Goal failed`, depois de já ter andado um pouco (y foi de 0
+pra 0,38 de um alvo de 1,5, e parou aí).
+
+Ou seja: os fixes desta sessão (corte de nós, pausa de assentamento,
+timeout ajustado) melhoraram bastante a fase de **ficar pronto**, mas o
+risco de "salto no tempo" no meio do caminho continua existindo durante a
+navegação em si — não é garantia de sucesso completo, é redução de
+risco. Vale o usuário saber: o robô pode aceitar o comando, começar a se
+mover, e ainda assim não terminar de chegar, sob carga. `deactivateRobot`
+ainda roda (via `finally` no hook), então não trava a sessão — só o robô
+não completa a formação dessa vez.
+
 ## Próximos passos naturais
 
 - Autenticação/rate-limit em `/api/agent/*` — hoje qualquer um que acesse
