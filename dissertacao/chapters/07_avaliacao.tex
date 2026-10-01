@@ -8,10 +8,10 @@ A avaliação do framework foi conduzida em simulação Gazebo Harmonic com um r
 TurtleBot4 Standard no mundo \textit{warehouse}. O ambiente de simulação garante
 condições perfeitamente repetíveis dentro do mesmo laboratório --- sem variação de iluminação, temperatura
 ou tráfego de outros agentes --- o que permite isolar a variabilidade introduzida
-pelos algoritmos de navegação e SLAM da variabilidade ambiental, o tipo de
-controle completo de variáveis apontado como vantagem da simulação sobre o
-hardware real \cite{amigoni2010}. Experimentos em
-hardware real, com sua camada adicional de incerteza, constituem trabalho futuro.
+pelos algoritmos de navegação e SLAM da variabilidade ambiental. Esse é o tipo
+de controle completo de variáveis apontado como vantagem da simulação sobre o
+hardware real \cite{amigoni2010}; experimentos em hardware real, com sua camada
+adicional de incerteza, constituem trabalho futuro.
 
 A configuração da pilha de software é:
 
@@ -67,8 +67,8 @@ Para a campanha final de avaliação, o procedimento é:
     Standard.
     \item Aguardar ativação completa do Nav2, SLAM Toolbox, sensores e serviços
     do orquestrador.
-    \item Gravar uma baseline limpa (\texttt{dissertation\_\allowbreak clean01}) por
-    navegação sequencial pelos waypoints definidos para a rota curta de validação.
+    \item Gravar uma baseline limpa (\texttt{dissertation\_\allowbreak clean01}) navegando
+    sequencialmente pelos waypoints definidos para a rota curta de validação.
     \item Armazenar a rota resultante em YAML e o bag MCAP da baseline.
     \item Executar dez replays independentes da rota gravada.
     \item Antes de cada replay, relançar completamente a simulação, a pilha Nav2,
@@ -114,12 +114,12 @@ limiar, como apresentado na Seção~\ref{sec:res_qa3}.
 \section{Ameaças à Validade}
 \label{sec:ameacas}
 
-Seguindo a prática de reportar ameaças à validade em pesquisa empírica de
-Engenharia de Software \cite{amigoni2010}, e em resposta ao diagnóstico de
-rigor metodológico limitado --- comparação estatística fraca, baixa
-disponibilidade de artefatos --- identificado em experimentos de robótica
-autônoma publicados \cite{amigoni2014}, esta seção examina os limites da
-avaliação nas quatro dimensões clássicas, na linha do que
+Esta seção examina os limites da avaliação nas quatro dimensões clássicas,
+seguindo a prática de reportar ameaças à validade em pesquisa empírica de
+Engenharia de Software \cite{amigoni2010}. A escolha responde também ao
+diagnóstico de rigor metodológico limitado --- comparação estatística fraca,
+baixa disponibilidade de artefatos --- identificado em experimentos de
+robótica autônoma publicados \cite{amigoni2014}, na linha do que
 \citeonline{bonsignorio2015} defendem como pesquisa em robótica replicável e
 mensurável.
 
@@ -165,7 +165,7 @@ replays foi da ordem de 0,02\,m, contra cerca de 0,14\,m entre a baseline e
 cada replay, com a baseline durando cerca de 2,5$\times$ menos que os replays
 --- diferença explicada quase inteiramente pelo mecanismo de navegação
 distinto, não por falta de repetibilidade do robô. Por esse motivo, o RMSE
-calculado entre replays entre si (que compartilham o mesmo mecanismo de
+calculado entre os replays (que compartilham o mesmo mecanismo de
 navegação) é a métrica mais fiel à repetibilidade que este trabalho pretende
 medir --- seguindo a mesma lógica metodológica adotada por
 \citeonline{maset2022} para repetibilidade em mapeamento 3D, de comparar

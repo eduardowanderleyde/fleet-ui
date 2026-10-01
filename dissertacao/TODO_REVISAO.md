@@ -225,6 +225,25 @@ que resolve, com referência a ele).
   robôs e atribui o limite de escala exclusivamente a três robôs — o que o
   trabalho mais recente não confirma.
 
+## Avaliação (07_avaliacao.tex) — 2026-10-01
+- **Achado:** a Seção "Questões de Avaliação" (`sec:questoes`) abre com
+  "Três questões orientam a avaliação:", mas a lista `description` que
+  segue enumera QUATRO itens (QA1, QA2, QA3, QA4). O próprio texto logo
+  abaixo da lista usa a notação "QA1--QA4" e explica que QA4 "foi
+  adicionada durante a execução do trabalho" — ou seja, o conjunto atual
+  é de quatro questões, não três; a introdução não foi atualizada quando
+  QA4 foi incluída.
+- **Por que está fora do escopo:** corrigir "três" para "quatro" é uma
+  mudança de contagem/número, que este agente (revisão só de redação) está
+  explicitamente proibido de fazer — é decisão de conteúdo sobre quantas
+  questões de avaliação o capítulo de fato define, não sobre como a frase
+  é dita.
+- **Sugestão:** trocar "Três questões orientam a avaliação" por "Quatro
+  questões orientam a avaliação" (ou reescrever para "QA1--QA3 orientam a
+  avaliação original; QA4 foi adicionada posteriormente", já que o próprio
+  parágrafo seguinte já faz essa distinção) — decisão do autor sobre qual
+  frasing reflete melhor a história real de como QA4 surgiu.
+
 ## Trabalhos Relacionados (03_trabalhos_relacionados.tex) — 2026-09-30
 - **Achado:** a Seção "A Taxonomia do SLAM" (`sec:rel_slam`) afirma, logo
   após citar `\citeonline{durrantwhyte2006}` e `\citeonline{bailey2006}`,
