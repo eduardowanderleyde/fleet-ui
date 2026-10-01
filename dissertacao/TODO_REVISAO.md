@@ -150,6 +150,26 @@ que resolve, com referência a ele).
   esta entrada e decidir se os capítulos 07/08 ganham uma seção nova de
   resultados ou só uma nota comparativa — e só então remover esta entrada.
 
+## Metodologia (05_metodologia.tex) — 2026-09-30
+- **Achado:** a Seção "Fase 1 — Gravação do Baseline" (`sec:record_replay`, linhas
+  ~32-34) afirma: "o Nav2 para quando a pose está dentro da tolerância
+  configurada (tipicamente 25\,cm em posição e 25\,cm em ângulo)". A unidade
+  "cm" para a tolerância angular está incorreta/incompatível dimensionalmente
+  --- ângulo não se mede em centímetros.
+- **Por que está fora do escopo:** não é falta de citação, é um erro técnico de
+  conteúdo (unidade errada), e corrigir o valor é decisão de conteúdo, não de
+  bibliografia. Além disso, `07_avaliacao.tex` (linha ~192) já descreve a
+  mesma tolerância do Nav2 corretamente, com unidades consistentes: "o
+  critério de chegada do Nav2 (\texttt{general\_\allowbreak goal\_\allowbreak checker})
+  aceita até 0,25\,m de erro de posição e 0,25\,rad (aproximadamente 14°) de
+  erro angular" --- ou seja, o valor numérico (0,25) está certo, mas a unidade
+  em `05_metodologia.tex` deveria ser "rad" (ou "~14°"), não "cm".
+- **Sugestão:** trocar "25\,cm em ângulo" por "0,25\,rad (aproximadamente 14°)
+  em ângulo" em `05_metodologia.tex`, alinhando com a descrição já correta de
+  `07_avaliacao.tex`. Não alterei a frase porque mudar o valor/unidade é
+  fora do escopo deste agente (que só adiciona citação, não corrige
+  conteúdo técnico).
+
 ## Trabalhos Relacionados (03_trabalhos_relacionados.tex) — 2026-09-30
 - **Achado:** a Seção "A Taxonomia do SLAM" (`sec:rel_slam`) afirma, logo
   após citar `\citeonline{durrantwhyte2006}` e `\citeonline{bailey2006}`,

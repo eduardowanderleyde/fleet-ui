@@ -762,3 +762,74 @@ estar fora do escopo deste agente promover chaves novas ao `.bib`).
   archiveprefix = {arXiv}
 }
 ```
+
+---
+
+## Parte 6 — Capítulo 05 (metodologia), seção "Intervalo de Confiança para
+$N \geq 5$" (`sec:ic_estatistico`), levantamento de 2026-09-30
+
+A subseção estatística do capítulo de metodologia (fórmula do IC~95\% via
+distribuição $t$ de Student, Equação~\ref{eq:ic_95}) não tinha nenhuma citação
+até esta rodada. Adicionei `\cite{amigoni2014}` ao texto (chave já aprovada,
+usada como justificativa de rigor metodológico, não como fonte do método
+estatístico em si). A fórmula do IC via $t$ de Student e a prática de reportar
+incerteza estatística em experimentos de repetibilidade de robôs não têm chave
+correspondente em `referencias.bib`; os dois candidatos abaixo foram
+confirmados contra fonte primária, mas **não promovidos** nesta rodada (fora do
+escopo deste agente promover chaves novas ao `.bib`).
+
+### 25. The Probable Error of a Mean
+- **Status:** CONFIRMADO contra fonte primária (DOI resolve para JSTOR/Biometrika;
+  dados bibliográficos cruzados com Wikipedia e Fermat's Library)
+- **Autor:** "Student" (pseudônimo de William Sealy Gosset)
+- **Ano:** 1908
+- **Venue:** Biometrika, vol. 6, n. 1, pp. 1–25
+- **DOI:** 10.2307/2331554
+- **Relevância:** É a referência primária e canônica da distribuição $t$ para
+  intervalos de confiança com amostra pequena e variância populacional
+  desconhecida — exatamente a justificativa dada no texto para usar $t$ em vez
+  da normal ("mais apropriada para amostras pequenas ($N < 30$), onde a
+  variância populacional é desconhecida e estimada a partir da própria
+  amostra"). Nenhuma chave de estatística existe hoje em `referencias.bib`.
+
+```bibtex
+@article{student1908,
+  author  = {Student},
+  title   = {The Probable Error of a Mean},
+  journal = {Biometrika},
+  year    = {1908},
+  volume  = {6},
+  number  = {1},
+  pages   = {1--25},
+  doi     = {10.2307/2331554}
+}
+```
+
+### 26. Rethink Repeatable Measures of Robot Performance with Statistical Query
+- **Status:** CONFIRMADO contra fonte primária (arXiv + publicação formal em
+  IEEE Transactions on Robotics, DOI resolvido)
+- **Autores:** Bowen Weng, Linda Capito, Guillermo A. Castillo, Dylan Khor
+- **Ano:** 2025
+- **Venue:** IEEE Transactions on Robotics
+- **DOI:** 10.1109/TRO.2025.3645934 (preprint: arXiv:2505.08216)
+- **Relevância:** Trata diretamente do problema de medir repetibilidade de
+  desempenho de robôs com algoritmos de consulta estatística (SQ) que estimam
+  valores esperados a partir de amostras, propondo uma modificação que garante
+  repetibilidade com limites de acurácia/eficiência — é literatura de
+  metodologia estatística de repetibilidade robótica publicada em 2025,
+  diretamente no eixo de `sec:ic_estatistico` e `sec:metricas` (que hoje citam
+  apenas `maset2022` para a prática de comparação entre execuções). Mais
+  próximo do tema do que o item 25 (que é a fonte estatística genérica), mas
+  também não promovido nesta rodada — prefiro que o autor avalie se o foco em
+  "statistical query algorithms" (mais amplo que RMSE/IC simples) se encaixa
+  no enquadramento desta dissertação antes de promover.
+
+```bibtex
+@article{weng2025repeatable,
+  author  = {Weng, Bowen and Capito, Linda and Castillo, Guillermo A. and Khor, Dylan},
+  title   = {Rethink Repeatable Measures of Robot Performance with Statistical Query},
+  journal = {IEEE Transactions on Robotics},
+  year    = {2025},
+  doi     = {10.1109/TRO.2025.3645934}
+}
+```

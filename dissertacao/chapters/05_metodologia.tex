@@ -58,7 +58,8 @@ para isolamento de variáveis.
 A análise é realizada offline sobre os bags coletados. Para cada bag, o script
 \texttt{analyze\_\allowbreak runs.py} extrai a trajetória via odometria a 50\,Hz, filtra
 saltos impossíveis (variações acima de 0,12\,m entre amostras a 50\,Hz),
-e interpola todas as trajetórias para uma grade de tempo normalizada $\{t_1, t_2, \ldots, t_n\}$.
+e interpola todas as trajetórias para uma grade de tempo normalizada $\{t_1, t_2, \ldots, t_n\}$
+\cite{amigoni2010}.
 O RMSE pairwise é calculado conforme a Equação~\ref{eq:rmse_pairwise}.
 
 Adicionalmente, o script gera: (i) CSV com as trajetórias interpoladas para
@@ -69,7 +70,9 @@ execuções.
 \section{Métricas Adotadas}
 \label{sec:metricas}
 
-Quatro métricas quantificam a repetibilidade de navegação neste trabalho:
+Quatro métricas quantificam a repetibilidade de navegação neste trabalho, seguindo a
+prática de comparar execuções repetidas tanto entre si quanto contra uma referência
+adotada por \citeonline{maset2022}:
 
 \begin{enumerate}
     \item \textbf{RMSE inter-replay}: RMSE pairwise entre as execuções de replay,
@@ -106,7 +109,9 @@ replays, $s$ o desvio padrão amostral e $t_{0{,}025,\,N-1}$ o quantil da
 distribuição $t$ de Student com $N-1$ graus de liberdade. A distribuição $t$,
 em vez da normal, é usada por ser mais apropriada para amostras pequenas
 ($N < 30$), onde a variância populacional é desconhecida e estimada a partir
-da própria amostra. Na campanha final desta dissertação, $N=10$ replays
+da própria amostra --- prática que mitiga o diagnóstico de comparação
+estatística fraca identificado em experimentos de robótica autônoma
+\cite{amigoni2014}. Na campanha final desta dissertação, $N=10$ replays
 fornecem uma estimativa descritiva mais estável da variabilidade observada; o
 intervalo de confiança, contudo, deve ser interpretado no escopo estreito da
 rota e do ambiente avaliados, não como generalização para outras configurações.
@@ -119,15 +124,18 @@ Um cenário controlado foi definido para validar o framework em simulação:
 \textbf{Campanha dissertation\_clean01}: rota curta, aproximadamente retilínea,
 executada no mundo \textit{warehouse} com TurtleBot4 Standard. A rota foi
 escolhida para isolar a capacidade do framework de registrar, reproduzir e medir
-uma trajetória sob condições rigorosamente controladas, antes de estender o
-protocolo para percursos mais longos, curvas acentuadas ou obstáculos dinâmicos.
+uma trajetória sob condições rigorosamente controladas \cite{amigoni2010}, antes
+de estender o protocolo para percursos mais longos, curvas acentuadas ou
+obstáculos dinâmicos.
 
 O protocolo executa uma baseline limpa e dez replays independentes. Diferentemente
 das campanhas exploratórias iniciais, cada replay da campanha final é iniciado
 após relançamento completo da simulação, da pilha Nav2 e dos nós de coleta. Essa
 decisão metodológica garante que a pose inicial medida em \texttt{/\allowbreak odom}
 seja praticamente a mesma em todas as execuções, evitando que o RMSE misture erro
-de repetição da trajetória com diferença de condição inicial.
+de repetição da trajetória com diferença de condição inicial --- uma pré-condição
+para que a medição seja interpretável como repetibilidade, não como artefato de
+protocolo \cite{bonsignorio2015}.
 
 
 \section{Ambiente Experimental}
@@ -139,7 +147,9 @@ todos os experimentos em um único ambiente controlado --- em vez de distribuí-
 entre máquinas com configurações distintas --- é deliberada: o objetivo desta
 dissertação é isolar a variabilidade intrínseca ao pipeline de navegação
 (SLAM, controlador, executor ROS~2), e não introduzir uma segunda fonte de
-variação decorrente de diferenças de hardware entre execuções.
+variação decorrente de diferenças de hardware entre execuções --- o tipo de
+controle completo de variáveis identificado como vantagem da simulação sobre
+o hardware real \cite{amigoni2010}.
 
 \begin{table}[H]
 \centering
@@ -216,7 +226,7 @@ comparáveis.
 \label{sec:met_conclusao}
 
 O protocolo record--replay formaliza o que muitos experimentos de robótica fazem
-informalmente, adicionando precisão nos pontos críticos: a gravação da pose atingida
+informalmente \cite{amigoni2014}, adicionando precisão nos pontos críticos: a gravação da pose atingida
 (não solicitada), o filtro de saltos impossíveis na odometria, a interpolação para
 grade de tempo comum antes do cálculo de RMSE e o retorno explícito ao ponto de
 partida entre execuções. O próximo capítulo descreve como esses procedimentos foram
