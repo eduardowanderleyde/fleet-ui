@@ -170,6 +170,31 @@ que resolve, com referência a ele).
   fora do escopo deste agente (que só adiciona citação, não corrige
   conteúdo técnico).
 
+## Metodologia (05_metodologia.tex) — 2026-10-01
+- **Achado:** `01_introducao.tex` (Objetivos, item 5, linha ~161) promete
+  "Validar o framework em dois cenários de simulação". Porém a Seção "Design
+  dos Experimentos de Validação" de `05_metodologia.tex` (título no plural,
+  `sec:design_experimentos`) descreve apenas **um** cenário/campanha
+  (\texttt{dissertation\_clean01}), e `07_avaliacao.tex` (linha ~210, Validade
+  de conclusão) é explícito: a campanha reportada está "restrit[a] a um único
+  cenário, uma única rota curta, um único robô simulado e uma única
+  configuração de Nav2".
+- **Por que está fora do escopo:** é uma contradição entre o objetivo
+  declarado no Capítulo 1 e o que os Capítulos 5/7 efetivamente descrevem e
+  reportam — decisão de conteúdo (o que foi ou não executado/prometido), não
+  de redação. Não é o mesmo achado já registrado abaixo sobre a unidade
+  "25\,cm em ângulo" (esse é um erro de unidade; este é uma divergência de
+  escopo entre capítulos). Não tenho visibilidade se um segundo cenário foi
+  planejado e descartado, rodou em outra branch, ou se o objetivo do
+  Capítulo 1 está simplesmente desatualizado.
+- **Sugestão:** decidir entre (a) atualizar `01_introducao.tex` para refletir
+  que a validação quantitativa final cobriu um único cenário controlado
+  (mencionando as campanhas exploratórias/\texttt{dissertacao\_teste1} como
+  complementares, não como o "segundo cenário"), ou (b) se um segundo
+  cenário de fato foi executado em algum momento, localizá-lo e incorporá-lo
+  a `05_metodologia.tex`/`08_resultados.tex`. Vale também revisar o título da
+  Seção "Design dos Experimentos de Validação" (plural) à luz da decisão.
+
 ## Trabalhos Relacionados (03_trabalhos_relacionados.tex) — 2026-09-30
 - **Achado:** a Seção "A Taxonomia do SLAM" (`sec:rel_slam`) afirma, logo
   após citar `\citeonline{durrantwhyte2006}` e `\citeonline{bailey2006}`,

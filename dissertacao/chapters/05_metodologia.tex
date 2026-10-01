@@ -29,7 +29,7 @@ não a pose solicitada, mas a pose efetivamente atingida conforme estimada pela
 cadeia TF \texttt{map} $\to$ \texttt{base\_\allowbreak link}. Ao final, \texttt{stop\_\allowbreak record}
 persiste o arquivo e \texttt{disable\_\allowbreak collection} fecha o bag.
 
-A distinção entre waypoints solicitados e poses atingidas é essencial: o Nav2 para
+Essa distinção importa na prática: o Nav2 para
 quando a pose está dentro da tolerância configurada (tipicamente 25\,cm em posição
 e 25\,cm em ângulo), não necessariamente no ponto exato. Gravar a pose atingida,
 e não a solicitada, garante que o replay reproduza o que o robô \textit{fez},
@@ -119,8 +119,7 @@ rota e do ambiente avaliados, não como generalização para outras configuraç�
 \section{Design dos Experimentos de Validação}
 \label{sec:design_experimentos}
 
-Um cenário controlado foi definido para validar o framework em simulação:
-
+A validação do framework em simulação parte de um cenário controlado, a
 \textbf{Campanha dissertation\_clean01}: rota curta, aproximadamente retilínea,
 executada no mundo \textit{warehouse} com TurtleBot4 Standard. A rota foi
 escolhida para isolar a capacidade do framework de registrar, reproduzir e medir
@@ -144,9 +143,9 @@ protocolo \cite{bonsignorio2015}.
 A Tabela~\ref{tab:ambiente_hw} descreve o ambiente de hardware e software
 utilizado em todas as execuções reportadas neste trabalho. A escolha de manter
 todos os experimentos em um único ambiente controlado --- em vez de distribuí-los
-entre máquinas com configurações distintas --- é deliberada: o objetivo desta
+entre máquinas com configurações distintas --- é deliberada. O objetivo desta
 dissertação é isolar a variabilidade intrínseca ao pipeline de navegação
-(SLAM, controlador, executor ROS~2), e não introduzir uma segunda fonte de
+(SLAM, controlador, executor ROS~2), sem introduzir uma segunda fonte de
 variação decorrente de diferenças de hardware entre execuções --- o tipo de
 controle completo de variáveis identificado como vantagem da simulação sobre
 o hardware real \cite{amigoni2010}.
