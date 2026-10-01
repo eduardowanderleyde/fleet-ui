@@ -172,9 +172,9 @@ com dependências de precedência entre si \cite{korsah2013}, passando por
 levantamentos de meia década que consolidam esse corpo de trabalho
 \cite{khamis2015}. Aplicações concretas dessa alocação dinâmica incluem
 estratégias de exploração cooperativa terrestre com recuperação automática de
-falhas de robôs \cite{yan2023}, e sistemas de gestão de frota baseados em
-plataformas de \textit{cloud robotics} \cite{singhal2017} ilustram esse mesmo
-foco em eficiência operacional --- atribuição de tarefas, monitoramento,
+falhas de robôs \cite{yan2023} e sistemas de gestão de frota baseados em
+plataformas de \textit{cloud robotics} \cite{singhal2017}, ambos ilustrando esse
+mesmo foco em eficiência operacional --- atribuição de tarefas, monitoramento,
 escalonamento --- em vez de repetibilidade.
 
 Abordagens recentes de orquestração de frotas em sistemas baseados em ROS adotam
@@ -203,12 +203,12 @@ toda vez. Os dois objetivos são ortogonais e complementares.
 \subsection{Comportamento Determinístico em Sistemas Multi-Robô}
 
 A dificuldade de garantir comportamento determinístico em sistemas multi-robô
-com ROS~2 é documentada em trabalhos de pesquisa de tempo-real. A não-determinismo
+com ROS~2 é documentada em trabalhos de pesquisa de tempo-real. O não-determinismo
 no scheduling do sistema operacional, o jitter do DDS e as variações de tempo de
 processamento entre execuções contribuem para a variabilidade observada em
 experimentos de navegação \cite{macenski2022ros2}.
 
-Historicamente, antes da consolidação do ROS, arquiteturas de coordenação
+Antes mesmo da consolidação do ROS, arquiteturas de coordenação
 multi-robô já buscavam robustez delegando-a ao comportamento individual de cada
 robô, em vez de a um coordenador central: o ALLIANCE \cite{parker1998} é o
 exemplo canônico de uma arquitetura \textit{behavior-based} totalmente
@@ -220,10 +220,11 @@ controle experimental --- o que facilita a auditoria e a reprodução de cada
 execução --- e endereça o não-determinismo não por redundância distribuída
 entre robôs, mas por mitigação de software no próprio coordenador.
 
-O framework proposto mitiga esse problema com estratégias de software --- espera
+Essa mitigação se traduz em estratégias concretas de software --- espera
 explícita pela ativação do Nav2, cooldown entre fases do experimento, e filtro de
-saltos impossíveis na odometria --- mas não elimina a fonte fundamental do
-não-determinismo, que reside no sistema operacional de tempo compartilhado.
+saltos impossíveis na odometria --- que não eliminam, contudo, a fonte
+fundamental do não-determinismo, residente no sistema operacional de tempo
+compartilhado.
 
 \section{Interfaces Web para Robótica}
 \label{sec:rel_web}
@@ -278,15 +279,15 @@ ampla de erros de programação geral. Embora o dataset seja anterior ao ROS~2 e
 portanto, não trate diretamente de conceitos específicos dessa geração do
 middleware --- como QoS ou o modelo de \textit{executor} --- as categorias de
 falha de concorrência e má configuração de comunicação identificadas por
-\citeauthor{timperley2024} são análogas, em espírito, a problemas de
+\citeauthor{timperley2024} são análogas, em espírito, a dois problemas de
 compatibilidade enfrentados durante o desenvolvimento do framework proposto
-(Seção~\ref{sec:impl_orquestrador}), como o mismatch de QoS entre o coletor de
-dados e o SLAM Toolbox --- um descompasso de comunicação da mesma classe ampla
+(Seção~\ref{sec:impl_orquestrador}): o mismatch de QoS entre o coletor de
+dados e o SLAM Toolbox, um descompasso de comunicação da mesma classe
 discutida na literatura sobre comunicação em sistemas multi-robô
-\cite{gielis2022} --- e os deadlocks do executor de serviço único frente ao
-\texttt{wait\_\allowbreak for\_\allowbreak server} do Nav2 --- manifestações específicas do ROS~2 da
-mesma classe geral de defeito de concorrência/comunicação já documentada no
-ecossistema ROS~1. Isso reforça que tais problemas não são peculiaridades de
+\cite{gielis2022}, e os deadlocks do executor de serviço único frente ao
+\texttt{wait\_\allowbreak for\_\allowbreak server} do Nav2. Ambos são manifestações específicas do
+ROS~2 da mesma classe geral de defeito de concorrência/comunicação já
+documentada no ecossistema ROS~1. Isso reforça que tais problemas não são peculiaridades de
 uma implementação isolada, mas uma classe de defeito recorrente e não-trivial
 que atravessa gerações do middleware.
 
