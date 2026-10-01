@@ -31,7 +31,7 @@ navegação 2D, o tipo de comparação direta entre execuções nominalmente
 idênticas que \citeonline{maset2022} empregam em mapeamento 3D, e preenchendo a
 lacuna de protocolo formal de record--replay e de métricas de RMSE entre
 trajetórias que \citeonline{hamer2025} deixam em aberto ao comparar algoritmos
-de SLAM por variabilidade entre execuções. A campanha final em
+de SLAM quanto à variabilidade entre execuções. A campanha final em
 simulação, composta por uma baseline limpa e $N=10$ replays independentes da
 rota \texttt{dissertation\_\allowbreak clean01}, obteve RMSE médio de
 3,35\,cm contra a execução de referência, RMSE máximo de 4,76\,cm, erro final
@@ -228,7 +228,7 @@ Experimentos em hardware real são a extensão mais urgente deste trabalho.
 
 O protocolo atual assume que o ambiente permanece estático entre as execuções.
 Qualquer variação --- um objeto movido, uma pessoa cruzando o campo do LiDAR ---
-invalida a comparação entre execuções. A integração de detecção de mudanças ambientais
+invalida essa comparação. A integração de detecção de mudanças ambientais
 como pré-condição para aceitar uma execução de replay é um desenvolvimento natural.
 
 \section{Trabalhos Futuros}
@@ -240,27 +240,28 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
 incluindo trajetórias mais longas, curvas fechadas e obstáculos dinâmicos, com
 $N$ de réplicas por cenário na casa de 10--20 ou mais, para reduzir a
 incerteza da estimativa de RMSE também fora da rota
-\texttt{dissertation\_\allowbreak clean01}; repetir o protocolo em hardware físico
-com TurtleBot4 real; comparar \texttt{/\allowbreak odom}, pose estimada por SLAM
-e \textit{ground truth} do Gazebo em uma mesma campanha para separar erro de
-controle, erro de localização e erro de medição --- infraestrutura de coleta
-desse \textit{ground truth} (tópico nativo \texttt{dynamic\_\allowbreak pose/info} do
-Gazebo, sem plugin adicional) já implementada e validada em execução real ao
-final deste trabalho, com piloto e campanha completa ainda pendentes; decidir e avaliar a
-metodologia de gravação de baseline --- hoje via \texttt{go\_\allowbreak to\_\allowbreak point}
+\texttt{dissertation\_\allowbreak clean01}; e repetir o protocolo em hardware
+físico com TurtleBot4 real. Também comparar \texttt{/\allowbreak odom}, pose
+estimada por SLAM e \textit{ground truth} do Gazebo em uma mesma campanha para
+separar erro de controle, erro de localização e erro de medição ---
+infraestrutura de coleta desse \textit{ground truth} (tópico nativo
+\texttt{dynamic\_\allowbreak pose/info} do Gazebo, sem plugin adicional) já
+implementada e validada em execução real ao final deste trabalho, com piloto
+e campanha completa ainda pendentes. Decidir e avaliar, ainda, a metodologia
+de gravação de baseline --- hoje via \texttt{go\_\allowbreak to\_\allowbreak point}
 sequencial, mecanismo distinto do usado no replay (\texttt{play\_\allowbreak route},
 Seção~\ref{sec:res_qa2}) --- incluindo a alternativa de gravar a própria
 baseline via \texttt{play\_\allowbreak route} para permitir comparação direta
-baseline-vs-replay sem essa diferença de implementação; comparar o
+baseline-vs-replay sem essa diferença de implementação; e comparar o
 controlador MPPI \cite{williams2016}, estocástico por projeto, com um controlador
 determinístico (DWB \cite{fox1997} ou Regulated Pure Pursuit \cite{macenski2023survey})
 sob o mesmo protocolo, isolando a variância do
-método de controle da variância do sistema como um todo (Seção~\ref{sec:limitacoes});
-avaliar quantitativamente cenários multi-robô (MUUT+FUUT simultâneos) com RMSE
+método de controle da variância do sistema como um todo (Seção~\ref{sec:limitacoes}).
+Por fim, avaliar quantitativamente cenários multi-robô (MUUT+FUUT simultâneos) com RMSE
 pairwise por robô, usando dois robôs simultâneos como alvo inicial --- teto
 validado nesta máquina por contenção de CPU/DDS, não por GPU
 (Seção~\ref{sec:limitacoes}) ---, respondendo diretamente à limitação de
-escopo single-robot registrada na mesma seção; integrar câmera OAK-D para
+escopo single-robot registrada na mesma seção; e integrar câmera OAK-D para
 coleta de dados visuais sincronizados com trajetória.
 
 \textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações
