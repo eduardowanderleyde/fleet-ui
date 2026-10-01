@@ -75,11 +75,11 @@ mantém seis campos: \texttt{nav\_\allowbreak state}, \texttt{is\_\allowbreak re
 \texttt{route\_\allowbreak poses}, \texttt{last\_\allowbreak saved} e \texttt{pending\_\allowbreak goal\_\allowbreak pose}. Este último
 é o mais crítico para a gravação: ao receber o callback de resultado do action Nav2,
 se o status for \texttt{STATUS\_\allowbreak SUCCEEDED} e o robô estiver em modo de gravação,
-a pose enviada como meta é imediatamente appendada à lista de rotas --- pois a pose
+a pose enviada como meta é imediatamente adicionada à lista de rotas --- pois a pose
 real confirmada pelo Nav2 é a melhor estimativa disponível da posição atingida.
 
 A lógica de gravação baseada em polling de TF (\texttt{\_\allowbreak record\_\allowbreak tick}) funciona em
-paralelo para ambientes onde o Nav2 não reporta SUCCEEDED (e.g., quando o controlador
+paralelo, cobrindo os casos em que o Nav2 não reporta SUCCEEDED (e.g., quando o controlador
 para dentro da tolerância antes de publicar o callback). O tick a 5\,Hz consulta a
 cadeia TF e adiciona a pose ao buffer se o robô deslocou ao menos 10\,cm ou girou
 mais de 5° desde a última amostra, evitando redundância em trechos estacionários.
@@ -385,7 +385,7 @@ publicados pelo SLAM Toolbox \cite{macenski2021slam}.
 
 O mapa pré-construído do \textit{warehouse} (\texttt{warehouse.pgm} +
 \texttt{warehouse.yaml}) é utilizado como fundo estático com alinhamento perfeito:
-como ambos o mapa SLAM ao vivo e o PGM utilizam o mesmo sistema de coordenadas
+como tanto o mapa SLAM ao vivo quanto o PGM utilizam o mesmo sistema de coordenadas
 do mundo Gazebo, a sobreposição é pixel-a-pixel. O pesquisador vê paredes, prateleiras
 e o robô em tempo real, podendo clicar para definir waypoints diretamente na planta.
 
@@ -411,8 +411,8 @@ processos de longa duração da simulação por grupo de processos
 \texttt{analyze\_\allowbreak runs.py}, a desserialização CDR sem tipo registrado, a
 conversão de coordenadas canvas--mundo --- resultaram de problemas concretos
 encontrados durante o desenvolvimento. Cada uma representa uma contribuição de
-engenharia que outros grupos de pesquisa que adotarem o framework não
-precisarão replicar --- a correção de detecção do tópico de pose, em
+engenharia que outros grupos de pesquisa não precisarão replicar ao adotar
+o framework --- a correção de detecção do tópico de pose, em
 particular, protege diretamente a validade dos números de repetibilidade
 reportados no Capítulo~\ref{chap:resultados} contra um viés que não tinha
 relação alguma com o desempenho real do robô. O próximo capítulo apresenta
