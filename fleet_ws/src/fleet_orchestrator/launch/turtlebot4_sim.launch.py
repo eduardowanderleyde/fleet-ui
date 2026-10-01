@@ -68,12 +68,21 @@ ARGUMENTS = [
 ]
 
 
-def generate_launch_description():
+def _launch_setup(context, *args, **kwargs):
     pkg_minimal = get_package_share_directory('nav2_minimal_tb4_sim')
     pkg_nav4    = get_package_share_directory('turtlebot4_navigation')
 
-    world_path = PathJoinSubstitution([pkg_minimal, 'worlds',
-                                       [LaunchConfiguration('world'), '.sdf']])
+    # Capturado como string Python simples, AQUI, antes de qualquer
+    # IncludeLaunchDescription rodar. Achado ao vivo (2026-09-30): o include
+    # de `sim` abaixo passa 'world' como argumento pro simulation.launch.py
+    # do vendor com o CAMINHO COMPLETO do .sdf (não o nome simples) — e como
+    # LaunchConfiguration é um dicionário global compartilhado no launch,
+    # isso SOBRESCREVE o valor de 'world' pro resto da árvore de launch.
+    # O bridge de ground truth (abaixo) que lesse LaunchConfiguration('world')
+    # depois disso pegaria o caminho completo por engano, não "warehouse".
+    world_name = LaunchConfiguration('world').perform(context)
+
+    world_path = PathJoinSubstitution([pkg_minimal, 'worlds', [world_name, '.sdf']])
 
     # ── Simulação mínima TB4 (Gazebo Harmonic nativo) ─────────────────────────
     sim = IncludeLaunchDescription(
@@ -87,6 +96,22 @@ def generate_launch_description():
             ('y_pose',  LaunchConfiguration('y_pose')),
             ('yaw',     LaunchConfiguration('yaw')),
         ],
+    )
+
+    # ── Ground truth: pose real do robô no mundo Gazebo, direto da cena ──────
+    # (não é odometria por integração de roda — é a pose exata que o Gazebo
+    # mantém internamente para cada entidade, sem ruído/deriva nenhuma).
+    # Confirmado ao vivo (orquestracion.md, "Plano: campanha /odom vs /pose vs
+    # ground truth") que /world/<world>/dynamic_pose/info já publica isso de
+    # fábrica, sem precisar de plugin novo no xacro/SDF — só bridgear.
+    gz_topic = f"/world/{world_name}/dynamic_pose/info"
+    ground_truth_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='bridge_ground_truth',
+        output='screen',
+        arguments=[f"{gz_topic}@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"],
+        remappings=[(gz_topic, 'ground_truth_pose')],
     )
 
     # ── SLAM Toolbox (8s após Gazebo) ─────────────────────────────────────────
@@ -116,8 +141,10 @@ def generate_launch_description():
         )],
     )
 
+    return [sim, ground_truth_bridge, slam, nav2]
+
+
+def generate_launch_description():
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(sim)
-    ld.add_action(slam)
-    ld.add_action(nav2)
+    ld.add_action(OpaqueFunction(function=_launch_setup))
     return ld
