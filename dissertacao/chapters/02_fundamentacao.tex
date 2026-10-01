@@ -144,7 +144,7 @@ carrega parâmetros e aloca recursos; a transição \textit{inactive} $\to$
 \textit{active} (\textit{activate}) inicia o processamento.
 
 O Nav2 usa extensivamente o lifecycle por meio do \texttt{lifecycle\_\allowbreak manager},
-que ativa os servidores de planeamento, controle e comportamento em sequência,
+que ativa os servidores de planejamento, controle e comportamento em sequência,
 verificando a saúde de cada um antes de prosseguir. Esse comportamento implica
 que uma chamada prematura a um action server de navegação --- antes da ativação
 completa --- resulta em timeout silencioso. O framework proposto nesta dissertação
@@ -172,7 +172,7 @@ que se comunicam por meio de ROS~2 actions e serviços:
 
     \item[\texttt{behavior\_\allowbreak server}] Gerencia comportamentos de recuperação
     (\textit{spin}, \textit{backup}, \textit{drive on heading}) ativados quando
-    o planeamento ou controle falham.
+    o planejamento ou controle falham.
 
     \item[\texttt{bt\_\allowbreak navigator}] Orquestra os servidores via \textit{Behavior Trees}
     (BTs) \cite{colledanchise2018}. Cada ação de navegação corresponde a uma
@@ -192,7 +192,7 @@ o controle com a média ponderada das trajetórias amostradas, com pesos inversa
 proporcionais ao custo.
 
 Essa abordagem tem duas vantagens relevantes para experimentos de repetibilidade:
-(i) produz trajetórias suaves e consistentes porque a atualização é um média ponderada,
+(i) produz trajetórias suaves e consistentes porque a atualização é uma média ponderada,
 não uma seleção discreta; (ii) é naturalmente paralelizável em GPU, embora em
 aplicações com TurtleBot4 em CPU a versão CPU seja suficiente.
 
@@ -219,7 +219,6 @@ os planos, produzindo trajetórias mais suaves mas geometricamente diferentes. E
 distinção entre baseline e replay constitui uma fonte de variação sistemática que
 o framework identifica e documenta.
 
-
 \subsection{Ciclo de Vida de uma Meta de Action}
 \label{sec:action_lifecycle}
 
@@ -235,16 +234,17 @@ primeiro, resolve quando a execução termina, com o \texttt{GoalStatus} final
 anexado ao resultado.
 
 Essa assincronia de três estágios tem uma implicação direta de implementação,
-discutida em detalhe na Seção~\ref{sec:impl_orquestrador}: como o orquestrador
-usa o mesmo mecanismo de \textit{callback} tanto para atualizar o estado interno
+discutida em detalhe na Seção~\ref{sec:impl_orquestrador}. O orquestrador usa o
+mesmo mecanismo de \textit{callback} tanto para atualizar o estado interno
 do robô (\texttt{nav\_\allowbreak state}) quanto para decidir se uma pose deve ser salva
-durante uma gravação, um erro na composição desses \textit{callbacks} --- por
+durante uma gravação; um erro na composição desses \textit{callbacks} --- por
 exemplo, tratar \texttt{ACCEPTED} como se fosse \texttt{SUCCEEDED} --- resultaria
 em poses gravadas antes que o robô de fato tivesse alcançado o destino. A
 implementação evita esse erro condicionando a gravação exclusivamente ao
-\textit{callback} de resultado (Código~\ref{lst:start_stop_record} não mostra
-esse trecho especificamente, mas o método \texttt{\_\allowbreak make\_\allowbreak result\_\allowbreak cb} descrito
-na Seção~\ref{sec:impl_orquestrador} o implementa), nunca ao de aceitação.
+\textit{callback} de resultado, nunca ao de aceitação (Código~\ref{lst:start_stop_record}
+não mostra esse trecho especificamente, mas o método
+\texttt{\_\allowbreak make\_\allowbreak result\_\allowbreak cb}, descrito na
+Seção~\ref{sec:impl_orquestrador}, o implementa).
 
 \section{Localização: Filtros Bayesianos e AMCL}
 \label{sec:localizacao_bayes}
@@ -260,12 +260,12 @@ sensibilidade do Capítulo~\ref{chap:resultados}.
 
 O AMCL é uma instância de filtro de partículas: mantém um conjunto de $M$
 hipóteses de pose (partículas), cada uma ponderada por sua verossimilhança
-face à observação de \textit{laser scan} mais recente, e resample as partículas
+face à observação de \textit{laser scan} mais recente, e reamostra as partículas
 proporcionalmente a esse peso a cada iteração. Formalmente, o filtro de
 partículas aproxima numericamente a mesma recursão bayesiana que o filtro de
 Kalman resolve de forma fechada sob hipóteses de linearidade e ruído gaussiano
 \cite{kalman1960}: a etapa de predição aplica o modelo de movimento do robô a
-cada partícula, e a etapa de atualização reponderada as partículas pela
+cada partícula, e a etapa de atualização repondera as partículas pela
 verossimilhança da observação. A vantagem do filtro de partículas sobre o
 filtro de Kalman clássico é justamente dispensar a hipótese de linearidade do
 modelo de observação --- o modelo de \textit{laser scan matching} contra um
@@ -295,11 +295,9 @@ manter e expandir continuamente uma representação do ambiente (grafo de poses,
 submapas, fechamento de laços) enquanto localiza o robô, ao passo que o AMCL
 localiza um robô já posicionado sobre um mapa finalizado, com um conjunto de
 partículas de tamanho fixo. Essa diferença estrutural --- construir e otimizar um
-mapa versus apenas localizar-se nele --- é uma das razões que motivam a proposta de
-usar AMCL com mapa pré-construído como alternativa ao SLAM ao vivo em sessões
-experimentais longas, discutida como trabalho futuro na Seção~\ref{sec:futuros} a
-partir da variabilidade observada nos experimentos exploratórios da
-Seção~\ref{sec:res_exp_complementares}.
+mapa versus apenas localizar-se nele --- motiva a proposta, discutida como trabalho
+futuro na Seção~\ref{sec:futuros} a partir da variabilidade observada nos
+experimentos exploratórios da Seção~\ref{sec:res_exp_complementares}.
 
 \section{SLAM Toolbox}
 \label{sec:slam_toolbox}
