@@ -8,6 +8,17 @@ revisão do autor.** As 29 chaves já existentes em `referencias.bib` foram
 conferidas antes da busca; nenhuma referência abaixo duplica uma chave já
 presente.
 
+> **Atualização 2026-09-30:** 15 dos 18 candidatos abaixo (itens 1–10, 14, 16,
+> 18, mais os itens 3 e 5 usados em outro trecho do capítulo) foram promovidos
+> para `referencias.bib` e citados em `chapters/03_trabalhos_relacionados.tex`
+> (seções "Sistemas de Orquestração para Frotas" e "Engenharia de Software").
+> Os itens 11 (Athira et al., 2024), 12 (Rizk et al., 2019) e 17 (Ren & Beard,
+> 2005) **não** foram promovidos nesta rodada — a própria nota de relevância de
+> cada um já apontava `chapters/02_fundamentacao.tex` como destino mais
+> apropriado, fora do escopo desta rodada (que tratou só do capítulo 3). Um
+> novo candidato (item 21, Parte 4) foi adicionado nesta rodada e ainda não
+> promovido.
+
 ## Resumo
 
 - **Lista original (7 itens recebidos de outra IA):** 7/7 **CONFIRMADOS** como
@@ -586,3 +597,64 @@ abaixo existe em `referencias.bib`; nenhuma foi adicionada ao capítulo.
   afirmação como incorreta; fica para o autor confirmar com a documentação
   completa do Create3 (ou com `ros2 topic hz /imu` no robô real) antes de
   decidir se cita algo.
+
+---
+
+## Parte 4 — Capítulo 03, subseção "Comportamento Determinístico em Sistemas
+Multi-Robô" (`sec:rel_frota`), levantamento de 2026-09-30
+
+### 21. Response-Time Analysis of ROS 2 Processing Chains Under Reservation-Based Scheduling
+- **Status:** CONFIRMADO contra fonte primária (Dagstuhl/LIPIcs, DOI resolvido
+  em `drops.dagstuhl.de`)
+- **Autores:** Daniel Casini, Tobias Blaß, Ingo Lütkebohle, Björn B. Brandenburg
+- **Ano:** 2019
+- **Venue:** 31st Euromicro Conference on Real-Time Systems (ECRTS 2019),
+  Leibniz International Proceedings in Informatics (LIPIcs), vol. 133, pp. 6:1–6:23
+- **DOI:** 10.4230/LIPIcs.ECRTS.2019.6
+- **Relevância:** É um artigo de pesquisa de tempo-real que modela formalmente
+  o escalonamento de cadeias de processamento no ROS~2 (executor, QoS,
+  reservas de CPU) e deriva análise de tempo de resposta sob escalonamento
+  baseado em reservas — exatamente o tipo de "trabalho de pesquisa de
+  tempo-real" que a primeira frase da subseção "Comportamento Determinístico
+  em Sistemas Multi-Robô" (`sec:rel_frota`, linha ~164 do capítulo 3) menciona
+  de forma genérica e sem citação: "A dificuldade de garantir comportamento
+  determinístico em sistemas multi-robô com ROS~2 é documentada em trabalhos
+  de pesquisa de tempo-real." Ainda não promovido a `referencias.bib` nem
+  citado no capítulo nesta rodada — conforme a regra do processo, um
+  candidato encontrado via busca nova só é registrado aqui, a promoção para
+  o `.bib` e o `\cite{}` ficam para uma rodada de revisão seguinte, após
+  confirmação adicional do autor.
+
+```bibtex
+@inproceedings{casini2019,
+  author    = {Casini, Daniel and Bla{\ss}, Tobias and L{\"u}tkebohle, Ingo and Brandenburg, Bj{\"o}rn B.},
+  title     = {Response-Time Analysis of {ROS} 2 Processing Chains Under Reservation-Based Scheduling},
+  booktitle = {31st Euromicro Conference on Real-Time Systems (ECRTS 2019)},
+  series    = {Leibniz International Proceedings in Informatics (LIPIcs)},
+  volume    = {133},
+  year      = {2019},
+  pages     = {6:1--6:23},
+  publisher = {Schloss Dagstuhl--Leibniz-Zentrum f{\"u}r Informatik},
+  doi       = {10.4230/LIPIcs.ECRTS.2019.6}
+}
+```
+
+### Item pesquisado mas NÃO confirmado (registrado para transparência)
+- **"Durrant-Whyte, Rye e Nebot (1996)" como origem da estrutura/nomenclatura
+  do SLAM:** a Seção "A Taxonomia do SLAM" (`sec:rel_slam`, logo após
+  `\citeonline{durrantwhyte2006}` e `\citeonline{bailey2006}`) afirma que "a
+  estrutura, resultado de convergência e nomenclatura" do problema SLAM
+  "haviam sido propostos originalmente por Durrant-Whyte, Rye e Nebot em
+  1996", sem nenhuma citação. Tentei localizar um artigo de 1996 com esses
+  três autores e esse conteúdo (busca web por título/venue), mas não
+  encontrei um artigo correspondente — os resultados mais próximos desses
+  mesmos autores no período são de 1997 (ex. "Ultra-High Integrity
+  Navigation Systems for Large Autonomous Vehicles", ISRR'97, com um quarto
+  e quinto coautor). Não é possível descartar que o artigo exista (pode ser
+  um trabalho de ISRR'95/96 pouco indexado), mas também não consegui
+  confirmá-lo contra fonte primária, então não registro como candidato
+  (regra: não citar é melhor que citar errado) e não corrijo a frase —
+  registrei o achado em `TODO_REVISAO.md` para o autor verificar a atribuição
+  diretamente contra a seção de referências históricas de
+  `\citeonline{durrantwhyte2006}`/`\citeonline{bailey2006}`, de onde essa
+  atribuição provavelmente foi extraída.

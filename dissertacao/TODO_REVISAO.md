@@ -149,3 +149,31 @@ que resolve, com referência a ele).
 - **Sugestão:** quando a campanha (ou ao menos o piloto) rodar, revisitar
   esta entrada e decidir se os capítulos 07/08 ganham uma seção nova de
   resultados ou só uma nota comparativa — e só então remover esta entrada.
+
+## Trabalhos Relacionados (03_trabalhos_relacionados.tex) — 2026-09-30
+- **Achado:** a Seção "A Taxonomia do SLAM" (`sec:rel_slam`) afirma, logo
+  após citar `\citeonline{durrantwhyte2006}` e `\citeonline{bailey2006}`,
+  que "a estrutura, resultado de convergência e nomenclatura" do problema
+  SLAM "haviam sido propostos originalmente por Durrant-Whyte, Rye e Nebot
+  em 1996" — uma atribuição histórica específica (autores + ano) sem
+  nenhuma citação própria.
+- **Por que está fora do escopo:** não é falta de citação que eu possa
+  simplesmente promover — é uma afirmação factual específica (quem
+  propôs o quê, em que ano) que eu não consegui confirmar contra fonte
+  primária depois de buscar na web. Os resultados mais próximos desses
+  mesmos autores (Durrant-Whyte, Nebot) no período são de 1997, com outros
+  coautores e outro título ("Ultra-High Integrity Navigation Systems for
+  Large Autonomous Vehicles", ISRR'97), não exatamente o que o capítulo
+  descreve. Corrigir ou remover essa atribuição é decisão de conteúdo, não
+  de bibliografia — por isso não toquei na frase (ver regra: "sem
+  referência adequada... é melhor não citar do que citar errado").
+  Registrado também em `referencias_candidatas.md` (Parte 4, item "não
+  confirmado") para rastreabilidade.
+- **Sugestão:** o autor (ou quem escreveu a frase originalmente) deveria
+  verificar essa atribuição direto na seção de referências históricas de
+  `durrantwhyte2006`/`bailey2006` — é provável que a frase tenha sido
+  parafraseada de lá, e a citação correta pode já estar nas referências
+  desses dois tutoriais. Se a atribuição de 1996 não se confirmar, trocar
+  por uma formulação mais genérica (ex. atribuir a `\citeonline{durrantwhyte2006}`
+  mesmo, que já está citado na frase anterior) ou remover o ano/autoria
+  específicos.

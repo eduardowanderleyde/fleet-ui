@@ -148,11 +148,52 @@ indiscutível.
 
 \subsection{Arquiteturas de Frota em ROS~2}
 
+A coordenação de múltiplos robôs é taxonomizada, na literatura clássica da área,
+por duas dimensões centrais: o grau de acoplamento entre robôs (cooperação fraca
+ou forte) e a arquitetura de controle (centralizada, descentralizada ou híbrida)
+\cite{farinelli2004}. \citeonline{verma2021} atualizam essa taxonomia para a era
+de frotas conectadas, organizando o espaço de projeto em seis dimensões ---
+comunicação, planejamento, arquitetura de controle, escalabilidade e tomada de
+decisão, entre outras. O framework proposto nesta dissertação situa-se nesse
+espaço como uma arquitetura centralizada, com comunicação explícita entre coletor
+e robôs e decisão sequencial por papéis experimentais, e não por formação
+geométrica ou consenso distribuído entre robôs, como em abordagens de controle
+descentralizado \cite{cortes2017}.
+
 O ROS~2 provê os primitivos de comunicação necessários para sistemas multi-robô,
 mas não uma camada de orquestração de alto nível \cite{macenski2022ros2}. Propostas
 como o Fleet Management do Open RMF (Open Robotics Middleware Framework) abordam o
 problema de despacho de tarefas em frotas com múltiplos robôs, mas com foco em
 planejamento de missões e otimização de rotas, não em repetibilidade experimental.
+O despacho de tarefas em frotas, de forma mais geral, é historicamente formalizado
+pela taxonomia de alocação de tarefas multi-robô (MRTA): da formulação
+\textit{domain-independent} original \cite{gerkey2004} às extensões para tarefas
+com dependências de precedência entre si \cite{korsah2013}, passando por
+levantamentos de meia década que consolidam esse corpo de trabalho
+\cite{khamis2015}. Aplicações concretas dessa alocação dinâmica incluem
+estratégias de exploração cooperativa terrestre com recuperação automática de
+falhas de robôs \cite{yan2023}, e sistemas de gestão de frota baseados em
+plataformas de \textit{cloud robotics} \cite{singhal2017} ilustram esse mesmo
+foco em eficiência operacional --- atribuição de tarefas, monitoramento,
+escalonamento --- em vez de repetibilidade.
+
+Abordagens recentes de orquestração de frotas em sistemas baseados em ROS adotam
+estratégias de implementação distintas entre si. O RobotKube \cite{lampe2023}
+orquestra componentes de software de sistemas multi-robô cooperativos usando
+Kubernetes, delegando a um detector de eventos e a um gerenciador de aplicação a
+adaptação dinâmica da topologia de execução. O Resh \cite{carroll2021} propõe,
+em sentido oposto, uma linguagem de programação declarativa dedicada à
+orquestração de times heterogêneos de robôs, abstraindo o sequenciamento de
+tarefas em tempo de execução em vez de expressá-lo como infraestrutura. O
+Robofleet \cite{sikand2021} oferece um sistema leve de comunicação e
+monitoramento remoto para frotas ROS, com foco em resiliência de rede --- um dos
+trabalhos mais próximos em espírito ao framework proposto nesta dissertação,
+embora sem protocolo de repetibilidade experimental. Em um sentido ainda mais
+amplo do termo, a orquestração conjunta de robôs e infraestrutura de rede também
+aparece na integração de ROS com redes 5G \cite{romero2023}, e o controle de
+formação de robôs --- outro subtema recorrente sob o guarda-chuva de
+``orquestração de frotas'' --- foi tratado via otimização com restrições para
+transporte cooperativo de objetos \cite{alonsomora2017}.
 
 A distinção é fundamental e define o posicionamento desta dissertação: um sistema
 de gestão de frota maximiza a eficiência operacional; o framework proposto aqui
@@ -166,6 +207,18 @@ com ROS~2 é documentada em trabalhos de pesquisa de tempo-real. A não-determin
 no scheduling do sistema operacional, o jitter do DDS e as variações de tempo de
 processamento entre execuções contribuem para a variabilidade observada em
 experimentos de navegação \cite{macenski2022ros2}.
+
+Historicamente, antes da consolidação do ROS, arquiteturas de coordenação
+multi-robô já buscavam robustez delegando-a ao comportamento individual de cada
+robô, em vez de a um coordenador central: o ALLIANCE \cite{parker1998} é o
+exemplo canônico de uma arquitetura \textit{behavior-based} totalmente
+distribuída e tolerante a falhas, na qual cada robô monitora a atividade dos
+demais e assume tarefas abandonadas sem negociação explícita com um
+coordenador. O framework proposto nesta dissertação segue a direção oposta:
+aceita deliberadamente uma arquitetura centralizada como ponto único de
+controle experimental --- o que facilita a auditoria e a reprodução de cada
+execução --- e endereça o não-determinismo não por redundância distribuída
+entre robôs, mas por mitigação de software no próprio coordenador.
 
 O framework proposto mitiga esse problema com estratégias de software --- espera
 explícita pela ativação do Nav2, cooldown entre fases do experimento, e filtro de
@@ -228,7 +281,9 @@ falha de concorrência e má configuração de comunicação identificadas por
 \citeauthor{timperley2024} são análogas, em espírito, a problemas de
 compatibilidade enfrentados durante o desenvolvimento do framework proposto
 (Seção~\ref{sec:impl_orquestrador}), como o mismatch de QoS entre o coletor de
-dados e o SLAM Toolbox e os deadlocks do executor de serviço único frente ao
+dados e o SLAM Toolbox --- um descompasso de comunicação da mesma classe ampla
+discutida na literatura sobre comunicação em sistemas multi-robô
+\cite{gielis2022} --- e os deadlocks do executor de serviço único frente ao
 \texttt{wait\_\allowbreak for\_\allowbreak server} do Nav2 --- manifestações específicas do ROS~2 da
 mesma classe geral de defeito de concorrência/comunicação já documentada no
 ecossistema ROS~1. Isso reforça que tais problemas não são peculiaridades de
