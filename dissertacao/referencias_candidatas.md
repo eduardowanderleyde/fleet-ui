@@ -841,3 +841,46 @@ escopo deste agente promover chaves novas ao `.bib`).
   doi     = {10.1109/TRO.2025.3645934}
 }
 ```
+
+---
+
+## Parte 7 — Capítulo 07 (avaliação), seção "Ameaças à Validade"
+(`sec:ameacas`), levantamento de 2026-10-01
+
+### 27. Experimentation in Software Engineering
+- **Status:** CONFIRMADO contra fonte primária (Springer, DOI resolvido)
+- **Autores:** Claes Wohlin, Per Runeson, Martin Höst, Magnus C. Ohlsson,
+  Björn Regnell, Anders Wesslén
+- **Ano:** 2012 (2ª edição)
+- **Venue:** Livro, Springer-Verlag, Berlin/Heidelberg
+- **DOI:** 10.1007/978-3-642-29044-2 (ISBN 978-3-642-29043-5)
+- **Relevância:** `sec:ameacas` abre afirmando que a seção "examina os limites
+  da avaliação nas quatro dimensões clássicas" de validade — construto,
+  interna, externa e conclusão — exatamente a nomenclatura e a categorização
+  em quatro tipos formalizada por este livro (capítulo "Validity Evaluation"),
+  hoje a referência canônica em Engenharia de Software Experimental para essa
+  categorização. A frase de abertura da seção atribui essa prática a
+  "pesquisa empírica de Engenharia de Software" mas cita `\cite{amigoni2010}`
+  (metodologia experimental em robótica autônoma, não um texto de metodologia
+  de Engenharia de Software em si) para sustentar especificamente esse ponto.
+  Não troquei nem removi a citação existente — `amigoni2010` continua sendo
+  uma citação legítima para o restante da frase (diagnóstico de rigor em
+  robótica, usado de forma consistente em todo o resto da dissertação) e
+  decidir se ela deve ser complementada ou substituída por Wohlin et al. é
+  decisão de conteúdo/estilo do autor, fora do escopo deste agente (que só
+  adiciona citação a afirmação sem nenhuma, não troca citação já aprovada por
+  outra). Candidato forte para complementar `\cite{amigoni2010}` nessa frase
+  específica, caso o autor concorde.
+
+```bibtex
+@book{wohlin2012experimentation,
+  author    = {Wohlin, Claes and Runeson, Per and H{\"o}st, Martin and Ohlsson, Magnus C. and Regnell, Bj{\"o}rn and Wessl{\'e}n, Anders},
+  title     = {Experimentation in Software Engineering},
+  edition   = {2},
+  publisher = {Springer},
+  year      = {2012},
+  address   = {Berlin, Heidelberg},
+  doi       = {10.1007/978-3-642-29044-2},
+  isbn      = {978-3-642-29043-5}
+}
+```

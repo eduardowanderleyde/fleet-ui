@@ -8,7 +8,9 @@ A avaliação do framework foi conduzida em simulação Gazebo Harmonic com um r
 TurtleBot4 Standard no mundo \textit{warehouse}. O ambiente de simulação garante
 condições perfeitamente repetíveis dentro do mesmo laboratório --- sem variação de iluminação, temperatura
 ou tráfego de outros agentes --- o que permite isolar a variabilidade introduzida
-pelos algoritmos de navegação e SLAM da variabilidade ambiental. Experimentos em
+pelos algoritmos de navegação e SLAM da variabilidade ambiental, o tipo de
+controle completo de variáveis apontado como vantagem da simulação sobre o
+hardware real \cite{amigoni2010}. Experimentos em
 hardware real, com sua camada adicional de incerteza, constituem trabalho futuro.
 
 A configuração da pilha de software é:
@@ -145,6 +147,11 @@ com mensagens de fato gravadas; a seleção também pode ser forçada
 explicitamente. Análises realizadas antes dessa correção que tenham caído no
 \textit{fallback} de \texttt{/\allowbreak odom} deveriam, a rigor, ser
 reconsideradas caso a pose do SLAM também estivesse disponível no mesmo bag.
+Esse tipo de falha --- uma suposição de nomenclatura de tópico que deixa de
+valer quando o pacote de SLAM é trocado, degradando silenciosamente para um
+\textit{fallback} em vez de falhar de forma visível --- é consistente com
+classes de defeito já catalogadas empiricamente em sistemas baseados em ROS
+\cite{timperley2024}.
 
 Uma segunda fonte de viés de construto, evidenciada em execuções exploratórias
 reais (Seção~\ref{sec:res_exp_complementares}), é que a fase de gravação e a
@@ -187,7 +194,8 @@ rota, no mesmo robô e no mesmo ambiente, divergem parcialmente apenas pela
 amostragem aleatória do controlador --- isso não é falha de repetibilidade do
 sistema avaliado, é ruído esperado e não-eliminável do método de controle
 escolhido (a menos que se troque por um controlador determinístico, como DWB
-ou Regulated Pure Pursuit, alternativa não avaliada nesta dissertação).
+\cite{fox1997} ou Regulated Pure Pursuit \cite{macenski2023survey}, alternativa
+não avaliada nesta dissertação).
 Adicionalmente, o critério de chegada do Nav2 (\texttt{general\_\allowbreak goal\_\allowbreak
 checker}) aceita até 0,25\,m de erro de posição e 0,25\,rad (aproximadamente
 14°) de erro angular; desvios de endpoint dentro dessa faixa refletem o
