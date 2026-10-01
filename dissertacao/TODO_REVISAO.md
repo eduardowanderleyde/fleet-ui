@@ -195,6 +195,36 @@ que resolve, com referência a ele).
   a `05_metodologia.tex`/`08_resultados.tex`. Vale também revisar o título da
   Seção "Design dos Experimentos de Validação" (plural) à luz da decisão.
 
+## Implementação (06_implementacao.tex) — 2026-10-01
+- **Achado:** a Seção "Ambiente de Simulação" de `06_implementacao.tex`
+  (linhas ~51-62) afirma que "uma campanha completa com dois robôs
+  simultâneos gravou uma rota real no `tb1` ... enquanto o `tb2` navegava
+  para outro alvo ao mesmo tempo, sem interferência mútua entre os dois", e
+  que o "teto prático de escala... revelou-se ser de CPU": o relógio
+  simulado só "salta para trás" ao subir **três** robôs simultâneos, com
+  `tb1`+`tb2` (dois robôs) descrito como "o alvo suportado e validado por
+  padrão".
+- **Por que está fora do escopo:** é a mesma classe de achado já registrada
+  no item "2. Afirmação '2 robôs funcionam sem interferência' está
+  desatualizada" da entrada "Revisão geral (leitura de capítulos
+  04/06/07/08/09) — 2026-09-30" deste arquivo, mas aquela entrada cita
+  apenas `09_conclusao.tex` e `08_resultados.tex` como os textos afetados —
+  não lista esta passagem de `06_implementacao.tex`, que faz a mesma
+  afirmação (dois robôs sem interferência mútua) de forma ainda mais
+  específica e tecnicamente factual, atribuindo o "jump back in time" só a
+  três robôs. Trabalho posterior (sessão de 25–30/09, `orquestracion.md`,
+  seção "Missão Coordenada") reproduziu o mesmo sintoma de salto do
+  `/clock` **com dois robôs**, não só com três, levando ao redesenho para
+  ativação sequencial (~70% de taxa de sucesso medida). Corrigir isso é
+  decisão de conteúdo/dados experimentais, não de citação bibliográfica —
+  fora do meu escopo como agente de referências.
+- **Sugestão:** ao atualizar `09_conclusao.tex`/`08_resultados.tex` conforme
+  a sugestão já registrada no item 2 de "Revisão geral — 2026-09-30",
+  revisar também esta passagem de `06_implementacao.tex` (Seção "Ambiente de
+  Simulação"), já que ela faz a mesma promessa de estabilidade com dois
+  robôs e atribui o limite de escala exclusivamente a três robôs — o que o
+  trabalho mais recente não confirma.
+
 ## Trabalhos Relacionados (03_trabalhos_relacionados.tex) — 2026-09-30
 - **Achado:** a Seção "A Taxonomia do SLAM" (`sec:rel_slam`) afirma, logo
   após citar `\citeonline{durrantwhyte2006}` e `\citeonline{bailey2006}`,

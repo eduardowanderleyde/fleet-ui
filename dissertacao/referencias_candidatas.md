@@ -545,6 +545,14 @@ abaixo existe em `referencias.bib`; nenhuma foi adicionada ao capítulo.
   todos os referenciais do sistema — e cita o rastreamento incorreto de
   transformações como fonte comum de bugs, o que conecta diretamente à
   discussão de `odom`→`base_link` vs. `map`→`odom` do capítulo.
+  **Nota (2026-10-01, levantamento para `06_implementacao.tex`):** este mesmo
+  candidato também seria adequado para a Seção "O Orquestrador em Detalhe"
+  (`sec:impl_orquestrador`) de `chapters/06_implementacao.tex`, que descreve
+  sem nenhuma citação a limitação de `tf2_ros.TransformListener` (não escuta
+  um tópico diferente de `/tf` global, exigindo um `Buffer`/inscrição manual
+  por robô). Não promovido nem citado em nenhum dos dois capítulos nesta
+  rodada — seguindo a regra do processo (chave nova só é registrada aqui, a
+  promoção ao `.bib` fica para o autor decidir).
 
 ```bibtex
 @inproceedings{foote2013,

@@ -188,7 +188,12 @@ isolada em uma classe dedicada, \texttt{RosBridge} (\texttt{backend/\allowbreak 
 mas ela hoje apenas delega para o método \texttt{run\_\allowbreak service} do \texttt{RosBridge},
 que também é reaproveitado pelas chamadas de análise de bags e de descoberta
 de robôs na rede, evitando duplicar a lógica de montagem de comando e
-tratamento de erro em múltiplos pontos do backend.
+tratamento de erro em múltiplos pontos do backend. Essa arquitetura é
+deliberadamente mais simples do que \textit{middlewares} de comunicação web
+dedicados à robótica, como o Robot Web Tools \cite{toris2015}, que expõe um
+servidor WebSocket (\textit{rosbridge}) como camada intermediária entre o
+navegador e o ROS~2; a comparação entre as duas abordagens é discutida na
+Seção~\ref{sec:rel_web}.
 
 \begin{lstlisting}[style=pycode, caption={Método \texttt{RosBridge.\allowbreak run\_\allowbreak service}, usado por \texttt{\_\allowbreak run\_\allowbreak ros2\_\allowbreak service} e por todos os endpoints \texttt{/\allowbreak api/\allowbreak *} que encaminham comandos ao orquestrador (\texttt{backend/\allowbreak ros\_\allowbreak bridge.py}).}, label={lst:backend_bridge}]
 def run_service(self, service: str, service_type: str, request: dict | str, timeout: int = 10) -> tuple[bool, str]:
