@@ -2,7 +2,7 @@
 \label{chap:arquitetura}
 
 O framework proposto, denominado \textit{Fleet UI}, é organizado em cinco camadas
-que separando responsabilidades claras: a camada de simulação, o orquestrador de
+que separam responsabilidades claras: a camada de simulação, o orquestrador de
 frota, o coletor de dados, o backend REST e a interface web. A Figura~\ref{fig:arquitetura}
 ilustra essa estrutura.
 
@@ -100,7 +100,6 @@ manifestação específica do ROS~2 da mesma classe geral de defeitos de
 concorrência e comunicação já documentada em sistemas ROS~1 por
 \citeonline{timperley2024}.
 
-
 A Tabela~\ref{tab:nav_state_transicoes} formaliza as transições do campo
 \texttt{nav\_\allowbreak state} de \texttt{RobotRuntime} (Apêndice~\ref{ap:fleet_msgs}, mensagem
 \texttt{RobotState}), derivadas diretamente dos \textit{callbacks} de serviço e de
@@ -175,8 +174,8 @@ para novos usuários.
 O backend também mantém um subscriber ROS~2 nativo para os tópicos de status
 (\texttt{/\allowbreak fleet/\allowbreak status}), mapa (\texttt{/\allowbreak map}) e pose (\texttt{/\allowbreak tf}), que são
 servidos diretamente via REST --- o frontend faz polling de status e pose a
-300\,ms de intervalo e do mapa a 1500\,ms, intervalos mais espaçados por ser
-um payload maior e variar com menor frequência. O mapa
+300\,ms de intervalo e do mapa a 1500\,ms, intervalo mais espaçado por se
+tratar de um payload maior, que varia com menor frequência. O mapa
 \texttt{OccupancyGrid} \cite{elfes1989} é convertido para PNG RGBA em memória --- células livres
 em creme, ocupadas em azul-escuro, desconhecidas em azul-cinza --- e retornado
 como base64 ao frontend, que o renderiza em um canvas HTML5.
