@@ -203,6 +203,22 @@ gravação baseline, que usa um mecanismo de
 navegação distinto, misturam essa diferença de implementação com
 repetibilidade real e devem ser interpretadas com essa ressalva.
 
+Esse experimento exploratório, portanto, confunde dois fatores manipulados
+simultaneamente --- o mecanismo de navegação (\texttt{go\_\allowbreak
+to\_\allowbreak point} sequencial vs. \texttt{play\_\allowbreak route} contínuo)
+e a ausência de reinicialização de pose entre réplicas --- o que constitui, em
+si, uma limitação de desenho experimental, e não apenas uma observação lateral
+sobre a métrica: a partir desses dados não é possível atribuir isoladamente a
+diferença observada a um dos dois fatores. Um desenho fatorial mínimo que
+separasse esses efeitos ficaria para trabalho futuro confirmatório --- por
+exemplo, comparar (i) réplicas que repetem o mesmo mecanismo de navegação da
+gravação mas sem reinicialização de pose entre elas contra (ii) réplicas que
+usam o mecanismo distinto (\texttt{play\_\allowbreak route}) mas com
+reinicialização de pose entre cada uma, isolando cada fator antes de
+combiná-los. Até que esse desenho seja executado, o experimento exploratório
+permanece, como já enquadrado para QA4 (Seção~\ref{sec:questoes}), evidência
+diagnóstica e não causal.
+
 \textbf{Validade interna.} Campanhas preliminares sem reinicialização do estado
 entre replays produziram trajetórias cujos pontos iniciais coincidiam com os
 pontos finais da execução anterior, misturando erro de repetição com erro de
@@ -231,14 +247,37 @@ comportamento configurado do Nav2, não necessariamente imprecisão do
 framework de medição.
 
 \textbf{Validade externa.} A validação usa simulação com TurtleBot4 em um único
-ambiente (\textit{warehouse}). Hardware real introduziria slip de roda, ruído de
-sensores, erro de calibração e efeitos de superfície não modelados pelo Gazebo.
-Ainda assim, a arquitetura foi projetada para minimizar dependências
-específicas de plataforma: o orquestrador depende de actions, tópicos e
-transforms padrão do ROS~2/Nav2 --- não de interfaces proprietárias do
-TurtleBot4 --- o que favorece, em princípio, a generalização para outras
-plataformas com a mesma pilha de navegação. Essa generalização não foi
-testada empiricamente nesta dissertação com nenhuma outra plataforma.
+ambiente (\textit{warehouse}). A ameaça mais óbvia a essa validade é a transição
+simulação--hardware real (\textit{sim-to-real}, ou \textit{reality gap}): o
+plugin DiffDrive do Gazebo integra a cinemática do robô a partir de comandos de
+velocidade de forma determinística, sem modelar slip de roda, folga mecânica ou
+irregularidades de superfície, de modo que a odometria simulada usada como fonte
+de trajetória nesta avaliação (Seção~\ref{sec:res_bags}) é estruturalmente mais
+limpa do que a de encoders físicos reais. Da mesma forma, o LiDAR simulado do
+TurtleBot4 no Gazebo não reproduz o perfil de ruído de um sensor físico
+equivalente (reflexões especulares, dropout em superfícies absorventes,
+variação térmica do sensor), o que afeta a qualidade do \textit{scan matching}
+do SLAM Toolbox e, por consequência, a estabilidade do mapa e do costmap sobre
+os quais o Nav2 planeja. Um terceiro fator não capturado é temporal: o
+controlador MPPI (discutido acima em Validade interna) roda a 20\,Hz com
+\texttt{regenerate\_\allowbreak noises: true} sobre um \textit{clock} simulado,
+no qual cada ciclo de controle recebe o tempo de computação que o Gazebo decide
+alocar; em hardware real, o mesmo laço de controle competiria por CPU com o
+restante da pilha ROS~2/Nav2 em tempo real, introduzindo \textit{jitter} de
+latência de ciclo que não existe da mesma forma em simulação e que poderia, em
+tese, degradar tanto o desempenho do controlador quanto a própria repetibilidade
+medida. Hardware real somaria ainda erro de calibração e efeitos de superfície
+não modelados pelo Gazebo. Ainda assim, a arquitetura foi projetada para
+minimizar dependências específicas de plataforma: o orquestrador depende de
+actions, tópicos e transforms padrão do ROS~2/Nav2 --- não de interfaces
+proprietárias do TurtleBot4 --- o que favorece, em princípio, a generalização
+para outras plataformas com a mesma pilha de navegação. Essa afirmação de
+generalização arquitetural é, no entanto, uma hipótese de projeto, não uma
+evidência: nenhuma das fontes de ruído físico listadas acima --- slip de roda,
+ruído real de LiDAR, \textit{jitter} de latência de ciclo de controle --- foi
+testada empiricamente nesta dissertação, com o TurtleBot4 ou com qualquer outra
+plataforma, e a generalização só poderá ser confirmada por experimentos futuros
+em hardware real.
 
 \textbf{Validade de conclusão.} A campanha final controlada utiliza $N=10$
 replays, o que melhora substancialmente a estimativa de variabilidade em relação

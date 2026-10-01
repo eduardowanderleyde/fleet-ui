@@ -92,6 +92,25 @@ do projeto, em conversas de corredor que nunca entram na seção de metodologia 
 O conhecimento que torna um experimento bem-feito permanece tácito e não
 transferível \cite{albonico2023}.
 
+A literatura já citada nesta seção e na Seção~\ref{sec:motivacao} nomeia facetas
+semelhantes deste problema: \citeonline{amigoni2014} descreve a falta de
+reprodutibilidade de resultados experimentais em robótica de forma ampla;
+\citeonline{bonsignorio2015} discute a ausência de métricas e protocolos de
+benchmarking padronizados; e \citeonline{albonico2023} caracteriza o
+conhecimento tácito de engenharia que não chega a ser documentado. O que esta
+dissertação propõe nomear como \textbf{crise de orquestração experimental} não é,
+portanto, um sinônimo para "falta de reprodutibilidade" em geral, já nomeada por
+esses trabalhos. É algo mais específico: o problema de \emph{coordenação
+multi-camada} entre mecanismos de execução que operam em paralelo, com
+semânticas próprias e pouco compatíveis entre si --- o lifecycle de nós do
+ROS~2, as políticas de QoS por tópico, o protocolo assíncrono de ações do Nav2
+e a convergência incerta do SLAM. A dificuldade não está em cada camada
+isoladamente, nem apenas em registrar o que foi feito, mas em fazer essas
+camadas heterogêneas operarem em sequência correta de forma automática e
+repetível, sem intervenção manual entre fases. É esse problema de coordenação
+--- e não a reprodutibilidade em sentido geral --- que o framework proposto
+nesta dissertação visa resolver.
+
 \section{O Papel da Robótica de Frota nos Experimentos Modernos}
 \label{sec:frota}
 
@@ -121,6 +140,17 @@ os experimentos de validação foram conduzidos em simulação Gazebo Harmonic, 
 garante condições perfeitamente controladas mas abstrai os fenômenos físicos de
 superfícies reais, slip de roda e variação de calibração de sensores ao longo do
 tempo.
+
+Embora a Seção~\ref{sec:frota} discuta o papel da robótica de frota --- e a
+arquitetura de papéis MUUT/FUUT/SU seja formalizada para suportar múltiplas
+unidades --- a avaliação empírica conduzida nesta dissertação (Capítulos~\ref{chap:avaliacao}
+e~\ref{chap:resultados}) restringe-se a uma única unidade móvel sob teste (MUUT),
+sem unidade fixa (FUUT) ativa durante a campanha de validação e sem operação
+simultânea de múltiplos robôs. A dualidade de perspectivas endógena/exógena e a
+coordenação de frota permanecem, portanto, contribuições de projeto e arquitetura
+verificadas em software, não resultados empíricos cobertos pela avaliação de
+repetibilidade; a extensão da avaliação para múltiplos robôs é tratada como
+trabalho futuro (Seção~\ref{sec:futuros}).
 
 As métricas adotadas --- RMSE, erro de endpoint e consistência temporal --- são
 métricas espaciotemporais clássicas para avaliação de navegação \cite{amigoni2010},
@@ -181,8 +211,14 @@ Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados
     de papéis experimentais (MUUT/FUUT/SU)?
     \textbf{H1}: um conjunto reduzido de serviços ROS~2 de alto nível
     (Seção~\ref{sec:orquestrador}), combinado a um script orquestrador de
-    linha de comando, é suficiente para expressar qualquer protocolo de
-    record--replay sem código adicional por experimento.
+    linha de comando, é suficiente para expressar, sem código adicional por
+    experimento, a classe de protocolos de record--replay efetivamente
+    testados nesta dissertação --- isto é, protocolos construídos pela
+    composição dos serviços \texttt{go\_\allowbreak to\_\allowbreak point} e
+    \texttt{play\_\allowbreak route} observados neste trabalho. A generalização dessa suficiência para
+    \emph{qualquer} protocolo de record--replay, sobre outras rotas, robôs
+    ou plataformas, não foi testada e é tratada como conjectura a explorar
+    em trabalhos futuros (Seção~\ref{sec:futuros}).
 
     \item[PP2 --- Repetibilidade mensurável.] Qual é o grau de repetibilidade
     espacial (RMSE) e temporal (CV$_t$) de execuções de replay sucessivas sobre
@@ -205,7 +241,14 @@ Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados
     ~\ref{sec:res_exp_complementares} discute evidência exploratória
     compatível com H3, mas insuficiente para atribuir causalidade específica,
     e a Seção~\ref{sec:ameacas} trata essa limitação como ameaça à validade
-    de conclusão.
+    de conclusão. Diferentemente de H2, que estabelece um critério numérico
+    explícito (RMSE inferior a 30\,cm), H3 não define um limiar quantitativo
+    de aceite: trata-se de uma hipótese de natureza qualitativa e exploratória,
+    voltada a caracterizar uma tendência (aumento de variabilidade fora do
+    protocolo controlado) e não a confirmar ou refutar um valor-limite
+    pré-definido. As duas hipóteses são "verificadas empiricamente" em
+    sentidos distintos: H2 por comparação direta com um limiar, H3 por
+    análise descritiva e exploratória dos dados coletados.
 
     \item[PP4 --- Custo de engenharia para o pesquisador.] O framework reduz
     o esforço de engenharia necessário para configurar e executar um

@@ -81,6 +81,20 @@ e~\ref{chap:resultados}, que permanece restrita a um único robô
 (Seção~\ref{sec:limitacoes}); seu valor é ampliar a base de engenharia sobre a
 qual uma avaliação multi-robô futura pode ser construída sem retrabalho.
 
+Em conjunto, o framework aqui descrito endereça a crise de orquestração
+experimental nomeada na Introdução (Seção~\ref{sec:problema}) ao formalizar em
+software três das camadas que, segundo aquela seção, operam de forma
+descoordenada e tacitamente resolvida a cada novo experimento: a separação de
+papéis MUUT/FUUT e os mecanismos de compatibilidade multi-robô (nível
+arquitetural), o protocolo record--replay com análise RMSE pairwise (nível
+experimental) e a redução da interação manual via interface web e Painel de
+Simulação (nível de acessibilidade). Essa formalização não elimina a
+dificuldade de coordenação multi-camada descrita na Introdução --- os limites
+discutidos na Seção~\ref{sec:limitacoes}, sobretudo sob operação simultânea de
+múltiplos robôs, mostram que parte dela permanece --- mas transforma o
+conhecimento tácito que antes vivia em scripts não publicados e notebooks
+descartados em um pipeline documentado, automatizável e transferível.
+
 \section{Retomada das Perguntas de Pesquisa}
 \label{sec:retomada_pp}
 
@@ -135,7 +149,14 @@ empiricamente avaliada. Nenhuma das execuções reportadas neste trabalho exigiu
 escrever ou modificar código Python além dos parâmetros de linha de comando do
 protocolo; a interface web descrita na Seção~\ref{sec:impl_web} permite o mesmo
 fluxo sem terminal --- isso é verificável diretamente no código e nos fluxos
-descritos no Apêndice~\ref{ap:cli_reference}. O que não foi medido é se essa
+descritos no Apêndice~\ref{ap:cli_reference}. É importante precisar, porém,
+que a campanha que produziu os resultados de PP2 (Seção~\ref{sec:res_qa2}) foi
+executada via linha de comando e scripts, não pela interface web; a evidência
+de PP4 relatada aqui é de disponibilidade funcional da interface --- ela
+existe, está implementada e é operável ---, não de uso efetivo dela na geração
+dos números reportados nesta dissertação, o que é consistente com a
+classificação de ``evidência funcional apenas'' já atribuída a PP4 na
+Tabela~\ref{tab:pp_h_qa_sintese}. O que não foi medido é se essa
 redução de interação manual se traduz em menor esforço percebido pelo
 pesquisador: nenhum estudo de usabilidade com participantes externos (tempo de
 configuração, número de erros, SUS, NASA-TLX ou instrumento equivalente) foi
@@ -203,6 +224,20 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     substitui uma avaliação quantitativa formal de repetibilidade sob
     operação multi-robô, que permanece em aberto.
 
+    \item \textbf{Papel FUUT nunca exercitado.} Distinta da limitação de
+    escala acima, há uma lacuna específica quanto ao papel de observação
+    exógena: a dualidade MUUT/FUUT, motivada em seção inteira da Introdução
+    (Seção~\ref{sec:frota}) como enriquecimento metodológico da análise de
+    repetibilidade, permanece inteiramente não testada nesta dissertação.
+    Nem a campanha quantitativa principal nem os testes exploratórios de
+    multi-robô citados acima ativaram uma unidade fixa sob teste --- estes
+    últimos testaram exclusivamente duas ou três unidades móveis
+    (MUUT+MUUT) simultâneas, não a combinação MUUT+FUUT que motivou a
+    arquitetura de papéis. O valor da observação exógena como fonte de
+    verdade alternativa, central ao argumento da Introdução, permanece
+    portanto uma contribuição de projeto verificada em software, sem
+    qualquer evidência empírica de seu funcionamento.
+
     \item \textbf{Estocasticidade do controlador local não isolada como fator
     de variância.} O controlador \texttt{nav2\_\allowbreak mppi\_\allowbreak controller}
     (algoritmo MPPI --- \textit{Model Predictive Path Integral} \cite{williams2016})
@@ -248,39 +283,55 @@ como pré-condição para aceitar uma execução de replay é um desenvolvimento
 
 A agenda de trabalhos futuros pode ser organizada em três horizontes.
 
-\textbf{Curto prazo}: ampliar a campanha controlada para múltiplas rotas,
-incluindo trajetórias mais longas, curvas fechadas e obstáculos dinâmicos, com
-$N$ de réplicas por cenário na casa de 10--20 ou mais, para reduzir a
-incerteza da estimativa de RMSE também fora da rota
-\texttt{dissertation\_\allowbreak clean01}; e repetir o protocolo em hardware
-físico com TurtleBot4 real. Também comparar \texttt{/\allowbreak odom}, pose
-estimada por SLAM e \textit{ground truth} do Gazebo em uma mesma campanha para
-separar erro de controle, erro de localização e erro de medição ---
-infraestrutura de coleta desse \textit{ground truth} (tópico nativo
-\texttt{dynamic\_\allowbreak pose/info} do Gazebo, sem plugin adicional) já
-implementada e validada em execução real ao final deste trabalho, com piloto
-e campanha completa ainda pendentes. Avaliar também AMCL com mapa
-pré-construído (Seção~\ref{sec:localizacao_bayes}) como alternativa ao SLAM
-ao vivo em sessões experimentais longas, motivado pela variabilidade
-observada nos experimentos exploratórios (Seção~\ref{sec:res_exp_complementares}).
-Decidir e avaliar, ainda, a metodologia
-de gravação de baseline --- hoje via \texttt{go\_\allowbreak to\_\allowbreak point}
-sequencial, mecanismo distinto do usado no replay (\texttt{play\_\allowbreak route},
-Seção~\ref{sec:res_qa2}) --- incluindo a alternativa de gravar a própria
-baseline via \texttt{play\_\allowbreak route} para permitir comparação direta
-baseline-vs-replay sem essa diferença de implementação; e comparar o
-controlador MPPI \cite{williams2016}, estocástico por projeto, com um controlador
-determinístico (DWB \cite{fox1997} ou Regulated Pure Pursuit \cite{macenski2023survey})
-sob o mesmo protocolo, isolando a variância do
-método de controle da variância do sistema como um todo (Seção~\ref{sec:limitacoes}).
-Por fim, avaliar quantitativamente cenários multi-robô (MUUT+FUUT) com RMSE
-pairwise por robô, usando a arquitetura de ativação sequencial de dois
-robôs (Seção~\ref{sec:limitacoes}) como alvo inicial --- já com taxa de
-sucesso de 70\% medida qualitativamente, mas ainda sem avaliação
-quantitativa de RMSE sob essa operação ---, respondendo diretamente à
-limitação de escopo single-robot registrada na mesma seção; e integrar
-câmera OAK-D para
-coleta de dados visuais sincronizados com trajetória.
+\textbf{Curto prazo}, coerente com a urgência declarada na Seção~\ref{sec:limitacoes}:
+
+\begin{itemize}
+    \item \textbf{Repetir o protocolo em hardware físico com TurtleBot4
+    real} --- a extensão mais urgente deste trabalho, conforme discutido na
+    Seção~\ref{sec:limitacoes}.
+
+    \item Ampliar a campanha controlada para múltiplas rotas, incluindo
+    trajetórias mais longas, curvas fechadas e obstáculos dinâmicos, com $N$
+    de réplicas por cenário na casa de 10--20 ou mais, para reduzir a
+    incerteza da estimativa de RMSE também fora da rota
+    \texttt{dissertation\_\allowbreak clean01}.
+
+    \item Comparar \texttt{/\allowbreak odom}, pose estimada por SLAM e
+    \textit{ground truth} do Gazebo em uma mesma campanha para separar erro
+    de controle, erro de localização e erro de medição --- infraestrutura de
+    coleta desse \textit{ground truth} (tópico nativo
+    \texttt{dynamic\_\allowbreak pose/info} do Gazebo, sem plugin adicional)
+    já implementada e validada em execução real ao final deste trabalho, com
+    piloto e campanha completa ainda pendentes.
+
+    \item Avaliar também AMCL com mapa pré-construído
+    (Seção~\ref{sec:localizacao_bayes}) como alternativa ao SLAM ao vivo em
+    sessões experimentais longas, motivado pela variabilidade observada nos
+    experimentos exploratórios (Seção~\ref{sec:res_exp_complementares}).
+
+    \item Decidir e avaliar a metodologia de gravação de baseline --- hoje
+    via \texttt{go\_\allowbreak to\_\allowbreak point} sequencial, mecanismo
+    distinto do usado no replay (\texttt{play\_\allowbreak route},
+    Seção~\ref{sec:res_qa2}) --- incluindo a alternativa de gravar a própria
+    baseline via \texttt{play\_\allowbreak route} para permitir comparação
+    direta baseline-vs-replay sem essa diferença de implementação.
+
+    \item Comparar o controlador MPPI \cite{williams2016}, estocástico por
+    projeto, com um controlador determinístico (DWB \cite{fox1997} ou
+    Regulated Pure Pursuit \cite{macenski2023survey}) sob o mesmo protocolo,
+    isolando a variância do método de controle da variância do sistema como
+    um todo (Seção~\ref{sec:limitacoes}).
+
+    \item Avaliar quantitativamente cenários multi-robô (MUUT+FUUT) com RMSE
+    pairwise por robô, usando a arquitetura de ativação sequencial de dois
+    robôs (Seção~\ref{sec:limitacoes}) como alvo inicial --- já com taxa de
+    sucesso de 70\% medida qualitativamente, mas ainda sem avaliação
+    quantitativa de RMSE sob essa operação ---, respondendo diretamente à
+    limitação de escopo single-robot registrada na mesma seção.
+
+    \item Integrar câmera OAK-D para coleta de dados visuais sincronizados
+    com trajetória.
+\end{itemize}
 
 \textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações
 ambientais entre execuções; interface para exportação de dados no formato Roboflow

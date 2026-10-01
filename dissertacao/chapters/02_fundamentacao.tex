@@ -69,9 +69,16 @@ Diferentes algoritmos aproximam essa distribuição de formas distintas. Filtros
 partículas (como o GMapping \cite{grisetti2007}) representam a incerteza com um
 conjunto de hipóteses amostradas; abordagens baseadas em grafos (como o SLAM Toolbox
 \cite{macenski2021slam}) representam a trajetória do robô como um grafo de poses
-e minimizam a energia do grafo via otimização esparsa. Esta última abordagem escala
-melhor para ambientes grandes e é mais adequada para mapeamento lifelong
-\cite{bailey2006}.
+e minimizam a energia do grafo via otimização esparsa.
+
+Uma terceira família algorítmica clássica, o EKF-SLAM (\textit{Extended Kalman
+Filter SLAM}), aproxima a mesma distribuição pelo filtro de Kalman estendido,
+representando a pose do robô e os marcos do mapa em um único vetor de estado
+gaussiano \cite{thrun2005}. Esta dissertação não emprega EKF-SLAM --- o SLAM
+Toolbox, adotado como ferramenta de mapeamento (Seção~\ref{sec:slam_toolbox}),
+pertence à família baseada em grafos ---, mas introduz o conceito aqui porque
+ele é retomado como uma das três famílias algorítmicas dominantes na revisão de
+literatura do Capítulo~\ref{chap:relacionados}.
 
 \subsection{A Cadeia TF no ROS~2}
 \label{sec:cadeia_tf}
@@ -358,6 +365,28 @@ e velocidade angular a até 200\,Hz como \texttt{sensor\_\allowbreak msgs/\allow
 de repetibilidade, a variância da aceleração durante o percurso serve como indicador
 indireto de instabilidade --- vibração acima do esperado pode indicar superfícies
 irregulares ou acelerações abruptas do controlador \cite{siegwart2011}.
+
+\section{Coordenação Multi-Robô}
+\label{sec:coordenacao_multirrobo}
+
+Sistemas com múltiplos robôs introduzem um problema que não existe para um único
+robô: como distribuir esforço e decisão entre as unidades. A literatura clássica
+de sistemas multi-robô organiza esse espaço de projeto, entre outras dimensões,
+pela arquitetura de controle --- centralizada, em que um coordenador único
+concentra a decisão e a distribui aos robôs, ou descentralizada, em que cada
+robô decide localmente a partir de informação parcial e comunicação direta com
+seus vizinhos, sem um ponto único de controle \cite{farinelli2004}.
+
+Um subproblema recorrente nessa coordenação é a alocação de tarefas multi-robô
+(MRTA, \textit{Multi-Robot Task Allocation}): dado um conjunto de tarefas e um
+conjunto de robôs, decidir qual robô executa qual tarefa e em qual ordem,
+respeitando restrições de capacidade de cada unidade \cite{gerkey2004}. Essas
+duas dimensões --- arquitetura de controle e alocação de tarefas --- fornecem o
+vocabulário mínimo para situar, na revisão de literatura do
+Capítulo~\ref{chap:relacionados}, os sistemas de orquestração de frota
+existentes, e para contextualizar, no Capítulo~\ref{chap:arquitetura}, a
+escolha arquitetural de papéis experimentais (MUUT/FUUT/SU) adotada pelo
+framework proposto.
 
 \section{Métricas de Repetibilidade}
 \label{sec:metricas_teoricas}

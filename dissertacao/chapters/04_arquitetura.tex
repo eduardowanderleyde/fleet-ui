@@ -47,6 +47,28 @@ externa de simulação/navegação em laranja.}
 \label{fig:arquitetura}
 \end{figure}
 
+Essa separação em cinco camadas não decorre apenas de conveniência de
+organização de código: ela é orientada por um pequeno conjunto de requisitos
+não-funcionais estabelecidos antes da implementação. Primeiro,
+\textbf{reprodutibilidade} --- cada camada deve poder ser inspecionada e
+reexecutada isoladamente (por exemplo, repetir uma coleta de dados sem
+reiniciar a simulação), o que exige fronteiras de responsabilidade explícitas
+entre simulação, orquestração/coleta, backend e interface. Segundo,
+\textbf{uso por um pesquisador não especialista em ROS~2} --- a existência de
+um backend REST e de uma interface web (Seção~\ref{sec:backend_web}) permite
+que a operação cotidiana do framework (lançar uma formação, iniciar uma
+gravação, consultar um resultado) não dependa de conhecimento de tópicos,
+serviços ou \textit{namespaces} do DDS. Terceiro, \textbf{extensibilidade}
+--- a camada de agentes de IA (Seção~\ref{sec:agentes}), construída
+integralmente sobre a API REST já existente sem alterar o orquestrador
+ROS~2 ou o coletor de dados, é a evidência de que essas fronteiras entre
+camadas sustentam extensões substanciais sem retrabalho na base. É essa
+combinação de requisitos --- e não só a ordem em que os problemas foram
+encontrados durante o desenvolvimento --- que motiva a divisão em camadas
+da Figura~\ref{fig:arquitetura}, ainda que, como a Seção~\ref{sec:arq_conclusao}
+reconhece, várias decisões dentro de cada camada tenham sido motivadas por
+problemas concretos surgidos ao longo do desenvolvimento.
+
 \section{Papéis Experimentais: MUUT e FUUT}
 \label{sec:papeis}
 
@@ -66,11 +88,38 @@ experimentais. Cada robô na frota é classificado em um de três papéis:
     sem participação direta na navegação ou coleta.
 \end{itemize}
 
+Essa tricotomia não é a única forma possível de modelar o problema. Uma
+alternativa mais simples seria um único campo booleano, como
+\texttt{can\_\allowbreak navigate}, distinguindo apenas robôs que recebem comandos de
+navegação dos que não recebem. Essa alternativa foi descartada porque
+colapsaria duas distinções que a prática experimental exige manter separadas:
+FUUT e SU têm, ambos, \texttt{can\_\allowbreak navigate=False}, mas só o FUUT participa
+da coleta de dados sensoriais de perspectiva externa que caracteriza uma
+unidade fixa \textit{observadora} --- um booleano trataria FUUT e SU como
+equivalentes, obscurecendo a diferença entre "unidade fixa com papel de
+observação" e "infraestrutura sem papel experimental direto". A tricotomia
+MUUT/FUUT/SU é o menor número de categorias que ainda captura as três funções
+distintas observadas nos experimentos de frota --- executar o percurso,
+observar de posição fixa e sustentar a infraestrutura --- sem recorrer a uma
+hierarquia mais complexa (múltiplos booleanos independentes ou uma
+enumeração aberta de papéis).
+
 Essa distinção tem consequências diretas na implementação: o orquestrador verifica
 o papel de cada robô antes de processar qualquer requisição de movimento, rejeitando
 comandos de navegação para FUUTs. Isso evita que erros de configuração comprometam
 o design experimental --- um robô fixo que inadvertidamente recebe um comando de
 navegação poderia invalidar todo um conjunto de execuções.
+
+A atribuição de papéis, no entanto, é estática: cada robô recebe um único
+papel fixo em \texttt{roles.\allowbreak yaml}, carregado pelo orquestrador na
+inicialização, sem mecanismo de troca em tempo de execução nem de papéis
+compostos (um robô que fosse MUUT em uma fase do experimento e FUUT em outra,
+por exemplo). Essa rigidez é tratada aqui como uma fronteira deliberada do
+escopo do framework, não como uma limitação técnica incidental: o protocolo
+de repetibilidade avaliado nesta dissertação (Capítulo~\ref{chap:metodologia})
+não exige reconfiguração de papéis durante uma campanha, e estender o modelo
+para papéis dinâmicos ou compostos permanece como extensão possível, não como
+requisito do escopo atual.
 
 \section{O Orquestrador de Frota}
 \label{sec:orquestrador}
@@ -234,41 +283,45 @@ entre si. O histórico dessas execuções é persistido em disco
 (\texttt{fleet\_\allowbreak ws/\allowbreak agent\_\allowbreak runs/*.json}) e consultável via
 \texttt{GET~/\allowbreak api/\allowbreak agent/\allowbreak history}, sobrevivendo a um reinício do backend.
 
+Uma alternativa de design seria expor as mesmas ferramentas do
+\texttt{Executor} por um servidor MCP (\textit{Model Context Protocol})
+genérico, de modo que qualquer cliente LLM externo (Claude Desktop, Codex)
+pudesse consumi-las, não apenas o \texttt{Planner} interno --- caminho que o
+próprio registro de desenvolvimento do projeto já identifica como extensão
+natural. Essa generalização foi deliberadamente deixada fora do escopo desta
+dissertação: o objetivo aqui é um experimento único e controlado, em que
+Planner e Executor são acoplados diretamente via chamadas de \textit{tool
+calling} da API da Anthropic, com o escopo por robô imposto internamente em
+\texttt{\_scope\_\allowbreak input()}. Esse acoplamento direto simplifica a
+implementação e manteve o controle do raio de ação do agente dentro do que
+esta dissertação precisava validar, ao custo de amarrar o framework a um
+único provedor de LLM --- um custo aceitável para a pergunta de pesquisa
+tratada aqui, mas que tornaria um servidor MCP genérico a escolha mais
+apropriada caso o objetivo fosse reutilização por clientes LLM de terceiros.
+
 \subsection{O Painel de Simulação}
 \label{sec:painel_simulacao}
 
 Antes deste painel, subir a simulação exigia abrir dois terminais e invocar
 manualmente os \textit{launch files} do ROS~2. O painel "Missão
-Coordenada" do frontend
-(\texttt{frontend/\allowbreak src/\allowbreak components/\allowbreak SimulationPanel.jsx}) elimina
-essa etapa: o pesquisador escolhe uma formação entre quatro opções fixas
-(L, I, V, barra invertida --- cada uma com um ponto-alvo por robô) e
-aciona um único botão; o backend cuida de lançar os mesmos processos que
-antes seriam digitados manualmente, e de despachar cada um dos dois
-robôs fixos (\texttt{tb1}, \texttt{tb2}) para o seu ponto da formação.
+Coordenada" do frontend elimina essa etapa, permitindo escolher uma
+formação para a frota e lançar ou encerrar a simulação a partir de um
+único botão; a mecânica de processo por trás desse painel --- endpoints,
+gerenciamento dos processos de longa duração e leitura de log --- é
+descrita no Capítulo~\ref{chap:implementacao}
+(Seção~\ref{sec:impl_backend_simulacao}).
 
-Os endpoints \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak options},
-\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}, \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak start},
-\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak stop},
-\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak activate\_\allowbreak robot} e
-\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak deactivate\_\allowbreak robot}
-(\texttt{backend/\allowbreak main.py}) encapsulam essa orquestração. Ao iniciar, o
-backend monta os mesmos dois comandos que já existiam como instruções de
-terminal --- \texttt{turtlebot4\_\allowbreak sim.launch.py} (ou
-\texttt{turtlebot4\_\allowbreak multi\_\allowbreak sim.launch.py}, no modo com múltiplos
-robôs) e \texttt{fleet.launch.py} --- e os executa como subprocessos
-independentes via \texttt{subprocess.\allowbreak Popen}, com \texttt{os.\allowbreak setsid} para
-permitir encerrá-los como grupo de processos ao parar a simulação. Uma
-\textit{thread} leitora por processo consome a saída padrão em tempo real e a
-expõe via \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}, detectando prontidão ao
-observar as mensagens \texttt{"Managed nodes are active"} e
-\texttt{"fleet\_\allowbreak orchestrator ready"} nos logs. No modo com múltiplos
-robôs, a simulação sobe sem nenhuma pilha de navegação ativa
-(\texttt{bringup\_\allowbreak nav:=false}); o frontend então dispara, para cada robô
-móvel, um ciclo sequencial de \texttt{activate\_\allowbreak robot} $\to$ aguardar
-prontidão $\to$ \texttt{go\_\allowbreak to\_\allowbreak point} $\to$ \texttt{deactivate\_\allowbreak robot}
---- nunca duas pilhas completas de Nav2 simultâneas (ver
-Seção~\ref{sec:limitacoes} para a motivação dessa escolha de arquitetura).
+A decisão de arquitetura relevante para este capítulo é não subir, no modo
+com múltiplos robôs, mais de uma pilha completa de Nav2 simultaneamente: o
+despacho de cada robô para seu ponto da formação é sequencial --- ativar a
+navegação, aguardar a conclusão, desativar --- antes de passar ao próximo
+robô. Essa escolha troca paralelismo por estabilidade: a ativação
+simultânea de duas ou mais pilhas completas de Nav2/SLAM~Toolbox nessa
+configuração reproduziu, durante o desenvolvimento, o sintoma do relógio
+simulado retrocedendo e invalidando o buffer de TF antes do prazo interno
+do Nav2 (ver Seção~\ref{sec:limitacoes} da Conclusão para o registro
+detalhado desse problema e da decisão de redesenho que resultou na
+ativação sequencial).
 
 \section{Considerações Finais}
 \label{sec:arq_conclusao}

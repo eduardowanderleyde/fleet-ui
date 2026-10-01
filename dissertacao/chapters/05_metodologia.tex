@@ -62,6 +62,28 @@ e interpola todas as trajetórias para uma grade de tempo normalizada $\{t_1, t_
 \cite{amigoni2010}.
 O RMSE pairwise é calculado conforme a Equação~\ref{eq:rmse_pairwise}.
 
+Esse limiar de 0,12\,m a 50\,Hz corresponde a uma velocidade implícita de
+cerca de 6\,m/s --- bem acima da velocidade real do robô nas execuções
+reportadas (em torno de 0,05\,m/s, a partir dos valores de duração e
+comprimento da Tabela~\ref{tab:campanha_final} do
+Capítulo~\ref{chap:resultados}). A margem é,
+portanto, ampla por construção: o filtro foi dimensionado para capturar
+artefatos grosseiros de leitura (por exemplo, saltos de localização), não
+para refletir um limite calibrado contra a dinâmica real do robô ou do
+controlador MPPI, que não foi medida separadamente neste trabalho.
+
+A normalização temporal foi escolhida, em vez de alternativas de
+alinhamento mais elaboradas da literatura de comparação de trajetórias
+--- como \textit{Dynamic Time Warping} ou a distância de Fréchet ---, por
+essas técnicas existirem especificamente para lidar com desalinhamentos de
+fase e variações de velocidade entre curvas. Não é o caso deste cenário: a
+rota avaliada é curta e percorrida a velocidade aproximadamente constante
+(Seção~\ref{sec:design_experimentos}), de modo que o tempo decorrido já
+funciona, para este caso específico, como um proxy razoável da posição ao
+longo do percurso. A adoção de técnicas de alinhamento mais gerais fica
+reservada para rotas futuras com variação de velocidade ou curvas
+acentuadas, onde essa suposição deixaria de valer.
+
 Adicionalmente, o script gera: (i) CSV com as trajetórias interpoladas para
 visualização externa; (ii) PNG de overlay das trajetórias com codificação visual
 por execução; (iii) JSON de sumário com todas as métricas calculadas por par de
@@ -70,7 +92,7 @@ execuções.
 \section{Métricas Adotadas}
 \label{sec:metricas}
 
-Quatro métricas quantificam a repetibilidade de navegação neste trabalho, seguindo a
+Cinco métricas quantificam a repetibilidade de navegação neste trabalho, seguindo a
 prática de comparar execuções repetidas tanto entre si quanto contra uma referência
 adotada por \citeonline{maset2022}:
 
@@ -90,7 +112,27 @@ adotada por \citeonline{maset2022}:
     \item \textbf{Consistência temporal}: desvio padrão das durações entre execuções
     equivalentes. Um desvio pequeno indica que o controlador opera a velocidades
     estáveis e não encontra obstáculos que forcem replanejamentos.
+
+    \item \textbf{Comprimento de percurso}: soma das distâncias euclidianas entre
+    poses consecutivas da trajetória extraída do bag, calculada pelo mesmo script
+    \texttt{analyze\_\allowbreak runs.py} que produz as métricas anteriores. É
+    reportada e discutida no Capítulo~\ref{chap:resultados}
+    (Tabela~\ref{tab:campanha_final}) como
+    indicador descritivo auxiliar --- útil para checar grosseiramente se o robô
+    percorreu uma distância compatível entre execuções --- e não tem, neste
+    trabalho, um limiar de aceite associado como as métricas de RMSE.
 \end{enumerate}
+
+Nenhuma das métricas acima trata explicitamente a orientação (\textit{heading})
+do robô, apesar de o critério de chegada do Nav2 citado na
+Seção~\ref{sec:record_replay} incluir uma componente angular (tolerância de
+0,25\,rad). Essa exclusão é uma escolha de escopo, não um descuido: a rota
+avaliada é curta e aproximadamente retilínea, o que torna a orientação
+instantânea do robô pouco informativa para discriminar entre execuções neste
+cenário específico. A extensão da análise a uma métrica angular explícita ---
+mais relevante em rotas com curvas acentuadas ou mudanças de direção, onde o
+heading intermediário passa a carregar informação discriminante --- é deixada
+para trabalho futuro.
 
 \subsection{Intervalo de Confiança para $N \geq 5$}
 \label{sec:ic_estatistico}
@@ -115,6 +157,11 @@ estatística fraca identificado em experimentos de robótica autônoma
 fornecem uma estimativa descritiva mais estável da variabilidade observada; o
 intervalo de confiança, contudo, deve ser interpretado no escopo estreito da
 rota e do ambiente avaliados, não como generalização para outras configurações.
+Cabe registrar, com honestidade, que esse $N=10$ foi uma escolha prática,
+limitada pelo custo e tempo de execução de cada replay completo (relançamento
+de simulação, pilha de navegação e coleta de dados) --- não o resultado de um
+cálculo formal de tamanho de amostra ou de poder estatístico, seja a priori,
+seja a posteriori.
 
 \section{Design dos Experimentos de Validação}
 \label{sec:design_experimentos}
@@ -228,5 +275,16 @@ O protocolo record--replay formaliza o que muitos experimentos de robótica faze
 informalmente \cite{amigoni2014}, adicionando precisão nos pontos críticos: a gravação da pose atingida
 (não solicitada), o filtro de saltos impossíveis na odometria, a interpolação para
 grade de tempo comum antes do cálculo de RMSE e o retorno explícito ao ponto de
-partida entre execuções. O próximo capítulo descreve como esses procedimentos foram
+partida entre execuções.
+
+Vale registrar uma limitação de replicabilidade: os atrasos fixos de 8\,s e
+12\,s usados no fluxo de inicialização (Seção~\ref{sec:fluxo_protocolo}) foram
+calibrados empiricamente nesta máquina específica, e não derivados de uma
+barreira de sincronização determinística baseada em algum sinal de prontidão.
+Em hardware com desempenho distinto, esses valores podem ser insuficientes
+(inicialização ainda incompleta) ou excessivamente conservadores, o que
+representa um risco de replicabilidade entre ambientes que este trabalho não
+investiga.
+
+O próximo capítulo descreve como esses procedimentos foram
 implementados no código do framework.

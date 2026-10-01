@@ -89,29 +89,31 @@ para dentro da tolerância antes de publicar o callback). O tick a 5\,Hz consult
 cadeia TF e adiciona a pose ao buffer se o robô deslocou ao menos 10\,cm ou girou
 mais de 5° desde a última amostra, evitando redundância em trechos estacionários.
 
-A extensão para múltiplos robôs (Seção~\ref{sec:simulacao}) impôs uma
-restrição adicional sobre essa mesma lógica de gravação: a convenção de
-namespace por robô adotada pelo Nav2 publica a árvore de transformações em
-tópicos por robô (\texttt{/tb1/\allowbreak tf}, \texttt{/tb2/\allowbreak tf}), com \texttt{frame\_\allowbreak id}s sem
-prefixo dentro de cada árvore. Como \texttt{tf2\_\allowbreak ros.\allowbreak TransformListener} não
-permite escutar um tópico diferente do \texttt{/tf} global, o orquestrador passou
-a instanciar manualmente um \texttt{Buffer} e uma inscrição por robô --- uma para
-cada \texttt{/tb\{1,2,3\}/\allowbreak tf} --- consultando em cada uma a transformação
-\texttt{map → base\_\allowbreak link} sem prefixo.
+Como descrito na Seção~\ref{sec:orquestrador} do Capítulo~\ref{chap:arquitetura},
+essa mesma lógica de gravação por polling de TF precisou de um
+\texttt{tf2\_\allowbreak ros.\allowbreak Buffer} dedicado por robô. O detalhe de implementação que
+viabiliza essa separação, não coberto naquele capítulo, é que
+\texttt{tf2\_\allowbreak ros.\allowbreak TransformListener} não permite escutar um tópico diferente
+do \texttt{/tf} global: por isso o orquestrador instancia manualmente um
+\texttt{Buffer} e uma inscrição por robô --- uma para cada \texttt{/tb\{1,2,3\}/\allowbreak tf} ---
+consultando em cada uma a transformação \texttt{map → base\_\allowbreak link} sem prefixo.
 
 
 \subsection{Exemplo: os Serviços \texttt{start\_\allowbreak record} e \texttt{stop\_\allowbreak record}}
 \label{sec:impl_servicos_exemplo}
 
 Para tornar concreta a discussão anterior, o Código~\ref{lst:start_stop_record}
-reproduz, tal como publicado no repositório público do projeto, os \textit{callbacks}
-que implementam o início e o fim de uma gravação de rota. Note-se a rejeição explícita
-de requisições inconsistentes com o estado corrente do robô (\texttt{ALREADY\_\allowbreak NAVIGATING})
-e a limpeza do buffer de poses e do último ponto salvo (\texttt{last\_\allowbreak saved = None}) a
-cada novo início de gravação --- sem essa limpeza, uma segunda gravação herdaria pontos
-da anterior, corrompendo silenciosamente o arquivo de rota resultante.
+reproduz os \textit{callbacks} que implementam o início e o fim de uma gravação de
+rota, com a verificação de robô desconhecido (\texttt{UNKNOWN\_\allowbreak ROBOT}) e a montagem
+dos campos de resposta elididas (\texttt{...}) na segunda função por serem idênticas
+às da primeira --- o que importa para a discussão é a rejeição explícita de
+requisições inconsistentes com o estado corrente do robô
+(\texttt{ALREADY\_\allowbreak NAVIGATING}) e a limpeza do buffer de poses e do último ponto
+salvo (\texttt{last\_\allowbreak saved = None}) a cada novo início de gravação --- sem essa
+limpeza, uma segunda gravação herdaria pontos da anterior, corrompendo
+silenciosamente o arquivo de rota resultante.
 
-\begin{lstlisting}[style=pycode, caption={Callbacks \texttt{\_\allowbreak cb\_\allowbreak start\_\allowbreak record} e \texttt{\_\allowbreak cb\_\allowbreak stop\_\allowbreak record} (\texttt{fleet\_\allowbreak orchestrator/\allowbreak main.py}).}, label={lst:start_stop_record}]
+\begin{lstlisting}[style=pycode, caption={Callbacks \texttt{\_\allowbreak cb\_\allowbreak start\_\allowbreak record} e \texttt{\_\allowbreak cb\_\allowbreak stop\_\allowbreak record}, com boilerplate repetido elidido (\texttt{fleet\_\allowbreak orchestrator/\allowbreak main.py}).}, label={lst:start_stop_record}]
 def _cb_start_record(self, req, resp):
     rid = req.robot_id
     if not self._known_robot(rid):
@@ -138,11 +140,7 @@ def _cb_start_record(self, req, resp):
 
 def _cb_stop_record(self, req, resp):
     rid = req.robot_id
-    if not self._known_robot(rid):
-        resp.success = False
-        resp.message = f"Unknown robot {rid!r}"
-        resp.error_code = "UNKNOWN_ROBOT"
-        return resp
+    # ... verificação de UNKNOWN_ROBOT idêntica à de _cb_start_record ...
     st = self._state[rid]
     route_name = st.current_route
     st.is_recording = False
@@ -152,7 +150,6 @@ def _cb_stop_record(self, req, resp):
         st.current_route = ""
         resp.success = True
         resp.message = "Route length: 0"
-        resp.error_code = ""
         return resp
     path = self._save_route_yaml(rid, route_name, st.route_poses)
     st.route_poses.clear()
@@ -161,7 +158,6 @@ def _cb_stop_record(self, req, resp):
     st.current_route = ""
     resp.success = True
     resp.message = f"Saved {n} poses to {path}"
-    resp.error_code = ""
     return resp
 \end{lstlisting}
 
@@ -290,7 +286,11 @@ Para fins de auditoria, o próprio \texttt{summary.json} produzido pela análise
 registra o modo de reamostragem usado. Na campanha final
 \texttt{dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual}, o campo
 \texttt{resampling.mode} indica \texttt{time}, com 100 amostras na grade
-normalizada.
+normalizada. Essa quantidade de amostras não foi submetida a um teste de
+sensibilidade: não se verificou experimentalmente se o RMSE reportado muda
+de forma relevante com uma grade mais fina ou mais grosseira, de modo que
+não é possível afirmar, com os dados desta dissertação, que o resultado é
+insensível a essa escolha específica.
 
 Uma segunda fonte de tópico precisou ser tratada com o mesmo cuidado: o
 \texttt{fleet\_\allowbreak data\_\allowbreak collector} grava, para cada execução, tanto a pose ao vivo
@@ -313,6 +313,40 @@ próprio \texttt{summary.json}, permitindo auditar retroativamente qual fonte
 alimentou cada número. A correção é coberta por nove testes dedicados em
 \texttt{tests/\allowbreak test\_\allowbreak analyze\_\allowbreak runs.py}, exercitando a detecção de cada tópico e
 a ordem de prioridade do modo \texttt{auto}.
+
+\subsection{A Cadeia de Fallback \texttt{amcl\_pose > pose > odom}}
+\label{sec:impl_fallback_pose}
+
+Dado que esta é, entre as correções descritas neste capítulo, a que mais
+diretamente protege a validade dos números de repetibilidade reportados
+(Seção~\ref{sec:impl_conclusao}), vale um tratamento proporcional, com
+código, e não apenas a descrição em prosa acima. O Código~\ref{lst:pose_fallback}
+reproduz o trecho de \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} que implementa a
+prioridade do modo \texttt{auto}: a primeira fonte candidata --- \texttt{amcl\_\allowbreak pose},
+depois \texttt{pose} do SLAM~Toolbox, depois \texttt{odom} --- que de fato tiver
+mensagens gravadas no bag (\texttt{counts.\allowbreak get(topic, 0) > 0}, não apenas presença
+no \textit{schema}) é a escolhida.
+
+\begin{lstlisting}[style=pycode, caption={Prioridade do modo \texttt{auto} em \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} (\texttt{fleet\_\allowbreak ws/\allowbreak scripts/\allowbreak analyze\_\allowbreak runs.py}).}, label={lst:pose_fallback}]
+if mode == "auto":
+    # Prioridade: amcl_pose > pose (SLAM Toolbox, ao vivo) > odom (deriva sem
+    # correção). Antes desta correção, "auto" nunca reconhecia o tópico "pose"
+    # e caía direto pra odom mesmo quando a pose corrigida do SLAM tinha sido
+    # gravada.
+    amcl = _find_amcl_topic_name(tmap)
+    if amcl is not None and counts.get(amcl, 0) > 0:
+        return amcl
+    slam_pose = _find_slam_pose_topic_name(tmap)
+    if slam_pose is not None and counts.get(slam_pose, 0) > 0:
+        return slam_pose
+    return _find_odom_topic_name(tmap)
+\end{lstlisting}
+
+Note-se a checagem por contagem de mensagens (\texttt{counts}), e não apenas
+pela presença do nome do tópico em \texttt{tmap}: um bag pode registrar
+\texttt{/amcl\_\allowbreak pose} no \textit{schema} de tópicos sem nenhuma mensagem efetivamente
+publicada nele (por exemplo, AMCL sem pose inicial definida), caso em que a
+cadeia de fallback precisa seguir adiante em vez de escolher um tópico vazio.
 
 Uma segunda ressalva --- esta não relacionada a nenhum bug, e sim ao próprio
 método de controle escolhido --- também é relevante para interpretar o RMSE:
@@ -378,6 +412,62 @@ muito grandes de duração ainda podem indicar que as execuções não são
 experimentalmente equivalentes ---, mas reduz o artefato geométrico introduzido
 pela reamostragem puramente por índice.
 
+O Código~\ref{lst:rmse_impl} mostra apenas as funções auxiliares; falta o
+laço que efetivamente compara cada par de execuções e a agregação final que
+produz o ``RMSE médio'' citado nos Capítulos~\ref{chap:resultados}
+e~\ref{chap:conclusao}. Esses dois passos vivem em lugares diferentes do
+código, o que já é, em si, relevante para auditar de onde vêm os números: o
+laço pairwise que monta a matriz $N\times N$ (gravada em \texttt{summary.json}
+como \texttt{pairwise\_\allowbreak rmse\_\allowbreak m}) está em \texttt{analyze\_\allowbreak runs.py}, na
+função \texttt{main}:
+
+\begin{lstlisting}[style=pycode, caption={Laço pairwise que produz a matriz $N\times N$ de RMSE (\texttt{scripts/\allowbreak analyze\_\allowbreak runs.py}, função \texttt{main}).}, label={lst:rmse_pairwise}]
+n = len(trajectories)
+rmse_matrix: List[List[Optional[float]]] = [[None] * n for _ in range(n)]
+for i in range(n):
+    for j in range(i + 1, n):
+        a, b = _resample_pair(
+            trajectories[i], trajectories[j],
+            t1=times[i], t2=times[j],
+            mode=args.resample_mode, samples=args.resample_samples,
+        )
+        r = _rmse(a, b)
+        rmse_matrix[i][j] = r
+        rmse_matrix[j][i] = r
+    rmse_matrix[i][i] = 0.0
+\end{lstlisting}
+
+O mesmo script calcula também, para cada execução, o RMSE contra a primeira
+execução da lista (tomada como referência), armazenado em \texttt{summary.json}
+como a lista \texttt{vs\_\allowbreak reference}. Nenhuma dessas duas estruturas, porém, é
+por si só o ``RMSE médio'' relatado nos capítulos de resultados e conclusão ---
+essa média é calculada fora de \texttt{analyze\_\allowbreak runs.py}, no backend, pelo
+método \texttt{analyze\_\allowbreak experiment} de \texttt{Analyst} (\texttt{backend/\allowbreak agents/\allowbreak analyst.py}),
+que lê o \texttt{summary.json} já produzido e agrega a lista \texttt{vs\_\allowbreak reference}:
+
+\begin{lstlisting}[style=pycode, caption={Agregação final do RMSE médio a partir de \texttt{summary.json} (\texttt{backend/\allowbreak agents/\allowbreak analyst.py}, método \texttt{Analyst.\allowbreak analyze\_\allowbreak experiment}).}, label={lst:rmse_mean}]
+summary = self.load_summary(run_id)
+vs_reference: list[dict[str, Any]] = summary.get("vs_reference", [])
+
+rmse_values = [
+    e["rmse_vs_ref_m"] for e in vs_reference
+    if e["label"] != summary.get("reference_label")
+]
+
+return {
+    ...
+    "mean_rmse_vs_ref_m": sum(rmse_values) / len(rmse_values) if rmse_values else 0.0,
+    "max_rmse_vs_ref_m": max(rmse_values) if rmse_values else 0.0,
+    ...
+}
+\end{lstlisting}
+
+É importante notar o que essa média de fato representa: \texttt{mean\_\allowbreak rmse\_\allowbreak vs\_\allowbreak ref\_\allowbreak m}
+é a média do RMSE de cada execução \textit{contra a execução de referência}
+(\texttt{rmse\_\allowbreak vs\_\allowbreak ref\_\allowbreak m}), e não uma agregação da matriz pairwise completa
+de \texttt{pairwise\_\allowbreak rmse\_\allowbreak m} --- uma distinção que a simples leitura do
+Código~\ref{lst:rmse_impl}, isolado do restante do pipeline, não deixa clara.
+
 \section{Interface Web}
 \label{sec:impl_web}
 
@@ -420,7 +510,7 @@ tópicos gz-transport que o Gazebo publica de forma absoluta, o
 \texttt{MultiThreadedExecutor} para evitar deadlocks, o gerenciamento de
 processos de longa duração da simulação por grupo de processos
 (\texttt{setsid}/\texttt{killpg}), a correção de detecção do tópico de pose em
-\texttt{analyze\_\allowbreak runs.py}, a desserialização CDR sem tipo registrado, a
+\texttt{analyze\_\allowbreak runs.py} (Seção~\ref{sec:impl_fallback_pose}), a
 conversão de coordenadas canvas--mundo --- resultaram de problemas concretos
 encontrados durante o desenvolvimento. Cada uma representa uma contribuição de
 engenharia que outros grupos de pesquisa não precisarão replicar ao adotar

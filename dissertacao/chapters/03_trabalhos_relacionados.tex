@@ -346,7 +346,18 @@ infraestrutura que torna cada execução um artefato de pesquisa autocontido.
 \label{sec:rel_sintese}
 
 A Tabela~\ref{tab:comparacao_relacionados} resume os trabalhos discutidos e
-compara suas características com o framework proposto nesta dissertação.
+compara suas características com o framework proposto nesta dissertação. A
+comparação restringe-se a sistemas e frameworks de robótica cujas
+características podem ser avaliadas de forma significativa ao longo dos seis
+eixos da tabela. Os artigos de \citeonline{amigoni2010} e
+\citeonline{guevaravega2024}, já discutidos nas Seções~\ref{sec:rel_repeticao}
+e~\ref{sec:rel_reprodutibilidade}, respectivamente, são contribuições de
+metodologia experimental e de estrutura de artefatos de pesquisa --- não
+sistemas concorrentes diretos --- e fundamentam a abordagem desta dissertação
+em vez de competir com ela nesses eixos; perguntar se um artigo de metodologia
+ou de survey ``tem Web UI'' ou é ``multi-robô'', por exemplo, não é uma
+pergunta bem-formada para esse tipo de trabalho, por isso eles foram mantidos
+apenas na discussão em prosa e excluídos da tabela.
 
 \begin{table}[H]
 \centering
@@ -362,8 +373,6 @@ compara suas características com o framework proposto nesta dissertação.
 \citeonline{macenski2022ros2}      & Plataforma ROS~2          & $\times$ & Parcial  & $\times$ & $\times$ & \checkmark \\
 \citeonline{hamer2025}             & Avaliação de SLAM         & Parcial  & $\times$ & $\times$ & \checkmark & $\times$ \\
 \citeonline{maset2022}       & Repetibilidade 3D         & \checkmark & $\times$ & $\times$ & \checkmark & $\times$ \\
-\citeonline{amigoni2010}           & Metodologia experimental  & $\times$ & $\times$ & $\times$ & Parcial  & N/A \\
-\citeonline{guevaravega2024}       & Artefatos de pesquisa (ES) & $\times$ & N/A & $\times$ & N/A & N/A \\
 \textbf{Esta dissertação}     & Framework experimental    & \checkmark & Parcial\footnotemark & \checkmark & \checkmark & \checkmark \\
 \bottomrule
 \end{tabularx}
@@ -374,6 +383,24 @@ implementada em software, mas a avaliação quantitativa de repetibilidade
 reportada nesta dissertação foi conduzida com uma única unidade móvel; a
 operação multi-robô foi exercitada apenas em testes funcionais
 exploratórios, não na campanha controlada (Seção~\ref{sec:limitacoes}).}
+
+Os padrões revelados pela tabela reforçam o posicionamento desta dissertação
+mais do que qualquer linha isolada: cada eixo de comparação é coberto apenas
+por um subconjunto diferente de trabalhos, e nenhum deles cobre mais de dois
+eixos simultaneamente. O trabalho mais próximo no eixo record--replay e
+métricas RMSE é \citeonline{maset2022}, mas restrito a mapeamento 3D com
+hardware dedicado (scanner laser e IMU), sem suporte a múltiplos robôs, sem
+interface de operação e sem publicação de código. No eixo multi-robô, o
+``Parcial'' de \citeonline{macenski2022ros2} vem de estudos de caso reais de
+frotas industriais (OTTO Motors) documentados qualitativamente, não de um
+framework que implemente ou avalie repetibilidade entre robôs. \citeonline{hamer2025}
+é o quase-concorrente mais próximo em metodologia de avaliação dentro do
+ecossistema ROS --- múltiplas execuções do mesmo cenário com análise de
+variabilidade --- mas aplicada a um único robô alternando entre algoritmos de
+SLAM, sem protocolo formal de record--replay nem interface web. Essa
+dispersão é o retrato concreto da lacuna discutida a seguir: a combinação
+específica de record--replay, suporte a papéis em frota e interface web sem
+ROSBridge não aparece simultaneamente em nenhum dos trabalhos revisados.
 
 \section{Lacuna Identificada}
 \label{sec:rel_lacuna}
@@ -389,16 +416,42 @@ sistemática com protocolo de busca formal; não é, portanto, uma alegação de
 ineditismo absoluto, mas um relato preciso do que a bibliografia examinada
 cobre ou deixa de cobrir.
 
-Essa lacuna não é acidental. Ela reflete uma escolha implícita da comunidade de
-robótica experimental: priorizar a contribuição algorítmica (um novo controlador,
-um novo algoritmo de SLAM) sobre a infraestrutura de avaliação. Esta dissertação
-inverte essa prioridade: a infraestrutura de avaliação \textit{é} a contribuição.
+Uma leitura possível dessa lacuna --- não uma conclusão sociológica
+estabelecida pela revisão, mas uma interpretação do autor a partir do padrão
+observado nas seções anteriores --- é que ela reflete uma tendência da
+comunidade de robótica experimental a priorizar a contribuição algorítmica (um
+novo controlador, um novo algoritmo de SLAM) sobre a infraestrutura de
+avaliação. O achado mais próximo entre os trabalhos revisados que dá algum
+sustento a essa leitura é o de \citeonline{albonico2023}: do seu mapeamento de
+63 estudos de Engenharia de Software sobre ROS, 46 não discutem ameaças à
+validade e a relevância industrial das avaliações é predominantemente baixa
+(Seção~\ref{sec:rel_es}) --- um sintoma de infraestrutura de avaliação pouco
+madura, ainda que o próprio mapeamento não enuncie isso como uma escolha
+implícita e deliberada da comunidade. Esta dissertação aposta na direção
+oposta a essa tendência observada: trata a infraestrutura de avaliação como a
+contribuição em si, não como suporte incidental a ela.
 
 \section{Considerações Finais}
 \label{sec:rel_conclusao}
 
 A revisão confirma que os componentes técnicos necessários existem e são maduros
 --- Nav2, SLAM Toolbox, bags ROS~2 --- mas não estão integrados de forma coerente
-em um framework orientado a experimentos reprodutíveis. O próximo capítulo apresenta
-a arquitetura que realiza essa integração, com decisões de design motivadas pelos
-problemas identificados na literatura.
+em um framework orientado a experimentos reprodutíveis.
+
+Vale registrar, como observação em aberto, que o limiar de 30\,cm adotado para
+H2 (Seção~\ref{sec:problema}) é uma ordem de grandeza mais permissivo do que os
+números reportados pelos próprios trabalhos revisados neste capítulo: o
+controlador Regulated Pure Pursuit isolado, avaliado por
+\citeonline{macenski2023survey}, atinge erro lateral médio inferior a 5\,cm, e
+\citeonline{maset2022} reporta distância \textit{cloud-to-cloud} da ordem de
+2\,cm em mapeamento 3D com hardware dedicado. Essa diferença não implica, por
+si só, que o limiar desta dissertação seja pouco exigente --- ele é definido
+para o pipeline completo (SLAM + Nav2 + odometria), que acumula fontes de erro
+distintas e adicionais às avaliadas isoladamente nos dois trabalhos citados,
+e não apenas para o controlador ou para o sensor de mapeamento em isolado.
+Se o limiar deveria ser mais apertado à luz do estado da arte de seus
+componentes individuais é uma pergunta que esta dissertação não resolve;
+fica registrada aqui como limite de escopo, não como justificativa fechada.
+
+O próximo capítulo apresenta a arquitetura que realiza essa integração, com
+decisões de design motivadas pelos problemas identificados na literatura.

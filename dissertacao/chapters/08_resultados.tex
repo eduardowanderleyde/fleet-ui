@@ -19,7 +19,10 @@ A campanha final foi concluída com dez replays válidos, todos com
 \texttt{fleet\_\allowbreak ws/\allowbreak runs/\allowbreak dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual/},
 incluindo o manifesto da campanha, os exports individuais de cada replay, os
 bags MCAP, os CSVs de trajetória, o gráfico de sobreposição das trajetórias e o
-arquivo \texttt{summary.json} consolidado.
+arquivo \texttt{summary.json} consolidado. Esse gráfico de sobreposição, gerado
+automaticamente pela campanha, não é reproduzido como figura formal neste
+capítulo; os resultados numéricos equivalentes são apresentados na
+Tabela~\ref{tab:campanha_final}, a seguir.
 
 \section{QA2 — RMSE de Repetibilidade}
 \label{sec:res_qa2}
@@ -59,6 +62,16 @@ de reportar a dispersão entre execuções e não apenas um valor médio isolado
 O menor RMSE observado foi de 1,65\,cm e o maior foi de 4,76\,cm. Todos os
 valores ficaram substancialmente abaixo dos 25\,cm da tolerância padrão de
 objetivo do Nav2.
+
+Esse limiar de 25\,cm não foi calibrado a partir dos dados desta campanha nem
+escolhido a posteriori para garantir sucesso: corresponde à tolerância padrão
+de chegada do \texttt{general\_\allowbreak goal\_\allowbreak checker} do Nav2, parâmetro
+usado operacionalmente pelo framework independentemente deste experimento
+específico de repetibilidade (discussão mais detalhada na
+Seção~\ref{sec:criterios}). O RMSE máximo observado (4,76\,cm,
+Tabela~\ref{tab:campanha_final}) está quase uma ordem de grandeza abaixo desse
+valor, o que afasta a hipótese de que o limiar tenha sido ajustado a partir dos
+próprios resultados para torná-los positivos.
 
 O resultado é metodologicamente mais forte que as campanhas preliminares porque
 os pontos iniciais foram controlados. No \texttt{summary.json}, todos os dez
@@ -135,10 +148,13 @@ de controle, não um indício de degradação do protocolo de replay.
 \label{sec:res_qa3}
 
 A duração média dos dez replays foi de 17,51\,s, com desvio-padrão de
-0,36\,s. O comprimento médio estimado por \texttt{/\allowbreak odom} foi de
-0,826\,m, com desvio-padrão de 0,010\,m. A variação temporal observada é
-pequena para o objetivo da análise e compatível com o uso de reamostragem em
-tempo normalizado.
+0,36\,s. O coeficiente de variação correspondente é de aproximadamente
+2,1\% ($0,36/17,51$), bem abaixo do limiar de 10\% definido na
+Seção~\ref{sec:criterios} como critério de aceitação para QA3. O comprimento
+médio estimado por \texttt{/\allowbreak odom} foi de 0,826\,m, com
+desvio-padrão de 0,010\,m. A variação temporal observada é pequena para o
+objetivo da análise e compatível com o uso de reamostragem em tempo
+normalizado.
 
 Esses valores mostram que as execuções foram não apenas espacialmente próximas,
 mas também temporalmente consistentes. A combinação de baixo RMSE, baixo erro
@@ -175,6 +191,19 @@ foi preservado como dado auxiliar. A presença
 consistente desses tópicos nos dez bags confirma que a coleta em MCAP permaneceu
 operacional mesmo com o relançamento completo da simulação entre replays.
 
+Essa estabilidade de contagens e frequências entre os dez bags não é apenas uma
+verificação de integridade de coleta: é também pré-condição de validade para a
+reamostragem em tempo normalizado usada nas comparações de QA2 e QA3
+(Seções~\ref{sec:res_qa2} e~\ref{sec:res_qa3}). Se a frequência efetiva de
+\texttt{/\allowbreak odom} variasse de forma expressiva entre execuções, a
+interpolação para uma grade temporal comum introduziria um erro de reamostragem
+que se misturaria ao erro de repetibilidade que o RMSE pretende medir. A faixa
+observada para \texttt{/\allowbreak odom} (467--504 mensagens, Tabela~\ref{tab:sensor_bags})
+corresponde a uma variação de cerca de 7,6\% em torno da média --- padrão
+semelhante ao de \texttt{/\allowbreak scan} e \texttt{/\allowbreak imu}
+($\approx$7,4--7,6\%) --- pequena o suficiente para sustentar, em vez de
+comprometer, a comparação por tempo normalizado adotada em QA2 e QA3.
+
 \section{Experimentos Complementares: Variabilidade Fora do Protocolo Controlado}
 \label{sec:res_exp_complementares}
 
@@ -191,6 +220,15 @@ de um replay era praticamente igual ao \texttt{end\_\allowbreak xy} do replay
 anterior. O efeito visual era uma separação progressiva entre trajetórias, mas
 essa separação não media apenas a variabilidade do controlador ou do SLAM; media
 também a consequência de iniciar cada nova execução a partir de uma pose diferente.
+
+Os três conjuntos exploratórios referidos como base de QA4
+(Seção~\ref{sec:questoes}) são discutidos aqui de forma qualitativa, sem uma
+tabela consolidada de N de replays e RMSE por conjunto: ao contrário da
+campanha controlada de QA1--QA3, eles foram gerados antes de existir um
+protocolo padronizado de reinicialização e coleta, com condições heterogêneas
+entre si, e seu papel nesta dissertação é diagnóstico --- motivar e justificar
+o desenho da campanha final --- não o de compor uma métrica central
+comparável às de QA1--QA3.
 
 Por essa razão, os resultados exploratórios são mantidos como evidência
 diagnóstica e motivação do protocolo final, mas não substituem a campanha
@@ -213,7 +251,17 @@ geração automática de bags, CSVs, gráfico e \texttt{summary.json}. QA2 é
 respondida pelo RMSE médio de 3,35\,cm e máximo de 4,76\,cm contra a execução de
 referência, ambos muito abaixo da tolerância de 25\,cm do Nav2. QA3 é respondida
 pela baixa variabilidade temporal observada nos dez replays, com duração média
-de 17,51\,s e desvio-padrão de 0,36\,s.
+de 17,51\,s e desvio-padrão de 0,36\,s (coeficiente de variação de
+aproximadamente 2,1\%, bem abaixo do limiar de 10\% da Seção~\ref{sec:criterios}).
+
+QA4 não é respondida com o mesmo grau de certeza. Os dados exploratórios da
+Seção~\ref{sec:res_exp_complementares} são compatíveis com a repetibilidade
+observada sob o protocolo controlado, mas, como já discutido na
+Seção~\ref{sec:questoes}, essa questão foi formulada a partir de dados que já
+existiam, é geradora de hipótese e não confirmatória, e os próprios dados que a
+sustentam confundem mecanismo de navegação com variação de pose inicial. Nos
+mesmos termos adotados no Capítulo~\ref{chap:conclusao}: trata-se de evidência
+exploratória compatível, não de causalidade estabelecida.
 
 A análise também reforça uma lição metodológica central: a pose inicial precisa
 ser controlada explicitamente \cite{bonsignorio2015}. Campanhas preliminares sem reinicialização entre
