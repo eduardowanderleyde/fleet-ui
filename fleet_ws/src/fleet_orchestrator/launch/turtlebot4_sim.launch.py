@@ -114,6 +114,17 @@ def _launch_setup(context, *args, **kwargs):
         remappings=[(gz_topic, 'ground_truth_pose')],
     )
 
+    # O bridge acima perde o nome de cada entidade (child_frame_id vazio) —
+    # este nó extrai só a entrada do robô por índice fixo e publica como
+    # PoseStamped limpo (ver fleet_orchestrator/ground_truth_filter.py).
+    ground_truth_filter = Node(
+        package='fleet_orchestrator',
+        executable='ground_truth_filter',
+        name='ground_truth_filter',
+        output='screen',
+        parameters=[{'use_sim_time': True}],
+    )
+
     # ── SLAM Toolbox (8s após Gazebo) ─────────────────────────────────────────
     slam = TimerAction(
         period=8.0,
@@ -141,7 +152,7 @@ def _launch_setup(context, *args, **kwargs):
         )],
     )
 
-    return [sim, ground_truth_bridge, slam, nav2]
+    return [sim, ground_truth_bridge, ground_truth_filter, slam, nav2]
 
 
 def generate_launch_description():

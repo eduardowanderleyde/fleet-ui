@@ -985,29 +985,37 @@ o raciocínio do zero.
    `/ground_truth_pose`) confirmado publicando a ~51-55Hz via
    `ros2 topic hz`, sem erro.
 
-   **Problema real, não resolvido ainda:** o bridge `gz.msgs.Pose_V ->
-   tf2_msgs/msg/TFMessage` **não preserva o nome da entidade** — todo
-   `child_frame_id`/`frame_id` chega vazio (`''`) no lado ROS, só
-   posição/orientação sobrevivem. Ou seja, dá pra saber que a entrada de
-   índice 2 É o robô (confirmado comparando a ordem do `gz topic -e` cru
-   com o número de entradas do `ros2 topic echo` bridgeado), mas não dá
-   pra filtrar por nome depois de bridgeado — só por índice, que é frágil
-   (muda se o mundo ganhar/perder objetos, e quase certamente é diferente
-   por robô em modo multi-robô, não verificado ainda). Não tem bindings
-   Python de gz-transport instalados nesta máquina
-   (`ros-jazzy-gz-transport-vendor` só tem a parte C++) pra escrever um
-   nó que leia o tópico cru e filtre por nome direto — essa rota não é
-   trivial aqui.
+   **Problema real, encontrado e já resolvido (2026-09-30):** o bridge
+   `gz.msgs.Pose_V -> tf2_msgs/msg/TFMessage` **não preserva o nome da
+   entidade** — todo `child_frame_id`/`frame_id` chega vazio (`''`) no
+   lado ROS, só posição/orientação sobrevivem. Dá pra saber que a entrada
+   de índice 2 É o robô (confirmado comparando a ordem do `gz topic -e`
+   cru com o número de entradas do `ros2 topic echo` bridgeado), mas não
+   dá pra filtrar por nome depois de bridgeado — só por índice. Não tem
+   bindings Python de gz-transport instalados nesta máquina
+   (`ros-jazzy-gz-transport-vendor` só tem a parte C++), então filtrar
+   direto na fonte (sem passar pelo bridge genérico) não é trivial aqui.
 
-   **Próximo passo real:** escrever um nozinho ROS2 (Python puro, sem
-   gz-transport) que assine `/ground_truth_pose` (`TFMessage`, array sem
-   nome) e republique só `transforms[ROBOT_INDEX]` como
-   `PoseStamped` limpo — `ROBOT_INDEX` documentado por configuração
-   (2 pra single-robot no mundo `warehouse`, a confirmar pra multi-robô).
-   Frágil, mas funciona pro escopo desta campanha (mundo/robôs fixos,
-   não precisa generalizar). Alternativa mais robusta, não tentada:
-   investigar se existe um pacote `ros-jazzy-gz-transport-python` ou
-   equivalente pra instalar e falar gz-transport nativo em Python.
+   **Implementado:** nó novo `fleet_orchestrator/ground_truth_filter.py`
+   (registrado como `ground_truth_filter` no `setup.py`, adicionado ao
+   `turtlebot4_sim.launch.py`) — assina `/ground_truth_pose` (`TFMessage`,
+   array sem nome), extrai `transforms[ROBOT_INDEX]` (parâmetro ROS,
+   default 2 — confirmado pra single-robot no mundo `warehouse`, **ainda
+   não verificado pra multi-robô**) e republica em
+   `/ground_truth_pose_clean` como `PoseStamped` limpo. Frágil por
+   depender de índice fixo, mas suficiente pro escopo desta campanha
+   (mundo/robôs fixos, não precisa generalizar).
+
+   **Bug extra encontrado e corrigido no caminho:** o `header.stamp` de
+   cada entrada do bridge `Pose_V -> TFMessage` vem **sempre zerado**
+   (`sec: 0, nanosec: 0`), tanto no tópico cru `/ground_truth_pose` quanto
+   seria no filtrado se copiássemos o stamp de origem — inútil pra
+   sincronizar com `/odom`/`/pose` na campanha. Corrigido no
+   `ground_truth_filter`: ignora o stamp de origem e usa
+   `self.get_clock().now()` (com `use_sim_time:=True` no launch, reflete
+   o `/clock` da simulação). Verificado ao vivo: `/ground_truth_pose_clean`
+   publicando a ~100Hz com `stamp.sec` crescendo de verdade (não mais
+   zero) e posição/orientação coerentes com o spawn do robô (~0,0,0).
 2. **Rota longa com curvas** (~5-10m, reta + curva de 90°/180°) — não
    existe ainda. Precisa definir waypoints novos e validar que cabem no
    mundo `warehouse` sem bater em prateleira/obstáculo (testar primeiro
@@ -1018,16 +1026,19 @@ o raciocínio do zero.
 
 **Ordem de execução refinada (2026-09-30, revisão do plano original):**
 
-1. **Integrar o ground truth ao pipeline.** Adicionar a entrada de bridge
-   confirmada acima em `spawn_multi_tb4.launch.py`/launch equivalente de
-   single-robot, filtrar a entidade certa (`"turtlebot4"` sem namespace,
-   confirmar o nome em modo multi-robô), e gravar esse tópico no
-   `fleet_data_collector` junto com `/odom`, `/pose`, `/scan`, `/imu`.
-   Confirmar explicitamente referencial (frame) e timestamps antes de
-   calcular qualquer RMSE — `dynamic_pose/info` vem no frame do mundo
-   Gazebo, não necessariamente o mesmo `map`/`odom` do ROS; pode precisar
-   de uma transformação ou pelo menos de uma verificação de que a origem
-   coincide.
+1. **Integrar o ground truth ao pipeline — bridge e filtro prontos no
+   single-robot, falta gravar.** `bridge_ground_truth` +
+   `ground_truth_filter` (ver seção acima) já publicam
+   `/ground_truth_pose_clean` com timestamp de sim time correto no
+   `turtlebot4_sim.launch.py`. Falta: (a) replicar em
+   `turtlebot4_multi_sim.launch.py`/`spawn_multi_tb4.launch.py` —
+   `ROBOT_INDEX` certamente muda por robô em modo multi, não verificado
+   ainda; (b) gravar `/ground_truth_pose_clean` no `fleet_data_collector`
+   junto com `/odom`, `/pose`, `/scan`, `/imu` (não tocado ainda). Confirmar
+   explicitamente referencial (frame) antes de calcular qualquer RMSE —
+   `dynamic_pose/info` vem no frame do mundo Gazebo, não necessariamente o
+   mesmo `map`/`odom` do ROS; pode precisar de uma transformação ou pelo
+   menos de uma verificação de que a origem coincide.
 
 2. **Piloto antes da campanha grande — não pular esta etapa.** 1 replay
    curto só, gravando as três fontes (`/odom`, `/pose`, ground truth) e
