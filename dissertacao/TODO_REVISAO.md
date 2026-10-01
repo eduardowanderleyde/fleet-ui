@@ -126,3 +126,26 @@ que resolve, com referência a ele).
   (b) deixar explícito que a descrição se refere a uma versão anterior do
   componente, já substituída. Hoje o texto descreve algo que não existe
   mais no repositório.
+
+## Campanha /odom vs. /pose vs. ground truth — 2026-09-30
+- **Achado:** `09_conclusao.tex` (Trabalhos Futuros, curto prazo) já citava
+  a comparação `/odom` vs. pose SLAM vs. *ground truth* do Gazebo como
+  trabalho futuro. Nesta sessão essa comparação deixou de ser só uma
+  frase de trabalho futuro: a infraestrutura de coleta do ground truth
+  (bridge `/world/<world>/dynamic_pose/info` do Gazebo, sem plugin novo,
+  + nó `ground_truth_filter` pra extrair a pose do robô por índice, já que
+  o bridge não preserva nome de entidade) foi implementada e validada ao
+  vivo (`mission-coordinate-large-scale`, ver `orquestracion.md` seção
+  "Plano: campanha /odom vs. /pose vs. ground truth"). Adicionada uma
+  frase em `09_conclusao.tex` registrando isso.
+- **Por que está pendente, não resolvido:** só a infraestrutura de coleta
+  existe. Faltam: réplicas pra modo multi-robô, as duas geometrias de rota
+  novas (longa com curvas, loop fechado), o piloto obrigatório (1 replay,
+  3 fontes sobrepostas, pra pegar erro de frame/timestamp antes de
+  escalar), e só então a campanha completa (30 replays). Nenhum número
+  novo existe ainda — não decidir se o RMSE de 3,35cm (achado 1 da seção
+  "Revisão geral" acima) muda, fica como está, ou passa a ser apresentado
+  ao lado dos outros dois, até essa campanha rodar.
+- **Sugestão:** quando a campanha (ou ao menos o piloto) rodar, revisitar
+  esta entrada e decidir se os capítulos 07/08 ganham uma seção nova de
+  resultados ou só uma nota comparativa — e só então remover esta entrada.

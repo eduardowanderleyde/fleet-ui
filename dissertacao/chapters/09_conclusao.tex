@@ -242,7 +242,10 @@ incerteza da estimativa de RMSE também fora da rota
 \texttt{dissertation\_\allowbreak clean01}; repetir o protocolo em hardware físico
 com TurtleBot4 real; comparar \texttt{/\allowbreak odom}, pose estimada por SLAM
 e \textit{ground truth} do Gazebo em uma mesma campanha para separar erro de
-controle, erro de localização e erro de medição; decidir e avaliar a
+controle, erro de localização e erro de medição --- infraestrutura de coleta
+desse \textit{ground truth} (tópico nativo \texttt{dynamic\_\allowbreak pose/info} do
+Gazebo, sem plugin adicional) já implementada e validada em execução real ao
+final deste trabalho, com piloto e campanha completa ainda pendentes; decidir e avaliar a
 metodologia de gravação de baseline --- hoje via \texttt{go\_\allowbreak to\_\allowbreak point}
 sequencial, mecanismo distinto do usado no replay (\texttt{play\_\allowbreak route},
 Seção~\ref{sec:res_qa2}) --- incluindo a alternativa de gravar a própria
