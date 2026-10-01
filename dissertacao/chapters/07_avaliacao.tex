@@ -44,11 +44,14 @@ Quatro questões orientam a avaliação:
     \item[QA4] A repetibilidade observada sob o protocolo controlado (QA2, QA3)
     se mantém quando as execuções ocorrem fora desse regime controlado --- sem
     a mesma ação de navegação, pose inicial fixa ou retorno explícito ao ponto
-    de partida entre réplicas? Esta questão foi adicionada durante a execução
-    do trabalho, motivada pela disponibilidade de três conjuntos de dados
-    exploratórios adicionais no repositório do projeto
-    (Seção~\ref{sec:res_exp_complementares}), e por isso é tratada como
-    evidência diagnóstica, não como conclusão causal principal.
+    de partida entre réplicas? Esta questão foi formulada depois de os dados
+    exploratórios que a sustentam já existirem no repositório do projeto
+    (três conjuntos adicionais, Seção~\ref{sec:res_exp_complementares}) --- ou
+    seja, é geradora de hipótese (\textit{hypothesis-generating}), não
+    confirmatória: não há, nem poderia haver, um critério de aceitação/rejeição
+    formal para ela (diferente de QA1--QA3, Seção~\ref{sec:criterios}), e por
+    isso QA4 é tratada estritamente como evidência diagnóstica a explorar em
+    trabalho futuro confirmatório, nunca como conclusão causal.
 \end{description}
 
 QA1 corresponde à hipótese H1; QA2 e QA3, em conjunto, correspondem a H2; QA4
@@ -104,6 +107,24 @@ O framework é considerado válido se:
     \item O desvio de duração entre execuções equivalentes for inferior a 10\%
     da duração média (\textbf{QA3}).
 \end{enumerate}
+
+\noindent QA4 não tem critério de aceitação/rejeição nesta lista, deliberadamente:
+por ser geradora de hipótese, e não confirmatória (ver discussão na
+Seção~\ref{sec:questoes}), não há um limiar numérico que a "valide" ou
+"invalide" sem o risco de ajustá-lo aos próprios dados que a motivaram.
+
+O limiar de 25\,cm acima (QA2 e erro final) é o mesmo valor da tolerância
+padrão de chegada do \texttt{general\_\allowbreak goal\_\allowbreak checker} do
+Nav2 (Seção~\ref{sec:record_replay}) --- uma métrica de chegada a um
+único ponto, reaproveitada aqui como limiar de aceitação para RMSE de
+trajetória completa e erro de endpoint, sem derivação independente
+específica para essas duas grandezas. Essa escolha é operacionalmente
+conveniente (reusa um parâmetro já existente do sistema), mas não foi
+calibrada a partir dos dados da campanha nem comparada contra limiares
+usados por trabalhos relacionados que medem grandezas semelhantes
+(Seção~\ref{sec:rel_sintese}); o RMSE médio obtido (Capítulo~\ref{chap:resultados})
+ficou bem abaixo desse limiar, o que deve ser lido como evidência de
+repetibilidade, não como validação do limiar em si.
 
 O limiar de 10\% acima é usado como critério mínimo de aceitação para QA3. Ele
 não significa que durações diferentes sejam desejáveis, apenas que variações

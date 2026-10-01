@@ -255,8 +255,11 @@ dos sistemas de navegação autônoma opera com um mapa já conhecido e resolve
 apenas o subproblema de localização --- estimar a pose do robô dado um mapa
 fixo e um fluxo de observações sensoriais ruidosas. Esse é o papel do AMCL
 (\textit{Adaptive Monte Carlo Localization}), o localizador padrão empacotado
-com o Nav2 e utilizado como alternativa ao SLAM ao vivo nas análises de
-sensibilidade do Capítulo~\ref{chap:resultados}.
+com o Nav2. Esta dissertação não o utiliza --- opera com SLAM Toolbox
+(Seção~\ref{sec:slam_toolbox}) ao vivo durante toda a campanha --- mas o
+introduz aqui como contraponto teórico ao filtro de partículas e como
+proposta de trabalho futuro (Seção~\ref{sec:futuros}), discutida ao final
+desta seção.
 
 O AMCL é uma instância de filtro de partículas: mantém um conjunto de $M$
 hipóteses de pose (partículas), cada uma ponderada por sua verossimilhança
@@ -427,7 +430,12 @@ Definimos o coeficiente de variação temporal entre $N$ execuções como:
 \noindent onde $\bar{t}$ é a duração média e $\sigma_t$ o desvio padrão das
 durações. Um $\text{CV}_t < 5\%$ indica consistência temporal suficiente para
 que a interpolação para grade de tempo comum não introduza artefatos geométricos
-significativos.
+significativos. O critério de aceitação empírico adotado no protocolo de
+avaliação (Seção~\ref{sec:criterios}) é mais permissivo, $\text{CV}_t < 10\%$,
+usado como limiar mínimo de aceitação operacional da campanha, não como o
+patamar ideal de validade da interpolação estabelecido aqui; a campanha
+controlada reportada no Capítulo~\ref{chap:resultados} ficou, de qualquer
+forma, bem abaixo de ambos os limiares.
 
 \section{Considerações Finais}
 \label{sec:fund_conclusao}

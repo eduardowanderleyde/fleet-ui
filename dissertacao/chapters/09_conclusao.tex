@@ -19,10 +19,14 @@ quantitativa:
 entre unidades que executam tarefas e unidades que observam, permitindo designs
 experimentais heterogêneos sem modificação do core do sistema. Os buffers TF por
 robô, o executor multithreaded e os perfis de QoS diferenciados resolvem problemas
-concretos de compatibilidade que qualquer equipe que adotar ROS~2 em modo multi-robô
-enfrentará --- ainda que, como reconhecido na Seção~\ref{sec:limitacoes}, a
-avaliação quantitativa desta dissertação não tenha exercitado esses mecanismos
-sob operação simultânea de múltiplos robôs.
+concretos de compatibilidade --- de \textit{namespace}, QoS e API --- que qualquer
+equipe que adotar ROS~2 em modo multi-robô enfrentará. Esses mecanismos não
+resolvem, porém, o problema distinto de sincronização temporal sob carga combinada
+descrito na Seção~\ref{sec:limitacoes} (salto do relógio simulado com duas ou mais
+pilhas completas de Nav2 simultâneas): este foi mitigado por uma mudança de
+arquitetura --- ativação sequencial em vez de simultânea ---, não pelos mecanismos
+de compatibilidade acima, e a avaliação quantitativa desta dissertação não
+exercitou nenhum dos dois sob operação simultânea de múltiplos robôs.
 
 \textbf{Nível experimental}: o protocolo record--replay com análise RMSE pairwise
 por reamostragem temporal normalizada constitui uma metodologia de avaliação que
@@ -255,7 +259,11 @@ separar erro de controle, erro de localização e erro de medição ---
 infraestrutura de coleta desse \textit{ground truth} (tópico nativo
 \texttt{dynamic\_\allowbreak pose/info} do Gazebo, sem plugin adicional) já
 implementada e validada em execução real ao final deste trabalho, com piloto
-e campanha completa ainda pendentes. Decidir e avaliar, ainda, a metodologia
+e campanha completa ainda pendentes. Avaliar também AMCL com mapa
+pré-construído (Seção~\ref{sec:localizacao_bayes}) como alternativa ao SLAM
+ao vivo em sessões experimentais longas, motivado pela variabilidade
+observada nos experimentos exploratórios (Seção~\ref{sec:res_exp_complementares}).
+Decidir e avaliar, ainda, a metodologia
 de gravação de baseline --- hoje via \texttt{go\_\allowbreak to\_\allowbreak point}
 sequencial, mecanismo distinto do usado no replay (\texttt{play\_\allowbreak route},
 Seção~\ref{sec:res_qa2}) --- incluindo a alternativa de gravar a própria

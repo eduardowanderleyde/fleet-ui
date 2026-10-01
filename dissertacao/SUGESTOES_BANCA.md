@@ -1,44 +1,58 @@
 # Sugestões de conteúdo/argumentação — leitura tipo banca (2026-10-01)
 
 Gerado por 9 agentes (um por capítulo, rodados em paralelo), cada um só lendo
-e analisando — nenhuma edição foi feita nos capítulos. Isso é complementar à
-revisão bibliográfica/redação já feita antes; aqui o foco é conteúdo e
-argumentação, no papel de um avaliador de banca de mestrado. Nenhuma dessas
-sugestões foi aplicada — são para o autor decidir.
+e analisando — nenhuma edição foi feita nos capítulos nessa rodada. Isso é
+complementar à revisão bibliográfica/redação já feita antes; aqui o foco é
+conteúdo e argumentação, no papel de um avaliador de banca de mestrado.
+
+**Atualização (2026-10-01):** os 6 achados cross-capítulo abaixo foram
+aplicados diretamente (marcados com ✅), por serem bem especificados e não
+exigirem dado/figura que eu não tinha. As sugestões por capítulo (mais
+abaixo) continuam todas pendentes — exigem figura nova, cálculo estatístico
+formal, ou decisão de reestruturação, e ficam para o autor decidir.
 
 ## Achados cross-capítulo mais sérios (aparecem de forma independente em mais de um agente)
 
-1. **Overclaiming de "multi-robô"**: a Tabela de Síntese Comparativa
-   (`03_trabalhos_relacionados.tex`, linha 367) marca ✓ pleno pra
+1. ✅ **Overclaiming de "multi-robô"**: a Tabela de Síntese Comparativa
+   (`03_trabalhos_relacionados.tex`, linha 367) marcava ✓ pleno pra
    "Multi-robô" nesta dissertação, mas o Capítulo 1 já declara
-   explicitamente que a avaliação quantitativa foi single-robot. Overclaiming
-   direto — fácil de a banca pegar comparando as duas páginas.
-2. **Camada de agentes de IA (Planner/Executor/Analyst, CI) nunca é
+   explicitamente que a avaliação quantitativa foi single-robot. **Aplicado:**
+   célula trocada para "Parcial" + nota de rodapé explicando o escopo.
+2. ✅ **Camada de agentes de IA (Planner/Executor/Analyst, CI) nunca era
    anunciada na Introdução**, apesar de aparecer com peso na Arquitetura
    (`04_arquitetura.tex`) e na Síntese de Contribuições da Conclusão
    (`09_conclusao.tex`). Achado de forma independente pelos agentes dos
-   capítulos 01, 04 e 09 — é o ponto mais repetido de toda a rodada.
-3. **Inconsistência "2 robôs resolvido" vs. "70% de sucesso"**: já corrigida
-   nesta sessão (ver `TODO_REVISAO.md`), mas o agente da Conclusão notou que
-   ainda existe uma tensão lógica residual — se os mecanismos arquiteturais
-   "resolvem problemas concretos" de multi-robô, por que a tentativa real
-   ainda falha 30% das vezes? Vale uma frase distinguindo problema de
-   API/namespace (resolvido) de problema de sincronização temporal (não
-   resolvido).
-4. **Limiares numéricos sem justificativa própria, reaproveitados de outro
+   capítulos 01, 04 e 09 — foi o ponto mais repetido de toda a rodada.
+   **Aplicado:** adicionado bullet em Contribuições de Engenharia e menção na
+   Organização da Dissertação (01_introducao.tex).
+3. ✅ **Inconsistência "2 robôs resolvido" vs. "70% de sucesso"**: já
+   corrigida antes nesta sessão (ver `TODO_REVISAO.md`); o agente da
+   Conclusão notou que ainda existia uma tensão lógica residual — se os
+   mecanismos arquiteturais "resolvem problemas concretos" de multi-robô,
+   por que a tentativa real ainda falha 30% das vezes? **Aplicado:** frase
+   distinguindo problema de API/namespace (resolvido) de problema de
+   sincronização temporal (mitigado por ativação sequencial, não "resolvido"
+   pelos mesmos mecanismos) em 09_conclusao.tex.
+4. ✅ **Limiares numéricos sem justificativa própria, reaproveitados de outro
    contexto**: o 25cm de RMSE (critério QA2) é na verdade a tolerância de
    chegada a um ponto único do Nav2, não uma métrica desenhada para RMSE de
    trajetória inteira; e o CV_t teórico de 5% (cap. 02) virou 10% no
-   critério de aceite (cap. 07) sem explicação. Dois agentes diferentes
-   (05 e 07) chegaram a essa mesma classe de problema de ângulos distintos.
-5. **QA4/H3 tem cheiro de HARKing**: foi formulada depois de já existirem os
-   dados exploratórios que a confirmam. O texto já admite isso em uma frase,
-   mas um avaliador vai cobrar uma defesa metodológica mais explícita
-   (pesquisa exploratória/geradora de hipótese vs. confirmatória).
-6. **AMCL é fundamentado no Cap. 2 com promessas de uso futuro que nunca se
-   confirmam** — e outros capítulos (06, 07) dizem explicitamente que o
-   projeto nunca usa AMCL. Candidato a maior contradição isolada de um
-   capítulo só.
+   critério de aceite (cap. 07) sem explicação. **Aplicado:** adicionadas
+   frases de transparência em 02_fundamentacao.tex e 07_avaliacao.tex
+   explicitando a relação entre os números — não inventei uma justificativa
+   que não tenho, só tornei o reaproveitamento explícito em vez de silencioso.
+5. ✅ **QA4/H3 tinha cheiro de HARKing**: foi formulada depois de já
+   existirem os dados exploratórios que a confirmam. O texto só admitia isso
+   em uma frase. **Aplicado:** reforçada a defesa metodológica em
+   07_avaliacao.tex (QA4 explicitamente enquadrada como *hypothesis-generating*,
+   não confirmatória, com nota explícita em Critérios de Validação sobre por
+   que não tem limiar numérico de aceite).
+6. ✅ **AMCL era fundamentado no Cap. 2 com promessas de uso futuro que nunca
+   se confirmavam** — e outros capítulos (06, 07) dizem explicitamente que o
+   projeto nunca usa AMCL. **Aplicado:** removida a afirmação falsa de uso em
+   "análises de sensibilidade do Cap. 8" (02_fundamentacao.tex); adicionada a
+   proposta de AMCL de fato em Trabalhos Futuros (09_conclusao.tex), fechando
+   o laço da referência cruzada que antes apontava para o vazio.
 
 ## Por capítulo
 
