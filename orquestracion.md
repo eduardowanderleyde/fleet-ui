@@ -944,6 +944,72 @@ mover, e ainda assim não terminar de chegar, sob carga. `deactivateRobot`
 ainda roda (via `finally` no hook), então não trava a sessão — só o robô
 não completa a formação dessa vez.
 
+## Plano: campanha /odom vs. /pose vs. ground truth, 3 geometrias de rota (2026-09-30)
+
+**Motivação.** Revisão da dissertação (ver `TODO_REVISAO.md` na branch
+`dissertacao`, achado "1") encontrou uma tensão real: a seção de "Ameaças
+à Validade" explica em detalhe o bug de detecção de tópico que fazia a
+análise cair em `/odom` por engano, mas o Procedimento e os Resultados
+dizem explicitamente que a campanha final usou `/odom` como fonte
+principal. Em vez de só reescrever o texto, decisão (2026-09-30): rodar
+o experimento que a própria dissertação já lista como trabalho futuro —
+comparar `/odom`, `/pose` (SLAM) e *ground truth* do Gazebo na mesma
+campanha, com rotas de geometria diferente, pra ver se a diferença entre
+as fontes cresce com o comprimento/complexidade da rota. Decisão
+explícita de **não fazer agora** nesta máquina — continuar no PC Windows
+do trabalho. Isso aqui é o plano pra retomar lá, sem precisar reconstruir
+o raciocínio do zero.
+
+**O que falta construir (nada disso existe ainda no repo):**
+
+1. **Coleta de ground truth.** Hoje `fleet_data_collector` grava `/scan`,
+   `/odom`, `/imu`, `/pose` — nenhum ground truth. Investigar se o
+   Gazebo Harmonic já expõe a pose "verdadeira" do modelo via algum
+   plugin/tópico gz-transport não conectado ainda (ex.: sistema de pose
+   do `gz-sim`, `/world/<world>/pose/info`, ou um plugin
+   `PosePublisher`/equivalente ao antigo `P3D` do Gazebo Classic) — uma
+   busca inicial por `P3D|PosePublisher|pose_publisher|odometry_source`
+   no xacro/launch do projeto não encontrou nada (grep vazio, checado
+   nesta sessão, não investigado a fundo ainda — faltou olhar o SDF do
+   mundo e a documentação do plugin DiffDrive do gz-sim pra ver se ele
+   tem uma saída "sem ruído"/"world frame" configurável). Se existir,
+   é só adicionar um bridge `ros_gz_bridge` novo + mais um tópico no
+   coletor. Se não existir, precisa de um plugin novo no SDF/xacro.
+2. **Rota longa com curvas** (~5-10m, reta + curva de 90°/180°) — não
+   existe ainda. Precisa definir waypoints novos e validar que cabem no
+   mundo `warehouse` sem bater em prateleira/obstáculo (testar primeiro
+   com `headless:=false` pra ver visualmente, como o projeto já faz pra
+   validar poses novas).
+3. **Rota em loop fechado** (sai de um ponto, retorna ao mesmo ponto) —
+   idem, não existe, precisa ser desenhada e validada.
+
+**Metodologia da campanha (reaproveita o que já existe):** mesma rigor
+da campanha `dissertation_clean01_final_manual` (Capítulo 7/8 da
+dissertação) — relançar a simulação inteira antes de cada réplica, não
+só a navegação. 3 rotas × (1 baseline + 10 réplicas) = 33 execuções.
+Em cada execução, depois de coletado o bag, rodar `analyze_runs.py` três
+vezes sobre os MESMOS bags (não precisa de 3 campanhas separadas) —
+uma vez forçando `--trajectory-topic odom`, uma vez `--trajectory-topic
+slam_pose` (ou `pose`), e uma vez com o tópico de ground truth novo —
+e comparar o RMSE resultante por rota/fonte numa tabela só.
+
+**Pergunta que isso responde, pra dissertação:** não é "pose é melhor
+que odom" (isso já é sabido) — é "o efeito de usar a fonte errada cresce
+com o comprimento da rota, e por quanto". Se aparecer um padrão como
+odom divergindo mais em rotas longas enquanto pose/ground-truth ficam
+estáveis, isso é evidência concreta e nova pra fortalecer exatamente a
+limitação que a dissertação já reconhece (campanha restrita a 1 rota
+curta) — sem precisar reescrever o número de 3,35cm já publicado, já que
+essa seria uma campanha adicional, documentada como tal.
+
+**Antes de rodar de verdade:** nesta sessão (Linux nativo) já ficou
+estabelecido que o mesmo problema de "jump back in time" afeta qualquer
+bringup de Nav2+SLAM sob certas condições de carga (seção "Resolvido na
+máquina Linux nativa" acima) — isso é single-robot aqui, então o risco é
+baixo (campanha de verificação rodou 11/11 sem falha), mas vale rodar
+num momento de máquina descansada, e checar `uptime`/load antes de
+começar, como já é hábito neste projeto.
+
 ## Próximos passos naturais
 
 - Autenticação/rate-limit em `/api/agent/*` — hoje qualquer um que acesse
