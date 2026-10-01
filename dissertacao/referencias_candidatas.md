@@ -658,3 +658,107 @@ Multi-Robô" (`sec:rel_frota`), levantamento de 2026-09-30
   diretamente contra a seção de referências históricas de
   `\citeonline{durrantwhyte2006}`/`\citeonline{bailey2006}`, de onde essa
   atribuição provavelmente foi extraída.
+
+---
+
+## Parte 5 — Capítulo 04 (arquitetura), subseção "A Camada de Agentes de IA"
+(`sec:agentes`), levantamento de 2026-09-30
+
+Três afirmações nessa subseção descrevem conceitos com embasamento teórico
+consolidado na literatura de agentes baseados em LLM, mas sem nenhuma
+citação no texto atual. Não existe, em `referencias.bib` ou nos capítulos
+02/03, nenhuma chave sobre agentes de LLM, \textit{tool use}/\textit{function
+calling} ou grounding de ações — é um eixo totalmente novo, então os três
+candidatos abaixo são registrados aqui (não promovidos nesta rodada, por
+estar fora do escopo deste agente promover chaves novas ao `.bib`).
+
+### 22. ReAct: Synergizing Reasoning and Acting in Language Models
+- **Status:** CONFIRMADO contra fonte primária (arXiv, versão camera-ready
+  ICLR 2023)
+- **Autores:** Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran,
+  Karthik Narasimhan, Yuan Cao
+- **Ano:** 2022 (v1 em out/2022; versão camera-ready ICLR 2023 em mar/2023)
+- **Venue:** International Conference on Learning Representations (ICLR 2023)
+- **arXiv:** 2210.03629
+- **Relevância:** É a referência canônica do padrão "laço de raciocínio +
+  ação" (intercalar decisão e chamada de ferramenta) que o capítulo descreve
+  sem citação em `chapters/04_arquitetura.tex`, linhas ~201–204: "O
+  \texttt{Planner} [...] implementa o laço de \textit{tool calling} da API
+  da Anthropic: recebe uma instrução, decide uma sequência de chamadas de
+  ferramenta e devolve o texto final mais o histórico de passos executados."
+  Essa é exatamente a estrutura formalizada por ReAct.
+
+```bibtex
+@inproceedings{yao2023react,
+  author    = {Yao, Shunyu and Zhao, Jeffrey and Yu, Dian and Du, Nan and Shafran, Izhak and Narasimhan, Karthik and Cao, Yuan},
+  title     = {{ReAct}: Synergizing Reasoning and Acting in Language Models},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2023},
+  eprint    = {2210.03629},
+  archiveprefix = {arXiv}
+}
+```
+
+### 23. Do As I Can, Not As I Say: Grounding Language in Robotic Affordances (SayCan)
+- **Status:** CONFIRMADO contra fonte primária (arXiv + página oficial
+  Google Research; venue confirmada via mlanthology.org/corl/2022)
+- **Autores:** Michael Ahn, Anthony Brohan, Noah Brown, Yevgen Chebotar,
+  Omar Cortes, Byron David, Chelsea Finn, Chuyuan Fu, Keerthana
+  Gopalakrishnan, Karol Hausman, Alex Herzog, Daniel Ho, Jasmine Hsu, Julian
+  Ibarz, Brian Ichter, Alex Irpan, Eric Jang, Rosario Jauregui Ruano, Kyle
+  Jeffrey, Sally Jesmonth, Nikhil J. Joshi, Ryan Julian, Dmitry Kalashnikov,
+  Yuheng Kuang, Kuang-Huei Lee, Sergey Levine, Yao Lu, Linda Luu, Carolina
+  Parada, Peter Pastor, Jornell Quiambao, Kanishka Rao, Jarek Rettinghouse,
+  Diego Reyes, Pierre Sermanet, Nicolas Sievers, Clayton Tan, Alexander
+  Toshev, Vincent Vanhoucke, Fei Xia, Ted Xiao, Peng Xu, Sichun Xu, Mengyuan
+  Yan, Andy Zeng
+- **Ano:** 2022
+- **Venue:** Conference on Robot Learning (CoRL 2022)
+- **arXiv:** 2204.01691
+- **Relevância:** Embasa teoricamente a afirmação de linhas ~196–199 de
+  `chapters/04_arquitetura.tex` — "a execução em si continua passando pelos
+  mesmos endpoints REST que o frontend já usa [...] o que limita o raio de
+  ação de uma eventual alucinação do modelo ao conjunto de ferramentas
+  explicitamente exposto a ele". SayCan é a referência central sobre
+  restringir (\textit{grounding}) a saída de um modelo de linguagem a um
+  conjunto fixo de ações/afordances executáveis para reduzir planos
+  inviáveis ou incorretos.
+
+```bibtex
+@inproceedings{ahn2022saycan,
+  author    = {Ahn, Michael and Brohan, Anthony and Brown, Noah and Chebotar, Yevgen and Cortes, Omar and David, Byron and Finn, Chelsea and Fu, Chuyuan and Gopalakrishnan, Keerthana and Hausman, Karol and Herzog, Alex and Ho, Daniel and Hsu, Jasmine and Ibarz, Julian and Ichter, Brian and Irpan, Alex and Jang, Eric and Jauregui Ruano, Rosario and Jeffrey, Kyle and Jesmonth, Sally and Joshi, Nikhil J. and Julian, Ryan and Kalashnikov, Dmitry and Kuang, Yuheng and Lee, Kuang-Huei and Levine, Sergey and Lu, Yao and Luu, Linda and Parada, Carolina and Pastor, Peter and Quiambao, Jornell and Rao, Kanishka and Rettinghouse, Jarek and Reyes, Diego and Sermanet, Pierre and Sievers, Nicolas and Tan, Clayton and Toshev, Alexander and Vanhoucke, Vincent and Xia, Fei and Xiao, Ted and Xu, Peng and Xu, Sichun and Yan, Mengyuan and Zeng, Andy},
+  title     = {Do As {I} Can, Not As {I} Say: Grounding Language in Robotic Affordances},
+  booktitle = {Conference on Robot Learning (CoRL)},
+  year      = {2022},
+  eprint    = {2204.01691},
+  archiveprefix = {arXiv}
+}
+```
+
+### 24. Design Patterns for Securing LLM Agents against Prompt Injections
+- **Status:** CONFIRMADO contra fonte primária (arXiv)
+- **Autores:** Luca Beurer-Kellner, Beat Buesser, Ana-Maria Crețu, Edoardo
+  Debenedetti, Daniel Dobos, Daniel Fabian, Marc Fischer, David Froelicher,
+  Kathrin Grosse, Daniel Naeff, Ezinwanne Ozoani, Andrew Paverd, Florian
+  Tramèr, Václav Volhejn
+- **Ano:** 2025
+- **arXiv:** 2506.08837
+- **Relevância:** Embasa a afirmação de linhas ~225–230 de
+  `chapters/04_arquitetura.tex` — "O isolamento entre robôs é uma restrição
+  estrutural, não uma convenção que depende do modelo 'se comportar'" (sobre
+  \texttt{\_scope\_input()} reescrever à força o \texttt{robot\_id} antes de
+  qualquer chamada real). O artigo propõe exatamente padrões de design que
+  restringem estruturalmente as ações de um agente de LLM (em vez de
+  depender do modelo obedecer a instruções de prompt) para obter resistência
+  comprovável a desvios de escopo.
+
+```bibtex
+@article{beurerkellner2025designpatterns,
+  author    = {Beurer-Kellner, Luca and Buesser, Beat and Cre{\c{t}}u, Ana-Maria and Debenedetti, Edoardo and Dobos, Daniel and Fabian, Daniel and Fischer, Marc and Froelicher, David and Grosse, Kathrin and Naeff, Daniel and Ozoani, Ezinwanne and Paverd, Andrew and Tram{\`e}r, Florian and Volhejn, V{\'a}clav},
+  title     = {Design Patterns for Securing {LLM} Agents against Prompt Injections},
+  journal   = {arXiv preprint},
+  year      = {2025},
+  eprint    = {2506.08837},
+  archiveprefix = {arXiv}
+}
+```
