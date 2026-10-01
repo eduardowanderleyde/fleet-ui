@@ -884,3 +884,73 @@ escopo deste agente promover chaves novas ao `.bib`).
   isbn      = {978-3-642-29043-5}
 }
 ```
+
+---
+
+## Parte 8 — Capítulo 09 (conclusão), seção "Trabalhos Futuros"/"Retomada
+das Perguntas de Pesquisa", levantamento de 2026-10-01
+
+`09_conclusao.tex` menciona nominalmente, em dois pontos (Seção "Retomada das
+Perguntas de Pesquisa", PP4, linha ~137; Seção "Trabalhos Futuros", médio
+prazo, linha ~268), um futuro estudo de usabilidade controlado usando "SUS,
+NASA-TLX ou instrumento equivalente" para quantificar a redução de esforço de
+engenharia atribuída à interface web. Nenhum dos dois instrumentos tem
+citação própria em nenhum capítulo da dissertação (busca em todos os
+`chapters/*.tex` e em `referencias.bib`: nenhuma chave para Brooke ou para
+Hart/Staveland). Como a frase já qualifica os dois nomes com "ou instrumento
+equivalente" (não é uma afirmação fechada que dependa de citação para ser
+compreensível) e nenhuma chave aprovada cobre esses instrumentos, não citei
+nenhuma das duas fontes abaixo no texto — ficam registradas aqui apenas como
+candidatas, caso o autor decida formalizar essa menção com citação no futuro
+estudo de usabilidade.
+
+### 28. SUS: A "Quick and Dirty" Usability Scale
+- **Status:** CONFIRMADO contra fonte primária (capítulo de livro amplamente
+  catalogado; editora Taylor & Francis, 1996)
+- **Autor:** John Brooke
+- **Ano:** 1996
+- **Venue:** Capítulo em *Usability Evaluation in Industry* (eds. P. W.
+  Jordan, B. Thomas, B. A. Weerdmeester, I. L. McClelland), Taylor and
+  Francis, Londres, pp. 189–194
+- **Relevância:** origem do System Usability Scale (SUS), o primeiro
+  instrumento citado nominalmente em `09_conclusao.tex` como exemplo de
+  "instrumento equivalente" para medir esforço percebido do pesquisador (PP4).
+
+```bibtex
+@incollection{brooke1996sus,
+  author    = {Brooke, John},
+  title     = {{SUS}: A `Quick and Dirty' Usability Scale},
+  booktitle = {Usability Evaluation in Industry},
+  editor    = {Jordan, Patrick W. and Thomas, Bruce and Weerdmeester, Bernard A. and McClelland, Ian L.},
+  publisher = {Taylor and Francis},
+  address   = {London},
+  year      = {1996},
+  pages     = {189--194}
+}
+```
+
+### 29. Development of NASA-TLX (Task Load Index): Results of Empirical and Theoretical Research
+- **Status:** CONFIRMADO contra fonte primária (DOI resolvido, ScienceDirect/Elsevier)
+- **Autores:** Sandra G. Hart, Lowell E. Staveland
+- **Ano:** 1988
+- **Venue:** Em *Human Mental Workload* (eds. Peter A. Hancock, Najmedin
+  Meshkati), Advances in Psychology vol. 52, North-Holland, pp. 139–183
+- **DOI:** 10.1016/S0166-4115(08)62386-9
+- **Relevância:** origem do NASA Task Load Index (NASA-TLX), o segundo
+  instrumento citado nominalmente em `09_conclusao.tex` no mesmo trecho que
+  o item 28.
+
+```bibtex
+@incollection{hart1988nasatlx,
+  author    = {Hart, Sandra G. and Staveland, Lowell E.},
+  title     = {Development of {NASA-TLX} (Task Load Index): Results of Empirical and Theoretical Research},
+  booktitle = {Human Mental Workload},
+  series    = {Advances in Psychology},
+  volume    = {52},
+  editor    = {Hancock, Peter A. and Meshkati, Najmedin},
+  publisher = {North-Holland},
+  year      = {1988},
+  pages     = {139--183},
+  doi       = {10.1016/S0166-4115(08)62386-9}
+}
+```

@@ -193,14 +193,15 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
 
     \item \textbf{Estocasticidade do controlador local não isolada como fator
     de variância.} O controlador \texttt{nav2\_\allowbreak mppi\_\allowbreak controller}
+    (algoritmo MPPI --- \textit{Model Predictive Path Integral} \cite{williams2016})
     reamostra ruído gaussiano a cada ciclo de controle por definição do
     algoritmo (discussão de validade interna, Seção~\ref{sec:ameacas}), de
     modo que parte da variância
     de RMSE observada é ruído esperado do método de controle escolhido, não
     necessariamente falta de repetibilidade do sistema como um todo. Esta
-    dissertação não avaliou um controlador determinístico (DWB ou Regulated
-    Pure Pursuit) sob o mesmo protocolo para isolar essas duas fontes de
-    variância.
+    dissertação não avaliou um controlador determinístico (DWB \cite{fox1997}
+    ou Regulated Pure Pursuit \cite{macenski2023survey}) sob o mesmo protocolo
+    para isolar essas duas fontes de variância.
 
     \item \textbf{Escopo restrito da campanha quantitativa.} A campanha final
     utiliza $N=10$ replays, superando a limitação inicial de amostra muito
@@ -251,8 +252,9 @@ sequencial, mecanismo distinto do usado no replay (\texttt{play\_\allowbreak rou
 Seção~\ref{sec:res_qa2}) --- incluindo a alternativa de gravar a própria
 baseline via \texttt{play\_\allowbreak route} para permitir comparação direta
 baseline-vs-replay sem essa diferença de implementação; comparar o
-controlador MPPI, estocástico por projeto, com um controlador determinístico
-(DWB ou Regulated Pure Pursuit) sob o mesmo protocolo, isolando a variância do
+controlador MPPI \cite{williams2016}, estocástico por projeto, com um controlador
+determinístico (DWB \cite{fox1997} ou Regulated Pure Pursuit \cite{macenski2023survey})
+sob o mesmo protocolo, isolando a variância do
 método de controle da variância do sistema como um todo (Seção~\ref{sec:limitacoes});
 avaliar quantitativamente cenários multi-robô (MUUT+FUUT simultâneos) com RMSE
 pairwise por robô, usando dois robôs simultâneos como alvo inicial --- teto
