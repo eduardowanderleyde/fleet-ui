@@ -954,3 +954,59 @@ estudo de usabilidade.
   doi       = {10.1016/S0166-4115(08)62386-9}
 }
 ```
+
+## Parte 9 — Referências extraídas de duas dissertações comparáveis (2026-10-01)
+
+A pedido do autor, depois de ler duas dissertações de mestrado comparáveis
+para calibrar o rigor desta ("Uma Abordagem para Mapeamento e Localização
+Simultâneos Utilizando Informação Topológica", UFMG, 2011, e "Detecção de
+Ataques de Injeção de Dados em Sistemas ROS via Anomalias no Tráfego de
+Rede", FURG, 2023), as referências abaixo foram extraídas das listas
+bibliográficas dessas duas dissertações, filtradas pelas que fazem sentido
+pro tema desta (SLAM, ROS~2/DDS, Gazebo, exploração multi-robô — excluída
+toda a parte de segurança/detecção de intrusão da FURG, fora de escopo).
+Todas as 7 abaixo foram confirmadas como reais (DOI resolvido ou busca
+cruzada) e **já promovidas direto para `referencias.bib`** e citadas no
+texto (`02_fundamentacao.tex`, `03_trabalhos_relacionados.tex`) — diferente
+das partes anteriores deste arquivo, que ficam só como candidatos. Um
+oitavo candidato óbvio, Quigley et al. (2009) "ROS: an open-source Robot
+Operating System", já existia em `referencias.bib` como `quigley2009` —
+não duplicado.
+
+1. **dissanayake2001** — Dissanayake, Newman, Clark, Durrant-Whyte, Csorba
+   (2001), "A Solution to the Simultaneous Localization and Map Building
+   (SLAM) Problem", IEEE Transactions on Robotics and Automation 17(3),
+   pp. 229–241, DOI 10.1109/70.938381 (confirmado: resolve pro IEEE
+   Xplore). Usado em `03_trabalhos_relacionados.tex` pra embasar
+   corretamente a afirmação sobre resultado de convergência do SLAM —
+   substitui a atribuição genérica ("trabalhos anteriores dos mesmos
+   autores") que tinha ficado sem fonte específica numa correção anterior
+   (ver achado "Trabalhos Relacionados — 2026-09-30" no `TODO_REVISAO.md`,
+   agora de fato resolvido com citação real).
+2. **koenig2004gazebo** — Koenig & Howard (2004), "Design and Use
+   Paradigms for Gazebo, an Open-Source Multi-Robot Simulator", IROS 2004,
+   pp. 2149–2154. Usado em `02_fundamentacao.tex` na primeira menção
+   substantiva ao Gazebo Harmonic.
+3. **eugster2003pubsub** — Eugster, Felber, Guerraoui, Kermarrec (2003),
+   "The Many Faces of Publish/Subscribe", ACM Computing Surveys 35(2),
+   pp. 114–131, DOI 10.1145/857076.857078. Usado em `02_fundamentacao.tex`
+   pra fundamentar o modelo publicador/assinante do ROS~2 na literatura
+   de sistemas distribuídos.
+4. **pardocastellote2003dds** — Pardo-Castellote (2003), "OMG
+   Data-Distribution Service: Architectural Overview", ICDCS Workshops
+   2003, pp. 200–206. Usado em `02_fundamentacao.tex` na primeira menção
+   ao protocolo DDS.
+5. **gerkey2003playerstage** — Gerkey, Vaughan, Howard (2003), "The
+   Player/Stage Project: Tools for Multi-Robot and Distributed Sensor
+   Systems", ICAR 2003, pp. 317–323. Usado em
+   `03_trabalhos_relacionados.tex` como predecessor histórico da lacuna de
+   orquestração de alto nível que o ROS~2 também não resolve sozinho.
+6. **fox2006multirobot** — Fox, Ko, Konolige, Limketkai, Schulz, Stewart
+   (2006), "Distributed Multirobot Exploration and Mapping", Proceedings
+   of the IEEE 94(7), pp. 1325–1339, DOI 10.1109/JPROC.2006.876927.
+7. **burgard2000exploration** — Burgard, Moors, Fox, Simmons, Thrun
+   (2000), "Collaborative Multi-Robot Exploration", ICRA 2000, vol. 1,
+   pp. 476–481. Os dois últimos (6 e 7) usados juntos em
+   `03_trabalhos_relacionados.tex` como a literatura clássica de
+   coordenação de exploração multi-robô que precede as abordagens mais
+   recentes (cloud robotics, MRTA dinâmico) já citadas no capítulo.

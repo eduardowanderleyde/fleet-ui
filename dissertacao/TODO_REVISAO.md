@@ -145,9 +145,11 @@ que resolve, com referência a ele).
   a lista QA1–QA4 e a notação já usada no parágrafo seguinte.
 
 ## Trabalhos Relacionados (03_trabalhos_relacionados.tex) — 2026-09-30
-- **Resolução (2026-10-01):** removida a atribuição específica não
-  confirmada ("Durrant-Whyte, Rye e Nebot em 1996"); a frase agora
-  atribui a estrutura/nomenclatura do SLAM genericamente a "trabalhos
-  anteriores dos mesmos autores", sem data/autoria específica não
-  verificável. Mantida a entrada em `referencias_candidatas.md` (Parte 4)
-  como registro de que a atribuição original não foi confirmada.
+- **Resolução (2026-10-01, atualizada):** removida a atribuição específica
+  não confirmada ("Durrant-Whyte, Rye e Nebot em 1996"); primeiro trocada
+  por uma formulação genérica, e agora **substituída por citação real** —
+  `\citeonline{dissanayake2001}` (Dissanayake et al., IEEE TRA 2001, DOI
+  10.1109/70.938381, confirmado), o artigo correto e canônico sobre o
+  resultado de convergência do SLAM. Resolvido de fato, não só suavizado.
+  Mantida a entrada em `referencias_candidatas.md` (Parte 4) como registro
+  histórico de que a atribuição original não foi confirmada.

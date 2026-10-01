@@ -67,9 +67,9 @@ de lifecycle e a arquitetura do DDS.
 \subsection{A Taxonomia do SLAM}
 
 O tutorial em duas partes de \citeonline{durrantwhyte2006} e \citeonline{bailey2006}
-consolidou e popularizou a taxonomia do problema SLAM --- sua estrutura, resultado
-de convergência e nomenclatura, já discutidos pelos mesmos autores em trabalhos
-anteriores --- e forneceu uma análise sistemática abrangente das abordagens
+consolidou e popularizou a taxonomia do problema SLAM --- sua estrutura e
+resultado de convergência, demonstrados formalmente por \citeonline{dissanayake2001}
+--- e forneceu uma análise sistemática abrangente das abordagens
 então existentes. Vinte anos depois, essa taxonomia permanece válida: filtros
 de partículas (Gmapping, AMCL), filtros de Kalman estendidos (EKF-SLAM), e grafos
 de poses (SLAM Toolbox, Cartographer) ainda são as três famílias algorítmicas
@@ -161,7 +161,10 @@ geométrica ou consenso distribuído entre robôs, como em abordagens de control
 descentralizado \cite{cortes2017}.
 
 O ROS~2 provê os primitivos de comunicação necessários para sistemas multi-robô,
-mas não uma camada de orquestração de alto nível \cite{macenski2022ros2}. Propostas
+mas não uma camada de orquestração de alto nível \cite{macenski2022ros2} ---
+lacuna que já era reconhecida antes do próprio ROS existir, quando o
+Player/Stage \cite{gerkey2003playerstage} se propôs como ferramenta genérica
+para sistemas multi-robô e de sensores distribuídos. Propostas
 como o Fleet Management do Open RMF (Open Robotics Middleware Framework) abordam o
 problema de despacho de tarefas em frotas com múltiplos robôs, mas com foco em
 planejamento de missões e otimização de rotas, não em repetibilidade experimental.
@@ -175,7 +178,9 @@ estratégias de exploração cooperativa terrestre com recuperação automática
 falhas de robôs \cite{yan2023} e sistemas de gestão de frota baseados em
 plataformas de \textit{cloud robotics} \cite{singhal2017}, ambos ilustrando esse
 mesmo foco em eficiência operacional --- atribuição de tarefas, monitoramento,
-escalonamento --- em vez de repetibilidade.
+escalonamento --- em vez de repetibilidade, na mesma linha dos trabalhos
+clássicos de coordenação de exploração multi-robô que a precedem
+\cite{burgard2000exploration, fox2006multirobot}.
 
 Abordagens recentes de orquestração de frotas em sistemas baseados em ROS adotam
 estratégias de implementação distintas entre si. O RobotKube \cite{lampe2023}

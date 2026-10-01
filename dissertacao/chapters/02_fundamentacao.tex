@@ -110,9 +110,12 @@ referencial do mapa com a maior precisão disponível.
 O ROS~2 (\textit{Robot Operating System 2}) é uma plataforma de middleware para
 robótica publicada como software livre pela Open Robotics \cite{macenski2022ros2}.
 Desenvolvida desde 2014 para corrigir limitações arquiteturais do ROS~1, foi
-construída sobre o protocolo DDS (\textit{Data Distribution Service}), que lhe
+construída sobre o protocolo DDS (\textit{Data Distribution Service}
+\cite{pardocastellote2003dds}), que lhe
 confere comunicação distribuída nativa, descoberta automática de nós, e suporte
-a múltiplos perfis de qualidade de serviço (QoS).
+a múltiplos perfis de qualidade de serviço (QoS) --- um modelo de
+publicador/assinante cuja fundamentação geral antecede o DDS
+\cite{eugster2003pubsub}.
 
 \subsection{Políticas de QoS}
 \label{sec:qos}
@@ -354,7 +357,8 @@ válido). O SLAM consome essas mensagens para atualizar o mapa e a estimativa de
 \subsection{Odometria de Roda}
 
 A odometria é publicada como \texttt{nav\_\allowbreak msgs/\allowbreak msg/\allowbreak Odometry}, contendo a pose
-estimada e a velocidade do robô. Em simulação Gazebo Harmonic, o plugin DiffDrive
+estimada e a velocidade do robô. Em simulação Gazebo Harmonic
+\cite{koenig2004gazebo}, o plugin DiffDrive
 computa a odometria a partir das velocidades das juntas e publica diretamente no
 tópico \texttt{/\allowbreak odom} via bridge ROS-Gazebo. A frequência típica é 50\,Hz.
 
