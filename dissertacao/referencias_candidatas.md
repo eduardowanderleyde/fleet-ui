@@ -506,3 +506,83 @@ presente.
   apresentá-lo). Se o autor quiser citar Open-RMF, recomendo citar via
   documentação oficial/repositório (`@misc`) em vez de forçar uma citação de
   artigo, ou usar esse artigo de análise comportamental como citação indireta.
+
+---
+
+## Parte 3 — Fundamentação teórica (`chapters/02_fundamentacao.tex`), levantamento de 2026-09-30
+
+Levantamento feito para embasar duas afirmações do capítulo de fundamentação que
+hoje não têm citação: a cadeia de referenciais TF do ROS~2
+(`\label{sec:cadeia_tf}`) e as especificações do LiDAR RPLIDAR S2
+(`subsection` "LiDAR 2D (RPLIDAR S2)", `\label{sec:sensores}`). Nenhuma chave
+abaixo existe em `referencias.bib`; nenhuma foi adicionada ao capítulo.
+
+### 19. tf: The transform library
+- **Status:** CONFIRMADO contra fonte primária (IEEE Xplore, DOI resolvido)
+- **Autor:** Tully Foote
+- **Ano:** 2013
+- **Venue:** 2013 IEEE International Conference on Technologies for Practical
+  Robot Applications (TePRA), pp. 1–6
+- **DOI:** 10.1109/TePRA.2013.6556373 (ISSN 2325-0526)
+- **Relevância:** É a referência canônica da biblioteca `tf`/`tf2`, que
+  implementa exatamente a cadeia de referenciais `map` → `odom` →
+  `base_link` descrita na Seção "A Cadeia TF no ROS~2" (`sec:cadeia_tf`) —
+  hoje essa seção inteira não tem nenhuma citação. O abstract do artigo
+  descreve literalmente o problema que a seção apresenta: manter o controle
+  de referenciais de coordenadas em todo o sistema para que cada componente
+  confie que os dados estão no referencial esperado, sem precisar conhecer
+  todos os referenciais do sistema — e cita o rastreamento incorreto de
+  transformações como fonte comum de bugs, o que conecta diretamente à
+  discussão de `odom`→`base_link` vs. `map`→`odom` do capítulo.
+
+```bibtex
+@inproceedings{foote2013,
+  author    = {Foote, Tully},
+  title     = {{tf}: The Transform Library},
+  booktitle = {2013 IEEE International Conference on Technologies for Practical Robot Applications (TePRA)},
+  year      = {2013},
+  pages     = {1--6},
+  publisher = {IEEE},
+  doi       = {10.1109/TePRA.2013.6556373}
+}
+```
+
+### 20. Datasheet oficial do RPLIDAR S2 (Slamtec)
+- **Status:** CONFIRMADO contra fonte primária — página oficial de
+  especificações do fabricante (não é artigo acadêmico, então tratar como
+  referência técnica/datasheet, não como citação de pesquisa)
+- **Fabricante:** Shanghai Slamtec Co., Ltd.
+- **Ano:** especificação vigente consultada em 2026-09-30 (datasheet PDF
+  também existe com versionamento próprio, ex. "S2 v2.0")
+- **Fonte:** https://www.slamtec.com/en/s2/spec (página oficial de specs);
+  PDF: datasheet `SLAMTEC_rplidar_datasheet_S2_v2.0_en.pdf` hospedado em
+  `bucket-download.slamtec.com`
+- **Relevância:** O capítulo (subseção "LiDAR 2D (RPLIDAR S2)") afirma que o
+  sensor "opera a frequências de até 32\,kHz de amostragem e 10\,Hz de
+  rotação" sem nenhuma citação. Confirmei os dois números exatamente contra
+  a página oficial do fabricante: "32000 times per second" (sample rate) e
+  "10Hz" (scan rate) para o modelo S2. Se o autor quiser citar, o formato
+  mais adequado é `@misc` com `howpublished`/`note` de acesso, no mesmo
+  padrão já usado em `referencias.bib` para `acm2020badging`.
+
+```bibtex
+@misc{slamtec2024rplidars2,
+  author       = {{Shanghai Slamtec Co., Ltd.}},
+  title        = {{RPLIDAR S2} Specifications},
+  howpublished = {\url{https://www.slamtec.com/en/s2/spec}},
+  note         = {Acessado em: 2026-09-30}
+}
+```
+
+### Item pesquisado mas não confirmado (registrado para transparência)
+- **IMU do Create3 — taxa de publicação "até 200\,Hz":** o capítulo (subseção
+  "IMU") afirma que a IMU do Create3 publica a até 200\,Hz. A documentação
+  oficial (`iroboteducation.github.io/create3_docs`) confirma apenas que o
+  tópico `/imu` existe com tipo `sensor_msgs/msg/Imu`, mas a página de API
+  consultada não especifica a taxa de publicação em Hz, e a página de
+  hardware elétrico tampouco traz esse número. Não encontrei uma página
+  oficial do Create3 que confirme ou contradiga especificamente os 200\,Hz
+  citados no capítulo — por isso não registro candidato nem marco a
+  afirmação como incorreta; fica para o autor confirmar com a documentação
+  completa do Create3 (ou com `ros2 topic hz /imu` no robô real) antes de
+  decidir se cita algo.

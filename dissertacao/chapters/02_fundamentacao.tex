@@ -66,11 +66,12 @@ p(x_t, m \mid z_{1:t}, u_{1:t})
 \end{equation}
 
 Diferentes algoritmos aproximam essa distribuição de formas distintas. Filtros de
-partículas (como o GMapping) representam a incerteza com um conjunto de hipóteses
-amostradas; abordagens baseadas em grafos (como o SLAM Toolbox
+partículas (como o GMapping \cite{grisetti2007}) representam a incerteza com um
+conjunto de hipóteses amostradas; abordagens baseadas em grafos (como o SLAM Toolbox
 \cite{macenski2021slam}) representam a trajetória do robô como um grafo de poses
 e minimizam a energia do grafo via otimização esparsa. Esta última abordagem escala
-melhor para ambientes grandes e é mais adequada para mapeamento lifelong.
+melhor para ambientes grandes e é mais adequada para mapeamento lifelong
+\cite{bailey2006}.
 
 \subsection{A Cadeia TF no ROS~2}
 \label{sec:cadeia_tf}
