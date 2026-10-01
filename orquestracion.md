@@ -962,19 +962,27 @@ o raciocínio do zero.
 
 **O que falta construir (nada disso existe ainda no repo):**
 
-1. **Coleta de ground truth.** Hoje `fleet_data_collector` grava `/scan`,
-   `/odom`, `/imu`, `/pose` — nenhum ground truth. Investigar se o
-   Gazebo Harmonic já expõe a pose "verdadeira" do modelo via algum
-   plugin/tópico gz-transport não conectado ainda (ex.: sistema de pose
-   do `gz-sim`, `/world/<world>/pose/info`, ou um plugin
-   `PosePublisher`/equivalente ao antigo `P3D` do Gazebo Classic) — uma
-   busca inicial por `P3D|PosePublisher|pose_publisher|odometry_source`
-   no xacro/launch do projeto não encontrou nada (grep vazio, checado
-   nesta sessão, não investigado a fundo ainda — faltou olhar o SDF do
-   mundo e a documentação do plugin DiffDrive do gz-sim pra ver se ele
-   tem uma saída "sem ruído"/"world frame" configurável). Se existir,
-   é só adicionar um bridge `ros_gz_bridge` novo + mais um tópico no
-   coletor. Se não existir, precisa de um plugin novo no SDF/xacro.
+1. **Coleta de ground truth — RESOLVIDO, confirmado ao vivo (2026-09-30):**
+   não precisa de plugin novo nenhum. O `gz-sim-diff-drive-system` só
+   publica `/odom` (odometria por integração de roda — não é ground
+   truth, mesmo sem ruído configurado). Mas o Gazebo já expõe a pose real
+   de todas as entidades dinâmicas do mundo de fábrica, via
+   `/world/warehouse/dynamic_pose/info` (tipo `gz.msgs.Pose_V`,
+   confirmado com `gz topic -e` rodando a simulação single-robot: a
+   mensagem traz um `pose { name: "turtlebot4" ... }` junto com as outras
+   entidades do mundo, ex. `chair_0`). Testado o bridge:
+   ```
+   ros2 run ros_gz_bridge parameter_bridge \
+     /world/warehouse/dynamic_pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V
+   ```
+   publica em ROS a ~55Hz (confirmado via `ros2 topic hz`), sem erro. É
+   só adicionar essa entrada de bridge (mesmo padrão dos bridges já
+   existentes em `spawn_multi_tb4.launch.py`) e, no
+   `fleet_data_collector`, gravar esse tópico junto com os outros,
+   filtrando pelo nome da entidade (`"turtlebot4"` sem namespace, ou
+   `"tb1"`/`"tb2"` em multi-robô — não confirmado ainda se o nome muda
+   com namespace, verificar na hora). Trabalho que falta: só esse fiozinho
+   de bridge + coleta, não é mais um risco de engenharia desconhecido.
 2. **Rota longa com curvas** (~5-10m, reta + curva de 90°/180°) — não
    existe ainda. Precisa definir waypoints novos e validar que cabem no
    mundo `warehouse` sem bater em prateleira/obstáculo (testar primeiro
