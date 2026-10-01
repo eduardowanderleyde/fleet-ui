@@ -61,23 +61,16 @@ que resolve, com referência a ele).
 
 ## Revisão geral (leitura de capítulos 04/06/07/08/09) — 2026-09-30
 
-### 1. Contradição ainda não resolvida: /odom explícito vs. a seção que corrige o viés de /odom
-- **Achado:** `07_avaliacao.tex` (Procedimento, passo 9) diz literalmente
-  "usando `/odom` como fonte da trajetória", e `08_resultados.tex` (linha
-  ~172, "Integridade dos Bags") confirma: "A trajetória principal da
-  análise foi extraída de `/odom`; `/pose` ... foi preservado como dado
-  auxiliar." Isso está a poucos parágrafos de distância da própria seção
-  "Ameaças à Validade" que descreve, em detalhe, o bug de detecção
-  automática que fazia a análise cair erroneamente em `/odom` quando
-  deveria usar a pose do SLAM, e como ele foi corrigido.
-- **Por que importa:** um leitor atento (ou um avaliador de banca) vai
-  perguntar diretamente: "se vocês corrigiram esse bug, por que a
-  campanha principal diz explicitamente que usou `/odom`?" Isso já estava
-  registrado como resolvido no achado anterior deste arquivo (a autoria
-  decidiu manter 3,35cm), mas o TEXTO em si ainda apresenta essa tensão
-  sem nenhuma nota explicando por que o `/odom` explícito não é o mesmo
-  problema que a seção de ameaças descreve. Vale pelo menos uma frase de
-  transição conectando os dois pontos, mesmo mantendo o número como está.
+### 1. Contradição /odom explícito vs. a seção que corrige o viés de /odom
+- **Resolução (2026-10-01):** adicionada uma frase de transição em
+  `07_avaliacao.tex` (Ameaças à Validade, após o parágrafo do bug de
+  detecção automática), explicando que o bug corrigido afeta
+  especificamente o modo *automático* de detecção de tópico, enquanto a
+  campanha principal (Procedimento, passo 9) especifica `/odom`
+  explicitamente — não depende dessa detecção automática. A escolha de
+  manter `/odom` em vez de `/pose` para essa campanha é mantida como
+  decisão de projeto já registrada (achado "Resultados — 2026-09-25"
+  acima), não como efeito do bug. O número de 3,35cm não foi alterado.
 
 ### 2. Afirmação "2 robôs funcionam sem interferência" estava desatualizada
 - **Resolução (2026-10-01):** `09_conclusao.tex` (Limitações e Trabalhos
@@ -127,29 +120,16 @@ que resolve, com referência a ele).
   de `07_avaliacao.tex`.
 
 ## Metodologia (05_metodologia.tex) — 2026-10-01
-- **Achado:** `01_introducao.tex` (Objetivos, item 5, linha ~161) promete
-  "Validar o framework em dois cenários de simulação". Porém a Seção "Design
-  dos Experimentos de Validação" de `05_metodologia.tex` (título no plural,
-  `sec:design_experimentos`) descreve apenas **um** cenário/campanha
-  (\texttt{dissertation\_clean01}), e `07_avaliacao.tex` (linha ~210, Validade
-  de conclusão) é explícito: a campanha reportada está "restrit[a] a um único
-  cenário, uma única rota curta, um único robô simulado e uma única
-  configuração de Nav2".
-- **Por que está fora do escopo:** é uma contradição entre o objetivo
-  declarado no Capítulo 1 e o que os Capítulos 5/7 efetivamente descrevem e
-  reportam — decisão de conteúdo (o que foi ou não executado/prometido), não
-  de redação. Não é o mesmo achado já registrado abaixo sobre a unidade
-  "25\,cm em ângulo" (esse é um erro de unidade; este é uma divergência de
-  escopo entre capítulos). Não tenho visibilidade se um segundo cenário foi
-  planejado e descartado, rodou em outra branch, ou se o objetivo do
-  Capítulo 1 está simplesmente desatualizado.
-- **Sugestão:** decidir entre (a) atualizar `01_introducao.tex` para refletir
-  que a validação quantitativa final cobriu um único cenário controlado
-  (mencionando as campanhas exploratórias/\texttt{dissertacao\_teste1} como
-  complementares, não como o "segundo cenário"), ou (b) se um segundo
-  cenário de fato foi executado em algum momento, localizá-lo e incorporá-lo
-  a `05_metodologia.tex`/`08_resultados.tex`. Vale também revisar o título da
-  Seção "Design dos Experimentos de Validação" (plural) à luz da decisão.
+- **Resolução (2026-10-01):** `01_introducao.tex` (Objetivos, item 5)
+  atualizado de "dois cenários de simulação" para "um cenário de
+  simulação controlado, complementado por execuções exploratórias fora
+  desse protocolo controlado" — opção (a) da sugestão original, já que
+  não há evidência de um segundo cenário controlado executado em
+  qualquer branch. Consistente com `05_metodologia.tex` (que já descreve
+  só a Campanha `dissertation_clean01`) e `07_avaliacao.tex` (Validade de
+  conclusão, que já era explícito sobre o escopo de um único cenário).
+  Título da Seção "Design dos Experimentos de Validação" mantido como
+  está (plural genérico, não uma contagem específica).
 
 ## Implementação (06_implementacao.tex) — 2026-10-01
 - **Resolução (2026-10-01):** passagem da Seção "Ambiente de Simulação"

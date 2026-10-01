@@ -151,7 +151,14 @@ Esse tipo de falha --- uma suposição de nomenclatura de tópico que deixa de
 valer quando o pacote de SLAM é trocado, degradando silenciosamente para um
 \textit{fallback} em vez de falhar de forma visível --- é consistente com
 classes de defeito já catalogadas empiricamente em sistemas baseados em ROS
-\cite{timperley2024}.
+\cite{timperley2024}. O bug descrito afeta especificamente o modo
+\textit{automático} de detecção de tópico; a campanha principal reportada
+neste capítulo (Seção~\ref{sec:procedimento}, passo 9) especifica
+\texttt{/\allowbreak odom} explicitamente como fonte da trajetória, não
+dependendo dessa detecção automática --- a escolha de manter \texttt{/\allowbreak odom}
+em vez de \texttt{/\allowbreak pose} para essa campanha específica é, portanto, uma
+decisão de projeto distinta do bug corrigido acima, discutida na íntegra
+na Seção~\ref{sec:res_bags}.
 
 Uma segunda fonte de viés de construto, evidenciada em execuções exploratórias
 reais (Seção~\ref{sec:res_exp_complementares}), é que a fase de gravação e a
