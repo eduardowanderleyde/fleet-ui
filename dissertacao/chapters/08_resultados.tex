@@ -57,8 +57,8 @@ Considerando os nove replays comparados à referência, o RMSE médio foi de
 \citeonline{maset2022} na avaliação de repetibilidade de sistemas robóticos,
 de reportar a dispersão entre execuções e não apenas um valor médio isolado.
 O menor RMSE observado foi de 1,65\,cm e o maior foi de 4,76\,cm. Todos os
-valores ficaram substancialmente abaixo da tolerância padrão de objetivo do
-Nav2 de 25\,cm.
+valores ficaram substancialmente abaixo dos 25\,cm da tolerância padrão de
+objetivo do Nav2.
 
 O resultado é metodologicamente mais forte que as campanhas preliminares porque
 os pontos iniciais foram controlados. No \texttt{summary.json}, todos os dez
@@ -79,13 +79,13 @@ Uma campanha independente e menor, executada em 23/09/2026 sobre a rota
 \texttt{dissertacao\_\allowbreak teste1} (quatro waypoints, aproximadamente
 2\,m de percurso, configuração single-robot), foi usada para investigar por
 que o RMSE contra a execução baseline tende a ser maior que o RMSE entre
-réplicas. Essa campanha consistiu de uma gravação baseline seguida de três
+réplicas. Essa campanha consistiu em uma gravação baseline seguida de três
 réplicas
 (\texttt{fleet\_\allowbreak ws/\allowbreak runs/\allowbreak dissertacao\_\allowbreak teste1\_\allowbreak 20260923\_\allowbreak 182049/\allowbreak analysis/\allowbreak summary.json}).
 
 A Tabela~\ref{tab:mecanismo_navegacao} resume o resultado: o RMSE médio
-entre as três réplicas entre si foi de 2,00\,cm, enquanto o RMSE médio de
-cada réplica contra a baseline foi de 13,90\,cm — quase sete vezes maior.
+entre as três réplicas foi de 2,00\,cm, enquanto o RMSE médio de cada réplica
+contra a baseline foi de 13,90\,cm — quase sete vezes maior.
 
 \begin{table}[H]
 \centering
@@ -116,7 +116,7 @@ metodológica adotada nesta seção: a métrica de repetibilidade que isola o
 fenômeno de interesse é o RMSE entre execuções que usam o mesmo mecanismo de
 navegação (par-a-par, matriz \texttt{pairwise\_\allowbreak rmse\_\allowbreak m} do
 \texttt{summary.json}), não o RMSE contra uma execução de referência gravada
-por um mecanismo distinto — escolha alinhada à recomendação de
+por um mecanismo distinto. Essa escolha está alinhada à recomendação de
 \citeonline{maset2022} de comparar execuções nominalmente idênticas entre si
 como medida primária de repetibilidade, em vez de depender exclusivamente de
 uma referência única, e ao diagnóstico de \citeonline{amigoni2014} de que
