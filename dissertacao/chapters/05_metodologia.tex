@@ -30,8 +30,8 @@ cadeia TF \texttt{map} $\to$ \texttt{base\_\allowbreak link}. Ao final, \texttt{
 persiste o arquivo e \texttt{disable\_\allowbreak collection} fecha o bag.
 
 Essa distinção importa na prática: o Nav2 para
-quando a pose está dentro da tolerância configurada (tipicamente 25\,cm em posição
-e 25\,cm em ângulo), não necessariamente no ponto exato. Gravar a pose atingida,
+quando a pose está dentro da tolerância configurada (tipicamente 0,25\,m em posição
+e 0,25\,rad, aproximadamente 14°, em ângulo), não necessariamente no ponto exato. Gravar a pose atingida,
 e não a solicitada, garante que o replay reproduza o que o robô \textit{fez},
 não o que foi \textit{pedido} --- uma distinção relevante quando a análise de
 repetibilidade compara execuções entre si.

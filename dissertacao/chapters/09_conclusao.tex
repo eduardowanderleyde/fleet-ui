@@ -179,17 +179,25 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     simultânea de múltiplos robôs --- incluindo eventuais interferências de
     rede, DDS ou TF entre unidades --- não foram empiricamente avaliados. Um
     teste funcional preliminar, fora do escopo da campanha quantitativa,
-    confirmou que dois robôs simultâneos (\texttt{tb1}+\texttt{tb2}) executam
-    ciclos completos de gravação e reprodução sem interferência cruzada de
-    \texttt{cmd\_\allowbreak vel} ou odometria, enquanto três robôs simultâneos
-    falharam de forma reproduzível: a causa identificada nos logs foi
-    contenção de CPU/DDS entre três pilhas independentes de SLAM Toolbox e
-    Nav2 (o relógio simulado salta para trás sob a carga combinada, invalidando
-    o buffer de TF antes do prazo interno do Nav2), e não falta de GPU --- a
-    GPU dedicada desta máquina foi confirmada em uso real pela renderização do
-    Gazebo, e nenhum processo do SLAM Toolbox ou do Nav2 depende de GPU. Esse
-    resultado é qualitativo e não substitui a avaliação quantitativa de
-    repetibilidade sob carga multi-robô, que permanece em aberto.
+    sugeriu originalmente que dois robôs simultâneos (\texttt{tb1}+\texttt{tb2})
+    executavam ciclos completos de gravação e reprodução sem interferência
+    cruzada de \texttt{cmd\_\allowbreak vel} ou odometria, com o teto prático de
+    escala atribuído a três robôs simultâneos (contenção de CPU/DDS entre três
+    pilhas independentes de SLAM Toolbox e Nav2, não falta de GPU --- a GPU
+    dedicada desta máquina foi confirmada em uso real pela renderização do
+    Gazebo). Investigação mais aprofundada na mesma semana, porém, reproduziu
+    repetidamente o mesmo sintoma --- o relógio simulado saltando para trás,
+    invalidando o buffer de TF antes do prazo interno do Nav2 --- mesmo com
+    apenas dois robôs sob navegação Nav2 simultânea, invalidando essa
+    conclusão preliminar. A arquitetura foi então redesenhada para ativar a
+    pilha completa de navegação de um robô por vez (ativação sequencial em
+    vez de duas pilhas simultâneas), e essa arquitetura revisada foi medida
+    formalmente em cinco tentativas: taxa de sucesso de 70\% (sete em dez
+    ativações individuais), sem padrão claro de falha ligado à ordem de
+    ativação --- robôs na primeira e na segunda posição falharam com
+    frequência semelhante. Esse resultado é qualitativo/exploratório e não
+    substitui uma avaliação quantitativa formal de repetibilidade sob
+    operação multi-robô, que permanece em aberto.
 
     \item \textbf{Estocasticidade do controlador local não isolada como fator
     de variância.} O controlador \texttt{nav2\_\allowbreak mppi\_\allowbreak controller}
@@ -257,11 +265,13 @@ controlador MPPI \cite{williams2016}, estocástico por projeto, com um controlad
 determinístico (DWB \cite{fox1997} ou Regulated Pure Pursuit \cite{macenski2023survey})
 sob o mesmo protocolo, isolando a variância do
 método de controle da variância do sistema como um todo (Seção~\ref{sec:limitacoes}).
-Por fim, avaliar quantitativamente cenários multi-robô (MUUT+FUUT simultâneos) com RMSE
-pairwise por robô, usando dois robôs simultâneos como alvo inicial --- teto
-validado nesta máquina por contenção de CPU/DDS, não por GPU
-(Seção~\ref{sec:limitacoes}) ---, respondendo diretamente à limitação de
-escopo single-robot registrada na mesma seção; e integrar câmera OAK-D para
+Por fim, avaliar quantitativamente cenários multi-robô (MUUT+FUUT) com RMSE
+pairwise por robô, usando a arquitetura de ativação sequencial de dois
+robôs (Seção~\ref{sec:limitacoes}) como alvo inicial --- já com taxa de
+sucesso de 70\% medida qualitativamente, mas ainda sem avaliação
+quantitativa de RMSE sob essa operação ---, respondendo diretamente à
+limitação de escopo single-robot registrada na mesma seção; e integrar
+câmera OAK-D para
 coleta de dados visuais sincronizados com trajetória.
 
 \textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações

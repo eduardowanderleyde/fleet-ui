@@ -79,53 +79,24 @@ que resolve, com referência a ele).
   problema que a seção de ameaças descreve. Vale pelo menos uma frase de
   transição conectando os dois pontos, mesmo mantendo o número como está.
 
-### 2. Afirmação "2 robôs funcionam sem interferência" está desatualizada
-- **Achado:** `09_conclusao.tex` (Limitações) afirma: "Um teste funcional
-  preliminar... confirmou que dois robôs simultâneos (tb1+tb2) executam
-  ciclos completos de gravação e reprodução sem interferência cruzada...
-  três robôs simultâneos falharam de forma reproduzível." `08_resultados`
-  (Trabalhos Futuros) repete isso como premissa para o trabalho futuro
-  multi-robô.
-- **Por que está desatualizado:** essa afirmação reflete o entendimento
-  do projeto até ~22/09. Trabalho posterior (sessão de 25 a 30/09,
-  `orquestracion.md`, seção "Missão Coordenada — opção B" e as que a
-  sucedem) encontrou e reproduziu repetidamente o MESMO sintoma de "jump
-  back in time" com **2 robôs simultâneos**, não só com 3 — inclusive
-  numa medição formal de 5 tentativas com o fluxo mais seguro (1 robô com
-  Nav2 ativo por vez, não os dois simultâneos como o texto descreve): taxa
-  de sucesso de 70% (7/10), com falhas no 1º robô tanto quanto no 2º. Ou
-  seja, a arquitetura inteira foi redesenhada essa semana (de "2 robôs
-  Nav2 simultâneos" pra "1 robô Nav2 por vez, trocando") exatamente porque
-  a premissa "2 robôs funcionam sem interferência" não se sustentou sob
-  investigação mais a fundo.
-- **Sugestão:** atualizar `09_conclusao.tex` (Limitações) e
-  `08_resultados.tex` (Trabalhos Futuros) pra refletir o achado mais
-  recente — não é "2 robôs ok, 3 não", é "mesmo 2 robôs simultâneos têm
-  risco real de instabilidade, mitigado nesta semana por uma arquitetura
-  de ativação sequencial, ainda com ~70% de taxa de sucesso medida, não
-  100%". Isso é trabalho posterior à campanha quantitativa reportada e
-  não afeta o RMSE de 3,35cm (que é single-robot), mas afeta diretamente o
-  texto de Limitações e Trabalhos Futuros, que cita esse teste preliminar
-  como já relativamente resolvido.
+### 2. Afirmação "2 robôs funcionam sem interferência" estava desatualizada
+- **Resolução (2026-10-01):** `09_conclusao.tex` (Limitações e Trabalhos
+  Futuros) e `06_implementacao.tex` (Ambiente de Simulação) atualizados
+  para refletir o achado real: mesmo 2 robôs simultâneos têm risco de
+  instabilidade (mesmo sintoma de "jump back in time" reproduzido com 2,
+  não só 3), mitigado por uma arquitetura de ativação sequencial (nunca
+  duas pilhas completas de Nav2 ao mesmo tempo), medida formalmente em
+  70% de taxa de sucesso (7/10), sem padrão claro de falha por posição —
+  não mais apresentado como "2 ok / 3 falha, resolvido". Não afeta o RMSE
+  de 3,35cm (single-robot).
 
-### 3. Descrição do "Painel de Simulação" não corresponde ao código atual
-- **Achado:** `04_arquitetura.tex` (Seção "O Painel de Simulação") e
-  `06_implementacao.tex` (Seção "Interface Web") descrevem o painel como:
-  escolher mapa, modo (robô único/frota) e quais robôs incluir via
-  checkboxes, com start/stop simples. Essa é a versão ANTERIOR ao
-  redesenho desta semana.
-- **Por que está desatualizado:** o componente atual (`SimulationPanel.jsx`,
-  branch `mission-coordinate-large-scale`) é o painel "Missão Coordenada":
-  um dropdown de formação (L/I/V/\barra), 2 robôs fixos, 1 botão, e por
-  baixo uma arquitetura de ativação sequencial (`activate_robot`/
-  `deactivate_robot`) que liga a navegação de 1 robô por vez — não o
-  seletor de mapa/modo/robôs que o texto descreve.
-- **Sugestão:** como esse componente evoluiu bastante depois da campanha
-  quantitativa (e inclusive depois dos capítulos terem sido escritos),
-  vale decidir: (a) atualizar a descrição pra bater com o painel atual, ou
-  (b) deixar explícito que a descrição se refere a uma versão anterior do
-  componente, já substituída. Hoje o texto descreve algo que não existe
-  mais no repositório.
+### 3. Descrição do "Painel de Simulação" não correspondia ao código atual
+- **Resolução (2026-10-01):** `04_arquitetura.tex` (O Painel de
+  Simulação) e `06_implementacao.tex` (Interface Web) atualizados para
+  descrever o painel "Missão Coordenada" atual — formação (L/I/V/barra),
+  2 robôs fixos, 1 botão, ativação sequencial de navegação por robô
+  (`activate_robot`/`deactivate_robot`) — em vez da versão anterior
+  (seletor de mapa/modo/robôs via checkboxes).
 
 ## Campanha /odom vs. /pose vs. ground truth — 2026-09-30
 - **Achado:** `09_conclusao.tex` (Trabalhos Futuros, curto prazo) já citava
@@ -151,24 +122,9 @@ que resolve, com referência a ele).
   resultados ou só uma nota comparativa — e só então remover esta entrada.
 
 ## Metodologia (05_metodologia.tex) — 2026-09-30
-- **Achado:** a Seção "Fase 1 — Gravação do Baseline" (`sec:record_replay`, linhas
-  ~32-34) afirma: "o Nav2 para quando a pose está dentro da tolerância
-  configurada (tipicamente 25\,cm em posição e 25\,cm em ângulo)". A unidade
-  "cm" para a tolerância angular está incorreta/incompatível dimensionalmente
-  --- ângulo não se mede em centímetros.
-- **Por que está fora do escopo:** não é falta de citação, é um erro técnico de
-  conteúdo (unidade errada), e corrigir o valor é decisão de conteúdo, não de
-  bibliografia. Além disso, `07_avaliacao.tex` (linha ~192) já descreve a
-  mesma tolerância do Nav2 corretamente, com unidades consistentes: "o
-  critério de chegada do Nav2 (\texttt{general\_\allowbreak goal\_\allowbreak checker})
-  aceita até 0,25\,m de erro de posição e 0,25\,rad (aproximadamente 14°) de
-  erro angular" --- ou seja, o valor numérico (0,25) está certo, mas a unidade
-  em `05_metodologia.tex` deveria ser "rad" (ou "~14°"), não "cm".
-- **Sugestão:** trocar "25\,cm em ângulo" por "0,25\,rad (aproximadamente 14°)
-  em ângulo" em `05_metodologia.tex`, alinhando com a descrição já correta de
-  `07_avaliacao.tex`. Não alterei a frase porque mudar o valor/unidade é
-  fora do escopo deste agente (que só adiciona citação, não corrige
-  conteúdo técnico).
+- **Resolução (2026-10-01):** "25\,cm em ângulo" corrigido para "0,25\,rad
+  (aproximadamente 14°) em ângulo", alinhado com a descrição já correta
+  de `07_avaliacao.tex`.
 
 ## Metodologia (05_metodologia.tex) — 2026-10-01
 - **Achado:** `01_introducao.tex` (Objetivos, item 5, linha ~161) promete
@@ -196,78 +152,22 @@ que resolve, com referência a ele).
   Seção "Design dos Experimentos de Validação" (plural) à luz da decisão.
 
 ## Implementação (06_implementacao.tex) — 2026-10-01
-- **Achado:** a Seção "Ambiente de Simulação" de `06_implementacao.tex`
-  (linhas ~51-62) afirma que "uma campanha completa com dois robôs
-  simultâneos gravou uma rota real no `tb1` ... enquanto o `tb2` navegava
-  para outro alvo ao mesmo tempo, sem interferência mútua entre os dois", e
-  que o "teto prático de escala... revelou-se ser de CPU": o relógio
-  simulado só "salta para trás" ao subir **três** robôs simultâneos, com
-  `tb1`+`tb2` (dois robôs) descrito como "o alvo suportado e validado por
-  padrão".
-- **Por que está fora do escopo:** é a mesma classe de achado já registrada
-  no item "2. Afirmação '2 robôs funcionam sem interferência' está
-  desatualizada" da entrada "Revisão geral (leitura de capítulos
-  04/06/07/08/09) — 2026-09-30" deste arquivo, mas aquela entrada cita
-  apenas `09_conclusao.tex` e `08_resultados.tex` como os textos afetados —
-  não lista esta passagem de `06_implementacao.tex`, que faz a mesma
-  afirmação (dois robôs sem interferência mútua) de forma ainda mais
-  específica e tecnicamente factual, atribuindo o "jump back in time" só a
-  três robôs. Trabalho posterior (sessão de 25–30/09, `orquestracion.md`,
-  seção "Missão Coordenada") reproduziu o mesmo sintoma de salto do
-  `/clock` **com dois robôs**, não só com três, levando ao redesenho para
-  ativação sequencial (~70% de taxa de sucesso medida). Corrigir isso é
-  decisão de conteúdo/dados experimentais, não de citação bibliográfica —
-  fora do meu escopo como agente de referências.
-- **Sugestão:** ao atualizar `09_conclusao.tex`/`08_resultados.tex` conforme
-  a sugestão já registrada no item 2 de "Revisão geral — 2026-09-30",
-  revisar também esta passagem de `06_implementacao.tex` (Seção "Ambiente de
-  Simulação"), já que ela faz a mesma promessa de estabilidade com dois
-  robôs e atribui o limite de escala exclusivamente a três robôs — o que o
-  trabalho mais recente não confirma.
+- **Resolução (2026-10-01):** passagem da Seção "Ambiente de Simulação"
+  atualizada junto com o item 2 acima — mantém a verificação técnica real
+  (isolamento de namespace/tópicos) e atualiza a conclusão sobre
+  estabilidade multi-robô para refletir a arquitetura de ativação
+  sequencial (70% de sucesso medido), em vez da promessa anterior de "2
+  robôs ok por padrão, 3 é o teto".
 
 ## Avaliação (07_avaliacao.tex) — 2026-10-01
-- **Achado:** a Seção "Questões de Avaliação" (`sec:questoes`) abre com
-  "Três questões orientam a avaliação:", mas a lista `description` que
-  segue enumera QUATRO itens (QA1, QA2, QA3, QA4). O próprio texto logo
-  abaixo da lista usa a notação "QA1--QA4" e explica que QA4 "foi
-  adicionada durante a execução do trabalho" — ou seja, o conjunto atual
-  é de quatro questões, não três; a introdução não foi atualizada quando
-  QA4 foi incluída.
-- **Por que está fora do escopo:** corrigir "três" para "quatro" é uma
-  mudança de contagem/número, que este agente (revisão só de redação) está
-  explicitamente proibido de fazer — é decisão de conteúdo sobre quantas
-  questões de avaliação o capítulo de fato define, não sobre como a frase
-  é dita.
-- **Sugestão:** trocar "Três questões orientam a avaliação" por "Quatro
-  questões orientam a avaliação" (ou reescrever para "QA1--QA3 orientam a
-  avaliação original; QA4 foi adicionada posteriormente", já que o próprio
-  parágrafo seguinte já faz essa distinção) — decisão do autor sobre qual
-  frasing reflete melhor a história real de como QA4 surgiu.
+- **Resolução (2026-10-01):** "Três questões orientam a avaliação"
+  corrigido para "Quatro questões orientam a avaliação", consistente com
+  a lista QA1–QA4 e a notação já usada no parágrafo seguinte.
 
 ## Trabalhos Relacionados (03_trabalhos_relacionados.tex) — 2026-09-30
-- **Achado:** a Seção "A Taxonomia do SLAM" (`sec:rel_slam`) afirma, logo
-  após citar `\citeonline{durrantwhyte2006}` e `\citeonline{bailey2006}`,
-  que "a estrutura, resultado de convergência e nomenclatura" do problema
-  SLAM "haviam sido propostos originalmente por Durrant-Whyte, Rye e Nebot
-  em 1996" — uma atribuição histórica específica (autores + ano) sem
-  nenhuma citação própria.
-- **Por que está fora do escopo:** não é falta de citação que eu possa
-  simplesmente promover — é uma afirmação factual específica (quem
-  propôs o quê, em que ano) que eu não consegui confirmar contra fonte
-  primária depois de buscar na web. Os resultados mais próximos desses
-  mesmos autores (Durrant-Whyte, Nebot) no período são de 1997, com outros
-  coautores e outro título ("Ultra-High Integrity Navigation Systems for
-  Large Autonomous Vehicles", ISRR'97), não exatamente o que o capítulo
-  descreve. Corrigir ou remover essa atribuição é decisão de conteúdo, não
-  de bibliografia — por isso não toquei na frase (ver regra: "sem
-  referência adequada... é melhor não citar do que citar errado").
-  Registrado também em `referencias_candidatas.md` (Parte 4, item "não
-  confirmado") para rastreabilidade.
-- **Sugestão:** o autor (ou quem escreveu a frase originalmente) deveria
-  verificar essa atribuição direto na seção de referências históricas de
-  `durrantwhyte2006`/`bailey2006` — é provável que a frase tenha sido
-  parafraseada de lá, e a citação correta pode já estar nas referências
-  desses dois tutoriais. Se a atribuição de 1996 não se confirmar, trocar
-  por uma formulação mais genérica (ex. atribuir a `\citeonline{durrantwhyte2006}`
-  mesmo, que já está citado na frase anterior) ou remover o ano/autoria
-  específicos.
+- **Resolução (2026-10-01):** removida a atribuição específica não
+  confirmada ("Durrant-Whyte, Rye e Nebot em 1996"); a frase agora
+  atribui a estrutura/nomenclatura do SLAM genericamente a "trabalhos
+  anteriores dos mesmos autores", sem data/autoria específica não
+  verificável. Mantida a entrada em `referencias_candidatas.md` (Parte 4)
+  como registro de que a atribuição original não foi confirmada.

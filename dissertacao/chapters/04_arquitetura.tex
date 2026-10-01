@@ -238,27 +238,37 @@ entre si. O histórico dessas execuções é persistido em disco
 \label{sec:painel_simulacao}
 
 Antes deste painel, subir a simulação exigia abrir dois terminais e invocar
-manualmente os \textit{launch files} do ROS~2. O painel "Simulação" do
-frontend (\texttt{frontend/\allowbreak src/\allowbreak components/\allowbreak SimulationPanel.jsx}) elimina
-essa etapa: o pesquisador escolhe o mapa, o modo (robô único ou frota) e
-quais robôs incluir, e o backend cuida de lançar os mesmos processos que
-antes seriam digitados manualmente.
+manualmente os \textit{launch files} do ROS~2. O painel "Missão
+Coordenada" do frontend
+(\texttt{frontend/\allowbreak src/\allowbreak components/\allowbreak SimulationPanel.jsx}) elimina
+essa etapa: o pesquisador escolhe uma formação entre quatro opções fixas
+(L, I, V, barra invertida --- cada uma com um ponto-alvo por robô) e
+aciona um único botão; o backend cuida de lançar os mesmos processos que
+antes seriam digitados manualmente, e de despachar cada um dos dois
+robôs fixos (\texttt{tb1}, \texttt{tb2}) para o seu ponto da formação.
 
 Os endpoints \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak options},
-\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}, \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak start} e
-\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak stop} (\texttt{backend/\allowbreak main.py}) encapsulam
-essa orquestração. Ao iniciar, o backend monta os mesmos dois comandos que já
-existiam como instruções de terminal --- \texttt{turtlebot4\_\allowbreak sim.launch.py}
-(ou \texttt{turtlebot4\_\allowbreak multi\_\allowbreak sim.launch.py}, no modo com múltiplos
+\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}, \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak start},
+\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak stop},
+\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak activate\_\allowbreak robot} e
+\texttt{/\allowbreak api/\allowbreak simulation/\allowbreak deactivate\_\allowbreak robot}
+(\texttt{backend/\allowbreak main.py}) encapsulam essa orquestração. Ao iniciar, o
+backend monta os mesmos dois comandos que já existiam como instruções de
+terminal --- \texttt{turtlebot4\_\allowbreak sim.launch.py} (ou
+\texttt{turtlebot4\_\allowbreak multi\_\allowbreak sim.launch.py}, no modo com múltiplos
 robôs) e \texttt{fleet.launch.py} --- e os executa como subprocessos
 independentes via \texttt{subprocess.\allowbreak Popen}, com \texttt{os.\allowbreak setsid} para
 permitir encerrá-los como grupo de processos ao parar a simulação. Uma
 \textit{thread} leitora por processo consome a saída padrão em tempo real e a
 expõe via \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}, detectando prontidão ao
-observar as mensagens \texttt{"Managed nodes are active"} (uma por robô) e
-\texttt{"fleet\_\allowbreak orchestrator ready"} nos logs --- o que permite ao
-frontend indicar quando a simulação está de fato pronta para receber
-comandos, em vez de apenas "processo iniciado".
+observar as mensagens \texttt{"Managed nodes are active"} e
+\texttt{"fleet\_\allowbreak orchestrator ready"} nos logs. No modo com múltiplos
+robôs, a simulação sobe sem nenhuma pilha de navegação ativa
+(\texttt{bringup\_\allowbreak nav:=false}); o frontend então dispara, para cada robô
+móvel, um ciclo sequencial de \texttt{activate\_\allowbreak robot} $\to$ aguardar
+prontidão $\to$ \texttt{go\_\allowbreak to\_\allowbreak point} $\to$ \texttt{deactivate\_\allowbreak robot}
+--- nunca duas pilhas completas de Nav2 simultâneas (ver
+Seção~\ref{sec:limitacoes} para a motivação dessa escolha de arquitetura).
 
 \section{Considerações Finais}
 \label{sec:arq_conclusao}
