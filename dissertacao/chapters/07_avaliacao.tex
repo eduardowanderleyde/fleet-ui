@@ -6,8 +6,8 @@
 
 A avaliação do framework foi conduzida em simulação Gazebo Harmonic com um robô
 TurtleBot4 Standard no mundo \textit{warehouse}. O ambiente de simulação garante
-condições perfeitamente repetíveis dentro do mesmo laboratório --- sem variação de iluminação, temperatura
-ou tráfego de outros agentes --- o que permite isolar a variabilidade introduzida
+condições perfeitamente repetíveis dentro do mesmo laboratório, sem variação de iluminação, temperatura
+ou tráfego de outros agentes, o que permite isolar a variabilidade introduzida
 pelos algoritmos de navegação e SLAM da variabilidade ambiental. Esse é o tipo
 de controle completo de variáveis apontado como vantagem da simulação sobre o
 hardware real \cite{amigoni2010}; experimentos em hardware real, com sua camada
@@ -42,11 +42,11 @@ Quatro questões orientam a avaliação:
     normalizada?
 
     \item[QA4] A repetibilidade observada sob o protocolo controlado (QA2, QA3)
-    se mantém quando as execuções ocorrem fora desse regime controlado --- sem
+    se mantém quando as execuções ocorrem fora desse regime controlado, sem
     a mesma ação de navegação, pose inicial fixa ou retorno explícito ao ponto
     de partida entre réplicas? Esta questão foi formulada depois de os dados
     exploratórios que a sustentam já existirem no repositório do projeto
-    (três conjuntos adicionais, Seção~\ref{sec:res_exp_complementares}) --- ou
+    (três conjuntos adicionais, Seção~\ref{sec:res_exp_complementares}), ou
     seja, é geradora de hipótese (\textit{hypothesis-generating}), não
     confirmatória: não há, nem poderia haver, um critério de aceitação/rejeição
     formal para ela (diferente de QA1--QA3, Seção~\ref{sec:criterios}), e por
@@ -115,7 +115,7 @@ Seção~\ref{sec:questoes}), não há um limiar numérico que a "valide" ou
 
 O limiar de 25\,cm acima (QA2 e erro final) é o mesmo valor da tolerância
 padrão de chegada do \texttt{general\_\allowbreak goal\_\allowbreak checker} do
-Nav2 (Seção~\ref{sec:record_replay}) --- uma métrica de chegada a um
+Nav2 (Seção~\ref{sec:record_replay}), uma métrica de chegada a um
 único ponto, reaproveitada aqui como limiar de aceitação para RMSE de
 trajetória completa e erro de endpoint, sem derivação independente
 específica para essas duas grandezas. Essa escolha é operacionalmente
@@ -138,8 +138,8 @@ limiar, como apresentado na Seção~\ref{sec:res_qa3}.
 Esta seção examina os limites da avaliação nas quatro dimensões clássicas,
 seguindo a prática de reportar ameaças à validade em pesquisa empírica de
 Engenharia de Software \cite{amigoni2010}. A escolha responde também ao
-diagnóstico de rigor metodológico limitado --- comparação estatística fraca,
-baixa disponibilidade de artefatos --- identificado em experimentos de
+diagnóstico de rigor metodológico limitado (comparação estatística fraca,
+baixa disponibilidade de artefatos) identificado em experimentos de
 robótica autônoma publicados \cite{amigoni2014}, na linha do que
 \citeonline{bonsignorio2015} defendem como pesquisa em robótica replicável e
 mensurável.
@@ -168,15 +168,15 @@ com mensagens de fato gravadas; a seleção também pode ser forçada
 explicitamente. Análises realizadas antes dessa correção que tenham caído no
 \textit{fallback} de \texttt{/\allowbreak odom} deveriam, a rigor, ser
 reconsideradas caso a pose do SLAM também estivesse disponível no mesmo bag.
-Esse tipo de falha --- uma suposição de nomenclatura de tópico que deixa de
+Esse tipo de falha (uma suposição de nomenclatura de tópico que deixa de
 valer quando o pacote de SLAM é trocado, degradando silenciosamente para um
-\textit{fallback} em vez de falhar de forma visível --- é consistente com
+\textit{fallback} em vez de falhar de forma visível) é consistente com
 classes de defeito já catalogadas empiricamente em sistemas baseados em ROS
 \cite{timperley2024}. O bug descrito afeta especificamente o modo
 \textit{automático} de detecção de tópico; a campanha principal reportada
 neste capítulo (Seção~\ref{sec:procedimento}, passo 9) especifica
 \texttt{/\allowbreak odom} explicitamente como fonte da trajetória, não
-dependendo dessa detecção automática --- a escolha de manter \texttt{/\allowbreak odom}
+dependendo dessa detecção automática. A escolha de manter \texttt{/\allowbreak odom}
 em vez de \texttt{/\allowbreak pose} para essa campanha específica é, portanto, uma
 decisão de projeto distinta do bug corrigido acima, discutida na íntegra
 na Seção~\ref{sec:res_bags}.
@@ -190,12 +190,12 @@ enviado; \texttt{replay} envia uma única \texttt{play\_\allowbreak route}, perc
 rota inteira como navegação contínua. Em uma campanha exploratória com essa
 configuração (rota de quatro waypoints, $N=3$ replays), o RMSE par-a-par entre
 replays foi da ordem de 0,02\,m, contra cerca de 0,14\,m entre a baseline e
-cada replay, com a baseline durando cerca de 2,5$\times$ menos que os replays
---- diferença explicada quase inteiramente pelo mecanismo de navegação
+cada replay, com a baseline durando cerca de 2,5$\times$ menos que os replays.
+Essa diferença é explicada quase inteiramente pelo mecanismo de navegação
 distinto, não por falta de repetibilidade do robô. Por esse motivo, o RMSE
 calculado entre os replays (que compartilham o mesmo mecanismo de
 navegação) é a métrica mais fiel à repetibilidade que este trabalho pretende
-medir --- seguindo a mesma lógica metodológica adotada por
+medir, seguindo a mesma lógica metodológica adotada por
 \citeonline{maset2022} para repetibilidade em mapeamento 3D, de comparar
 execuções nominalmente idênticas diretamente entre si em vez de cada uma
 isoladamente contra um único valor de referência; comparações contra a
@@ -204,13 +204,13 @@ navegação distinto, misturam essa diferença de implementação com
 repetibilidade real e devem ser interpretadas com essa ressalva.
 
 Esse experimento exploratório, portanto, confunde dois fatores manipulados
-simultaneamente --- o mecanismo de navegação (\texttt{go\_\allowbreak
+simultaneamente: o mecanismo de navegação (\texttt{go\_\allowbreak
 to\_\allowbreak point} sequencial vs. \texttt{play\_\allowbreak route} contínuo)
-e a ausência de reinicialização de pose entre réplicas --- o que constitui, em
+e a ausência de reinicialização de pose entre réplicas. Isso constitui, em
 si, uma limitação de desenho experimental, e não apenas uma observação lateral
 sobre a métrica: a partir desses dados não é possível atribuir isoladamente a
 diferença observada a um dos dois fatores. Um desenho fatorial mínimo que
-separasse esses efeitos ficaria para trabalho futuro confirmatório --- por
+separasse esses efeitos ficaria para trabalho futuro confirmatório, por
 exemplo, comparar (i) réplicas que repetem o mesmo mecanismo de navegação da
 gravação mas sem reinicialização de pose entre elas contra (ii) réplicas que
 usam o mecanismo distinto (\texttt{play\_\allowbreak route}) mas com
@@ -229,13 +229,13 @@ fazendo com que os dez bags analisados comecem praticamente no mesmo ponto em
 \texttt{/\allowbreak odom}. Ainda assim, fatores como variação interna do controlador
 local, estado do SLAM e estabilização do costmap continuam sendo possíveis fontes
 de variabilidade residual. Em particular, o controlador local usado
-(\texttt{nav2\_\allowbreak mppi\_\allowbreak controller}, algoritmo MPPI --- \textit{Model
+(\texttt{nav2\_\allowbreak mppi\_\allowbreak controller}, algoritmo MPPI, \textit{Model
 Predictive Path Integral} \cite{williams2016}) é estocástico por projeto: a
 cada ciclo de controle
 (20\,Hz), com \texttt{regenerate\_\allowbreak noises: true}, ruído gaussiano é
 reamostrado sobre a trajetória candidata. Ou seja, duas execuções da mesma
 rota, no mesmo robô e no mesmo ambiente, divergem parcialmente apenas pela
-amostragem aleatória do controlador --- isso não é falha de repetibilidade do
+amostragem aleatória do controlador. Isso não é falha de repetibilidade do
 sistema avaliado, é ruído esperado e não-eliminável do método de controle
 escolhido (a menos que se troque por um controlador determinístico, como DWB
 \cite{fox1997} ou Regulated Pure Pursuit \cite{macenski2023survey}, alternativa
@@ -300,7 +300,7 @@ escopo ambiental para poder medir exatamente essa consistência.
 
 O arranjo de avaliação foi concebido para responder às questões de forma direta e
 verificável. A escolha por simulação sacrifica o realismo físico em favor do controle
-experimental --- uma troca razoável para uma primeira validação de framework,
+experimental, uma troca razoável para uma primeira validação de framework,
 onde o objetivo é demonstrar que o sistema funciona como projetado, não que o
 hardware físico se comporta de determinada forma. Os resultados são apresentados
 no capítulo seguinte.

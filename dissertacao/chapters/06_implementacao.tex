@@ -6,8 +6,8 @@
 
 Seguindo a prática estabelecida de validar algoritmos de navegação em simulação
 ROS~+~Gazebo antes de sua implantação no robô físico \cite{takaya2016}, o
-ambiente de simulação utiliza o Gazebo Harmonic --- versão de suporte estendido
-pareada com o ROS~2 Jazzy --- e o modelo TurtleBot4 Standard com RPLIDAR S2 (LiDAR
+ambiente de simulação utiliza o Gazebo Harmonic, versão de suporte estendido
+pareada com o ROS~2 Jazzy, e o modelo TurtleBot4 Standard com RPLIDAR S2 (LiDAR
 2D de 360°) e câmera OAK-D. O mundo \textit{warehouse} disponível no pacote
 \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} representa um armazém industrial com prateleiras,
 barreiras e espaços abertos, oferecendo diversidade de geometria para testar o SLAM
@@ -15,7 +15,7 @@ em diferentes condições de observabilidade.
 
 A escolha do \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} em detrimento do
 \texttt{turtlebot4\_\allowbreak gz\_\allowbreak bringup} resultou de problemas de compatibilidade entre os
-plugins \texttt{irobot\_\allowbreak create\_\allowbreak gz\_\allowbreak plugins} --- projetados para Ignition Fortress ---
+plugins \texttt{irobot\_\allowbreak create\_\allowbreak gz\_\allowbreak plugins}, projetados para Ignition Fortress,
 e o Gazebo Harmonic, que renomeou a API de mensagens de \texttt{ignition.msgs} para
 \texttt{gz.msgs}. A versão minimal contorna esse problema utilizando o plugin de
 DiffDrive nativo do Gazebo Harmonic com bridges corretos, incluindo o topic
@@ -28,16 +28,16 @@ Parte considerável do esforço de implementação, contudo, não esteve na cama
 de IA descrita nos capítulos anteriores, e sim em descobrir que a simulação de
 base do TurtleBot4 (\texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim}) nunca havia sido pensada
 para múltiplos robôs simultâneos. O plugin \texttt{DiffDrive} do Gazebo, embutido
-no xacro do TurtleBot4, publica em tópicos gz-transport absolutos e fixos ---
+no xacro do TurtleBot4, publica em tópicos gz-transport absolutos e fixos:
 \texttt{/cmd\_\allowbreak vel}, \texttt{/odom}, \texttt{tf} e \texttt{joint\_\allowbreak states}, além dos sensores
-\texttt{imu}, \texttt{scan} e \texttt{rgbd\_\allowbreak camera} --- nenhum deles respeitando namespace.
+\texttt{imu}, \texttt{scan} e \texttt{rgbd\_\allowbreak camera}. Nenhum deles respeita namespace.
 Confirmou-se empiricamente, antes de qualquer alteração de código, que
 \textit{spawnar} um segundo robô fazia um único \texttt{/cmd\_\allowbreak vel} mover ambos
 simultaneamente, com odometria indistinguível entre eles.
 
 A correção consistiu em um fork do xacro do TurtleBot4 dentro do próprio
 pacote (\texttt{fleet\_\allowbreak ws/\allowbreak src/\allowbreak fleet\_\allowbreak orchestrator/\allowbreak urdf/\allowbreak tb4/}), prefixando os
-sete tópicos gz-transport com \texttt{/<namespace>} --- comportamento idêntico ao
+sete tópicos gz-transport com \texttt{/<namespace>}, comportamento idêntico ao
 original quando o namespace é vazio, validado isoladamente com
 \texttt{xacro ... namespace:=tb1} sem necessidade de subir o Gazebo. Cada robô
 (\texttt{tb1}, \texttt{tb2}, \texttt{tb3}) é então \textit{spawnado} com seu próprio bridge
@@ -50,7 +50,7 @@ tópicos de TF por robô (\texttt{/tb1/\allowbreak tf}), com \texttt{frame\_\all
 
 A verificação não se limitou à leitura do código: \texttt{ros2 topic list}
 confirmou tópicos \texttt{/tb1/*}, \texttt{/tb2/*} e \texttt{/tb3/*} isolados; comandar
-\texttt{/tb1/\allowbreak cmd\_\allowbreak vel} moveu somente o \texttt{tb1}, com \texttt{/tb2/\allowbreak odom} parado ---
+\texttt{/tb1/\allowbreak cmd\_\allowbreak vel} moveu somente o \texttt{tb1}, com \texttt{/tb2/\allowbreak odom} parado,
 confirmando isolamento correto de \textit{namespace} entre robôs. Uma
 campanha com dois robôs simultâneos também gravou uma rota real no
 \texttt{tb1} (sensores \texttt{imu}/\texttt{odom}/\texttt{scan}/\texttt{pose} capturados no bag) enquanto o
@@ -60,11 +60,11 @@ sustentou em testes posteriores sob carga mais realista: subir a pilha
 completa de Nav2 e SLAM Toolbox de dois ou três robôs simultaneamente faz o
 relógio simulado (\texttt{/clock}) saltar para trás sob carga, invalidando a
 árvore de TF antes que o Nav2 consiga uma leitura estável de
-\texttt{base\_\allowbreak link → map} dentro do prazo interno --- contenção identificada
+\texttt{base\_\allowbreak link → map} dentro do prazo interno. Trata-se de contenção identificada
 como de CPU/DDS, não de GPU. Por isso a arquitetura foi redesenhada para
 ativar a pilha de navegação completa de um robô por vez em vez de manter
-duas (ou três) pilhas simultâneas como alvo suportado por padrão ---
-ativação sequencial medida formalmente em 70\% de taxa de sucesso (sete em
+duas (ou três) pilhas simultâneas como alvo suportado por padrão. A
+ativação sequencial foi medida formalmente em 70\% de taxa de sucesso (sete em
 dez ativações individuais; Seção~\ref{sec:limitacoes}). Essa mesma correção de xacro é validada
 automaticamente por um job de integração contínua que expande o xacro e
 valida o URDF resultante para os namespaces vazio, \texttt{tb1}, \texttt{tb2} e
@@ -80,7 +80,7 @@ mantém seis campos: \texttt{nav\_\allowbreak state}, \texttt{is\_\allowbreak re
 \texttt{route\_\allowbreak poses}, \texttt{last\_\allowbreak saved} e \texttt{pending\_\allowbreak goal\_\allowbreak pose}. Este último
 é o mais crítico para a gravação: ao receber o callback de resultado do action Nav2,
 se o status for \texttt{STATUS\_\allowbreak SUCCEEDED} e o robô estiver em modo de gravação,
-a pose enviada como meta é imediatamente adicionada à lista de rotas --- pois a pose
+a pose enviada como meta é imediatamente adicionada à lista de rotas, pois a pose
 real confirmada pelo Nav2 é a melhor estimativa disponível da posição atingida.
 
 A lógica de gravação baseada em polling de TF (\texttt{\_\allowbreak record\_\allowbreak tick}) funciona em
@@ -95,7 +95,7 @@ essa mesma lógica de gravação por polling de TF precisou de um
 viabiliza essa separação, não coberto naquele capítulo, é que
 \texttt{tf2\_\allowbreak ros.\allowbreak TransformListener} não permite escutar um tópico diferente
 do \texttt{/tf} global: por isso o orquestrador instancia manualmente um
-\texttt{Buffer} e uma inscrição por robô --- uma para cada \texttt{/tb\{1,2,3\}/\allowbreak tf} ---
+\texttt{Buffer} e uma inscrição por robô, uma para cada \texttt{/tb\{1,2,3\}/\allowbreak tf},
 consultando em cada uma a transformação \texttt{map → base\_\allowbreak link} sem prefixo.
 
 
@@ -106,10 +106,10 @@ Para tornar concreta a discussão anterior, o Código~\ref{lst:start_stop_record
 reproduz os \textit{callbacks} que implementam o início e o fim de uma gravação de
 rota, com a verificação de robô desconhecido (\texttt{UNKNOWN\_\allowbreak ROBOT}) e a montagem
 dos campos de resposta elididas (\texttt{...}) na segunda função por serem idênticas
-às da primeira --- o que importa para a discussão é a rejeição explícita de
+às da primeira. O que importa para a discussão é a rejeição explícita de
 requisições inconsistentes com o estado corrente do robô
 (\texttt{ALREADY\_\allowbreak NAVIGATING}) e a limpeza do buffer de poses e do último ponto
-salvo (\texttt{last\_\allowbreak saved = None}) a cada novo início de gravação --- sem essa
+salvo (\texttt{last\_\allowbreak saved = None}) a cada novo início de gravação. Sem essa
 limpeza, uma segunda gravação herdaria pontos da anterior, corrompendo
 silenciosamente o arquivo de rota resultante.
 
@@ -220,16 +220,16 @@ def run_service(self, service: str, service_type: str, request: dict | str, time
 \end{lstlisting}
 
 Note-se, em relação à primeira versão dessa função, o uso de \texttt{shlex.\allowbreak quote}
-em cada argumento do comando montado --- substituindo a interpolação direta
-do JSON da requisição entre aspas simples --- o que evita que caracteres
+em cada argumento do comando montado, substituindo a interpolação direta
+do JSON da requisição entre aspas simples, o que evita que caracteres
 especiais no payload (por exemplo, aspas simples dentro de um nome de rota)
 quebrem o comando \textit{shell} resultante.
 
 Essa abordagem tem um custo mensurável: cada chamada paga o overhead de
 inicializar um processo \texttt{ros2 service call} (tipicamente
 50--150\,ms na máquina de desenvolvimento), o que a torna inadequada para
-comandos de alta frequência, mas aceitável para o padrão de uso da interface
---- cliques esparsos do pesquisador, não um laço de controle. O preço em
+comandos de alta frequência, mas aceitável para o padrão de uso da interface,
+cliques esparsos do pesquisador, não um laço de controle. O preço em
 latência é trocado por uma superfície de acoplamento mínima entre o backend
 e o \textit{workspace} ROS~2: o backend só precisa saber o nome e o tipo do
 serviço, nunca importar diretamente os módulos gerados de \texttt{fleet\_\allowbreak msgs}
@@ -242,8 +242,8 @@ A função \texttt{\_\allowbreak run\_\allowbreak ros2\_\allowbreak service} des
 que retornam em no máximo alguns segundos. O painel de simulação da
 interface web (Seção~\ref{sec:impl_web}) exige um padrão diferente: os
 endpoints \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak start} e \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak stop} precisam
-gerenciar dois processos \texttt{ros2 launch} de longa duração --- a simulação
-Gazebo e o orquestrador/coletor --- que permanecem de pé indefinidamente até
+gerenciar dois processos \texttt{ros2 launch} de longa duração, a simulação
+Gazebo e o orquestrador/coletor, que permanecem de pé indefinidamente até
 serem explicitamente encerrados. Cada processo é iniciado com
 \texttt{subprocess.\allowbreak Popen(..., preexec\_\allowbreak fn=os.\allowbreak setsid)}, o que o coloca em seu
 próprio grupo de processos; o encerramento correspondente usa
@@ -251,8 +251,8 @@ próprio grupo de processos; o encerramento correspondente usa
 \texttt{SIGKILL} após um prazo de tolerância caso o \texttt{SIGTERM} não seja
 suficiente. Essa é uma diferença deliberada em relação à chamada pontual de
 serviço: encerrar apenas o processo principal do \texttt{ros2 launch} deixaria
-órfãos os processos filhos que o launch efetivamente sobe --- o próprio
-\texttt{gz sim} e todos os nós de Nav2/SLAM~Toolbox por robô --- exigindo uma
+órfãos os processos filhos que o launch efetivamente sobe, o próprio
+\texttt{gz sim} e todos os nós de Nav2/SLAM~Toolbox por robô, exigindo uma
 limpeza manual via \texttt{pkill -f} que, na prática, mostrou-se não confiável
 durante o desenvolvimento e a validação da simulação multi-robô
 (Seção~\ref{sec:simulacao}). Uma \textit{thread} leitora consome a saída
@@ -322,8 +322,8 @@ diretamente protege a validade dos números de repetibilidade reportados
 (Seção~\ref{sec:impl_conclusao}), vale um tratamento proporcional, com
 código, e não apenas a descrição em prosa acima. O Código~\ref{lst:pose_fallback}
 reproduz o trecho de \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} que implementa a
-prioridade do modo \texttt{auto}: a primeira fonte candidata --- \texttt{amcl\_\allowbreak pose},
-depois \texttt{pose} do SLAM~Toolbox, depois \texttt{odom} --- que de fato tiver
+prioridade do modo \texttt{auto}: a primeira fonte candidata (\texttt{amcl\_\allowbreak pose},
+depois \texttt{pose} do SLAM~Toolbox, depois \texttt{odom}) que de fato tiver
 mensagens gravadas no bag (\texttt{counts.\allowbreak get(topic, 0) > 0}, não apenas presença
 no \textit{schema}) é a escolhida.
 
@@ -348,17 +348,17 @@ pela presença do nome do tópico em \texttt{tmap}: um bag pode registrar
 publicada nele (por exemplo, AMCL sem pose inicial definida), caso em que a
 cadeia de fallback precisa seguir adiante em vez de escolher um tópico vazio.
 
-Uma segunda ressalva --- esta não relacionada a nenhum bug, e sim ao próprio
-método de controle escolhido --- também é relevante para interpretar o RMSE:
-o \texttt{nav2\_\allowbreak mppi\_\allowbreak controller} sorteia ruído gaussiano sobre a trajetória
+Uma segunda ressalva também é relevante para interpretar o RMSE: ela não está
+relacionada a nenhum bug, mas ao próprio método de controle escolhido.
+O \texttt{nav2\_\allowbreak mppi\_\allowbreak controller} sorteia ruído gaussiano sobre a trajetória
 candidata a cada ciclo de controle, com \texttt{regenerate\_\allowbreak noises: true} e
 desvios-padrão explicitamente configurados (\texttt{vx\_\allowbreak std}, \texttt{vy\_\allowbreak std},
-\texttt{wz\_\allowbreak std}) --- é assim que o MPPI (\textit{Model Predictive Path Integral})
+\texttt{wz\_\allowbreak std}). É assim que o MPPI (\textit{Model Predictive Path Integral})
 \cite{williams2016} funciona por definição, não um parâmetro mal ajustado. A consequência direta
 é que duas execuções da mesma rota, no mesmo robô e no mesmo ambiente,
 divergem um pouco apenas pela amostragem aleatória do controlador: uma fonte
-de variância esperada e não eliminável, a menos que se troque de controlador
---- por exemplo, para um determinístico como DWB \cite{fox1997} ou Regulated Pure Pursuit
+de variância esperada e não eliminável, a menos que se troque de controlador,
+por exemplo, para um determinístico como DWB \cite{fox1997} ou Regulated Pure Pursuit
 \cite{macenski2023survey}, alternativa não avaliada nesta dissertação.
 
 
@@ -407,9 +407,9 @@ def _rmse(a: np.ndarray, b: np.ndarray) -> float:
 A consequência prática dessa escolha é que duas trajetórias percorridas em
 velocidades ligeiramente distintas continuam comparáveis, pois os pontos
 homólogos representam a mesma fração normalizada do percurso temporal de cada
-execução. Essa formulação não elimina todas as ameaças à validade --- diferenças
+execução. Essa formulação não elimina todas as ameaças à validade (diferenças
 muito grandes de duração ainda podem indicar que as execuções não são
-experimentalmente equivalentes ---, mas reduz o artefato geométrico introduzido
+experimentalmente equivalentes), mas reduz o artefato geométrico introduzido
 pela reamostragem puramente por índice.
 
 O Código~\ref{lst:rmse_impl} mostra apenas as funções auxiliares; falta o
@@ -440,8 +440,8 @@ for i in range(n):
 O mesmo script calcula também, para cada execução, o RMSE contra a primeira
 execução da lista (tomada como referência), armazenado em \texttt{summary.json}
 como a lista \texttt{vs\_\allowbreak reference}. Nenhuma dessas duas estruturas, porém, é
-por si só o ``RMSE médio'' relatado nos capítulos de resultados e conclusão ---
-essa média é calculada fora de \texttt{analyze\_\allowbreak runs.py}, no backend, pelo
+por si só o ``RMSE médio'' relatado nos capítulos de resultados e conclusão.
+Essa média é calculada fora de \texttt{analyze\_\allowbreak runs.py}, no backend, pelo
 método \texttt{analyze\_\allowbreak experiment} de \texttt{Analyst} (\texttt{backend/\allowbreak agents/\allowbreak analyst.py}),
 que lê o \texttt{summary.json} já produzido e agrega a lista \texttt{vs\_\allowbreak reference}:
 
@@ -465,7 +465,7 @@ return {
 É importante notar o que essa média de fato representa: \texttt{mean\_\allowbreak rmse\_\allowbreak vs\_\allowbreak ref\_\allowbreak m}
 é a média do RMSE de cada execução \textit{contra a execução de referência}
 (\texttt{rmse\_\allowbreak vs\_\allowbreak ref\_\allowbreak m}), e não uma agregação da matriz pairwise completa
-de \texttt{pairwise\_\allowbreak rmse\_\allowbreak m} --- uma distinção que a simples leitura do
+de \texttt{pairwise\_\allowbreak rmse\_\allowbreak m}, uma distinção que a simples leitura do
 Código~\ref{lst:rmse_impl}, isolado do restante do pipeline, não deixa clara.
 
 \section{Interface Web}
@@ -491,30 +491,30 @@ uma formação (L, I, V ou barra invertida, um ponto por robô) e lançar ou
 encerrar a simulação diretamente pela tela, sem abrir um terminal
 separado. Enquanto a simulação sobe, o painel exibe em tempo real as
 últimas linhas de saída dos processos \texttt{ros2 launch} e sinaliza o
-estado corrente --- parada, subindo, pronta ou erro no \textit{bringup} --- a
+estado corrente (parada, subindo, pronta ou erro no \textit{bringup}) a
 partir do mesmo status consultado em \texttt{/\allowbreak api/\allowbreak simulation/\allowbreak status}.
 Uma vez pronta, o painel dispara o despacho de cada robô para seu ponto da
 formação de forma sequencial: ativa a navegação do robô
 (\texttt{activate\_\allowbreak robot}), aguarda prontidão, envia o comando
 \texttt{go\_\allowbreak to\_\allowbreak point} e, ao concluir, desativa a navegação
-(\texttt{deactivate\_\allowbreak robot}) antes de passar ao próximo robô --- nunca
+(\texttt{deactivate\_\allowbreak robot}) antes de passar ao próximo robô (nunca
 duas pilhas completas de Nav2 simultâneas, pela razão discutida na
-Seção~\ref{sec:limitacoes}.
+Seção~\ref{sec:limitacoes}).
 
 \section{Considerações Finais}
 \label{sec:impl_conclusao}
 
-As decisões de implementação descritas neste capítulo --- o patch runtime do
+As decisões de implementação descritas neste capítulo resultaram de problemas
+concretos encontrados durante o desenvolvimento: o patch runtime do
 \texttt{nav2.yaml}, o fork do xacro do TurtleBot4 para isolar por robô os
 tópicos gz-transport que o Gazebo publica de forma absoluta, o
 \texttt{MultiThreadedExecutor} para evitar deadlocks, o gerenciamento de
 processos de longa duração da simulação por grupo de processos
 (\texttt{setsid}/\texttt{killpg}), a correção de detecção do tópico de pose em
-\texttt{analyze\_\allowbreak runs.py} (Seção~\ref{sec:impl_fallback_pose}), a
-conversão de coordenadas canvas--mundo --- resultaram de problemas concretos
-encontrados durante o desenvolvimento. Cada uma representa uma contribuição de
+\texttt{analyze\_\allowbreak runs.py} (Seção~\ref{sec:impl_fallback_pose}) e a
+conversão de coordenadas canvas--mundo. Cada uma representa uma contribuição de
 engenharia que outros grupos de pesquisa não precisarão replicar ao adotar
-o framework --- a correção de detecção do tópico de pose, em
+o framework. A correção de detecção do tópico de pose, em
 particular, protege diretamente a validade dos números de repetibilidade
 reportados no Capítulo~\ref{chap:resultados} contra um viés que não tinha
 relação alguma com o desempenho real do robô. O próximo capítulo apresenta

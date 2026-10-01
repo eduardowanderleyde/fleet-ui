@@ -24,8 +24,8 @@ A gravação do baseline define a rota de referência. O pesquisador especifica 
 conjunto de waypoints $\{w_1, w_2, \ldots, w_k\}$ no referencial do mapa SLAM.
 O sistema ativa a coleta de sensores, aciona o \texttt{start\_\allowbreak record} no orquestrador
 e comanda o robô via \texttt{NavigateToPose} sequencial para cada waypoint. Ao atingir
-cada ponto, a pose real do robô é registrada no arquivo de rota YAML ---
-não a pose solicitada, mas a pose efetivamente atingida conforme estimada pela
+cada ponto, a pose real do robô é registrada no arquivo de rota YAML: não a
+pose solicitada, mas a pose efetivamente atingida conforme estimada pela
 cadeia TF \texttt{map} $\to$ \texttt{base\_\allowbreak link}. Ao final, \texttt{stop\_\allowbreak record}
 persiste o arquivo e \texttt{disable\_\allowbreak collection} fecha o bag.
 
@@ -33,7 +33,7 @@ Essa distinção importa na prática: o Nav2 para
 quando a pose está dentro da tolerância configurada (tipicamente 0,25\,m em posição
 e 0,25\,rad, aproximadamente 14°, em ângulo), não necessariamente no ponto exato. Gravar a pose atingida,
 e não a solicitada, garante que o replay reproduza o que o robô \textit{fez},
-não o que foi \textit{pedido} --- uma distinção relevante quando a análise de
+não o que foi \textit{pedido}, uma distinção relevante quando a análise de
 repetibilidade compara execuções entre si.
 
 \subsection{Fase 2 — Execuções de Replay}
@@ -50,7 +50,7 @@ replay vs. baseline, deve ser documentada.
 
 Antes de cada replay, o robô retorna ao ponto de partida via \texttt{go\_\allowbreak to\_\allowbreak point}
 (opcional, configurável). Esse retorno é necessário quando o experimento exige que
-o robô parta da mesma pose inicial em todas as execuções --- requisito fundamental
+o robô parta da mesma pose inicial em todas as execuções, requisito fundamental
 para isolamento de variáveis.
 
 \subsection{Fase 3 — Análise Offline}
@@ -63,7 +63,7 @@ e interpola todas as trajetórias para uma grade de tempo normalizada $\{t_1, t_
 O RMSE pairwise é calculado conforme a Equação~\ref{eq:rmse_pairwise}.
 
 Esse limiar de 0,12\,m a 50\,Hz corresponde a uma velocidade implícita de
-cerca de 6\,m/s --- bem acima da velocidade real do robô nas execuções
+cerca de 6\,m/s, bem acima da velocidade real do robô nas execuções
 reportadas (em torno de 0,05\,m/s, a partir dos valores de duração e
 comprimento da Tabela~\ref{tab:campanha_final} do
 Capítulo~\ref{chap:resultados}). A margem é,
@@ -73,8 +73,8 @@ para refletir um limite calibrado contra a dinâmica real do robô ou do
 controlador MPPI, que não foi medida separadamente neste trabalho.
 
 A normalização temporal foi escolhida, em vez de alternativas de
-alinhamento mais elaboradas da literatura de comparação de trajetórias
---- como \textit{Dynamic Time Warping} ou a distância de Fréchet ---, por
+alinhamento mais elaboradas da literatura de comparação de trajetórias,
+como \textit{Dynamic Time Warping} ou a distância de Fréchet, por
 essas técnicas existirem especificamente para lidar com desalinhamentos de
 fase e variações de velocidade entre curvas. Não é o caso deste cenário: a
 rota avaliada é curta e percorrida a velocidade aproximadamente constante
@@ -151,7 +151,7 @@ replays, $s$ o desvio padrão amostral e $t_{0{,}025,\,N-1}$ o quantil da
 distribuição $t$ de Student com $N-1$ graus de liberdade. A distribuição $t$,
 em vez da normal, é usada por ser mais apropriada para amostras pequenas
 ($N < 30$), onde a variância populacional é desconhecida e estimada a partir
-da própria amostra --- prática que mitiga o diagnóstico de comparação
+da própria amostra, prática que mitiga o diagnóstico de comparação
 estatística fraca identificado em experimentos de robótica autônoma
 \cite{amigoni2014}. Na campanha final desta dissertação, $N=10$ replays
 fornecem uma estimativa descritiva mais estável da variabilidade observada; o
@@ -159,7 +159,7 @@ intervalo de confiança, contudo, deve ser interpretado no escopo estreito da
 rota e do ambiente avaliados, não como generalização para outras configurações.
 Cabe registrar, com honestidade, que esse $N=10$ foi uma escolha prática,
 limitada pelo custo e tempo de execução de cada replay completo (relançamento
-de simulação, pilha de navegação e coleta de dados) --- não o resultado de um
+de simulação, pilha de navegação e coleta de dados), não o resultado de um
 cálculo formal de tamanho de amostra ou de poder estatístico, seja a priori,
 seja a posteriori.
 
@@ -179,7 +179,7 @@ das campanhas exploratórias iniciais, cada replay da campanha final é iniciado
 após relançamento completo da simulação, da pilha Nav2 e dos nós de coleta. Essa
 decisão metodológica garante que a pose inicial medida em \texttt{/\allowbreak odom}
 seja praticamente a mesma em todas as execuções, evitando que o RMSE misture erro
-de repetição da trajetória com diferença de condição inicial --- uma pré-condição
+de repetição da trajetória com diferença de condição inicial, uma pré-condição
 para que a medição seja interpretável como repetibilidade, não como artefato de
 protocolo \cite{bonsignorio2015}.
 
@@ -189,11 +189,11 @@ protocolo \cite{bonsignorio2015}.
 
 A Tabela~\ref{tab:ambiente_hw} descreve o ambiente de hardware e software
 utilizado em todas as execuções reportadas neste trabalho. A escolha de manter
-todos os experimentos em um único ambiente controlado --- em vez de distribuí-los
-entre máquinas com configurações distintas --- é deliberada. O objetivo desta
+todos os experimentos em um único ambiente controlado, em vez de distribuí-los
+entre máquinas com configurações distintas, é deliberada. O objetivo desta
 dissertação é isolar a variabilidade intrínseca ao pipeline de navegação
 (SLAM, controlador, executor ROS~2), sem introduzir uma segunda fonte de
-variação decorrente de diferenças de hardware entre execuções --- o tipo de
+variação decorrente de diferenças de hardware entre execuções, o tipo de
 controle completo de variáveis identificado como vantagem da simulação sobre
 o hardware real \cite{amigoni2010}.
 
@@ -234,7 +234,7 @@ do ambiente limpo ao relatório de repetibilidade, compreende:
     \item \textbf{Inicialização da simulação}: subida do Gazebo, SLAM Toolbox
     (após um atraso de 8\,s para permitir que o \textit{bridge} de tópicos
     estabilize) e Nav2 (após 12\,s), aguardando a mensagem de log
-    \texttt{All BT navigator servers are active} antes de prosseguir --- uma
+    \texttt{All BT navigator servers are active} antes de prosseguir, uma
     barreira de sincronização que evita o início prematuro de comandos de
     navegação contra um Nav2 ainda não pronto.
 

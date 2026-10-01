@@ -49,17 +49,17 @@ externa de simulação/navegação em laranja.}
 
 Essa separação em cinco camadas não decorre apenas de conveniência de
 organização de código: ela é orientada por um pequeno conjunto de requisitos
-não-funcionais estabelecidos antes da implementação. Primeiro,
-\textbf{reprodutibilidade} --- cada camada deve poder ser inspecionada e
+não-funcionais estabelecidos antes da implementação. Primeiro, a
+\textbf{reprodutibilidade}: cada camada deve poder ser inspecionada e
 reexecutada isoladamente (por exemplo, repetir uma coleta de dados sem
 reiniciar a simulação), o que exige fronteiras de responsabilidade explícitas
-entre simulação, orquestração/coleta, backend e interface. Segundo,
-\textbf{uso por um pesquisador não especialista em ROS~2} --- a existência de
+entre simulação, orquestração/coleta, backend e interface. Segundo, o
+\textbf{uso por um pesquisador não especialista em ROS~2}: a existência de
 um backend REST e de uma interface web (Seção~\ref{sec:backend_web}) permite
 que a operação cotidiana do framework (lançar uma formação, iniciar uma
 gravação, consultar um resultado) não dependa de conhecimento de tópicos,
-serviços ou \textit{namespaces} do DDS. Terceiro, \textbf{extensibilidade}
---- a camada de agentes de IA (Seção~\ref{sec:agentes}), construída
+serviços ou \textit{namespaces} do DDS. Terceiro, a \textbf{extensibilidade}:
+a camada de agentes de IA (Seção~\ref{sec:agentes}), construída
 integralmente sobre a API REST já existente sem alterar o orquestrador
 ROS~2 ou o coletor de dados, é a evidência de que essas fronteiras entre
 camadas sustentam extensões substanciais sem retrabalho na base. É essa
@@ -95,19 +95,19 @@ navegação dos que não recebem. Essa alternativa foi descartada porque
 colapsaria duas distinções que a prática experimental exige manter separadas:
 FUUT e SU têm, ambos, \texttt{can\_\allowbreak navigate=False}, mas só o FUUT participa
 da coleta de dados sensoriais de perspectiva externa que caracteriza uma
-unidade fixa \textit{observadora} --- um booleano trataria FUUT e SU como
+unidade fixa \textit{observadora}. Um booleano trataria FUUT e SU como
 equivalentes, obscurecendo a diferença entre "unidade fixa com papel de
 observação" e "infraestrutura sem papel experimental direto". A tricotomia
 MUUT/FUUT/SU é o menor número de categorias que ainda captura as três funções
-distintas observadas nos experimentos de frota --- executar o percurso,
-observar de posição fixa e sustentar a infraestrutura --- sem recorrer a uma
+distintas observadas nos experimentos de frota (executar o percurso,
+observar de posição fixa e sustentar a infraestrutura) sem recorrer a uma
 hierarquia mais complexa (múltiplos booleanos independentes ou uma
 enumeração aberta de papéis).
 
 Essa distinção tem consequências diretas na implementação: o orquestrador verifica
 o papel de cada robô antes de processar qualquer requisição de movimento, rejeitando
 comandos de navegação para FUUTs. Isso evita que erros de configuração comprometam
-o design experimental --- um robô fixo que inadvertidamente recebe um comando de
+o design experimental: um robô fixo que inadvertidamente recebe um comando de
 navegação poderia invalidar todo um conjunto de execuções.
 
 A atribuição de papéis, no entanto, é estática: cada robô recebe um único
@@ -129,8 +129,8 @@ O orquestrador é um nó ROS~2 que expõe sete serviços de alto nível:
 \texttt{go\_\allowbreak to\_\allowbreak point}, \texttt{cancel}, \texttt{list\_\allowbreak robots} e
 \texttt{list\_\allowbreak routes}. Cada serviço abstrai uma sequência de operações ROS~2
 que seria custosa de implementar manualmente: \texttt{start\_\allowbreak record}, por exemplo,
-limpa o buffer de poses, ativa o estado de gravação e registra o timestamp de início
---- tudo de forma atômica, sem expor esses detalhes ao chamador.
+limpa o buffer de poses, ativa o estado de gravação e registra o timestamp de início,
+tudo de forma atômica, sem expor esses detalhes ao chamador.
 
 A gestão de múltiplos robôs em modo paralelo requereu uma solução não trivial para
 o TF: o SLAM de cada robô publica sua cadeia de transformações em um tópico
@@ -144,7 +144,7 @@ evitar deadlocks: os callbacks de serviço que invocam \texttt{wait\_\allowbreak
 do action client Nav2 precisam ocorrer em threads separadas das que processam
 as respostas de descoberta automática de nós do DDS \cite{macenski2022ros2}. A
 versão inicial com executor single-thread manifestava timeouts intermitentes em
-chamadas de \texttt{go\_\allowbreak to\_\allowbreak point} exatamente por esse motivo --- uma
+chamadas de \texttt{go\_\allowbreak to\_\allowbreak point} exatamente por esse motivo, uma
 manifestação específica do ROS~2 da mesma classe geral de defeitos de
 concorrência e comunicação já documentada em sistemas ROS~1 por
 \citeonline{timperley2024}.
@@ -182,7 +182,7 @@ enquanto o robô se desloca entre pontos.
 \end{table}
 
 Note-se que uma falha de navegação durante uma gravação em curso não interrompe
-a gravação --- o robô retorna a \texttt{recording} e o próximo comando do
+a gravação: o robô retorna a \texttt{recording} e o próximo comando do
 \textit{script} de experimento pode prosseguir ou abortar de acordo com sua
 própria lógica de contagem de falhas (\texttt{fails}, Apêndice~\ref{ap:cli_reference}).
 Essa escolha de design isola a responsabilidade de decidir se uma falha de
@@ -198,7 +198,7 @@ A separação em relação ao orquestrador é uma escolha arquitetural deliberad
 coleta e navegação são responsabilidades distintas e podem falhar independentemente.
 Serviços de \texttt{enable\_\allowbreak collection} e \texttt{disable\_\allowbreak collection} permitem
 controlar o início e fim da gravação com granularidade por robô, retornando o
-caminho do arquivo bag gerado na resposta --- o que elimina a necessidade de
+caminho do arquivo bag gerado na resposta, o que elimina a necessidade de
 inferência posterior sobre qual arquivo corresponde a qual execução.
 
 A camada de QoS do coletor é a sua parte mais delicada. Tópicos de sensores
@@ -206,7 +206,7 @@ em simulação Gazebo usam \texttt{BEST\_\allowbreak EFFORT}, enquanto o SLAM To
 \cite{macenski2021slam} usa \texttt{RELIABLE + VOLATILE} e o AMCL usa
 \texttt{RELIABLE + TRANSIENT\_\allowbreak LOCAL}. Assinar um tópico \texttt{RELIABLE} com
 um subscriber \texttt{BEST\_\allowbreak EFFORT} resulta em incompatibilidade silenciosa de
-QoS --- o subscriber nunca recebe mensagens, mas nenhum erro é reportado
+QoS: o subscriber nunca recebe mensagens, mas nenhum erro é reportado
 \cite{macenski2022ros2}. A implementação cria perfis de QoS distintos por
 categoria de tópico, eliminando essa fonte de dados ausentes.
 
@@ -222,12 +222,12 @@ para novos usuários.
 
 O backend também mantém um subscriber ROS~2 nativo para os tópicos de status
 (\texttt{/\allowbreak fleet/\allowbreak status}), mapa (\texttt{/\allowbreak map}) e pose (\texttt{/\allowbreak tf}), que são
-servidos diretamente via REST --- o frontend faz polling de status e pose a
+servidos diretamente via REST. O frontend faz polling de status e pose a
 300\,ms de intervalo e do mapa a 1500\,ms, intervalo mais espaçado por se
 tratar de um payload maior, que varia com menor frequência. O mapa
-\texttt{OccupancyGrid} \cite{elfes1989} é convertido para PNG RGBA em memória --- células livres
-em creme, ocupadas em azul-escuro, desconhecidas em azul-cinza --- e retornado
-como base64 ao frontend, que o renderiza em um canvas HTML5.
+\texttt{OccupancyGrid} \cite{elfes1989} é convertido para PNG RGBA em memória
+(células livres em creme, ocupadas em azul-escuro, desconhecidas em azul-cinza)
+e retornado como base64 ao frontend, que o renderiza em um canvas HTML5.
 
 A interface web permite que pesquisadores definam waypoints clicando no mapa SLAM
 ao vivo, selecionem percursos predefinidos para testes padronizados, iniciem
@@ -242,7 +242,7 @@ Sobre essa arquitetura de cinco camadas foi construída, posteriormente, uma
 camada de agentes de IA (\texttt{backend/\allowbreak agents/}) que permite substituir a
 interação direta com a interface web por instruções em linguagem natural. Um
 agente decide \textit{o quê} fazer; a execução em si continua passando pelos
-mesmos endpoints REST que o frontend já usa --- o agente nunca fala com
+mesmos endpoints REST que o frontend já usa: o agente nunca fala com
 ROS~2 diretamente, o que limita o raio de ação de uma eventual alucinação do
 modelo ao conjunto de ferramentas explicitamente exposto a ele.
 
@@ -252,7 +252,7 @@ A camada é dividida em três componentes. O \texttt{Planner}
 sequência de chamadas de ferramenta e devolve o texto final mais o histórico
 de passos executados. O \texttt{Executor}
 (\texttt{backend/\allowbreak agents/\allowbreak executor.py}) é a única fronteira HTTP entre o
-agente e o Fleet UI --- cada um de seus métodos corresponde a um endpoint já
+agente e o Fleet UI: cada um de seus métodos corresponde a um endpoint já
 existente (\texttt{/\allowbreak api/\allowbreak go\_\allowbreak to\_\allowbreak point},
 \texttt{/\allowbreak api/\allowbreak start\_\allowbreak record}, \texttt{/\allowbreak api/\allowbreak run\_\allowbreak campaign},
 entre outros), incluindo um \texttt{wait\_\allowbreak for\_\allowbreak job} que faz \textit{polling}
@@ -275,7 +275,7 @@ depende do modelo "se comportar": \texttt{Planner} aceita um parâmetro
 opcional \texttt{robot\_\allowbreak id} e, quando definido, todo \texttt{tool\_\allowbreak input}
 que contém \texttt{robot\_\allowbreak id} (ou \texttt{config.\allowbreak robot}, no caso de
 \texttt{run\_\allowbreak experiment}) é reescrito à força para esse valor antes de
-qualquer chamada real, em \texttt{\_scope\_\allowbreak input()} --- mesmo que o modelo
+qualquer chamada real, em \texttt{\_scope\_\allowbreak input()}, mesmo que o modelo
 peça outro robô. O endpoint \texttt{POST~/\allowbreak api/\allowbreak agent/\allowbreak run\_\allowbreak fleet}
 recebe um mapa \{robô: instrução\} e roda um \texttt{Planner} escopado por robô
 para cada entrada em paralelo, como agentes independentes, sem coordenação
@@ -286,7 +286,7 @@ entre si. O histórico dessas execuções é persistido em disco
 Uma alternativa de design seria expor as mesmas ferramentas do
 \texttt{Executor} por um servidor MCP (\textit{Model Context Protocol})
 genérico, de modo que qualquer cliente LLM externo (Claude Desktop, Codex)
-pudesse consumi-las, não apenas o \texttt{Planner} interno --- caminho que o
+pudesse consumi-las, não apenas o \texttt{Planner} interno, caminho que o
 próprio registro de desenvolvimento do projeto já identifica como extensão
 natural. Essa generalização foi deliberadamente deixada fora do escopo desta
 dissertação: o objetivo aqui é um experimento único e controlado, em que
@@ -295,7 +295,7 @@ calling} da API da Anthropic, com o escopo por robô imposto internamente em
 \texttt{\_scope\_\allowbreak input()}. Esse acoplamento direto simplifica a
 implementação e manteve o controle do raio de ação do agente dentro do que
 esta dissertação precisava validar, ao custo de amarrar o framework a um
-único provedor de LLM --- um custo aceitável para a pergunta de pesquisa
+único provedor de LLM, um custo aceitável para a pergunta de pesquisa
 tratada aqui, mas que tornaria um servidor MCP genérico a escolha mais
 apropriada caso o objetivo fosse reutilização por clientes LLM de terceiros.
 
@@ -306,15 +306,15 @@ Antes deste painel, subir a simulação exigia abrir dois terminais e invocar
 manualmente os \textit{launch files} do ROS~2. O painel "Missão
 Coordenada" do frontend elimina essa etapa, permitindo escolher uma
 formação para a frota e lançar ou encerrar a simulação a partir de um
-único botão; a mecânica de processo por trás desse painel --- endpoints,
-gerenciamento dos processos de longa duração e leitura de log --- é
+único botão; a mecânica de processo por trás desse painel (endpoints,
+gerenciamento dos processos de longa duração e leitura de log) é
 descrita no Capítulo~\ref{chap:implementacao}
 (Seção~\ref{sec:impl_backend_simulacao}).
 
 A decisão de arquitetura relevante para este capítulo é não subir, no modo
 com múltiplos robôs, mais de uma pilha completa de Nav2 simultaneamente: o
-despacho de cada robô para seu ponto da formação é sequencial --- ativar a
-navegação, aguardar a conclusão, desativar --- antes de passar ao próximo
+despacho de cada robô para seu ponto da formação é sequencial (ativar a
+navegação, aguardar a conclusão, desativar) antes de passar ao próximo
 robô. Essa escolha troca paralelismo por estabilidade: a ativação
 simultânea de duas ou mais pilhas completas de Nav2/SLAM~Toolbox nessa
 configuração reproduziu, durante o desenvolvimento, o sintoma do relógio
@@ -333,6 +333,6 @@ de QoS diferenciados para garantir integridade dos bags, e a separação entre
 orquestrador e coletor para permitir falhas independentes. Sobre essa base, a camada
 de agentes de IA descrita na Seção~\ref{sec:agentes} foi construída inteiramente por
 cima da API REST já existente, sem alterar o orquestrador ROS~2 ou o coletor de
-dados --- uma confirmação prática de que a separação em camadas cumpriu seu papel de
+dados, uma confirmação prática de que a separação em camadas cumpriu seu papel de
 permitir extensões futuras sem retrabalho na base. O próximo capítulo descreve
 como essa arquitetura é usada no protocolo experimental de repetibilidade.

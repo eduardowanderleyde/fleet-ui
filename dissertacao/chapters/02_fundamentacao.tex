@@ -24,7 +24,7 @@ v = \frac{v_R + v_L}{2}, \quad \omega = \frac{v_R - v_L}{L}
 \end{equation}
 
 \noindent onde $L$ é a distância entre as rodas (wheelbase). A integração dessas
-velocidades ao longo do tempo produz a estimativa de pose $(x, y, \theta)$ --- o
+velocidades ao longo do tempo produz a estimativa de pose $(x, y, \theta)$, o
 que é denominado \textit{dead reckoning} ou odometria de roda.
 
 \subsection{Acúmulo de Erro de Odometria}
@@ -48,7 +48,7 @@ A odometria por integração é inerentemente propensa a erros acumulados
 
 Para robôs de acionamento diferencial em superfície regular, erros de odometria pura
 da ordem de 5--10\% do percurso total são típicos \cite{siegwart2011}. Percursos de
-5\,m podem acumular até 50\,cm de erro de posição sem correção externa --- tornando o SLAM
+5\,m podem acumular até 50\,cm de erro de posição sem correção externa, tornando o SLAM
 indispensável para experimentos que exijam repetibilidade sub-decimétrica.
 
 \section{Localização e Mapeamento Simultâneos (SLAM)}
@@ -74,11 +74,11 @@ e minimizam a energia do grafo via otimização esparsa.
 Uma terceira família algorítmica clássica, o EKF-SLAM (\textit{Extended Kalman
 Filter SLAM}), aproxima a mesma distribuição pelo filtro de Kalman estendido,
 representando a pose do robô e os marcos do mapa em um único vetor de estado
-gaussiano \cite{thrun2005}. Esta dissertação não emprega EKF-SLAM --- o SLAM
+gaussiano \cite{thrun2005}. Esta dissertação não emprega EKF-SLAM. O SLAM
 Toolbox, adotado como ferramenta de mapeamento (Seção~\ref{sec:slam_toolbox}),
-pertence à família baseada em grafos ---, mas introduz o conceito aqui porque
-ele é retomado como uma das três famílias algorítmicas dominantes na revisão de
-literatura do Capítulo~\ref{chap:relacionados}.
+pertence à família baseada em grafos; ainda assim, esta dissertação introduz o
+conceito aqui porque ele é retomado como uma das três famílias algorítmicas
+dominantes na revisão de literatura do Capítulo~\ref{chap:relacionados}.
 
 \subsection{A Cadeia TF no ROS~2}
 \label{sec:cadeia_tf}
@@ -113,7 +113,7 @@ Desenvolvida desde 2014 para corrigir limitações arquiteturais do ROS~1, foi
 construída sobre o protocolo DDS (\textit{Data Distribution Service}
 \cite{pardocastellote2003dds}), que lhe
 confere comunicação distribuída nativa, descoberta automática de nós, e suporte
-a múltiplos perfis de qualidade de serviço (QoS) --- um modelo de
+a múltiplos perfis de qualidade de serviço (QoS), um modelo de
 publicador/assinante cuja fundamentação geral antecede o DDS
 \cite{eugster2003pubsub}.
 
@@ -156,8 +156,8 @@ carrega parâmetros e aloca recursos; a transição \textit{inactive} $\to$
 O Nav2 usa extensivamente o lifecycle por meio do \texttt{lifecycle\_\allowbreak manager},
 que ativa os servidores de planejamento, controle e comportamento em sequência,
 verificando a saúde de cada um antes de prosseguir. Esse comportamento implica
-que uma chamada prematura a um action server de navegação --- antes da ativação
-completa --- resulta em timeout silencioso. O framework proposto nesta dissertação
+que uma chamada prematura a um action server de navegação, antes da ativação
+completa, resulta em timeout silencioso. O framework proposto nesta dissertação
 implementa espera explícita pelo sinal de ativação completa antes de qualquer
 operação de navegação.
 
@@ -209,7 +209,7 @@ aplicações com TurtleBot4 em CPU a versão CPU seja suficiente.
 \subsection{Actions de Navegação}
 \label{sec:actions}
 
-O Nav2 expõe sua funcionalidade via ROS~2 actions --- um protocolo assíncrono
+O Nav2 expõe sua funcionalidade via ROS~2 actions, um protocolo assíncrono
 que permite enviar uma meta, receber feedback periódico e cancelar execuções em
 andamento. Os dois actions centrais para este trabalho são:
 
@@ -247,8 +247,8 @@ Essa assincronia de três estágios tem uma implicação direta de implementaç�
 discutida em detalhe na Seção~\ref{sec:impl_orquestrador}. O orquestrador usa o
 mesmo mecanismo de \textit{callback} tanto para atualizar o estado interno
 do robô (\texttt{nav\_\allowbreak state}) quanto para decidir se uma pose deve ser salva
-durante uma gravação; um erro na composição desses \textit{callbacks} --- por
-exemplo, tratar \texttt{ACCEPTED} como se fosse \texttt{SUCCEEDED} --- resultaria
+durante uma gravação; um erro na composição desses \textit{callbacks} (por
+exemplo, tratar \texttt{ACCEPTED} como se fosse \texttt{SUCCEEDED}) resultaria
 em poses gravadas antes que o robô de fato tivesse alcançado o destino. A
 implementação evita esse erro condicionando a gravação exclusivamente ao
 \textit{callback} de resultado, nunca ao de aceitação (Código~\ref{lst:start_stop_record}
@@ -262,11 +262,11 @@ Seção~\ref{sec:impl_orquestrador}, o implementa).
 Enquanto o SLAM Toolbox (Seção~\ref{sec:slam_toolbox}) resolve o problema de
 \emph{construir} o mapa e estimar a pose simultaneamente, uma parcela relevante
 dos sistemas de navegação autônoma opera com um mapa já conhecido e resolve
-apenas o subproblema de localização --- estimar a pose do robô dado um mapa
+apenas o subproblema de localização: estimar a pose do robô dado um mapa
 fixo e um fluxo de observações sensoriais ruidosas. Esse é o papel do AMCL
 (\textit{Adaptive Monte Carlo Localization}), o localizador padrão empacotado
-com o Nav2. Esta dissertação não o utiliza --- opera com SLAM Toolbox
-(Seção~\ref{sec:slam_toolbox}) ao vivo durante toda a campanha --- mas o
+com o Nav2. Esta dissertação não o utiliza: opera com SLAM Toolbox
+(Seção~\ref{sec:slam_toolbox}) ao vivo durante toda a campanha; mas o
 introduz aqui como contraponto teórico ao filtro de partículas e como
 proposta de trabalho futuro (Seção~\ref{sec:futuros}), discutida ao final
 desta seção.
@@ -281,25 +281,25 @@ Kalman resolve de forma fechada sob hipóteses de linearidade e ruído gaussiano
 cada partícula, e a etapa de atualização repondera as partículas pela
 verossimilhança da observação. A vantagem do filtro de partículas sobre o
 filtro de Kalman clássico é justamente dispensar a hipótese de linearidade do
-modelo de observação --- o modelo de \textit{laser scan matching} contra um
+modelo de observação: o modelo de \textit{laser scan matching} contra um
 mapa de ocupação é fortemente não linear e multimodal (múltiplas poses podem
 explicar igualmente bem a mesma leitura de LiDAR em ambientes com simetria,
-como corredores repetidos de um armazém) --- às custas de um custo
+como corredores repetidos de um armazém), às custas de um custo
 computacional proporcional a $M$, tipicamente na ordem de centenas a milhares
 de partículas.
 
 Essa distinção tem relevância direta para o framework proposto, ainda que por um
 motivo mais sutil do que uma leitura superficial da literatura sugeriria.
 \citeonline{hamer2025} (discutida na Seção~\ref{sec:rel_es}) comparam o custo
-computacional de quatro algoritmos de SLAM entre si --- não SLAM contra AMCL --- e
+computacional de quatro algoritmos de SLAM entre si (não SLAM contra AMCL) e
 mostram que o paradigma grafo-vs-filtro não é, isoladamente, um bom preditor de
 custo: o Cartographer, baseado em grafos, foi o mais caro em CPU (cerca de 43\% em
 um Raspberry Pi~4) por fundir dados de IMU e realizar refinamento de mapa e
 fechamento de laços, enquanto o Karto, também baseado em grafos, foi o algoritmo
 mais eficiente do estudo em todas as métricas avaliadas. O fator determinante
 identificado pelos autores é o conjunto de escolhas de projeto de cada
-implementação --- fusão sensorial, frequência de publicação de mensagens,
-refinamento de mapa --- não a família algorítmica em si.
+implementação (fusão sensorial, frequência de publicação de mensagens,
+refinamento de mapa), não a família algorítmica em si.
 
 Mesmo assim, o argumento estrutural desta dissertação para preferir AMCL com mapa
 pré-construído em sessões experimentais longas permanece válido por um motivo mais
@@ -307,8 +307,8 @@ elementar, independente do algoritmo específico de SLAM utilizado: SLAM precisa
 manter e expandir continuamente uma representação do ambiente (grafo de poses,
 submapas, fechamento de laços) enquanto localiza o robô, ao passo que o AMCL
 localiza um robô já posicionado sobre um mapa finalizado, com um conjunto de
-partículas de tamanho fixo. Essa diferença estrutural --- construir e otimizar um
-mapa versus apenas localizar-se nele --- motiva a proposta, discutida como trabalho
+partículas de tamanho fixo. Essa diferença estrutural (construir e otimizar um
+mapa versus apenas localizar-se nele) motiva a proposta, discutida como trabalho
 futuro na Seção~\ref{sec:futuros} a partir da variabilidade observada nos
 experimentos exploratórios da Seção~\ref{sec:res_exp_complementares}.
 
@@ -367,7 +367,7 @@ tópico \texttt{/\allowbreak odom} via bridge ROS-Gazebo. A frequência típica 
 A IMU (\textit{Inertial Measurement Unit}) do Create3 publica aceleração linear
 e velocidade angular a até 200\,Hz como \texttt{sensor\_\allowbreak msgs/\allowbreak msg/\allowbreak Imu}. Em experimentos
 de repetibilidade, a variância da aceleração durante o percurso serve como indicador
-indireto de instabilidade --- vibração acima do esperado pode indicar superfícies
+indireto de instabilidade: vibração acima do esperado pode indicar superfícies
 irregulares ou acelerações abruptas do controlador \cite{siegwart2011}.
 
 \section{Coordenação Multi-Robô}
@@ -376,7 +376,7 @@ irregulares ou acelerações abruptas do controlador \cite{siegwart2011}.
 Sistemas com múltiplos robôs introduzem um problema que não existe para um único
 robô: como distribuir esforço e decisão entre as unidades. A literatura clássica
 de sistemas multi-robô organiza esse espaço de projeto, entre outras dimensões,
-pela arquitetura de controle --- centralizada, em que um coordenador único
+pela arquitetura de controle: centralizada, em que um coordenador único
 concentra a decisão e a distribui aos robôs, ou descentralizada, em que cada
 robô decide localmente a partir de informação parcial e comunicação direta com
 seus vizinhos, sem um ponto único de controle \cite{farinelli2004}.
@@ -385,7 +385,7 @@ Um subproblema recorrente nessa coordenação é a alocação de tarefas multi-r
 (MRTA, \textit{Multi-Robot Task Allocation}): dado um conjunto de tarefas e um
 conjunto de robôs, decidir qual robô executa qual tarefa e em qual ordem,
 respeitando restrições de capacidade de cada unidade \cite{gerkey2004}. Essas
-duas dimensões --- arquitetura de controle e alocação de tarefas --- fornecem o
+duas dimensões (arquitetura de controle e alocação de tarefas) fornecem o
 vocabulário mínimo para situar, na revisão de literatura do
 Capítulo~\ref{chap:relacionados}, os sistemas de orquestração de frota
 existentes, e para contextualizar, no Capítulo~\ref{chap:arquitetura}, a
@@ -445,7 +445,7 @@ e_{\text{end}}(T_i, T_j) = \sqrt{(x_i^n - x_j^n)^2 + (y_i^n - y_j^n)^2}
 \end{equation}
 
 Um erro de endpoint pequeno com RMSE grande indica que os percursos chegam ao
-mesmo destino por caminhos diferentes --- comportamento aceitável para muitas
+mesmo destino por caminhos diferentes, comportamento aceitável para muitas
 aplicações de navegação. A relação entre as duas métricas caracteriza o
 tipo de variabilidade presente no sistema.
 
@@ -475,8 +475,8 @@ forma, bem abaixo de ambos os limiares.
 
 Este capítulo estabeleceu os fundamentos teóricos que sustentam a proposta desta
 dissertação, progressivamente da cinemática do robô às métricas de repetibilidade
-de trajetórias. A transição entre esses extremos --- de encoders de roda ao RMSE
-pairwise --- não é trivial; cada camada introduz abstrações, aproximações e fontes
+de trajetórias. A transição entre esses extremos (de encoders de roda ao RMSE
+pairwise) não é trivial; cada camada introduz abstrações, aproximações e fontes
 de erro que o framework proposto deve tratar explicitamente.
 
 O próximo capítulo examina como trabalhos existentes abordam partes desse problema,

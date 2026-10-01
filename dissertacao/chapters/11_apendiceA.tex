@@ -4,7 +4,7 @@
 Este apêndice documenta, na íntegra e sem alterações em relação ao repositório
 público do projeto (pacote \texttt{fleet\_\allowbreak msgs}, versão 0.1.0), as duas mensagens
 e os dez serviços que compõem a interface de comunicação entre o orquestrador de
-frota, o coletor de dados e os demais clientes ROS~2 do framework --- incluindo o
+frota, o coletor de dados e os demais clientes ROS~2 do framework, incluindo o
 backend REST descrito na Seção~\ref{sec:impl_backend_ponte}. Do total de dez
 serviços, sete (\texttt{start\_\allowbreak record}, \texttt{stop\_\allowbreak record}, \texttt{play\_\allowbreak route},
 \texttt{go\_\allowbreak to\_\allowbreak point}, \texttt{cancel}, \texttt{list\_\allowbreak robots} e \texttt{list\_\allowbreak routes})
@@ -152,7 +152,7 @@ string message
 A Tabela~\ref{tab:fleet_msgs_sintese} resume as dez interfaces de serviço por
 domínio de responsabilidade e presença de campos de identificação de robô,
 evidenciando que \texttt{robot\_\allowbreak id} é o único parâmetro obrigatório comum a
-praticamente toda a interface --- um reflexo direto da decisão de design de
+praticamente toda a interface, um reflexo direto da decisão de design de
 tratar cada robô como um sujeito experimental endereçável independentemente
 (Seção~\ref{sec:papeis}), inclusive no caso especial \texttt{robot\_\allowbreak id = ""},
 usado para o robô \textit{default} em execuções de um único MUUT sem

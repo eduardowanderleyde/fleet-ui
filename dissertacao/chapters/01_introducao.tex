@@ -9,8 +9,8 @@ finalmente chegam ao alcance de todos.''}{\normalfont --- adaptado de Max Planck
 \label{sec:motivacao}
 
 A robótica autônoma atravessa um momento singular em sua história. A convergência de
-plataformas de software maduras --- especialmente o ROS~2 \cite{macenski2022ros2}
---- com hardware acessível e simuladores de alta fidelidade tornou possível, pela
+plataformas de software maduras, especialmente o ROS~2 \cite{macenski2022ros2},
+com hardware acessível e simuladores de alta fidelidade tornou possível, pela
 primeira vez, que grupos de pesquisa sem grandes laboratórios físicos conduzam
 experimentos de navegação com rigor comparável ao de instituições bem equipadas.
 O que antes exigia uma sala climatizada, técnicos especializados e robôs industriais
@@ -22,7 +22,7 @@ metodológico equivalente. Enquanto os componentes técnicos se tornaram mais ac
 os procedimentos que tornam um experimento reprodutível permaneceram informais,
 específicos por equipe, raramente documentados e quase nunca transferíveis
 \cite{amigoni2014}. A questão
-não é mais \textit{se} um pesquisador consegue fazer um robô navegar --- é se consegue
+não é mais \textit{se} um pesquisador consegue fazer um robô navegar: é se consegue
 fazer isso de uma forma que outro pesquisador possa verificar.
 
 A comunidade de robótica reconhece essa lacuna metodológica há mais de uma
@@ -32,8 +32,8 @@ trata como sinônimos, mas que não o são \cite{acm2020badging}. \textbf{Repeti
 mesmo sistema, no mesmo ambiente, sob as mesmas condições, de produzir
 resultados equivalentes em execuções sucessivas. \textbf{Reprodutibilidade}, em
 sentido mais forte, é a capacidade de um investigador independente, em outro
-ambiente, obter resultados equivalentes a partir do mesmo artefato de pesquisa
---- código, dados e protocolo publicados \cite{amigoni2010}. Repetibilidade é
+ambiente, obter resultados equivalentes a partir do mesmo artefato de pesquisa,
+isto é, código, dados e protocolo publicados \cite{amigoni2010}. Repetibilidade é
 condição necessária, mas não suficiente, para reprodutibilidade: um sistema
 pode ser perfeitamente repetível em um único laboratório e, ainda assim, nunca
 ter sido reproduzido por ninguém fora dele.
@@ -45,12 +45,12 @@ todos os sensores coletados de forma síncrona e com a mesma configuração; e
 (iv) tenha as trajetórias resultantes comparadas por um método que não
 introduza vieses de análise. Cada um desses requisitos, isoladamente, é
 simples. Satisfazê-los simultaneamente, de forma automática e reutilizável, é
-o ponto em que a literatura apresenta uma lacuna persistente --- e é
+o ponto em que a literatura apresenta uma lacuna persistente, e é
 exatamente a repetibilidade, nesse sentido preciso, o que esta dissertação
 avalia empiricamente (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados}). O
-framework proposto busca \emph{favorecer} reprodutibilidade --- por meio de
+framework proposto busca \emph{favorecer} reprodutibilidade, por meio de
 código aberto, protocolo documentado e artefatos de saída estruturados
-(Seção~\ref{sec:rel_reprodutibilidade}) --- mas essa dissertação não conduziu
+(Seção~\ref{sec:rel_reprodutibilidade}), mas essa dissertação não conduziu
 nem observou replicação independente por outro pesquisador ou laboratório;
 a Seção~\ref{sec:repro_vs_repet} retoma essa distinção à luz dos resultados
 obtidos.
@@ -60,7 +60,7 @@ erro médio de 8\,cm'', sem especificar se essa é a média de 3 ou 30 execuçõ
 desvio padrão foi medido, ou se a comparação com trabalhos anteriores usa a mesma
 métrica, a contribuição científica se torna não verificável \cite{amigoni2014}. A
 acumulação de resultados não reprodutíveis na literatura não é apenas um problema
-acadêmico --- é um obstáculo para a transferência de tecnologia para aplicações
+acadêmico: é um obstáculo para a transferência de tecnologia para aplicações
 industriais que dependem de garantias comportamentais precisas \cite{bonsignorio2015}.
 
 \section{O Problema Central: Crise de Orquestração Experimental}
@@ -69,7 +69,7 @@ industriais que dependem de garantias comportamentais precisas \cite{bonsignorio
 Esta dissertação identifica e nomeia um problema específico que perpassa a robótica
 experimental contemporânea: a \textbf{crise de orquestração experimental}. Trata-se
 da dificuldade estrutural em coordenar, de forma automática e repetível, as múltiplas
-camadas de um experimento de navegação autônoma --- inicialização do ambiente de
+camadas de um experimento de navegação autônoma: inicialização do ambiente de
 simulação, ativação da pilha de navegação com tempo de espera correto, definição e
 execução de rotas, coleta síncrona de múltiplos sensores com políticas de QoS adequadas,
 e análise quantitativa comparável entre execuções.
@@ -102,13 +102,13 @@ dissertação propõe nomear como \textbf{crise de orquestração experimental} 
 portanto, um sinônimo para "falta de reprodutibilidade" em geral, já nomeada por
 esses trabalhos. É algo mais específico: o problema de \emph{coordenação
 multi-camada} entre mecanismos de execução que operam em paralelo, com
-semânticas próprias e pouco compatíveis entre si --- o lifecycle de nós do
+semânticas próprias e pouco compatíveis entre si: o lifecycle de nós do
 ROS~2, as políticas de QoS por tópico, o protocolo assíncrono de ações do Nav2
 e a convergência incerta do SLAM. A dificuldade não está em cada camada
 isoladamente, nem apenas em registrar o que foi feito, mas em fazer essas
 camadas heterogêneas operarem em sequência correta de forma automática e
-repetível, sem intervenção manual entre fases. É esse problema de coordenação
---- e não a reprodutibilidade em sentido geral --- que o framework proposto
+repetível, sem intervenção manual entre fases. É esse problema de coordenação,
+e não a reprodutibilidade em sentido geral, que o framework proposto
 nesta dissertação visa resolver.
 
 \section{O Papel da Robótica de Frota nos Experimentos Modernos}
@@ -121,15 +121,15 @@ não oferece: enquanto uma Unidade Móvel sob Teste (MUUT) percorre sua rota, um
 Unidade Fixa sob Teste (FUUT) pode observar a mesma cena de um ângulo externo,
 coletando dados independentes que funcionam como fonte de verdade alternativa.
 
-Essa dualidade de perspectivas --- endógena (o que o robô vê de si mesmo) e exógena
-(o que um observador fixo vê do robô) --- enriquece substancialmente a análise de
+Essa dualidade de perspectivas, endógena (o que o robô vê de si mesmo) e exógena
+(o que um observador fixo vê do robô), enriquece substancialmente a análise de
 repetibilidade. Pequenas variações de trajetória que seriam invisíveis à odometria
 interna do MUUT podem ser capturadas pelos scans do FUUT como variações na posição
 relativa do robô ao passar em frente ao sensor.
 
 O framework proposto nesta dissertação formaliza esse design experimental com uma
 arquitetura de papéis explícita, garantindo que as regras de cada tipo de unidade
-sejam verificadas em software --- não apenas documentadas no protocolo.
+sejam verificadas em software, não apenas documentadas no protocolo.
 
 \section{Escopo e Restrições}
 \label{sec:escopo}
@@ -141,9 +141,9 @@ garante condições perfeitamente controladas mas abstrai os fenômenos físicos
 superfícies reais, slip de roda e variação de calibração de sensores ao longo do
 tempo.
 
-Embora a Seção~\ref{sec:frota} discuta o papel da robótica de frota --- e a
+Embora a Seção~\ref{sec:frota} discuta o papel da robótica de frota, e a
 arquitetura de papéis MUUT/FUUT/SU seja formalizada para suportar múltiplas
-unidades --- a avaliação empírica conduzida nesta dissertação (Capítulos~\ref{chap:avaliacao}
+unidades, a avaliação empírica conduzida nesta dissertação (Capítulos~\ref{chap:avaliacao}
 e~\ref{chap:resultados}) restringe-se a uma única unidade móvel sob teste (MUUT),
 sem unidade fixa (FUUT) ativa durante a campanha de validação e sem operação
 simultânea de múltiplos robôs. A dualidade de perspectivas endógena/exógena e a
@@ -152,7 +152,7 @@ verificadas em software, não resultados empíricos cobertos pela avaliação de
 repetibilidade; a extensão da avaliação para múltiplos robôs é tratada como
 trabalho futuro (Seção~\ref{sec:futuros}).
 
-As métricas adotadas --- RMSE, erro de endpoint e consistência temporal --- são
+As métricas adotadas (RMSE, erro de endpoint e consistência temporal) são
 métricas espaciotemporais clássicas para avaliação de navegação \cite{amigoni2010},
 mas não capturam aspectos como consumo energético, desgaste mecânico ou robustez
 a falhas de comunicação. Essas dimensões constituem extensões naturais do trabalho,
@@ -205,7 +205,7 @@ uma hipótese de trabalho (H) verificada empiricamente nos capítulos de
 Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados}).
 
 \begin{description}
-    \item[PP1 --- Automação de protocolo.] É possível automatizar integralmente
+    \item[PP1: Automação de protocolo.] É possível automatizar integralmente
     o protocolo de gravação--reprodução de rotas em uma frota heterogênea de
     robôs ROS~2, sem intervenção manual entre fases, preservando a semântica
     de papéis experimentais (MUUT/FUUT/SU)?
@@ -213,14 +213,14 @@ Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados
     (Seção~\ref{sec:orquestrador}), combinado a um script orquestrador de
     linha de comando, é suficiente para expressar, sem código adicional por
     experimento, a classe de protocolos de record--replay efetivamente
-    testados nesta dissertação --- isto é, protocolos construídos pela
+    testados nesta dissertação, isto é, protocolos construídos pela
     composição dos serviços \texttt{go\_\allowbreak to\_\allowbreak point} e
     \texttt{play\_\allowbreak route} observados neste trabalho. A generalização dessa suficiência para
     \emph{qualquer} protocolo de record--replay, sobre outras rotas, robôs
     ou plataformas, não foi testada e é tratada como conjectura a explorar
     em trabalhos futuros (Seção~\ref{sec:futuros}).
 
-    \item[PP2 --- Repetibilidade mensurável.] Qual é o grau de repetibilidade
+    \item[PP2: Repetibilidade mensurável.] Qual é o grau de repetibilidade
     espacial (RMSE) e temporal (CV$_t$) de execuções de replay sucessivas sobre
     a mesma rota, sob controlador e SLAM padrão do Nav2/SLAM Toolbox?
     \textbf{H2}: em condições de simulação controlada, o RMSE inter-replay é
@@ -229,13 +229,13 @@ Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados
     cenário avaliado, sem generalizar esse comportamento para todas as rotas,
     ambientes ou configurações do Nav2 (Seção~\ref{sec:mppi}).
 
-    \item[PP3 --- Persistência da repetibilidade fora do regime estritamente
+    \item[PP3: Persistência da repetibilidade fora do regime estritamente
     controlado.] A baixa variabilidade observada sob o protocolo controlado
     (mesma ação de navegação, pose inicial fixa, $N=10$ na campanha final) se
     mantém quando as condições de execução são menos controladas?
-    \textbf{H3}: espera-se que execuções fora do protocolo formal --- sem
+    \textbf{H3}: espera-se que execuções fora do protocolo formal (sem
     controle explícito de ação de navegação, pose inicial e retorno ao ponto
-    de partida entre réplicas --- apresentem RMSE e variabilidade de duração
+    de partida entre réplicas) apresentem RMSE e variabilidade de duração
     substancialmente maiores que a campanha controlada final. Esta dissertação não
     hipotetiza, a priori, uma causa única para essa diferença; a Seção
     ~\ref{sec:res_exp_complementares} discute evidência exploratória
@@ -250,7 +250,7 @@ Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados
     sentidos distintos: H2 por comparação direta com um limiar, H3 por
     análise descritiva e exploratória dos dados coletados.
 
-    \item[PP4 --- Custo de engenharia para o pesquisador.] O framework reduz
+    \item[PP4: Custo de engenharia para o pesquisador.] O framework reduz
     o esforço de engenharia necessário para configurar e executar um
     experimento de repetibilidade, em comparação com a composição manual de
     chamadas Nav2/rosbag2 descrita informalmente na literatura correlata

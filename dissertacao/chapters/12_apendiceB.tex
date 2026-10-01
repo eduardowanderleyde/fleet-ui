@@ -2,8 +2,8 @@
 \label{ap:cli_reference}
 
 Este apêndice documenta, com base no código-fonte publicado do projeto, os dois
-subcomandos de \texttt{experiment\_\allowbreak repeatability.py} (Seção~\ref{sec:impl_pipeline})
---- \texttt{record} e \texttt{replay} --- e seus parâmetros de linha de comando.
+subcomandos de \texttt{experiment\_\allowbreak repeatability.py} (Seção~\ref{sec:impl_pipeline}),
+\texttt{record} e \texttt{replay}, e seus parâmetros de linha de comando.
 Trata-se do mesmo script que a interface web invoca internamente por meio da
 função \texttt{\_\allowbreak build\_\allowbreak cmd} do backend (Seção~\ref{sec:impl_backend_ponte}); a
 documentação aqui serve tanto para uso direto via terminal quanto para leitura
@@ -36,11 +36,11 @@ recebida da UI.
 \end{tabularx}
 \end{table}
 
-O fluxo interno de \texttt{cmd\_\allowbreak record} --- habilitar coleta, chamar
+O fluxo interno de \texttt{cmd\_\allowbreak record} consiste em habilitar a coleta, chamar
 \texttt{start\_\allowbreak record}, aguardar disponibilidade de TF (\texttt{map} $\to$
-\texttt{base\_\allowbreak link}) e do costmap, então iterar sobre os pontos chamando
-\texttt{go\_\allowbreak to\_\allowbreak point} sequencialmente antes de finalmente chamar
-\texttt{stop\_\allowbreak record} e \texttt{disable\_\allowbreak collection} --- é o que garante que
+\texttt{base\_\allowbreak link}) e do costmap, iterar então sobre os pontos chamando
+\texttt{go\_\allowbreak to\_\allowbreak point} sequencialmente e, por fim, chamar
+\texttt{stop\_\allowbreak record} e \texttt{disable\_\allowbreak collection}; esse fluxo é o que garante que
 cada rota gravada corresponda a uma sequência de navegações efetivamente
 concluídas, e não apenas a metas enviadas: a espera pelo estado
 \texttt{navigating} e, em seguida, pelo retorno a \texttt{recording} após cada
@@ -69,7 +69,7 @@ sincroniza o script com o ciclo de vida assíncrono das \textit{actions} do Nav2
 \texttt{--skip-collection} & desativado & Idêntico ao subcomando \texttt{record}. \\
 \texttt{--export} & --- & Idêntico ao subcomando \texttt{record}. \\
 \texttt{--initial-pose} & --- & Idêntico ao subcomando \texttt{record}. \\
-\texttt{--return-to-start} & --- & Antes da coleta, navega para a pose \texttt{x,y,yaw} informada via \texttt{go\_\allowbreak to\_\allowbreak point} --- o mecanismo que implementa o retorno ao ponto de partida entre execuções de replay mencionado na Seção~\ref{sec:met_conclusao}. \\
+\texttt{--return-to-start} & --- & Antes da coleta, navega para a pose \texttt{x,y,yaw} informada via \texttt{go\_\allowbreak to\_\allowbreak point}, o mecanismo que implementa o retorno ao ponto de partida entre execuções de replay mencionado na Seção~\ref{sec:met_conclusao}. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -86,7 +86,7 @@ trajetória já gravada. O filtro de saltos impossíveis mencionado na
 Seção~\ref{sec:impl_pipeline} e a interpolação temporal da
 Seção~\ref{sec:interpolacao}, por sua vez, dizem respeito à etapa de
 \emph{análise} (\texttt{analyze\_\allowbreak runs.py}), não à etapa de \emph{coleta}
-documentada neste apêndice --- são portanto dois mecanismos de garantia de
+documentada neste apêndice; são portanto dois mecanismos de garantia de
 qualidade distintos, atuando em estágios diferentes do pipeline, e a nota de
 implementação da Seção~\ref{sec:impl_pipeline} refere-se especificamente ao
 segundo, não ao primeiro (que está de fato implementado e ativo sempre que

@@ -72,8 +72,8 @@ Um erro de endpoint pequeno com RMSE grande indica caminhos diferentes chegando
 ao mesmo destino.
 
 \item[\textbf{Filtro de Partículas}]
-Técnica de estimação bayesiana que aproxima uma distribuição de probabilidade
---- por exemplo, a pose de um robô --- por um conjunto finito de amostras
+Técnica de estimação bayesiana que aproxima uma distribuição de probabilidade,
+por exemplo, a pose de um robô, por um conjunto finito de amostras
 ponderadas (partículas), reponderadas e reamostradas a cada nova observação.
 Base algorítmica do AMCL.
 
@@ -123,7 +123,7 @@ e grava percursos experimentais. Recebe comandos de navegação do orquestrador.
 Pode haver múltiplas unidades MUUT por experimento.
 
 \item[\textbf{Nav2}]
-Navigation2 --- a pilha de navegação autônoma padrão para ROS~2, introduzida
+Navigation2, a pilha de navegação autônoma padrão para ROS~2, introduzida
 pelo \textit{Marathon 2} \cite{macenski2020marathon}. Composta por servidores
 de planejamento global, controle local, comportamentos de recuperação e um
 orquestrador por Behavior Trees.
@@ -141,7 +141,7 @@ Estimativa de pose de um robô derivada de sensores de movimento internos
 Conjunto de políticas que controlam o comportamento da comunicação entre nós
 ROS~2, incluindo confiabilidade (\textit{reliability}), durabilidade e histórico
 de mensagens. Incompatibilidades de QoS entre publicador e subscritor são
-silenciosas --- nenhuma mensagem é entregue sem aviso de erro.
+silenciosas, ou seja, nenhuma mensagem é entregue sem aviso de erro.
 
 \item[\textbf{Record--Replay}]
 Protocolo experimental do framework Fleet UI composto por duas fases:
@@ -154,7 +154,7 @@ da média dos quadrados das distâncias euclidianas ponto a ponto. Amplamente
 utilizada para avaliar repetibilidade de trajetórias em robótica experimental.
 
 \item[\textbf{ROS~2}]
-Robot Operating System 2 --- middleware de código aberto para desenvolvimento
+Robot Operating System 2, middleware de código aberto para desenvolvimento
 de aplicações robóticas, construído sobre o protocolo DDS. Versão Jazzy Jalisco
 (LTS) utilizada nesta dissertação.
 

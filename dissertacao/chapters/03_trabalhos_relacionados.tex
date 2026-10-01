@@ -21,8 +21,8 @@ dissertação pretende preencher.
 
 O trabalho mais diretamente relacionado a esta dissertação é a introdução do
 Nav2 no contexto do \textit{Marathon 2} \cite{macenski2020marathon}. O artigo
-descreve a arquitetura do Nav2 --- servidores de planejamento, controle e
-comportamento orquestrados por Behavior Trees --- e valida a pilha em mais de
+descreve a arquitetura do Nav2 (servidores de planejamento, controle e
+comportamento orquestrados por Behavior Trees) e valida a pilha em mais de
 60\,km (37,4 milhas) de navegação autônoma acumulada em um campus universitário
 dinâmico e povoado por pessoas, usando dois robôs profissionais (Tiago e RB-1),
 sem nenhuma colisão registrada ao longo de quase 23 horas de operação.
@@ -31,7 +31,7 @@ A contribuição é fundamental: demonstra que o Nav2 é maduro o suficiente par
 uso contínuo em ambientes não estruturados. No entanto, o critério de avaliação
 é agregado (distância total percorrida, número de intervenções humanas) e não
 inclui análise de consistência entre execuções individuais. O framework proposto
-nesta dissertação não questiona a qualidade do Nav2 --- constrói sobre ela para
+nesta dissertação não questiona a qualidade do Nav2: constrói sobre ela para
 responder perguntas que o Marathon 2 não se propôs a responder.
 
 \subsection{O Controlador Regulated Pure Pursuit}
@@ -39,7 +39,7 @@ responder perguntas que o Marathon 2 não se propôs a responder.
 \citeonline{macenski2023survey} apresentam o controlador Regulated Pure Pursuit para
 ROS~2, uma adaptação do clássico Pure Pursuit \cite{coulter1992} com regulação
 de velocidade adaptativa. O artigo demonstra rastreamento de trajetória com
-erro lateral médio abaixo de 5\,cm em curvas acentuadas --- uma métrica diretamente
+erro lateral médio abaixo de 5\,cm em curvas acentuadas, uma métrica diretamente
 relacionada à repetibilidade de percurso.
 
 A diferença em relação a esta dissertação é de escopo: o artigo avalia o desempenho
@@ -52,11 +52,11 @@ para o RMSE total observado.
 
 \citeonline{macenski2022ros2} realizam uma análise abrangente do ROS~2 cerca de
 cinco anos após seu primeiro lançamento estável (Ardent Apalone, dezembro de 2017).
-O artigo documenta cinco estudos de caso reais --- um robô terrestre com pernas
+O artigo documenta cinco estudos de caso reais: um robô terrestre com pernas
 (Ghost Robotics), uma embarcação de superfície autônoma para missões marinhas
 (Mission Robotics), um sistema de drones aéreos (Auterion), o rover lunar VIPER
-da NASA, e a orquestração de frotas industriais em larga escala (OTTO Motors)
---- demonstrando que o middleware escalou de um framework experimental para
+da NASA, e a orquestração de frotas industriais em larga escala (OTTO Motors),
+demonstrando que o middleware escalou de um framework experimental para
 infraestrutura de produção em domínios críticos e heterogêneos. Para esta
 dissertação, o artigo é a referência primária para o modelo de QoS, o protocolo
 de lifecycle e a arquitetura do DDS.
@@ -67,9 +67,9 @@ de lifecycle e a arquitetura do DDS.
 \subsection{A Taxonomia do SLAM}
 
 O tutorial em duas partes de \citeonline{durrantwhyte2006} e \citeonline{bailey2006}
-consolidou e popularizou a taxonomia do problema SLAM --- sua estrutura e
-resultado de convergência, demonstrados formalmente por \citeonline{dissanayake2001}
---- e forneceu uma análise sistemática abrangente das abordagens
+consolidou e popularizou a taxonomia do problema SLAM, cuja estrutura e
+resultado de convergência foram demonstrados formalmente por \citeonline{dissanayake2001},
+e forneceu uma análise sistemática abrangente das abordagens
 então existentes. Vinte anos depois, essa taxonomia permanece válida: filtros
 de partículas (Gmapping, AMCL), filtros de Kalman estendidos (EKF-SLAM), e grafos
 de poses (SLAM Toolbox, Cartographer) ainda são as três famílias algorítmicas
@@ -83,7 +83,7 @@ sistemas baseados em ROS, medindo consumo de energia, utilização de CPU e acur
 múltiplas execuções em que o mesmo robô alterna entre algoritmos em cenários
 ponto-a-ponto e circulares. O ponto metodológico mais relevante para esta
 dissertação é a utilização de múltiplas execuções do mesmo cenário, com análise
-de variabilidade entre execuções --- um embrião de análise de repetibilidade,
+de variabilidade entre execuções, um embrião de análise de repetibilidade,
 embora sem um protocolo formal de record--replay nem métricas de RMSE entre
 trajetórias.
 
@@ -106,7 +106,7 @@ Embora focado em mapeamento 3D com hardware de custo elevado, o artigo estabelec
 um conceito metodológico que esta dissertação adapta para navegação 2D: avaliar
 repetibilidade por comparação direta entre execuções nominalmente idênticas do
 mesmo percurso, em vez de comparar cada execução apenas contra um valor de
-referência único --- e a importância de reportar não apenas a média dos erros,
+referência único, além da importância de reportar não apenas a média dos erros,
 mas também o desvio-padrão entre execuções.
 
 \section{Avaliação de Repetibilidade em Robótica}
@@ -117,7 +117,7 @@ mas também o desvio-padrão entre execuções.
 \citeonline{amigoni2014} realizam um levantamento sistemático de como experimentos são
 conduzidos em artigos de robótica autônoma publicados na \textit{International Conference
 on Autonomous Agents and Multiagent Systems} (AAMAS) entre 2002 e 2012. Os resultados
-mostram que boa parte dos trabalhos ainda carece de rigor científico --- comparação
+mostram que boa parte dos trabalhos ainda carece de rigor científico: comparação
 estatística fraca (presente em pouco mais de um terço dos artigos que reportam apenas
 médias), baixa disponibilidade de código e dados publicados (a maioria dos links
 fornecidos está quebrada) e uso predominante de comparações apenas com variantes do
@@ -152,7 +152,7 @@ A coordenação de múltiplos robôs é taxonomizada, na literatura clássica da
 por duas dimensões centrais: o grau de acoplamento entre robôs (cooperação fraca
 ou forte) e a arquitetura de controle (centralizada, descentralizada ou híbrida)
 \cite{farinelli2004}. \citeonline{verma2021} atualizam essa taxonomia para a era
-de frotas conectadas, organizando o espaço de projeto em seis dimensões ---
+de frotas conectadas, organizando o espaço de projeto em seis dimensões:
 comunicação, planejamento, arquitetura de controle, escalabilidade e tomada de
 decisão, entre outras. O framework proposto nesta dissertação situa-se nesse
 espaço como uma arquitetura centralizada, com comunicação explícita entre coletor
@@ -161,8 +161,8 @@ geométrica ou consenso distribuído entre robôs, como em abordagens de control
 descentralizado \cite{cortes2017}.
 
 O ROS~2 provê os primitivos de comunicação necessários para sistemas multi-robô,
-mas não uma camada de orquestração de alto nível \cite{macenski2022ros2} ---
-lacuna que já era reconhecida antes do próprio ROS existir, quando o
+mas não uma camada de orquestração de alto nível \cite{macenski2022ros2},
+lacuna já reconhecida antes do próprio ROS existir, quando o
 Player/Stage \cite{gerkey2003playerstage} se propôs como ferramenta genérica
 para sistemas multi-robô e de sensores distribuídos. Propostas
 como o Fleet Management do Open RMF (Open Robotics Middleware Framework) abordam o
@@ -177,8 +177,8 @@ levantamentos de meia década que consolidam esse corpo de trabalho
 estratégias de exploração cooperativa terrestre com recuperação automática de
 falhas de robôs \cite{yan2023} e sistemas de gestão de frota baseados em
 plataformas de \textit{cloud robotics} \cite{singhal2017}, ambos ilustrando esse
-mesmo foco em eficiência operacional --- atribuição de tarefas, monitoramento,
-escalonamento --- em vez de repetibilidade, na mesma linha dos trabalhos
+mesmo foco em eficiência operacional (atribuição de tarefas, monitoramento,
+escalonamento) em vez de repetibilidade, na mesma linha dos trabalhos
 clássicos de coordenação de exploração multi-robô que a precedem
 \cite{burgard2000exploration, fox2006multirobot}.
 
@@ -191,13 +191,13 @@ em sentido oposto, uma linguagem de programação declarativa dedicada à
 orquestração de times heterogêneos de robôs, abstraindo o sequenciamento de
 tarefas em tempo de execução em vez de expressá-lo como infraestrutura. O
 Robofleet \cite{sikand2021} oferece um sistema leve de comunicação e
-monitoramento remoto para frotas ROS, com foco em resiliência de rede --- um dos
+monitoramento remoto para frotas ROS, com foco em resiliência de rede, um dos
 trabalhos mais próximos em espírito ao framework proposto nesta dissertação,
 embora sem protocolo de repetibilidade experimental. Em um sentido ainda mais
 amplo do termo, a orquestração conjunta de robôs e infraestrutura de rede também
 aparece na integração de ROS com redes 5G \cite{romero2023}, e o controle de
-formação de robôs --- outro subtema recorrente sob o guarda-chuva de
-``orquestração de frotas'' --- foi tratado via otimização com restrições para
+formação de robôs, outro subtema recorrente sob o guarda-chuva de
+``orquestração de frotas'', foi tratado via otimização com restrições para
 transporte cooperativo de objetos \cite{alonsomora2017}.
 
 A distinção é fundamental e define o posicionamento desta dissertação: um sistema
@@ -221,13 +221,13 @@ distribuída e tolerante a falhas, na qual cada robô monitora a atividade dos
 demais e assume tarefas abandonadas sem negociação explícita com um
 coordenador. O framework proposto nesta dissertação segue a direção oposta:
 aceita deliberadamente uma arquitetura centralizada como ponto único de
-controle experimental --- o que facilita a auditoria e a reprodução de cada
-execução --- e endereça o não-determinismo não por redundância distribuída
+controle experimental, o que facilita a auditoria e a reprodução de cada
+execução, e endereça o não-determinismo não por redundância distribuída
 entre robôs, mas por mitigação de software no próprio coordenador.
 
-Essa mitigação se traduz em estratégias concretas de software --- espera
+Essa mitigação se traduz em estratégias concretas de software: espera
 explícita pela ativação do Nav2, cooldown entre fases do experimento, e filtro de
-saltos impossíveis na odometria --- que não eliminam, contudo, a fonte
+saltos impossíveis na odometria, que não eliminam, contudo, a fonte
 fundamental do não-determinismo, residente no sistema operacional de tempo
 compartilhado.
 
@@ -236,8 +236,8 @@ compartilhado.
 
 A maioria das interfaces de operação para robôs autônomos é baseada no RViz2,
 uma ferramenta de visualização que requer instalação local do ROS~2 e não oferece
-acesso remoto nativo. Alternativas web existem --- Foxglove Studio, Robot Web
-Tools \cite{toris2015} --- mas requerem o ROSBridge WebSocket server, adicionando
+acesso remoto nativo. Alternativas web existem, como Foxglove Studio e Robot Web
+Tools \cite{toris2015}, mas requerem o ROSBridge WebSocket server, adicionando
 uma camada de configuração e um ponto de falha ao sistema. O próprio Robot Web
 Tools, na origem do protocolo rosbridge amplamente adotado por essas alternativas,
 foi projetado como uma arquitetura cliente-servidor voltada à robótica em nuvem e
@@ -245,8 +245,8 @@ foi projetado como uma arquitetura cliente-servidor voltada à robótica em nuve
 objetivo mais amplo do que a interface de operação local e single-robot proposta
 nesta dissertação.
 
-A abordagem adotada nesta dissertação --- FastAPI como bridge REST sem ROSBridge,
-com canvas HTML5 para visualização do mapa --- representa uma solução de menor
+A abordagem adotada nesta dissertação, baseada em FastAPI como bridge REST sem ROSBridge,
+com canvas HTML5 para visualização do mapa, representa uma solução de menor
 peso de configuração. A ausência de trabalhos publicados que adotem especificamente
 essa combinação (FastAPI + canvas + Nav2 sem ROSBridge) reforça a originalidade
 da contribuição de interface.
@@ -255,8 +255,8 @@ da contribuição de interface.
 \label{sec:rel_es}
 
 Embora os eixos anteriores situem esta dissertação no espaço técnico da robótica
-autônoma, sua motivação central --- infraestrutura reprodutível, verificável e
-auditável para experimentos --- é, antes de tudo, um problema de Engenharia de
+autônoma, sua motivação central (infraestrutura reprodutível, verificável e
+auditável para experimentos) é, antes de tudo, um problema de Engenharia de
 Software aplicado a um domínio físico. Esta seção situa o trabalho nessa literatura.
 
 \citeonline{albonico2023} conduzem um mapeamento sistemático sobre pesquisa em
@@ -282,7 +282,7 @@ entre nós), configuração incorreta de comunicação em rede (tamanhos de fila
 publicador mal configurados, causando bloqueios não intencionais) e uma classe
 ampla de erros de programação geral. Embora o dataset seja anterior ao ROS~2 e,
 portanto, não trate diretamente de conceitos específicos dessa geração do
-middleware --- como QoS ou o modelo de \textit{executor} --- as categorias de
+middleware, como QoS ou o modelo de \textit{executor}, as categorias de
 falha de concorrência e má configuração de comunicação identificadas por
 \citeauthor{timperley2024} são análogas, em espírito, a dois problemas de
 compatibilidade enfrentados durante o desenvolvimento do framework proposto
@@ -300,8 +300,8 @@ que atravessa gerações do middleware.
 Integração Contínua (CI) em pipelines de engenharia de software, com o Holter
 como ferramenta de observabilidade de builds. Embora o domínio de aplicação seja
 distinto (CI de software convencional, não robótica), o princípio de tornar
-comportamentos regressivos observáveis automaticamente --- em vez de depender de
-inspeção manual --- é o mesmo princípio que motiva o protocolo record--replay com
+comportamentos regressivos observáveis automaticamente, em vez de depender de
+inspeção manual, é o mesmo princípio que motiva o protocolo record--replay com
 análise RMSE automatizada proposto nesta dissertação: cada execução do protocolo
 gera um oráculo quantitativo (o relatório de repetibilidade) que pode, em
 princípio, ser incorporado a um pipeline de CI/CD para navegação autônoma, tal
@@ -310,7 +310,7 @@ como sugerido na agenda de trabalhos futuros (Seção~\ref{sec:futuros}).
 Em conjunto, esses três trabalhos deslocam o enquadramento desta dissertação: o
 framework proposto não deve ser lido apenas como uma ferramenta de robótica que
 incidentalmente automatiza tarefas repetitivas, mas como uma resposta direta a uma
-lacuna documentada na literatura de Engenharia de Software sobre sistemas ROS ---
+lacuna documentada na literatura de Engenharia de Software sobre sistemas ROS:
 a ausência de infraestrutura reutilizável de teste, observabilidade e
 reprodutibilidade experimental.
 
@@ -324,7 +324,7 @@ amplo sobre reprodutibilidade em pesquisa empírica de Engenharia de Software.
 orientados a humanos e propõem uma estrutura de artefato de pesquisa alinhada à
 política de \textit{badges} da ACM (\textit{Artifacts Available},
 \textit{Artifacts Evaluated -- Functional} e \textit{Results Replicated}), com o
-objetivo de tornar experimentos publicados de fato reexecutáveis por terceiros ---
+objetivo de tornar experimentos publicados de fato reexecutáveis por terceiros,
 não apenas descritos em texto. Os autores relatam que uma fração substancial dos
 artefatos de pesquisa disponibilizados por autores de estudos empíricos está
 incompleta ou imprecisa o suficiente para impedir a reprodução direta dos
@@ -336,15 +336,15 @@ dos dados}, e não apenas na publicação posterior do artefato: cada execução
 protocolo record--replay (Capítulo~\ref{chap:metodologia}) produz, automaticamente,
 um \texttt{summary.json} com as métricas RMSE pairwise, os CSVs de trajetória por
 execução e o gráfico de sobreposição (\texttt{trajectory\_\allowbreak overlay.png}) descritos
-na Seção~\ref{sec:impl_pipeline} --- artefatos estruturados o suficiente para que
+na Seção~\ref{sec:impl_pipeline}, artefatos estruturados o suficiente para que
 outro pesquisador, de posse do mesmo \textit{workspace} ROS~2 e do mesmo mundo de
 simulação, consiga reexecutar o experimento e comparar diretamente os resultados,
 sem depender de reconstrução manual do protocolo a partir da prosa do artigo.
 Essa característica é precisamente o tipo de lacuna que motivou a rejeição do
 artigo original submetido à trilha de ferramentas da SBES (Apêndice~\ref{ap:fleet_msgs}
 documenta a interface que viabiliza essa automação): a contribuição de
-Engenharia de Software do framework não está nos algoritmos de navegação em si
---- que são reaproveitados do Nav2 e do SLAM Toolbox sem modificação --- mas na
+Engenharia de Software do framework não está nos algoritmos de navegação em si,
+que são reaproveitados do Nav2 e do SLAM Toolbox sem modificação, mas na
 infraestrutura que torna cada execução um artefato de pesquisa autocontido.
 
 \section{Síntese Comparativa}
@@ -357,8 +357,8 @@ características podem ser avaliadas de forma significativa ao longo dos seis
 eixos da tabela. Os artigos de \citeonline{amigoni2010} e
 \citeonline{guevaravega2024}, já discutidos nas Seções~\ref{sec:rel_repeticao}
 e~\ref{sec:rel_reprodutibilidade}, respectivamente, são contribuições de
-metodologia experimental e de estrutura de artefatos de pesquisa --- não
-sistemas concorrentes diretos --- e fundamentam a abordagem desta dissertação
+metodologia experimental e de estrutura de artefatos de pesquisa, não
+sistemas concorrentes diretos, e fundamentam a abordagem desta dissertação
 em vez de competir com ela nesses eixos; perguntar se um artigo de metodologia
 ou de survey ``tem Web UI'' ou é ``multi-robô'', por exemplo, não é uma
 pergunta bem-formada para esse tipo de trabalho, por isso eles foram mantidos
@@ -400,8 +400,8 @@ interface de operação e sem publicação de código. No eixo multi-robô, o
 frotas industriais (OTTO Motors) documentados qualitativamente, não de um
 framework que implemente ou avalie repetibilidade entre robôs. \citeonline{hamer2025}
 é o quase-concorrente mais próximo em metodologia de avaliação dentro do
-ecossistema ROS --- múltiplas execuções do mesmo cenário com análise de
-variabilidade --- mas aplicada a um único robô alternando entre algoritmos de
+ecossistema ROS, com múltiplas execuções do mesmo cenário e análise de
+variabilidade, mas aplicada a um único robô alternando entre algoritmos de
 SLAM, sem protocolo formal de record--replay nem interface web. Essa
 dispersão é o retrato concreto da lacuna discutida a seguir: a combinação
 específica de record--replay, suporte a papéis em frota e interface web sem
@@ -412,7 +412,7 @@ ROSBridge não aparece simultaneamente em nenhum dos trabalhos revisados.
 
 A revisão da literatura conduzida nesta dissertação (Seções~\ref{sec:rel_nav}
 a~\ref{sec:rel_reprodutibilidade}) não identificou, nos trabalhos analisados, a
-combinação específica de características do framework proposto --- protocolo
+combinação específica de características do framework proposto: protocolo
 formal de record--replay, suporte a papéis experimentais em frota, coleta
 síncrona de sensores heterogêneos com QoS diferenciada, análise RMSE pairwise
 automatizada e interface web sem ROSBridge. Essa afirmação reflete o escopo da
@@ -421,16 +421,16 @@ sistemática com protocolo de busca formal; não é, portanto, uma alegação de
 ineditismo absoluto, mas um relato preciso do que a bibliografia examinada
 cobre ou deixa de cobrir.
 
-Uma leitura possível dessa lacuna --- não uma conclusão sociológica
+Uma leitura possível dessa lacuna, não uma conclusão sociológica
 estabelecida pela revisão, mas uma interpretação do autor a partir do padrão
-observado nas seções anteriores --- é que ela reflete uma tendência da
+observado nas seções anteriores, é que ela reflete uma tendência da
 comunidade de robótica experimental a priorizar a contribuição algorítmica (um
 novo controlador, um novo algoritmo de SLAM) sobre a infraestrutura de
 avaliação. O achado mais próximo entre os trabalhos revisados que dá algum
 sustento a essa leitura é o de \citeonline{albonico2023}: do seu mapeamento de
 63 estudos de Engenharia de Software sobre ROS, 46 não discutem ameaças à
 validade e a relevância industrial das avaliações é predominantemente baixa
-(Seção~\ref{sec:rel_es}) --- um sintoma de infraestrutura de avaliação pouco
+(Seção~\ref{sec:rel_es}), um sintoma de infraestrutura de avaliação pouco
 madura, ainda que o próprio mapeamento não enuncie isso como uma escolha
 implícita e deliberada da comunidade. Esta dissertação aposta na direção
 oposta a essa tendência observada: trata a infraestrutura de avaliação como a
@@ -440,7 +440,7 @@ contribuição em si, não como suporte incidental a ela.
 \label{sec:rel_conclusao}
 
 A revisão confirma que os componentes técnicos necessários existem e são maduros
---- Nav2, SLAM Toolbox, bags ROS~2 --- mas não estão integrados de forma coerente
+(Nav2, SLAM Toolbox, bags ROS~2), mas não estão integrados de forma coerente
 em um framework orientado a experimentos reprodutíveis.
 
 Vale registrar, como observação em aberto, que o limiar de 30\,cm adotado para
@@ -450,7 +450,7 @@ controlador Regulated Pure Pursuit isolado, avaliado por
 \citeonline{macenski2023survey}, atinge erro lateral médio inferior a 5\,cm, e
 \citeonline{maset2022} reporta distância \textit{cloud-to-cloud} da ordem de
 2\,cm em mapeamento 3D com hardware dedicado. Essa diferença não implica, por
-si só, que o limiar desta dissertação seja pouco exigente --- ele é definido
+si só, que o limiar desta dissertação seja pouco exigente: ele é definido
 para o pipeline completo (SLAM + Nav2 + odometria), que acumula fontes de erro
 distintas e adicionais às avaliadas isoladamente nos dois trabalhos citados,
 e não apenas para o controlador ou para o sensor de mapeamento em isolado.
