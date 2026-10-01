@@ -15,6 +15,32 @@ confirmar, a opção foi reconhecer a limitação honestamente em vez de
 fabricar rigor. Só **3 itens** ficaram de fora (marcados ⏭️ abaixo),
 por exigirem decisão de reestruturação maior do autor.
 
+## ⚠️ Achado novo pendente de decisão (2026-10-01): figuras Val01/Val02 não usadas
+
+Comparando com duas dissertações de mestrado reais (ver
+`project-dissertation-context` na memória), ficou claro que esta
+dissertação tinha só 2 figuras (1 diagrama Mermaid, 1 PDF incluído) contra
+29 e 41 nas comparáveis — lacuna séria pra um tema de trajetória/navegação.
+Ao investigar, **`dissertacao/figuras/` já tem 8 imagens prontas**, geradas
+e nunca inseridas no texto:
+`overlay_trajetorias.png`, `rmse_comparacao.png`, `matriz_pairwise.png`,
+`sumario_metricas.png`, `overlay_val01.png`, `overlay_val02.png`,
+`consistencia_temporal.png`, `erro_endpoint.png`. Todas são de uma
+**campanha de validação anterior (Val01 ~4,8m, Val02 ~2,3m, RMSE 6,2cm e
+8,1cm entre réplicas)** que **não é mencionada em nenhum lugar do texto
+atual dos capítulos** — é dado real e de qualidade, mas inseri-la exigiria
+escrever prosa nova introduzindo essa campanha (quando ela rodou, como se
+relaciona com a campanha oficial de 3,35cm, por que não virou a campanha
+final), o que é decisão de conteúdo do autor, não um fix mecânico.
+
+**Resolvido parcialmente nesta sessão:** adicionada só a figura que já
+tinha ancoragem textual completa e zero risco de tocar no número
+sensível de 3,35cm — `overlay_teste1.png` (campanha `dissertacao_teste1`,
+já discutida com os mesmos números na Seção QA4/Experimentos
+Complementares do Cap. 08). As 8 figuras de Val01/Val02 continuam
+disponíveis em `dissertacao/figuras/`, não inseridas, aguardando decisão
+do autor sobre onde/se elas entram na narrativa da dissertação.
+
 ## Achados cross-capítulo mais sérios
 
 1. ✅ **Overclaiming de "multi-robô"** na Tabela de Síntese Comparativa —
@@ -110,9 +136,15 @@ explicitamente como limitação de desenho, com desenho fatorial mínimo
 esboçado como trabalho futuro; ausência de critério formal para QA4
 explicada.
 
-### 08 — Resultados — ✅ todos os 6 itens aplicados
-Figura ausente reconhecida com frase honesta (sem fabricar gráfico);
-QA4 reconhecido como tratado qualitativamente, sem números fabricados para
+### 08 — Resultados — ✅ todos os 6 itens aplicados, 1 reforçado depois (2026-10-01)
+Figura ausente originalmente reconhecida com frase honesta (sem fabricar
+gráfico) — **depois resolvida de verdade**: achamos um
+`trajectory_overlay.png` real, já gerado pelo pipeline de análise pra
+campanha `dissertacao_teste1` (a mesma já discutida em texto/tabela nesta
+seção), e incluímos como Figura~\ref{fig:overlay_teste1} logo após a
+Tabela~\ref{tab:mecanismo_navegacao} — mostra visualmente o mesmo
+agrupamento de réplicas vs. divergência da baseline já quantificado em
+número. QA4 reconhecido como tratado qualitativamente, sem números fabricados para
 os 2 conjuntos sem dado confirmável; síntese final fecha o ciclo de QA4;
 argumento contrafactual do limiar de 25cm adicionado; QA3 amarrado ao
 limiar de 10% (CV calculado a partir dos números reais já no texto,

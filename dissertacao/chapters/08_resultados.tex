@@ -114,6 +114,18 @@ Réplicas entre si (3 pares) & \texttt{play\_route} & \texttt{play\_route} & 2,0
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{overlay_teste1.png}
+\caption{Sobreposição das trajetórias da campanha \texttt{dissertacao\_teste1}:
+as três réplicas (laranja, verde, vermelho), que compartilham o mecanismo
+\texttt{play\_\allowbreak route}, ficam visualmente agrupadas entre si ao longo de
+todo o percurso, enquanto a baseline (azul), gravada por
+\texttt{go\_\allowbreak to\_\allowbreak point}, diverge visivelmente --- a mesma
+assimetria quantificada na Tabela~\ref{tab:mecanismo_navegacao}.}
+\label{fig:overlay_teste1}
+\end{figure}
+
 A causa não é degradação de repetibilidade do robô: o script
 \texttt{experiment\_\allowbreak repeatability.py} grava a baseline enviando uma
 sequência de metas individuais (\texttt{go\_\allowbreak to\_\allowbreak point}, um
