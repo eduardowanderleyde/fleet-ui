@@ -991,24 +991,65 @@ o raciocínio do zero.
 3. **Rota em loop fechado** (sai de um ponto, retorna ao mesmo ponto) —
    idem, não existe, precisa ser desenhada e validada.
 
-**Metodologia da campanha (reaproveita o que já existe):** mesma rigor
-da campanha `dissertation_clean01_final_manual` (Capítulo 7/8 da
-dissertação) — relançar a simulação inteira antes de cada réplica, não
-só a navegação. 3 rotas × (1 baseline + 10 réplicas) = 33 execuções.
-Em cada execução, depois de coletado o bag, rodar `analyze_runs.py` três
-vezes sobre os MESMOS bags (não precisa de 3 campanhas separadas) —
-uma vez forçando `--trajectory-topic odom`, uma vez `--trajectory-topic
-slam_pose` (ou `pose`), e uma vez com o tópico de ground truth novo —
-e comparar o RMSE resultante por rota/fonte numa tabela só.
+**Ordem de execução refinada (2026-09-30, revisão do plano original):**
+
+1. **Integrar o ground truth ao pipeline.** Adicionar a entrada de bridge
+   confirmada acima em `spawn_multi_tb4.launch.py`/launch equivalente de
+   single-robot, filtrar a entidade certa (`"turtlebot4"` sem namespace,
+   confirmar o nome em modo multi-robô), e gravar esse tópico no
+   `fleet_data_collector` junto com `/odom`, `/pose`, `/scan`, `/imu`.
+   Confirmar explicitamente referencial (frame) e timestamps antes de
+   calcular qualquer RMSE — `dynamic_pose/info` vem no frame do mundo
+   Gazebo, não necessariamente o mesmo `map`/`odom` do ROS; pode precisar
+   de uma transformação ou pelo menos de uma verificação de que a origem
+   coincide.
+
+2. **Piloto antes da campanha grande — não pular esta etapa.** 1 replay
+   curto só, gravando as três fontes (`/odom`, `/pose`, ground truth) e
+   plotando as três trajetórias sobrepostas. Serve pra pegar erro de
+   frame/origem/transformação/timestamp *antes* de gastar tempo com 30
+   execuções erradas. Só seguir pra campanha principal depois que as três
+   trajetórias do piloto fizerem sentido visualmente (mesma forma, mesma
+   escala, sem deslocamento constante entre elas).
+
+3. **Criar as 3 geometrias de rota** (curta = já existe/`dissertation_clean01`;
+   longa com curva de 90°/180°; loop fechado) — validar cada uma
+   visualmente (`headless:=false`) antes de rodar em lote, como já é
+   hábito no projeto pra poses novas.
+
+4. **Campanha principal: 10 replays por rota, não 90 execuções totais.**
+   Cada replay grava as três fontes simultaneamente no mesmo bag — são
+   **30 replays** (mais as baselines que o protocolo de cada rota exigir),
+   não 3 campanhas separadas. Mesmo rigor da campanha
+   `dissertation_clean01_final_manual` (relançar a simulação inteira
+   antes de cada réplica, não só a navegação).
+
+   | Rota  | N  | `/odom` | `/pose` | Ground truth |
+   |-------|----|---------|---------|---------------|
+   | Curta | 10 | ✓       | ✓       | ✓             |
+   | Longa | 10 | ✓       | ✓       | ✓             |
+   | Loop  | 10 | ✓       | ✓       | ✓             |
+
+5. **Análise, por rota:** RMSE inter-replay, erro final, duração,
+   comprimento, diferença `/odom` × ground truth, diferença `/pose` ×
+   ground truth.
 
 **Pergunta que isso responde, pra dissertação:** não é "pose é melhor
-que odom" (isso já é sabido) — é "o efeito de usar a fonte errada cresce
-com o comprimento da rota, e por quanto". Se aparecer um padrão como
-odom divergindo mais em rotas longas enquanto pose/ground-truth ficam
-estáveis, isso é evidência concreta e nova pra fortalecer exatamente a
-limitação que a dissertação já reconhece (campanha restrita a 1 rota
-curta) — sem precisar reescrever o número de 3,35cm já publicado, já que
-essa seria uma campanha adicional, documentada como tal.
+que odom" (isso já é sabido) — é "até que ponto a fonte usada pra
+representar a trajetória (`/odom` ou pose corrigida pelo SLAM) influencia
+a avaliação de repetibilidade, tomando o ground truth do simulador como
+referência — e esse efeito cresce com o comprimento/complexidade da
+rota?". Conversa direto com a fragilidade já registrada em
+`TODO_REVISAO.md`: o procedimento da dissertação declara `/odom` como
+fonte, enquanto a seção de validade já reconhece que isso pode
+contaminar a interpretação.
+
+**Decisão explícita sobre o número de 3,35cm: não mexer ainda.** Primeiro
+roda o piloto (passo 2) com as três fontes. Dependendo do que aparecer,
+decide-se depois se os 3,35cm ficam como resultado histórico em `/odom`,
+se a campanha é recalculada em `/pose`/ground-truth, ou se os três
+resultados são apresentados comparativamente — essa decisão é posterior
+aos dados, não anterior.
 
 **Antes de rodar de verdade:** nesta sessão (Linux nativo) já ficou
 estabelecido que o mesmo problema de "jump back in time" afeta qualquer
