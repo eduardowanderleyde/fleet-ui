@@ -225,15 +225,14 @@ do JSON da requisição entre aspas simples, o que evita que caracteres
 especiais no payload (por exemplo, aspas simples dentro de um nome de rota)
 quebrem o comando \textit{shell} resultante.
 
-Essa abordagem tem um custo mensurável: cada chamada paga o overhead de
-inicializar um processo \texttt{ros2 service call} (tipicamente
-50--150\,ms na máquina de desenvolvimento), o que a torna inadequada para
-comandos de alta frequência, mas aceitável para o padrão de uso da interface,
-cliques esparsos do pesquisador, não um laço de controle. O preço em
-latência é trocado por uma superfície de acoplamento mínima entre o backend
-e o \textit{workspace} ROS~2: o backend só precisa saber o nome e o tipo do
-serviço, nunca importar diretamente os módulos gerados de \texttt{fleet\_\allowbreak msgs}
-para essas chamadas específicas.
+O custo mensurável dessa abordagem --- tipicamente 50--150\,ms de overhead
+de inicialização de processo por chamada --- e o trade-off que ele
+representa frente ao acoplamento mínimo resultante já foram discutidos na
+Seção~\ref{sec:backend_web}, onde essa decisão de arquitetura é tomada; o
+que importa destacar aqui é só a mecânica concreta: o backend nunca
+importa diretamente os módulos gerados de \texttt{fleet\_\allowbreak msgs} para
+essas chamadas específicas, conhecendo apenas o nome e o tipo do serviço
+em tempo de execução.
 
 \subsection{Processos de Longa Duração: a Simulação Lançada pela Interface}
 \label{sec:impl_backend_simulacao}

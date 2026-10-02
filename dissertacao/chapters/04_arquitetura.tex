@@ -215,10 +215,18 @@ categoria de tópico, eliminando essa fonte de dados ausentes.
 
 O backend FastAPI expõe os serviços ROS~2 como endpoints HTTP, permitindo que a
 interface web opere sem exposição direta ao DDS. A decisão de não usar o
-protocolo rosbridge \cite{toris2015} foi motivada pela simplicidade: um backend
-FastAPI com chamadas subprocess ao \texttt{ros2 service call} elimina a
-dependência de um servidor de WebSocket e reduz a superfície de configuração
-para novos usuários.
+protocolo rosbridge \cite{toris2015} envolve um trade-off explícito entre
+latência e acoplamento: um backend FastAPI com chamadas via subprocess ao
+\texttt{ros2 service call} (Seção~\ref{sec:impl_backend_ponte}) paga o custo
+de inicializar um processo a cada chamada, tipicamente 50--150\,ms na
+máquina de desenvolvimento --- inadequado para comandos de alta frequência,
+mas aceitável para o padrão de uso da interface, cliques esparsos do
+pesquisador, não um laço de controle. Em troca, elimina-se a dependência de
+um servidor de WebSocket dedicado e reduz-se a superfície de acoplamento
+entre o backend e o \textit{workspace} ROS~2 a pouco mais que o nome e o
+tipo de cada serviço, sem precisar importar diretamente os módulos ROS~2
+gerados nem manter um cliente \texttt{rclpy} nativo só para chamadas
+pontuais.
 
 O backend também mantém um subscriber ROS~2 nativo para os tópicos de status
 (\texttt{/\allowbreak fleet/\allowbreak status}), mapa (\texttt{/\allowbreak map}) e pose (\texttt{/\allowbreak tf}), que são

@@ -102,10 +102,15 @@ não-funcionais adicionado antes das 5 camadas; alternativa MCP discutida
 na seção de agentes (citando o texto real de `orquestracion.md`); modelo
 estático de papéis (`roles.yaml`) reconhecido como fronteira de design
 deliberada.
-- ⏭️ **Item 2 pendente** (trade-off REST-vs-rosbridge no capítulo errado):
-  não movido. Caberia um parágrafo de custo/benefício na Seção do Backend
-  REST (hoje só diz "simplicidade"), com o número de latência que hoje só
-  existe no Cap. 6 — decisão do autor sobre mover ou duplicar.
+- ✅ **Item 2 resolvido (2026-10-01):** trade-off REST-vs-rosbridge agora
+  justificado onde a decisão é tomada (Cap. 04, Seção~\ref{sec:backend_web}) —
+  número real de latência (50--150ms) e o acoplamento mínimo em troca,
+  movidos pra lá; Cap. 06 (Seção~\ref{sec:impl_backend_ponte}) enxugado
+  pra não repetir a mesma justificativa, só remete de volta e foca na
+  mecânica de código. Avaliado antes como não prioritário (nenhuma das
+  duas dissertações comparáveis vai a esse nível de granularidade
+  estrutural), mas baixo risco e peça de boa prática de escrita
+  acadêmica, então aplicado a pedido do autor.
 
 ### 05 — Metodologia Experimental — ✅ todos os 6 itens aplicados
 N=10 reconhecido como escolha prática (custo/tempo), não cálculo de poder
