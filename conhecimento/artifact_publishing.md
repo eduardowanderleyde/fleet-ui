@@ -221,3 +221,32 @@ diretamente com o autor do projeto (Eduardo Wanderley, consistente com o
 — isso depende do item 2 (Zenodo), que segue pendente porque exige login
 do próprio autor no Zenodo, não pode ser feito por um agente. Ver
 `implementacao.md` ("Feito" e "Pendente").
+
+### 2026-10-02 — Achado real (não é pesquisa externa): dados brutos da campanha oficial foram perdidos
+
+Ao escrever o README de replicação (item 4 da lista de "Ação sugerida"
+acima), confirmei diretamente no disco e no histórico git: os dados brutos
+da campanha oficial citada no Capítulo 8 (`protocol_id=dissertation_clean01`,
+pasta esperada `fleet_ws/runs/dissertation_clean01_final_manual/` — bags
+MCAP, exports JSON por replay, manifesto) **não existem em lugar nenhum
+rastreável** — nem no working tree atual, nem em nenhum commit do git (as
+pastas `fleet_ws/runs/`/`collections/` nunca foram versionadas). Só restou
+o YAML da rota (`fleet_ws/routes/default/dissertation_clean01.yaml`). O
+commit git exato que gerou esses números também nunca foi registrado em
+lugar nenhum. Perguntei ao autor diretamente (2026-10-02) se havia cópia em
+outro lugar — resposta: não sabe, podem ter sido perdidos mesmo.
+
+**Isto está em tensão com a própria motivação deste agente** (reprodutibilidade
+como contribuição central da dissertação) — não é um achado de literatura,
+é uma lacuna real do próprio projeto. Mitigação aplicada: todo export de
+`experiment_repeatability.py` agora grava commit + dirty-flag automaticamente
+(`_git_provenance()`, ver `implementacao.md`), então essa lacuna específica
+não deve se repetir em campanhas futuras — mas os dados da campanha original
+permanecem irrecuperáveis. Não decidi se isso precisa de uma nota explícita
+na dissertação (Cap. 8 ou Limitações) — isso é decisão do autor.
+
+**Ação sugerida:** o autor decidir se quer adicionar uma nota breve na
+dissertação (Seção de Limitações, Cap. 09) mencionando que os dados brutos
+da campanha original não foram preservados — por ora a dissertação não
+afirma explicitamente que os dados estão disponíveis, então não há uma
+afirmação falsa a corrigir, só uma omissão a considerar.

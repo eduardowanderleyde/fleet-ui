@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -474,6 +475,36 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
 
 
 
+def _git_provenance() -> Dict[str, Any]:
+    """Melhor esforço: commit + dirty-tree de quem gerou este export.
+
+    Achado real desta sessão: a campanha oficial reportada na dissertação
+    (dissertation_clean01) não tem o commit exato registrado em nenhum
+    lugar, e os dados brutos dessa campanha não existem mais neste
+    repositório nem no histórico git — não há como reconstituir de qual
+    commit ela saiu. Daqui em diante, toda campanha nova grava isso
+    sozinha. Nunca deve derrubar o experimento por falta de git/repo.
+    """
+    try:
+        script_dir = Path(__file__).resolve().parent
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=script_dir,
+            capture_output=True, text=True, timeout=5,
+        )
+        if commit.returncode != 0:
+            return {}
+        dirty = subprocess.run(
+            ["git", "status", "--porcelain"], cwd=script_dir,
+            capture_output=True, text=True, timeout=5,
+        )
+        return {
+            "commit": commit.stdout.strip(),
+            "dirty": bool(dirty.stdout.strip()),
+        }
+    except Exception:
+        return {}
+
+
 def _write_export(
     path: str,
     payload: Dict[str, Any],
@@ -498,6 +529,7 @@ def _write_export(
     payload = {
         **payload,
         "finished_at": datetime.now(timezone.utc).isoformat(),
+        "git": _git_provenance(),
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)

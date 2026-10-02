@@ -37,10 +37,13 @@ código) confirmando o efeito.
   já existe (ver "Feito") — falta só criar a Release no GitHub e ligar a
   conta do Zenodo a ela. Fazer antes da defesa pra poder citar o
   repositório com DOI na dissertação.
-- [ ] **Escrever README de replicação separado do README de
-  desenvolvimento** (origem: `artifact_publishing`, 2026-10-02),
-  estruturado nos 4 eixos de Lier et al. (2017): artefatos técnicos,
-  design de experimento, execução, avaliação dos dados.
+- [ ] **Decidir se a dissertação (Cap. 09, Limitações) deve mencionar
+  explicitamente que os dados brutos da campanha oficial não foram
+  preservados** (origem: achado real desta sessão, 2026-10-02 — não é
+  "Ação sugerida" de pesquisa, é fato confirmado no disco/git; ver
+  `conhecimento/artifact_publishing.md`). A dissertação hoje não afirma
+  que os dados estão disponíveis, então não há afirmação falsa a corrigir
+  — é só uma omissão a considerar.
 
 ## Em andamento
 
@@ -67,6 +70,22 @@ código) confirmando o efeito.
   Wanderley) antes de criar — arquivo em `CITATION.cff`, licença MIT,
   aponta pro repositório. Sem DOI ainda (depende do item Zenodo acima,
   ainda pendente).
+- [x] **Escrever README de replicação separado do README de
+  desenvolvimento** (origem: `artifact_publishing`, 2026-10-02; feito em
+  2026-10-02). `fleet_ws/docs/REPLICATION.md`, estruturado nos 4 eixos de
+  Lier et al. (2017), linkado do `README.md` principal. Inclui, com
+  honestidade, o achado de que os dados brutos da campanha original
+  (`dissertation_clean01_final_manual`) não existem mais — o documento
+  descreve como reproduzir o *protocolo* (nova campanha comparável), não
+  como recuperar os números exatos já publicados.
+- [x] **Gravar commit git + dirty-flag em todo export de
+  `experiment_repeatability.py`** (origem: achado real desta sessão,
+  2026-10-02, surgido ao investigar o item anterior; feito em 2026-10-02).
+  `_git_provenance()` em `fleet_ws/scripts/experiment_repeatability.py`,
+  chamado de `_write_export()` — melhor esforço, nunca derruba o
+  experimento se o git não estiver disponível. Testado isoladamente
+  (resolveu o HEAD atual e detectou árvore suja corretamente). Mitiga a
+  lacuna acima para toda campanha futura.
 
 ## Como manter isto atualizado
 

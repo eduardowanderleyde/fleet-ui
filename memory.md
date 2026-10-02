@@ -77,6 +77,20 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   (exige login do autor, não pode ser feito por agente). Ver
   `implementacao.md` ("Feito") e `conhecimento/artifact_publishing.md`.
 
+### 2026-10-02 — achado real + mitigação: dados da campanha oficial perdidos
+
+- **[artifact_publishing]** Ao escrever o README de replicação, confirmado
+  no disco e no git: os dados brutos da campanha oficial do Capítulo 8
+  (`dissertation_clean01_final_manual`) não existem em lugar nenhum
+  rastreável, e o commit exato nunca foi registrado. Autor confirmou que
+  podem ter sido perdidos mesmo. Mitigação: todo export de
+  `experiment_repeatability.py` agora grava commit+dirty automaticamente
+  (`_git_provenance()`). README de replicação criado em
+  `fleet_ws/docs/REPLICATION.md`, honesto sobre a lacuna. Ver
+  `implementacao.md` ("Feito") e `conhecimento/artifact_publishing.md`.
+  Decisão pendente: mencionar isso no Cap. 09 (Limitações) da dissertação —
+  ver `implementacao.md` ("Pendente").
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

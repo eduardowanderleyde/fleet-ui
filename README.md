@@ -340,7 +340,13 @@ python3 scripts/experiment_repeatability.py replay \
 
 With `--repeat N`, each replay writes a separate export file such as
 `val01_replay_r01.json`, including protocol metadata (`protocol_id`,
-`replicate_id`, `replicate_total`, `condition`, command line and notes).
+`replicate_id`, `replicate_total`, `condition`, command line and notes),
+plus the git commit and dirty-tree flag that produced it (`"git"` key).
+
+To reproduce the specific controlled campaign reported in the dissertation's
+results chapter (not just the generic workflow above), see
+[`fleet_ws/docs/REPLICATION.md`](fleet_ws/docs/REPLICATION.md) — it's
+explicit about what from that original run is and isn't recoverable.
 
 ---
 
