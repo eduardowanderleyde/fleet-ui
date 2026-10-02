@@ -235,7 +235,7 @@ def _read_traj_xy(
     Ordenação e duração pelo timestamp de gravação no rosbag (3.º campo de read_next).
     """
     from nav_msgs.msg import Odometry
-    from geometry_msgs.msg import PoseWithCovarianceStamped
+    from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
     from rclpy.serialization import deserialize_message
     import rosbag2_py
 
@@ -266,6 +266,12 @@ def _read_traj_xy(
             msg = deserialize_message(data, PoseWithCovarianceStamped)
             x = float(msg.pose.pose.position.x)
             y = float(msg.pose.pose.position.y)
+        elif "PoseStamped" in typ:
+            # /ground_truth_pose_clean (ground_truth_filter.py) — campanha
+            # /odom vs /pose vs ground truth, ver orquestracion.md.
+            msg = deserialize_message(data, PoseStamped)
+            x = float(msg.pose.position.x)
+            y = float(msg.pose.position.y)
         else:
             reader.close()
             raise RuntimeError(f"Tipo não suportado para trajetória: {typ}")
