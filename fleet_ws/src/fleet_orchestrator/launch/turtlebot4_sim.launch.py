@@ -51,6 +51,18 @@ def _make_nav2_params(_ctx):
 
     _patch(cfg)
 
+    # nav2.yaml estoque do TB4 força regenerate_noises:true no MPPI, contra o
+    # próprio default recomendado pelo Nav2 (false) — achado do agente
+    # experiment-nav2-tracking (ver conhecimento/nav2_tracking.md e
+    # implementacao.md). Default aqui preserva o comportamento já usado em
+    # toda campanha reportada até agora; para o experimento candidato use
+    # NAV2_MPPI_REGENERATE_NOISES=false (mesmo padrão de FLEET_ROBOTS).
+    regenerate_noises = os.environ.get('NAV2_MPPI_REGENERATE_NOISES', 'true').strip().lower() not in ('false', '0', 'no')
+    try:
+        cfg['controller_server']['ros__parameters']['FollowPath']['regenerate_noises'] = regenerate_noises
+    except KeyError:
+        pass
+
     tmp = tempfile.NamedTemporaryFile(mode='w', suffix='_nav2.yaml', delete=False)
     yaml.safe_dump(cfg, tmp)
     tmp.close()

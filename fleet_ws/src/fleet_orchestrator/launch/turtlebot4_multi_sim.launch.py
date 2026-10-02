@@ -76,6 +76,18 @@ def _make_nav2_params(_ctx):
 
     _patch(cfg)
 
+    # nav2.yaml estoque do TB4 força regenerate_noises:true no MPPI, contra o
+    # próprio default recomendado pelo Nav2 (false) — achado do agente
+    # experiment-nav2-tracking (ver conhecimento/nav2_tracking.md e
+    # implementacao.md). Default aqui preserva o comportamento já usado em
+    # toda campanha reportada até agora; para o experimento candidato use
+    # NAV2_MPPI_REGENERATE_NOISES=false (mesmo padrão de FLEET_ROBOTS).
+    regenerate_noises = os.environ.get('NAV2_MPPI_REGENERATE_NOISES', 'true').strip().lower() not in ('false', '0', 'no')
+    try:
+        cfg['controller_server']['ros__parameters']['FollowPath']['regenerate_noises'] = regenerate_noises
+    except KeyError:
+        pass
+
     # Trims CPU cost per robot for the 3x multi-robot case (stock values are
     # tuned for 1 robot with a GPU-backed lidar; here it's 3x software-
     # rendered, no GPU — measured ~630% CPU across 3 TB4s before this).

@@ -60,6 +60,23 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   cliente, o argumento a favor de MCP genérico é fraco — reforça manter
   tool-calling direto. → `conhecimento/mcp_orchestration.md`
 
+### 2026-10-02 — ação em andamento: toggle de `regenerate_noises`
+
+- **[nav2_tracking]** Implementado (não testado em campanha real ainda) o
+  mecanismo pra testar o achado acima: `NAV2_MPPI_REGENERATE_NOISES=false`
+  (env var, mesmo padrão de `FLEET_ROBOTS`) agora sobrescreve
+  `controller_server.FollowPath.regenerate_noises` em
+  `turtlebot4_sim.launch.py` e `turtlebot4_multi_sim.launch.py`. Default
+  sem a variável = `true`, preservando toda campanha já reportada. Ver
+  `implementacao.md` ("Em andamento") e `conhecimento/nav2_tracking.md`.
+
+### 2026-10-02 — feito: `CITATION.cff`
+
+- **[artifact_publishing]** `CITATION.cff` criado na raiz do repo
+  (autor confirmado: Eduardo Wanderley, MIT). Falta só o DOI via Zenodo
+  (exige login do autor, não pode ser feito por agente). Ver
+  `implementacao.md` ("Feito") e `conhecimento/artifact_publishing.md`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

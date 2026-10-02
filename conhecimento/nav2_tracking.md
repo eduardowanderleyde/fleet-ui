@@ -260,3 +260,23 @@ de pesquisa pra esta rodada).
 **Ação sugerida:** nenhuma — registrado só como pista pra uma próxima
 execução deste agente (ou do agente de DDS) investigar mais a fundo,
 com rate-limit do GitHub disponível.
+
+### 2026-10-02 — Ação aplicada (parcial): toggle de `regenerate_noises` no código
+
+O achado acima sobre `regenerate_noises: true` (TB4) vs. `false` (default
+Nav2) ganhou um mecanismo de teste no código, não só a sinalização:
+`turtlebot4_sim.launch.py` e `turtlebot4_multi_sim.launch.py` agora leem a
+env var `NAV2_MPPI_REGENERATE_NOISES` (mesmo padrão de `FLEET_ROBOTS`) e
+sobrescrevem `controller_server.ros__parameters.FollowPath.regenerate_noises`
+antes de gravar o YAML temporário usado pelo Nav2. Default sem a variável
+definida é `true` — preserva exatamente o comportamento de toda campanha
+já reportada na dissertação, ninguém precisa mudar nada pra continuar
+igual. Testado isoladamente (chamando `_make_nav2_params()` com
+`NAV2_MPPI_REGENERATE_NOISES=true/false`/variável ausente e inspecionando
+o YAML gerado) nos dois launch files — o mecanismo funciona.
+
+**O que ainda falta (não é "Feito"):** rodar de fato a campanha com
+`NAV2_MPPI_REGENERATE_NOISES=false` num Gazebo/Nav2 reais e comparar a
+variância do RMSE entre réplicas contra a baseline (`regenerate_noises:
+true`, resultados já reportados) — isso ainda não foi executado. Ver
+`implementacao.md`, seção "Em andamento".

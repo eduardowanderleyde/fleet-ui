@@ -14,11 +14,6 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
-- [ ] **Testar `regenerate_noises: false` no MPPI do Nav2** (origem:
-  `nav2_tracking`, 2026-10-02). O `nav2.yaml` do TurtleBot4 sobrescreve o
-  default recomendado pelo próprio Nav2. Teste: rodar a campanha de
-  repetibilidade com esse override revertido e comparar variância do RMSE
-  com a baseline atual. Risco: baixo (é só mudar um parâmetro já exposto).
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
   real dos 70% de sucesso na ativação sequencial multi-robô. Risco: médio
@@ -37,10 +32,11 @@ código) confirmando o efeito.
   como limitação documentada mesmo?
 - [ ] **Arquivar uma Release do GitHub no Zenodo pra gerar DOI** (origem:
   `artifact_publishing`, 2026-10-02). Baixo esforço, baixo risco, não
-  exige mudar código — só criar a Release e conectar o Zenodo. Fazer
-  antes da defesa pra poder citar o repositório com DOI na dissertação.
-- [ ] **Criar `CITATION.cff` na raiz do repo** (origem:
-  `artifact_publishing`, 2026-10-02). Acompanha o item do Zenodo.
+  exige mudar código — só criar a Release e conectar o Zenodo (exige
+  login do autor no Zenodo, não pode ser feito por um agente). `CITATION.cff`
+  já existe (ver "Feito") — falta só criar a Release no GitHub e ligar a
+  conta do Zenodo a ela. Fazer antes da defesa pra poder citar o
+  repositório com DOI na dissertação.
 - [ ] **Escrever README de replicação separado do README de
   desenvolvimento** (origem: `artifact_publishing`, 2026-10-02),
   estruturado nos 4 eixos de Lier et al. (2017): artefatos técnicos,
@@ -48,12 +44,29 @@ código) confirmando o efeito.
 
 ## Em andamento
 
-(nenhum item ainda)
+- [~] **Testar `regenerate_noises: false` no MPPI do Nav2** (origem:
+  `nav2_tracking`, 2026-10-02; código em 2026-10-02).
+  `_make_nav2_params()` em `turtlebot4_sim.launch.py` e
+  `turtlebot4_multi_sim.launch.py` agora lê
+  `NAV2_MPPI_REGENERATE_NOISES` (env var, mesmo padrão já usado por
+  `FLEET_ROBOTS`) e sobrescreve `controller_server.FollowPath.regenerate_noises`.
+  Default sem a variável definida = `true` (preserva o comportamento de
+  toda campanha já reportada — ninguém precisa mudar nada pra continuar
+  igual). Testado isoladamente (chamando `_make_nav2_params` com
+  `true`/`false`/sem variável e inspecionando o YAML gerado) — o
+  mecanismo funciona nos dois launch files. **Falta**: rodar de fato a
+  campanha com `NAV2_MPPI_REGENERATE_NOISES=false` e comparar a variância
+  do RMSE contra a baseline — isso exige Gazebo/Nav2 reais de pé, não foi
+  executado ainda. Uso: `NAV2_MPPI_REGENERATE_NOISES=false ros2 launch
+  fleet_orchestrator turtlebot4_sim.launch.py ...`.
 
 ## Feito
 
-(nenhum item ainda — a rodada de 2026-10-02 foi só pesquisa, nada foi
-aplicado no código/experimento até agora)
+- [x] **Criar `CITATION.cff` na raiz do repo** (origem: `artifact_publishing`,
+  2026-10-02; feito em 2026-10-02). Autor confirmou o nome (Eduardo
+  Wanderley) antes de criar — arquivo em `CITATION.cff`, licença MIT,
+  aponta pro repositório. Sem DOI ainda (depende do item Zenodo acima,
+  ainda pendente).
 
 ## Como manter isto atualizado
 

@@ -210,3 +210,14 @@ confirmado**, só o resumo circulado em múltiplas fontes de indexação.
    detalhados, e tentar confirmar a versão atual (não "1.0 not current")
    da política ACM via fonte primária (tentar Google cache ou outra
    rota, já que o fetch direto deu 403).
+
+### 2026-10-02 — Ação aplicada: `CITATION.cff` criado
+
+Item 3 (acima) sobre `CITATION.cff` foi feito: arquivo criado na raiz do
+repositório (`CITATION.cff`, `cff-version: 1.2.0`), autor confirmado
+diretamente com o autor do projeto (Eduardo Wanderley, consistente com o
+`@eduardowanderleyde` do GitHub), licença MIT (já existente em
+`LICENSE`), `repository-code` apontando pro GitHub. **Não tem DOI ainda**
+— isso depende do item 2 (Zenodo), que segue pendente porque exige login
+do próprio autor no Zenodo, não pode ser feito por um agente. Ver
+`implementacao.md` ("Feito" e "Pendente").
