@@ -255,3 +255,73 @@ repo). Não alterei nenhum código do projeto nesta execução.
   lógica própria (ex.: casar poses por nome via outro tópico, tipo
   `/world/<world>/pose/info` com `gz.msgs.Pose_V` que porventura preserve
   nome, a confirmar em execução futura — não testado nesta sessão).
+
+### 2026-10-02 — Achado real e grave: ground truth congela por ~10-16s logo após o boot da simulação
+
+Não é pesquisa de literatura — é achado ao vivo do autor rodando o piloto
+da campanha /odom vs /pose vs ground truth (ver `orquestracion.md`, plano
+dessa campanha, e `fleet_ws/scripts/pilot_ground_truth_check.py`, criado
+nesta sessão).
+
+**O que aconteceu:** logo depois de subir a stack do zero
+(`turtlebot4_sim.launch.py` + `fleet.launch.py`), gravei um replay da rota
+`dissertation_clean01` com `/odom`, `/pose`, `/ground_truth_pose_clean`.
+`/odom` e `/pose` mostraram o robô se movendo normalmente (até ~0,93m),
+mas `/ground_truth_pose_clean` ficou **congelado em (0,0,0) por quase toda
+a gravação de 18s**, só "pulando" pro valor correto na ÚLTIMA mensagem do
+bag. Isso inflou artificialmente o RMSE de `/pose` vs. ground truth
+(43,96cm) pra um valor PIOR que `/odom` vs. ground truth (15,49cm) — o que
+seria um resultado contraintuitivo e preocupante (SLAM corrigindo pra
+pior) se fosse real.
+
+**Diagnóstico (eliminei 2 hipóteses antes de achar a causa real):**
+1. Não é desalinhamento de timestamp (bag-write-time vs. header.stamp) —
+   testei as duas formas em `analyze_runs.py::_read_traj_xy` (parâmetro
+   novo `use_header_stamp`), resultado idêntico.
+2. Não é o índice fixo (`ROBOT_INDEX=2`) errado — confirmei com
+   `gz topic -e -t /world/warehouse/dynamic_pose/info -n 1` (nomes reais,
+   bypassando o bridge) que o índice 2 É `turtlebot4` e reporta a posição
+   correta e em movimento quando testado isoladamente nessa checagem
+   pontual.
+3. **Causa real: artefato de cold-start.** Regravei o MESMO replay, na
+   MESMA stack (sem reiniciar nada), depois que o robô já tinha se movido
+   uma vez antes (stack "aquecida") — `/ground_truth_pose_clean` acompanhou
+   `/odom` corretamente o tempo todo, numa gravação de 67s com ida e volta
+   completa pela rota (path=2,17m), sem nenhum congelamento. A diferença
+   entre as duas gravações foi só "é a primeira vez que o robô se move
+   depois do boot da stack" vs. "não é".
+
+**Rates reais medidos ao vivo (resolve a inconsistência que o agente
+`experiment-stats-methodology` já tinha sinalizado em `stats_methodology.md`
+sobre números conflitantes pro ground truth):**
+- `/ground_truth_pose_clean`: ~105-111Hz (convergindo, `ros2 topic hz`
+  reporta a média subindo nos primeiros segundos — é a média cumulativa
+  da janela, não a taxa instável).
+- `/odom`: ~27,8Hz (perto do `odom_publish_frequency: 30` do URDF, não
+  exato).
+- `/scan`: 10,0Hz exato.
+- `/pose`: **~0,2-0,8Hz, variável entre execuções** — ainda mais esparso
+  que a estimativa de ~2Hz do agente de estatística, porque além do
+  `minimum_time_interval: 0.5` também há `minimum_travel_distance: 0.1`m
+  e `minimum_travel_heading: 0.1`rad (`slam.yaml`) — SLAM Toolbox só
+  processa um novo scan depois do robô andar/girar o suficiente, então a
+  taxa real depende de quão rápido o robô se move, não é uma constante.
+  Com o robô parado, `/pose` não publica NENHUMA mensagem (confirmado:
+  15s de espera sem nenhuma mensagem com o robô parado no spawn).
+
+**Ação sugerida (prioridade alta, bloqueante pra campanha principal):** o
+plano da campanha (`orquestracion.md`) prevê relançar a simulação inteira
+antes de CADA uma das 30 réplicas. Se esse congelamento de cold-start
+acontecer em toda réplica (não testei isso — só testei 1 boot, 2
+replays), as 30 réplicas podem ter a mesma janela inicial de dados de
+ground truth inválidos, contaminando a campanha inteira do mesmo jeito.
+Antes de rodar a campanha de verdade: (a) confirmar se o congelamento
+realmente se repete em todo boot fresco (testar mais algumas vezes), e
+(b) se confirmado, decidir uma mitigação — ex.: um período de
+"assentamento" (mover o robô um pouco e descartar esses dados antes de
+começar a réplica oficial), ou detectar/descartar automaticamente
+qualquer trecho inicial de ground truth com variância ~0 enquanto
+`/odom` mostra movimento real. Não implementei nenhuma mitigação ainda —
+só o diagnóstico. O RMSE de 43,96cm de `/pose` vs. ground truth do piloto
+original **não deve ser usado nem citado** — é artefato do congelamento,
+não um resultado real sobre a qualidade do SLAM.

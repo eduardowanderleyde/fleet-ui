@@ -122,6 +122,27 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   Decisão pendente: mencionar isso no Cap. 09 (Limitações) da dissertação —
   ver `implementacao.md` ("Pendente").
 
+### 2026-10-02 — piloto real rodado: alinhamento OK, mas ground truth congela no cold-start
+
+- **[gazebo_tracking]** Rodei o piloto de verdade (não é achado de agente,
+  é o autor rodando a simulação ao vivo): simulação single-robot subida,
+  rota `dissertation_clean01` reproduzida 2x, gravando `/odom`, `/pose`,
+  `/ground_truth_pose_clean`. Alinhamento de frame CONFIRMADO (odom/ground
+  truth ~(0,0,0) no spawn, TF `map`→`base_link` identidade exata) — mas
+  achei algo mais grave: `/ground_truth_pose_clean` ficou congelado em
+  (0,0,0) por ~10-16s na primeira gravação (logo após o boot da stack),
+  e funcionou perfeitamente numa segunda gravação com a stack já
+  "aquecida". **Isso é potencialmente bloqueante pra campanha principal**,
+  que relança a simulação inteira antes de cada uma das 30 réplicas. Ver
+  `conhecimento/gazebo_tracking.md` ("Achado real e grave...") e
+  `implementacao.md` ("Pendente", item BLOQUEANTE). Rates reais medidos:
+  ground truth ~105-111Hz, odom ~27,8Hz, scan 10,0Hz exato, pose
+  ~0,2-0,8Hz (ainda mais esparso que a estimativa anterior do agente de
+  estatística, porque `minimum_travel_distance`/`minimum_travel_heading`
+  também gateiam, não só `minimum_time_interval`). O RMSE de 43,96cm de
+  `/pose` vs. ground truth do piloto original é artefato do congelamento,
+  não deve ser citado como resultado real.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

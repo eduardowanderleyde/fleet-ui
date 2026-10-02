@@ -14,25 +14,23 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
-- [ ] **Validar ao vivo o alinhamento de frames (world/odom/map) ANTES do
-  piloto /odom vs /pose vs ground truth** (origem: `gazebo_tracking`,
-  2026-10-02, rodada 2). Pesquisa de código-fonte do `DiffDrive`/`gz-math`
-  e do `slam_toolbox` indica que, pra este projeto (spawn em 0,0,0,
-  yaw=0), as três fontes deveriam reportar ~(0,0,0) no instante inicial
-  (antes de qualquer movimento) — mas isso é dedução de como cada peça
-  inicializa isoladamente, não um teste real deste projeto. Ação
-  concreta: depois do robô spawnar e parado, comparar manualmente uma
-  amostra de `/ground_truth_pose_clean`, `/odom` e `/pose` (ou TF
-  `map`→`base_link`) — se todas ~(0,0,0)/~0 yaw, alinhamento confirmado
-  sem precisar de transformação estática; se não, suspeitar primeiro de
-  timing (SLAM só processar o 1º scan depois do robô já ter se movido),
-  não de convenção de eixo (Gazebo e ROS já concordam em right-handed
-  X-frente/Y-esquerda/Z-cima, confirmado via REP-103 e
-  `gazebosim.org/api/sim/8/frame_reference.html`). Baixo esforço, decisivo
-  antes de gastar as 30 execuções da campanha principal — já está coberto
-  pelo passo 2 ("piloto antes da campanha grande") do plano em
-  `orquestracion.md`, só precisa incluir essa checagem explícita no
-  início do piloto, não só comparar as trajetórias no fim.
+- [ ] **BLOQUEANTE pra campanha principal: confirmar se o ground truth
+  congela em todo boot fresco da simulação, não só no que eu testei**
+  (origem: achado real do autor, 2026-10-02, rodando o piloto de verdade
+  — não é "Ação sugerida" de agente de pesquisa). `/ground_truth_pose_clean`
+  ficou congelado em (0,0,0) por ~10-16s na primeira gravação logo após
+  o boot da stack, e funcionou perfeitamente numa segunda gravação com a
+  stack já "aquecida" (mesmo boot, sem reiniciar nada). Detalhe completo
+  em `conhecimento/gazebo_tracking.md` ("Achado real e grave..."). O
+  plano da campanha prevê relançar a simulação inteira antes de CADA uma
+  das 30 réplicas — se o congelamento se repetir em todo boot fresco
+  (só testei 1 vez), as 30 réplicas podem ter a mesma janela inicial de
+  dados de ground truth inválidos. Testar mais alguns boots frescos antes
+  de decidir uma mitigação (período de assentamento, ou detecção
+  automática de trecho com variância ~0 enquanto `/odom` mostra
+  movimento). **Não usar/citar o RMSE de 43,96cm de `/pose` vs. ground
+  truth do piloto original — é artefato do congelamento, não resultado
+  real.**
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
   real dos 70% de sucesso na ativação sequencial multi-robô. Risco: médio
@@ -107,6 +105,25 @@ código) confirmando o efeito.
 
 ## Feito
 
+- [x] **Gravar o piloto de verdade /odom vs /pose vs ground truth, rota
+  curta (`dissertation_clean01`)** (origem: passo 2 do plano em
+  `orquestracion.md`; feito em 2026-10-02). Simulação single-robot
+  lançada de verdade (headless), coletor gravando as 3 fontes +
+  scan/imu, `fleet_ws/scripts/pilot_ground_truth_check.py` (criado hoje)
+  rodado em 2 bags reais. Resultado: alinhamento de frame CONFIRMADO ao
+  vivo (odom/ground truth ~(0,0,0) no spawn, TF `map`→`base_link`
+  identidade exata) — mas achou um problema mais sério (congelamento de
+  ground truth no cold-start, ver item "BLOQUEANTE" em "Pendente" acima)
+  que precisa ser resolvido antes da campanha principal. `analyze_runs.py`
+  ganhou suporte a `PoseStamped` e um parâmetro `use_header_stamp` (ambos
+  aditivos, não mudam comportamento existente) pra viabilizar essa
+  análise. Processos da simulação encerrados corretamente ao final
+  (nenhum órfão deixado rodando).
+- [x] **Gravar `/ground_truth_pose_clean` no `fleet_data_collector`**
+  (origem: passo 1 do plano em `orquestracion.md`; feito em 2026-10-02).
+  `fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py` —
+  `_TYPE_MAP` e `_RELIABLE_TOPICS` atualizados. Testado de verdade no
+  piloto acima (mensagens gravadas e lidas com sucesso).
 - [x] **Criar `CITATION.cff` na raiz do repo** (origem: `artifact_publishing`,
   2026-10-02; feito em 2026-10-02). Autor confirmou o nome (Eduardo
   Wanderley) antes de criar — arquivo em `CITATION.cff`, licença MIT,

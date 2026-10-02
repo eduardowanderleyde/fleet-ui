@@ -229,10 +229,25 @@ def _resolve_trajectory_topic(
 def _read_traj_xy(
     bag_dir: Path,
     topic: str,
+    *,
+    use_header_stamp: bool = False,
 ) -> Tuple[str, np.ndarray, np.ndarray, np.ndarray, float]:
-    """Retorna (topic, t_sec_rel_bag, x, y, duration_wall_sec).
+    """Retorna (topic, t_sec_rel, x, y, duration_sec).
 
-    Ordenação e duração pelo timestamp de gravação no rosbag (3.º campo de read_next).
+    Por padrão (use_header_stamp=False), ordenação e duração pelo timestamp
+    de gravação no rosbag (3.º campo de read_next) — correto pra comparar a
+    MESMA trajetória entre bags DIFERENTES (baseline vs replay), onde o que
+    importa é a sequência real de gravação de cada bag.
+
+    Com use_header_stamp=True, usa o header.stamp da própria mensagem (sim
+    time) em vez do tempo de gravação no bag — mais correto pra comparar
+    tópicos DIFERENTES DENTRO DO MESMO bag (ex.: campanha /odom vs /pose vs
+    ground truth, ver pilot_ground_truth_check.py), já que o tempo de
+    gravação inclui latência de processamento que varia por tópico (SLAM
+    Toolbox demora mais pra computar /pose do que o bridge leva pra
+    republicar ground truth) — comparar por tempo de gravação nesse caso
+    introduz desalinhamento artificial entre fontes, não só ruído de
+    medição.
     """
     from nav_msgs.msg import Odometry
     from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
@@ -283,10 +298,15 @@ def _read_traj_xy(
     if not rows:
         raise RuntimeError(f"Nenhuma mensagem em {topic}")
 
-    rows.sort(key=lambda r: r[0])
-    bag_ns_arr = np.array([r[0] for r in rows], dtype=np.int64)
-    t_rel = (bag_ns_arr - bag_ns_arr[0]) * 1e-9
-    duration_wall_sec = float((bag_ns_arr[-1] - bag_ns_arr[0]) * 1e-9)
+    if use_header_stamp:
+        rows.sort(key=lambda r: r[1])
+        t_arr = np.array([r[1] for r in rows], dtype=np.float64)
+    else:
+        rows.sort(key=lambda r: r[0])
+        bag_ns_arr = np.array([r[0] for r in rows], dtype=np.int64)
+        t_arr = bag_ns_arr.astype(np.float64) * 1e-9
+    t_rel = t_arr - t_arr[0]
+    duration_wall_sec = float(t_arr[-1] - t_arr[0])
     xs = np.array([r[2] for r in rows], dtype=np.float64)
     ys = np.array([r[3] for r in rows], dtype=np.float64)
     return topic, t_rel, xs, ys, duration_wall_sec

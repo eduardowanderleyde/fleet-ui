@@ -57,7 +57,13 @@ def main() -> int:
         if counts.get(topic, 0) == 0:
             print(f"[AVISO] {topic} tem 0 mensagens nesse bag -- regrave com --topics incluindo {topic.lstrip('/')}")
             continue
-        _name, t, x, y, dur = _read_traj_xy(bag_dir, topic)
+        # use_header_stamp=True: as 3 fontes estao no MESMO bag, todas com
+        # /clock de sim time em comum -- o header.stamp de cada mensagem e
+        # mais correto aqui que o tempo de gravacao no bag, que inclui
+        # latencia de processamento que varia por fonte (SLAM Toolbox
+        # demora mais pra computar /pose do que o bridge leva pra
+        # republicar ground truth).
+        _name, t, x, y, dur = _read_traj_xy(bag_dir, topic, use_header_stamp=True)
         n = len(t)
         hz = (n - 1) / dur if dur and dur > 0 else float("nan")
         data[key] = {"t": t, "xy": np.stack([x, y], axis=1), "hz": hz, "n": n}
