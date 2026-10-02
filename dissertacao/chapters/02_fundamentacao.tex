@@ -138,6 +138,22 @@ e subscritores. Para experimentos de coleta de dados, três dimensões são crí
     KEEP\_LAST(1) para garantir que apenas a informação mais recente seja processada.
 \end{description}
 
+\begin{table}[H]
+\centering
+\caption{As três dimensões de QoS críticas para coleta de dados, suas
+opções e um exemplo de uso neste projeto.}
+\label{tab:qos_dimensoes}
+\begin{tabular}{lll}
+\toprule
+\textbf{Dimensão} & \textbf{Opções} & \textbf{Exemplo neste projeto} \\
+\midrule
+Reliability & BEST\_EFFORT / RELIABLE & LiDAR, IMU $\to$ BEST\_EFFORT \\
+Durability  & VOLATILE / TRANSIENT\_LOCAL & \texttt{/amcl\_pose} $\to$ TRANSIENT\_LOCAL \\
+History     & KEEP\_LAST(N) / KEEP\_ALL & navegação crítica $\to$ KEEP\_LAST(1) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 A incompatibilidade de QoS entre publicador e subscritor é \textit{silenciosa}
 no ROS~2: o match não é estabelecido, nenhuma mensagem é entregue, e nenhum
 erro é reportado. Esta característica é responsável por uma categoria inteira
