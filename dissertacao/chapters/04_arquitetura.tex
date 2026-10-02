@@ -88,6 +88,23 @@ experimentais. Cada robô na frota é classificado em um de três papéis:
     sem participação direta na navegação ou coleta.
 \end{itemize}
 
+\begin{table}[H]
+\centering
+\caption{Os três papéis experimentais segundo as duas propriedades que os
+distinguem: capacidade de receber comandos de navegação e participação na
+coleta de dados sensoriais.}
+\label{tab:papeis_muut_fuut_su}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Papel} & \textbf{Recebe comandos de navegação} & \textbf{Coleta dados sensoriais} \\
+\midrule
+MUUT & Sim & Sim (trajetória própria) \\
+FUUT & Não & Sim (perspectiva externa, posição fixa) \\
+SU   & Não & Não \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 Essa tricotomia não é a única forma possível de modelar o problema. Uma
 alternativa mais simples seria um único campo booleano, como
 \texttt{can\_\allowbreak navigate}, distinguindo apenas robôs que recebem comandos de
