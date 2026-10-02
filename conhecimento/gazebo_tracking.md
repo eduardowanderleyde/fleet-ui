@@ -367,3 +367,27 @@ pendente pra esse outro problema: higiene de processo rigorosa entre
 réplicas (matar TUDO antes de cada boot novo, não confiar que o processo
 anterior terminou limpo) e/ou um mecanismo de detecção de
 timeout-e-retry pra bringup que não progride. Ver `implementacao.md`.
+
+### 2026-10-02 — O mundo real da simulação (`nav2_minimal_tb4_sim`) tem geometria diferente do mapa de referência do `turtlebot4_navigation`
+
+Achado ao criar as rotas longa/loop do plano de campanha (`orquestracion.md`,
+passo 3). O mapa estático em
+`turtlebot4_navigation/maps/warehouse.yaml`/`.pgm` (pacote do fabricante,
+usado como referência/comparação) **não é o mundo que esta simulação
+realmente usa**. O mundo de verdade é
+`nav2_minimal_tb4_sim/worlds/warehouse.sdf` — mesmo nome "warehouse", mas
+pacote diferente, com layout de obstáculos diferente. Confirmei lendo o
+SDF como XML (24 `<include>` com `<pose>` explícita: `shelf_big_0..4`,
+`shelf_0..7`, `pallet_box_0`, `barrier_0..3`, `chair_0..1`,
+`fchair_0..1`, `table0`, 2 pessoas). A região x:[0,4], y:[0,4] (próxima
+ao spawn) está livre de qualquer um desses 24 modelos — o obstáculo mais
+próximo é `shelf_7` em (0.4,-2,0), 2m ao sul da zona usada.
+
+**Ação sugerida:** se alguma análise futura (desta sessão ou de um
+agente) precisar verificar colisão/clearance de uma rota nova, usar o
+SDF do mundo real (`nav2_minimal_tb4_sim/worlds/warehouse.sdf`), não o
+`.pgm`/`.yaml` do `turtlebot4_navigation` — são mundos de nome igual,
+conteúdo diferente. Não tentei (nem consegui, sem GUI) validar
+visualmente com `headless:=False`; a validação foi analítica (geometria
+do SDF) + empírica (gravação real sem avisos de colisão/recovery nos
+logs do Nav2).

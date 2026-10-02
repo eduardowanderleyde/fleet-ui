@@ -14,14 +14,16 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
-- [ ] **Criar as rotas longa (com curva 90°/180°) e loop fechado** (origem:
-  plano em `orquestracion.md`, "Plano: campanha /odom vs. /pose vs.
-  ground truth", passo 3 — nunca tinha sido listado aqui explicitamente).
-  Só a rota curta (`dissertation_clean01`) existe hoje. Validar
-  visualmente cada uma (`headless:=False`) antes de rodar em lote, como
-  já é hábito no projeto pra poses novas. Bloqueia rodar a campanha
-  completa de 30 réplicas (3 rotas × 10) — hoje só dá pra rodar a rota
-  curta com `run_ground_truth_campaign.py` (ver "Feito").
+- [ ] **Testar `run_ground_truth_campaign.py` nas 2 rotas novas
+  (`rota_longa_curva`, `loop_fechado`), não só na curta** (origem: achado
+  real do autor, 2026-10-02, ao criar as rotas — ver "Feito" abaixo). O
+  script só foi validado com `dissertation_clean01` (mini-campanha de 2
+  réplicas). Rotas mais longas (7,7m e 11,3m vs. ~0,9m da curta) podem
+  expor timeouts diferentes — `--boot-timeout` é só sobre o bringup da
+  simulação, não sobre a duração do replay em si, então não deveria
+  precisar de ajuste, mas isso não foi confirmado na prática. Fazer antes
+  da campanha completa de 30 réplicas.
+
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
   real dos 70% de sucesso na ativação sequencial multi-robô. Risco: médio
@@ -73,6 +75,37 @@ código) confirmando o efeito.
 
 ## Feito
 
+- [x] **Criar as rotas longa (com curva 90°) e loop fechado** (origem:
+  plano em `orquestracion.md`, "Plano: campanha /odom vs. /pose vs.
+  ground truth", passo 3; feito em 2026-10-02). Mapeei os obstáculos
+  reais do mundo usado pela simulação (não o mapa de referência de
+  outro pacote — são mundos diferentes, apesar do mesmo nome
+  "warehouse": `nav2_minimal_tb4_sim/worlds/warehouse.sdf`, lido direto
+  como XML, 24 modelos com pose exata) pra confirmar que a região
+  x:[0,4], y:[0,4] está livre de qualquer estante/obstáculo antes de
+  desenhar as rotas — não validei visualmente com GUI (não consigo ver
+  uma janela do Gazebo), validei analiticamente a geometria do mundo e
+  empiricamente (gravei de verdade, `experiment_repeatability.py
+  record`, sem nenhum aviso de colisão/recovery/oscillation nos logs).
+  - `rota_longa_curva` (reta + curva de 90°): pontos
+    `(2,0,0);(4,0,0);(4,2,1.571);(4,4,1.571)`, 7,66m percorridos
+    (teórico 8m), 75 poses salvas, sem falhas.
+  - `loop_fechado` (quadrado, retorna ao início): pontos
+    `(3,0,0);(3,3,1.571);(0,3,3.142);(0,0,-1.571)`, 11,33m percorridos
+    (teórico 12m), 118 poses salvas, sem falhas. **Erro real cometido e
+    corrigido**: gravei essa rota a primeira vez sem reiniciar a
+    simulação depois da `rota_longa_curva` — o robô ainda estava em
+    (4,4), então a rota salva começava contaminada por esse trecho de
+    transição, não do spawn (0,0). Descobri isso checando a primeira
+    pose do YAML salvo, reiniciei a simulação do zero e regravei
+    corretamente (primeira pose agora ~(0,0,0), última pose a 21cm do
+    início — dentro da tolerância normal de chegada do Nav2, consistente
+    com "loop fechado").
+  Ambos os arquivos ficam em `fleet_ws/routes/default/` — **não vão pro
+  git** (`fleet_ws/.gitignore` ignora `routes/` deliberadamente, mesmo
+  tratamento de `dissertation_clean01.yaml`). Testado rodando
+  `run_ground_truth_campaign.py --route rota_longa_curva` ainda não foi
+  feito nesta sessão — próximo passo natural antes da campanha completa.
 - [x] **Script de campanha com higiene de processo entre réplicas +
   timeout-e-retry pro bringup** (origem: achado real do autor,
   2026-10-02, testando o congelamento de ground truth; feito em

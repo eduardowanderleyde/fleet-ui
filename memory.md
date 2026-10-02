@@ -172,6 +172,22 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   as rotas longa/loop (que não existem ainda). Ver `implementacao.md`
   ("Feito" e "Pendente").
 
+### 2026-10-02 — feito: rotas longa e loop fechado criadas
+
+- **[gazebo_tracking]** `rota_longa_curva` (7,7m, reta+curva 90°) e
+  `loop_fechado` (11,3m, quadrado, retorna ao início) gravadas de
+  verdade, sem falhas — fecham o passo 3 do plano da campanha de ground
+  truth. Achado no caminho: o mapa estático de referência do
+  `turtlebot4_navigation` NÃO é o mundo real desta simulação (mundos de
+  mesmo nome "warehouse", pacotes e geometria diferentes) — usei o SDF
+  real (`nav2_minimal_tb4_sim/worlds/warehouse.sdf`) pra confirmar área
+  livre. Erro cometido e corrigido no caminho: gravei `loop_fechado` a
+  primeira vez sem reiniciar a sim depois da rota anterior, contaminando
+  o início com a posição residual do robô — regravado do zero. Rotas
+  ficam em `fleet_ws/routes/default/`, não vão pro git (gitignored, como
+  `dissertation_clean01`). Falta testar `run_ground_truth_campaign.py`
+  com essas 2 rotas antes da campanha completa. Ver `implementacao.md`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
