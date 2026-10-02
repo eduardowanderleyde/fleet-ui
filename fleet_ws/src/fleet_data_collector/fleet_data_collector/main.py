@@ -20,7 +20,7 @@ from rosbag2_py import ConverterOptions, SequentialWriter, StorageOptions, Topic
 
 from fleet_msgs.srv import CollectionStatus, DisableCollection, EnableCollection
 
-from geometry_msgs.msg import PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu, LaserScan
 from tf2_msgs.msg import TFMessage
@@ -49,6 +49,10 @@ class SensorCollector(Node):
         # Localização: inclua apenas um destes conforme o modo usado
         "amcl_pose": ("geometry_msgs/msg/PoseWithCovarianceStamped", PoseWithCovarianceStamped),  # AMCL (mapa fixo) ← padrão recomendado
         "pose":      ("geometry_msgs/msg/PoseWithCovarianceStamped", PoseWithCovarianceStamped),  # SLAM Toolbox (live)
+        # Referência pra campanha /odom vs /pose vs ground truth (orquestracion.md,
+        # "Plano: campanha ..."). Publicado por ground_truth_filter, só modo
+        # single-robot por ora (ROBOT_INDEX fixo, não namespaced ainda).
+        "ground_truth_pose_clean": ("geometry_msgs/msg/PoseStamped", PoseStamped),
     }
 
     def __init__(self) -> None:
@@ -109,8 +113,8 @@ class SensorCollector(Node):
             durability=DurabilityPolicy.TRANSIENT_LOCAL,
         )
 
-    # Tópicos com QoS RELIABLE + VOLATILE (SLAM Toolbox)
-    _RELIABLE_TOPICS = {"pose"}
+    # Tópicos com QoS RELIABLE + VOLATILE (SLAM Toolbox, ground truth)
+    _RELIABLE_TOPICS = {"pose", "ground_truth_pose_clean"}
     # Tópicos com QoS RELIABLE + TRANSIENT_LOCAL (AMCL publica latched)
     _TRANSIENT_LOCAL_TOPICS = {"amcl_pose"}
 
