@@ -52,6 +52,10 @@ mais abaixo):
 8. Dispatch da Missão Coordenada passou a alocar por papel (`roles.yaml`:
    MUUT/FUUT/SU), não por índice fixo na lista de robôs — ver "Pesquisa de
    mercado/acadêmica e aprendizados pros agentes" mais abaixo.
+9. 7 agentes de pesquisa especializados (`.claude/agents/experiment-*.md`),
+   cada um acumulando conhecimento num arquivo próprio em `conhecimento/`
+   entre execuções — ver "Agentes de pesquisa especializados do
+   experimento" mais abaixo. Criados, ainda não rodaram nenhuma vez.
 
 ## Por que essa camada existe
 
@@ -1094,6 +1098,30 @@ máquina Linux nativa" acima) — isso é single-robot aqui, então o risco é
 baixo (campanha de verificação rodou 11/11 sem falha), mas vale rodar
 num momento de máquina descansada, e checar `uptime`/load antes de
 começar, como já é hábito neste projeto.
+
+## Agentes de pesquisa especializados do experimento (2026-10-02)
+
+Formalização do que a seção "Pesquisa acadêmica sobre missão multi-robô"
+acima já fazia de forma manual/pontual: 7 agentes definidos em
+`.claude/agents/experiment-*.md`, cada um especializado num tema de
+atrito real já encontrado neste projeto, que acumulam conhecimento entre
+execuções num arquivo próprio em `conhecimento/` (lido no início de toda
+execução, nunca sobrescrito — só acrescentado). Não são sobre a
+dissertação (isso é escopo dos agentes `chapter-*` na branch
+`dissertacao`); são sobre melhorar o experimento/código em si.
+
+| Agente | Tema | Arquivo de conhecimento |
+|---|---|---|
+| `experiment-dds-tuning` | Tuning de DDS/ROS~2 pra multi-robô — ataca diretamente o problema não resolvido dos 70% de sucesso na ativação sequencial | `conhecimento/dds_tuning.md` |
+| `experiment-nav2-tracking` | Issues/tuning do Nav2 e MPPI | `conhecimento/nav2_tracking.md` |
+| `experiment-stats-methodology` | Metodologia estatística pra N pequeno, inclusive o desenho pareado da campanha de 3 fontes de pose | `conhecimento/stats_methodology.md` |
+| `experiment-gazebo-tracking` | Fidelidade de simulação, Gazebo Harmonic/gz-sim | `conhecimento/gazebo_tracking.md` |
+| `experiment-slam-toolbox-tracking` | Bugs/config do SLAM Toolbox | `conhecimento/slam_toolbox_tracking.md` |
+| `experiment-artifact-publishing` | Publicação de artefato de pesquisa (DOI, replicação) | `conhecimento/artifact_publishing.md` |
+| `experiment-mcp-orchestration` | MCP e orquestração multi-agente — mesmo tema do item "Servidor MCP" logo abaixo | `conhecimento/mcp_orchestration.md` |
+
+Nenhum rodou ainda (criados, não invocados) — os 7 arquivos de
+conhecimento estão vazios, só com o cabeçalho TL;DR/Achados.
 
 ## Próximos passos naturais
 
