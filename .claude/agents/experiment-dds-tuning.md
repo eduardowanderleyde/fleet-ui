@@ -99,6 +99,14 @@ em vez de omitir ou inventar.
    numa subseção "Ação sugerida" dentro do achado — mas NÃO altere código
    do projeto você mesmo; isso é decisão do autor ou de uma tarefa de
    implementação separada.
+6. Acrescente uma linha na seção "Linha do tempo" de `memory.md` (raiz do
+   repositório): data + achado em 1-2 linhas + link pro seu
+   `conhecimento/<topico>.md` — sem apagar entradas anteriores de outros
+   agentes.
+7. Se o achado tiver uma "Ação sugerida" concreta, acrescente também um
+   item na seção "Pendente" de `implementacao.md` (raiz do repositório),
+   com a mesma regra de nunca decidir ou implementar a mudança você
+   mesmo — só registrar a ação candidata pro autor decidir.
 
 ## Regras
 
