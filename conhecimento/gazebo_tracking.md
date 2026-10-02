@@ -325,3 +325,45 @@ qualquer trecho inicial de ground truth com variância ~0 enquanto
 só o diagnóstico. O RMSE de 43,96cm de `/pose` vs. ground truth do piloto
 original **não deve ser usado nem citado** — é artefato do congelamento,
 não um resultado real sobre a qualidade do SLAM.
+
+### 2026-10-02 — Atualização do achado acima: provavelmente NÃO é um bug do ground truth
+
+Testei 2 boots frescos adicionais, de propósito, pra confirmar se o
+congelamento se repete em todo boot — e **não se repetiu em nenhum dos
+dois**. Nos dois casos, `/ground_truth_pose_clean` acompanhou `/odom`
+corretamente a gravação toda, com concordância quase perfeita
+(odom=0,8423m vs gt=0,8424m no boot 1; odom=0,8340m vs gt=0,8340m no
+boot 2 — mesma rota curta `dissertation_clean01`).
+
+**O que mudou entre o piloto original (congelou) e esses 2 boots (não
+congelaram):** antes de rodar os 2 boots novos, descobri e matei um
+conjunto de processos **órfãos** de uma bateria de testes anterior
+(bridges `parameter_bridge`/`image_bridge` de PIDs antigos, ainda vivos
+~30min depois, competindo por CPU com a simulação nova — `uptime` chegou
+a mostrar load average 14,16, caiu pra ~0,2 só depois de matar os
+órfãos). É plausível — não comprovado com certeza absoluta, já que não
+recriei o cenário exato do piloto original de propósito — que o
+congelamento original tenha sido causado por essa mesma contenção de CPU
+(órfãos disputando recursos com a simulação nova), não por um defeito
+intrínseco do bridge/filtro de ground truth.
+
+**Achado lateral, mas relevante:** numa 3a tentativa de boot fresco
+(depois dos 2 boots limpos acima), a simulação travou de verdade —
+parou de progredir por >2min em
+`docking_server.rclcpp: failed to send response to /docking_server/change_state
+(timeout)`, nunca chegou a "Managed nodes are active". Isso é uma
+reprodução ao vivo do problema JÁ CONHECIDO e documentado em
+`conhecimento/dds_tuning.md` (ativação sequencial com ~70% de taxa de
+sucesso) — não é um achado novo, é confirmação de que o problema
+continua acontecendo espontaneamente, mesmo numa máquina com load baixo
+no momento do boot.
+
+**Conclusão revisada:** o risco real pra campanha principal não é
+"ground truth congela sistematicamente no cold-start" (evidência agora
+pesa contra isso, 2 testes limpos OK) — é o problema JÁ CONHECIDO de
+falha de ativação sequencial intermitente (dds_tuning.md). A mitigação
+certa não é algo específico de ground truth; é a mesma que já estava
+pendente pra esse outro problema: higiene de processo rigorosa entre
+réplicas (matar TUDO antes de cada boot novo, não confiar que o processo
+anterior terminou limpo) e/ou um mecanismo de detecção de
+timeout-e-retry pra bringup que não progride. Ver `implementacao.md`.

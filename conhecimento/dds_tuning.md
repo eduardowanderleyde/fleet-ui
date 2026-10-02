@@ -233,3 +233,41 @@ no tempo exato dos avisos "jump back in time" (indicaria DDS/descoberta)
 algum núcleo satura a 100% ANTES da explosão de pacotes (indicaria
 CPU/scheduling como causa primária, com DDS como efeito colateral, não
 causa). Isso é recomendação de ferramenta, não um resultado medido.
+
+### 2026-10-02 — Reprodução ao vivo do problema, achada por acaso rodando o piloto de ground truth
+
+Não é pesquisa nova — é confirmação ao vivo, ao rodar 3 boots frescos
+seguidos da simulação pra testar outra coisa (congelamento de ground
+truth, ver `conhecimento/gazebo_tracking.md`). Dois achados relevantes
+pra este tema:
+
+1. **Confirmei um caso real de órfãos de processo contaminando um boot
+   novo:** depois de uma bateria de testes, `parameter_bridge`/
+   `image_bridge` de PIDs antigos (~30min de vida) sobreviveram ao
+   `kill` que eu pensava ter encerrado tudo, e ficaram competindo por
+   CPU com uma simulação nova que eu tinha acabado de subir —
+   `uptime` chegou a load average 14,16 (baseline da máquina é ~0,2).
+   Só caiu pra próximo do normal depois de eu matar os PIDs órfãos
+   manualmente. Isso é evidência direta e concreta (não só suspeita) de
+   que processos não encerrados de uma réplica anterior podem contaminar
+   a réplica seguinte — relevante pra campanha principal, que depende de
+   encerrar e relançar a stack inteira 30 vezes.
+2. **Numa 3a tentativa de boot fresco (já sem órfãos, load baixo), a
+   ativação travou de verdade** — parou de progredir por mais de 2
+   minutos em `docking_server.rclcpp: failed to send response to
+   /docking_server/change_state (timeout)`, nunca chegou a "Managed
+   nodes are active". Reproduz o problema que já motivou este agente
+   (ativação sequencial com ~70% de taxa de sucesso) — não achei causa
+   nova, só confirmo que ainda acontece espontaneamente, mesmo com a
+   máquina relativamente descansada no momento exato do boot.
+
+**Ação sugerida:** pra campanha principal (30 réplicas, cada uma
+relançando a stack inteira), não basta um `kill` simples entre réplicas
+— o script de campanha precisa (a) confirmar ativamente que não sobrou
+processo da réplica anterior antes de subir a próxima (`pgrep` + kill
+forçado se necessário, não só esperar um tempo fixo), e (b) ter um
+timeout-e-retry pro próprio bringup (se não chegar em "Managed nodes are
+active" em N segundos, matar tudo e tentar de novo, contando quantas
+réplicas precisaram de retry — é um dado relevante pra reportar a taxa
+real de sucesso). Nenhuma dessas duas coisas existe hoje no script de
+campanha, até onde verificado nesta sessão.

@@ -14,23 +14,29 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
-- [ ] **BLOQUEANTE pra campanha principal: confirmar se o ground truth
-  congela em todo boot fresco da simulação, não só no que eu testei**
-  (origem: achado real do autor, 2026-10-02, rodando o piloto de verdade
-  — não é "Ação sugerida" de agente de pesquisa). `/ground_truth_pose_clean`
-  ficou congelado em (0,0,0) por ~10-16s na primeira gravação logo após
-  o boot da stack, e funcionou perfeitamente numa segunda gravação com a
-  stack já "aquecida" (mesmo boot, sem reiniciar nada). Detalhe completo
-  em `conhecimento/gazebo_tracking.md` ("Achado real e grave..."). O
-  plano da campanha prevê relançar a simulação inteira antes de CADA uma
-  das 30 réplicas — se o congelamento se repetir em todo boot fresco
-  (só testei 1 vez), as 30 réplicas podem ter a mesma janela inicial de
-  dados de ground truth inválidos. Testar mais alguns boots frescos antes
-  de decidir uma mitigação (período de assentamento, ou detecção
-  automática de trecho com variância ~0 enquanto `/odom` mostra
-  movimento). **Não usar/citar o RMSE de 43,96cm de `/pose` vs. ground
-  truth do piloto original — é artefato do congelamento, não resultado
-  real.**
+- [ ] **BLOQUEANTE revisado pra campanha principal: higiene de processo
+  entre réplicas + timeout-e-retry pro bringup** (origem: achado real do
+  autor, 2026-10-02, testando o item anterior — ver histórico "Feito"
+  abaixo). Testei mais 2 boots frescos: ground truth NÃO congelou em
+  nenhum dos dois (concordância quase perfeita com `/odom`), o que pesa
+  CONTRA a hipótese de bug intrínseco de ground truth. O que encontrei
+  de real: (a) processos órfãos de uma bateria de testes anterior
+  sobreviveram ao `kill` e contaminaram um boot novo com CPU em disputa
+  (load average chegou a 14,16); (b) numa 3a tentativa, já sem órfãos, a
+  ativação travou de verdade por >2min (`docking_server change_state
+  timeout`) — reprodução ao vivo do problema JÁ CONHECIDO dos ~70% de
+  sucesso (`conhecimento/dds_tuning.md`). Ação concreta: o script da
+  campanha principal precisa (1) confirmar ativamente, via `pgrep`, que
+  nenhum processo da réplica anterior sobrou antes de subir a próxima
+  (não só esperar um tempo fixo), e (2) ter timeout-e-retry pro próprio
+  bringup (se não chegar em "Managed nodes are active" em N segundos,
+  matar tudo e tentar de novo, contando quantos retries cada réplica
+  precisou — dado relevante pra reportar na campanha). Nenhuma das duas
+  coisas existe hoje no script. Detalhe completo em
+  `conhecimento/gazebo_tracking.md` e `conhecimento/dds_tuning.md`.
+  **O RMSE de 43,96cm de `/pose` vs. ground truth do piloto original
+  continua não devendo ser usado/citado — mas agora por ser de 1 boot
+  possivelmente contaminado por órfãos, não por um bug confirmado.**
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
   real dos 70% de sucesso na ativação sequencial multi-robô. Risco: médio
@@ -42,29 +48,6 @@ código) confirmando o efeito.
   simétrico entre 3 grupos (ANOVA de medidas repetidas/Friedman) — ou
   ambos, respondendo perguntas diferentes. Bloqueante: mudar depois do
   piloto é retrabalho.
-- [ ] **Medir ao vivo as taxas reais de `/pose`, `/ground_truth_pose` e
-  `/ground_truth_pose_clean` no próprio piloto, e decidir o método de
-  alinhamento temporal pra reamostragem ANTES de escalar pra 30 réplicas**
-  (origem: `stats_methodology`, 2026-10-02, rodada 2). `/odom` confirmado
-  a 30Hz exato (`odom_publish_frequency` em `create3.urdf.xacro`); `/pose`
-  pode ser só ~2Hz (`minimum_time_interval: 0.5` em `slam.yaml`, mas a
-  lógica exata de combinação com os outros 2 limiares não foi confirmada,
-  taxa real pode ser menor); ground truth tem números conflitantes no
-  próprio `orquestracion.md` (~51-55Hz vs. ~100Hz) nunca resolvidos.
-  Reamostrar as 3 fontes pra uma grade comum arbitrária (como
-  `analyze_runs.py --resample-mode time` faz hoje) corre risco de
-  interpolar o `/pose` esparso de forma que corte curvas da rota — o que
-  poderia simular artificialmente "divergência cresce com a complexidade
-  da rota" mesmo que não seja um efeito real do SLAM. Recomendação do
-  agente (não decisão): considerar um modo de reamostragem que interpole
-  só o ground truth (série densa) pros timestamps nativos de cada fonte a
-  avaliar, em vez da grade arbitrária comum; e tratar cada réplica como 1
-  observação no Bland-Altman do piloto (não pooled de todos os
-  pontos-tempo de todas as réplicas — isso infla artificialmente a
-  precisão aparente, confirmado via Bland & Altman 2007). Risco: médio
-  (pode exigir um modo novo em `analyze_runs.py`, não só decisão de
-  parâmetro). Bloqueante: decidir antes do piloto, não depois de já ter
-  rodado as 30 réplicas.
 - [ ] **Avaliar adicionar o plugin `WheelSlip` ao modelo do Gazebo**
   (origem: `gazebo_tracking`, 2026-10-02). Hoje a dissertação registra
   "DiffDrive não modela slip" como limitação; existe plugin oficial que
@@ -112,13 +95,28 @@ código) confirmando o efeito.
   scan/imu, `fleet_ws/scripts/pilot_ground_truth_check.py` (criado hoje)
   rodado em 2 bags reais. Resultado: alinhamento de frame CONFIRMADO ao
   vivo (odom/ground truth ~(0,0,0) no spawn, TF `map`→`base_link`
-  identidade exata) — mas achou um problema mais sério (congelamento de
-  ground truth no cold-start, ver item "BLOQUEANTE" em "Pendente" acima)
-  que precisa ser resolvido antes da campanha principal. `analyze_runs.py`
-  ganhou suporte a `PoseStamped` e um parâmetro `use_header_stamp` (ambos
-  aditivos, não mudam comportamento existente) pra viabilizar essa
-  análise. Processos da simulação encerrados corretamente ao final
-  (nenhum órfão deixado rodando).
+  identidade exata). `analyze_runs.py` ganhou suporte a `PoseStamped` e
+  um parâmetro `use_header_stamp` (ambos aditivos, não mudam
+  comportamento existente) pra viabilizar essa análise. **Correção**: a
+  primeira tentativa de encerrar os processos da simulação deixou
+  órfãos vivos sem eu perceber na hora (só descobri ~30min depois, ao
+  testar o item abaixo) — "nenhum órfão deixado rodando" dito aqui
+  originalmente estava errado.
+- [x] **Testar mais 2 boots frescos pra confirmar/refutar o congelamento
+  de ground truth, e medir taxas reais das 3 fontes** (origem: item
+  "BLOQUEANTE" anterior + achado do `stats_methodology`; feito em
+  2026-10-02). Resultado: ground truth NÃO congelou em nenhum dos 2
+  boots limpos (concordância quase perfeita com `/odom`, diferença
+  <0,1mm no total percorrido) — pesa contra a hipótese de bug intrínseco.
+  No caminho, descobri órfãos de uma bateria de testes anterior
+  contaminando CPU (load 14,16) e, numa 3a tentativa já sem órfãos, uma
+  reprodução ao vivo do problema JÁ CONHECIDO de ativação sequencial
+  instável (`conhecimento/dds_tuning.md`). Taxas reais medidas: ground
+  truth ~55-111Hz (varia entre execuções, possivelmente com a carga da
+  máquina), odom ~27,8Hz, pose ~0,2-0,8Hz. Novo item BLOQUEANTE revisado
+  em "Pendente" acima (higiene de processo + timeout-e-retry, não mais
+  sobre ground truth especificamente). Processos encerrados e
+  confirmados mortos (`pgrep` vazio) ao final de cada ciclo desta vez.
 - [x] **Gravar `/ground_truth_pose_clean` no `fleet_data_collector`**
   (origem: passo 1 do plano em `orquestracion.md`; feito em 2026-10-02).
   `fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py` —

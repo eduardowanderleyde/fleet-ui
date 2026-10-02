@@ -143,6 +143,22 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   `/pose` vs. ground truth do piloto original é artefato do congelamento,
   não deve ser citado como resultado real.
 
+### 2026-10-02 — correção: ground truth provavelmente não congela; problema real é outro
+
+- **[gazebo_tracking / dds_tuning]** Testei mais 2 boots frescos pra
+  confirmar o congelamento de ground truth achado antes — **não se
+  repetiu em nenhum dos dois** (concordância quase perfeita com
+  `/odom`). Pesa contra a hipótese de bug intrínseco de ground truth.
+  O que encontrei de real: processos órfãos de uma bateria de testes
+  anterior sobreviveram e contaminaram CPU de um boot novo (load chegou
+  a 14,16); numa 3a tentativa, já sem órfãos, a ativação travou de
+  verdade por >2min — reprodução ao vivo do problema JÁ CONHECIDO de
+  ativação sequencial instável (~70% de sucesso, já documentado antes).
+  Conclusão revisada: o risco real pra campanha principal é higiene de
+  processo entre réplicas + falta de timeout-e-retry no bringup, não
+  ground truth. Ver `implementacao.md` ("Pendente", item BLOQUEANTE
+  revisado) e `conhecimento/gazebo_tracking.md`/`dds_tuning.md`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
