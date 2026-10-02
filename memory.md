@@ -159,6 +159,19 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   ground truth. Ver `implementacao.md` ("Pendente", item BLOQUEANTE
   revisado) e `conhecimento/gazebo_tracking.md`/`dds_tuning.md`.
 
+### 2026-10-02 — feito: script de campanha com higiene de processo + retry
+
+- **[dds_tuning / gazebo_tracking]** `fleet_ws/scripts/run_ground_truth_campaign.py`
+  (novo): mata agressivamente por padrão de processo antes de cada
+  réplica e confirma que nada sobrou; se o bringup não ficar pronto a
+  tempo, mata tudo e tenta de novo (até N vezes), registrando retries
+  num `campaign_manifest.json`. Testado com mini-campanha real (2
+  réplicas): 2/2 ok, 0 retries, ground truth sem congelamento nas duas
+  (4a e 5a confirmação consecutiva de que o congelamento original não
+  era um bug de ground truth). Ainda falta: testar com N grande e com
+  as rotas longa/loop (que não existem ainda). Ver `implementacao.md`
+  ("Feito" e "Pendente").
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

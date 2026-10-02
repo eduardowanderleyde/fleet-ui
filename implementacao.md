@@ -14,29 +14,14 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
-- [ ] **BLOQUEANTE revisado pra campanha principal: higiene de processo
-  entre réplicas + timeout-e-retry pro bringup** (origem: achado real do
-  autor, 2026-10-02, testando o item anterior — ver histórico "Feito"
-  abaixo). Testei mais 2 boots frescos: ground truth NÃO congelou em
-  nenhum dos dois (concordância quase perfeita com `/odom`), o que pesa
-  CONTRA a hipótese de bug intrínseco de ground truth. O que encontrei
-  de real: (a) processos órfãos de uma bateria de testes anterior
-  sobreviveram ao `kill` e contaminaram um boot novo com CPU em disputa
-  (load average chegou a 14,16); (b) numa 3a tentativa, já sem órfãos, a
-  ativação travou de verdade por >2min (`docking_server change_state
-  timeout`) — reprodução ao vivo do problema JÁ CONHECIDO dos ~70% de
-  sucesso (`conhecimento/dds_tuning.md`). Ação concreta: o script da
-  campanha principal precisa (1) confirmar ativamente, via `pgrep`, que
-  nenhum processo da réplica anterior sobrou antes de subir a próxima
-  (não só esperar um tempo fixo), e (2) ter timeout-e-retry pro próprio
-  bringup (se não chegar em "Managed nodes are active" em N segundos,
-  matar tudo e tentar de novo, contando quantos retries cada réplica
-  precisou — dado relevante pra reportar na campanha). Nenhuma das duas
-  coisas existe hoje no script. Detalhe completo em
-  `conhecimento/gazebo_tracking.md` e `conhecimento/dds_tuning.md`.
-  **O RMSE de 43,96cm de `/pose` vs. ground truth do piloto original
-  continua não devendo ser usado/citado — mas agora por ser de 1 boot
-  possivelmente contaminado por órfãos, não por um bug confirmado.**
+- [ ] **Criar as rotas longa (com curva 90°/180°) e loop fechado** (origem:
+  plano em `orquestracion.md`, "Plano: campanha /odom vs. /pose vs.
+  ground truth", passo 3 — nunca tinha sido listado aqui explicitamente).
+  Só a rota curta (`dissertation_clean01`) existe hoje. Validar
+  visualmente cada uma (`headless:=False`) antes de rodar em lote, como
+  já é hábito no projeto pra poses novas. Bloqueia rodar a campanha
+  completa de 30 réplicas (3 rotas × 10) — hoje só dá pra rodar a rota
+  curta com `run_ground_truth_campaign.py` (ver "Feito").
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
   real dos 70% de sucesso na ativação sequencial multi-robô. Risco: médio
@@ -88,6 +73,25 @@ código) confirmando o efeito.
 
 ## Feito
 
+- [x] **Script de campanha com higiene de processo entre réplicas +
+  timeout-e-retry pro bringup** (origem: achado real do autor,
+  2026-10-02, testando o congelamento de ground truth; feito em
+  2026-10-02). `fleet_ws/scripts/run_ground_truth_campaign.py` (novo) —
+  antes de CADA réplica, mata agressivamente por padrão de processo
+  (`pkill -9 -f`, mesma lista de padrões do `backend/main.py`, com
+  extras achados nesta sessão: rviz2, image_bridge, opennav_docking,
+  ground_truth_filter), confirma que nada sobrou, e só então relança a
+  stack; se o bringup não sinalizar "Managed nodes are active" dentro de
+  `--boot-timeout`, mata tudo e tenta de novo até `--max-retries` vezes,
+  registrando quantos retries cada réplica precisou num
+  `campaign_manifest.json`. Testado de verdade com uma mini-campanha de
+  2 réplicas (`--repeat 2`, rota `dissertation_clean01`): 2/2 ok, 0
+  retries necessários, ground truth sem congelamento em nenhuma das 2
+  (confirmado com `freeze_check.py` — concordância com `/odom` em
+  <1mm). Ainda não testado com N grande (10+) nem com as rotas longa/
+  loop (que não existem ainda — ver item pendente "criar as 3
+  geometrias de rota" nunca formalizado nesta lista, mas presente no
+  plano de `orquestracion.md`, passo 3).
 - [x] **Gravar o piloto de verdade /odom vs /pose vs ground truth, rota
   curta (`dissertation_clean01`)** (origem: passo 2 do plano em
   `orquestracion.md`; feito em 2026-10-02). Simulação single-robot
