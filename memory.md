@@ -24,6 +24,37 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-02 — rodada 2, `experiment-stats-methodology`: sincronização temporal pro piloto
+
+- **[stats_methodology]** `/odom` confirmado publicando a 30Hz exato (fonte
+  própria do projeto: `odom_publish_frequency` no plugin DiffDrive do
+  `create3.urdf.xacro`). `/pose` (SLAM, ~2Hz) e ground truth (taxa com
+  números conflitantes no próprio `orquestracion.md`, ~51-55Hz vs. ~100Hz,
+  não resolvido) têm taxas tão diferentes que reamostrar as 3 pra uma
+  grade comum arbitrária (como `--resample-mode time` faz hoje) corre risco
+  de cortar curvas da rota ao interpolar o `/pose` esparso — achado em
+  tensão direta com o objetivo da campanha (ver se divergência cresce com
+  complexidade da rota: o corte de curva por reamostragem poderia simular
+  esse efeito artificialmente). Também confirmado (fonte primária, Martin
+  Bland): pooled de pontos-tempo não-independentes de uma mesma réplica
+  infla artificialmente a precisão de um Bland-Altman — reforça manter 1
+  observação por réplica (N=10), como `analyze_runs.py` já faz pro RMSE. →
+  `conhecimento/stats_methodology.md`
+
+### 2026-10-02 — rodada 2, `experiment-gazebo-tracking`: alinhamento de frames pro piloto
+
+- **[gazebo_tracking]** Pesquisa de código-fonte (não só doc) confirma:
+  `/odom` do `DiffDrive` (gz-sim) sempre zera pra (0,0,0,heading=0) ao
+  inicializar, independente da pose real de spawn; `slam_toolbox` (sync)
+  inicializa `map`→`odom` como identidade e a calcula no 1º scan a partir
+  da pose do `odom` naquele instante — bate com a convenção da REP-105
+  ("map e odom tipicamente alinhados com a pose inicial do robô"). Pra
+  este projeto (spawn em 0,0,0), as três fontes da campanha /odom vs
+  /pose vs ground truth deveriam coincidir no instante inicial, mas isso
+  não é garantido por código — depende do robô estar parado entre spawn e
+  1º scan. Ação sugerida: validar ao vivo comparando a 1ª amostra de
+  cada fonte antes do piloto grande. → `conhecimento/gazebo_tracking.md`
+
 ### 2026-10-02 — primeira rodada de todos os 7 agentes
 
 - **[nav2_tracking]** `nav2.yaml` do TurtleBot4 força `regenerate_noises: true`
