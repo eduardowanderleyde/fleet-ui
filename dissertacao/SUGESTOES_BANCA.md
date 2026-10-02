@@ -15,31 +15,34 @@ confirmar, a opção foi reconhecer a limitação honestamente em vez de
 fabricar rigor. Só **3 itens** ficaram de fora (marcados ⏭️ abaixo),
 por exigirem decisão de reestruturação maior do autor.
 
-## ⚠️ Achado novo pendente de decisão (2026-10-01): figuras Val01/Val02 não usadas
+## ✅ Figuras Val01/Val02 (2026-10-01) — resolvido
 
 Comparando com duas dissertações de mestrado reais (ver
 `project-dissertation-context` na memória), ficou claro que esta
 dissertação tinha só 2 figuras (1 diagrama Mermaid, 1 PDF incluído) contra
 29 e 41 nas comparáveis — lacuna séria pra um tema de trajetória/navegação.
-Ao investigar, **`dissertacao/figuras/` já tem 8 imagens prontas**, geradas
-e nunca inseridas no texto:
-`overlay_trajetorias.png`, `rmse_comparacao.png`, `matriz_pairwise.png`,
-`sumario_metricas.png`, `overlay_val01.png`, `overlay_val02.png`,
-`consistencia_temporal.png`, `erro_endpoint.png`. Todas são de uma
-**campanha de validação anterior (Val01 ~4,8m, Val02 ~2,3m, RMSE 6,2cm e
-8,1cm entre réplicas)** que **não é mencionada em nenhum lugar do texto
-atual dos capítulos** — é dado real e de qualidade, mas inseri-la exigiria
-escrever prosa nova introduzindo essa campanha (quando ela rodou, como se
-relaciona com a campanha oficial de 3,35cm, por que não virou a campanha
-final), o que é decisão de conteúdo do autor, não um fix mecânico.
+Ao investigar, achamos **8 imagens prontas em `dissertacao/figuras/`**,
+geradas mas nunca inseridas no texto, de uma campanha de validação
+anterior (Val01 ~4,8m, Val02 ~2,3m, RMSE 6,2cm/8,1cm entre réplicas) que
+não era mencionada em nenhum lugar do texto.
 
-**Resolvido parcialmente nesta sessão:** adicionada só a figura que já
-tinha ancoragem textual completa e zero risco de tocar no número
-sensível de 3,35cm — `overlay_teste1.png` (campanha `dissertacao_teste1`,
-já discutida com os mesmos números na Seção QA4/Experimentos
-Complementares do Cap. 08). As 8 figuras de Val01/Val02 continuam
-disponíveis em `dissertacao/figuras/`, não inseridas, aguardando decisão
-do autor sobre onde/se elas entram na narrativa da dissertação.
+**Aplicado:** nova seção "Validação Preliminar do Protocolo" no início do
+Cap. 08 (`\label{sec:res_validacao_preliminar}`, antes de QA1), com 2 das 8
+figuras (`overlay_trajetorias.png`, `rmse_comparacao.png`) e uma tabela
+nova (`tab:val_rmse`). Framing escolhido pelo autor: Val01/Val02
+apresentadas como a validação preliminar que antecipou, em escala menor
+(N=2), o mesmo achado sobre gap de mecanismo de navegação depois
+caracterizado com mais rigor pela campanha `dissertacao_teste1` (N=3,
+já discutida na Seção QA4) — não toca no número oficial de 3,35cm, não
+inventa data/narrativa que não pude confirmar (o histórico exato de
+quando Val01/Val02 rodaram não está documentado em nenhum commit; a
+seção não afirma uma data específica). `overlay_teste1.png` (campanha
+`dissertacao_teste1`) também foi adicionada, numa rodada anterior, mais
+abaixo no mesmo capítulo. As 6 figuras restantes de Val01/Val02
+(`matriz_pairwise.png`, `sumario_metricas.png`, `overlay_val01.png`,
+`overlay_val02.png`, `consistencia_temporal.png`, `erro_endpoint.png`)
+continuam disponíveis em `dissertacao/figuras/` mas não inseridas — as
+duas já usadas cobrem a história principal sem sobrecarregar a seção.
 
 ## Achados cross-capítulo mais sérios
 

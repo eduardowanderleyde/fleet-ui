@@ -1,6 +1,84 @@
 \chapter{Resultados}
 \label{chap:resultados}
 
+\section{Validação Preliminar do Protocolo}
+\label{sec:res_validacao_preliminar}
+
+Antes da definição da campanha controlada final
+(\texttt{dissertation\_\allowbreak clean01}, Seção~\ref{sec:res_qa1}), o
+protocolo record--replay foi validado preliminarmente em duas rotas de
+teste: Val01 (percurso mais longo, aproximadamente 4,8\,m, incluindo uma
+curva fechada) e Val02 (percurso diagonal mais curto, aproximadamente
+2,3\,m). Cada rota foi gravada como baseline e reproduzida em duas
+réplicas. A Figura~\ref{fig:overlay_val} mostra a sobreposição das
+trajetórias de cada rota.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{overlay_trajetorias.png}
+\caption{Validação preliminar: sobreposição de trajetórias em Val01
+(percurso longo, esquerda) e Val02 (percurso diagonal, direita). As
+réplicas (tracejado/pontilhado) ficam próximas entre si em ambas as
+rotas; a baseline (linha sólida) diverge mais em Val01.}
+\label{fig:overlay_val}
+\end{figure}
+
+A Tabela~\ref{tab:val_rmse} resume o RMSE observado em cada rota. O RMSE
+entre as duas réplicas, que compartilham o mesmo mecanismo de navegação,
+ficou bem abaixo da tolerância padrão de 25\,cm do Nav2 nas duas rotas. Já
+o RMSE de cada réplica contra a baseline inflou de forma assimétrica,
+sobretudo em Val01 --- o mesmo padrão identificado e explicado com mais
+rigor, posteriormente, pela campanha \texttt{dissertacao\_\allowbreak teste1}
+(Seção~\ref{sec:res_exp_complementares}): baseline e réplicas percorrem a
+rota por mecanismos de navegação distintos do Nav2.
+
+\begin{table}[H]
+\centering
+\caption{Validação preliminar (Val01/Val02): RMSE médio entre réplicas, RMSE
+contra a baseline e erro de endpoint, todos abaixo da tolerância de 25\,cm
+do Nav2 exceto onde indicado.}
+\label{tab:val_rmse}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Rota} & \textbf{RMSE entre réplicas} & \textbf{RMSE vs.\ baseline} & \textbf{Erro de endpoint} \\
+\midrule
+Val01 (\textasciitilde4,8\,m) & 6,2\,cm & \textasciitilde157,5\,cm\footnotemark & 20,5\,cm \\
+Val02 (\textasciitilde2,3\,m) & 8,1\,cm & 9,2--16,7\,cm & 5,8--9,3\,cm \\
+\bottomrule
+\end{tabular}
+\end{table}
+\footnotetext{Inflado pelo mesmo gap de mecanismo de navegação entre
+baseline (\texttt{go\_\allowbreak to\_\allowbreak point}) e réplicas
+(\texttt{FollowWaypoints}) caracterizado na Seção~\ref{sec:res_exp_complementares};
+não reflete falta de repetibilidade do robô.}
+
+A Figura~\ref{fig:rmse_val} visualiza essa mesma assimetria: o RMSE entre
+réplicas (repetibilidade pura, mesma estratégia de navegação) permanece de
+um a dois dígitos de centímetro nas duas rotas, enquanto o RMSE
+replay-vs-baseline em Val01 ultrapassa em muito a tolerância de 25\,cm do
+Nav2 --- não por falha de repetibilidade, mas pelo gap metodológico entre
+mecanismos de navegação já discutido.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{rmse_comparacao.png}
+\caption{RMSE de repetibilidade por experimento na validação preliminar:
+réplica contra baseline (esquerda, inclui o gap de estratégia de
+navegação) e entre réplicas (direita, repetibilidade pura).}
+\label{fig:rmse_val}
+\end{figure}
+
+Essa validação preliminar, com $N=2$ réplicas por rota, antecipou em
+escala menor o achado depois caracterizado com mais rigor estatístico pela
+campanha \texttt{dissertacao\_\allowbreak teste1} ($N=3$,
+Seção~\ref{sec:res_exp_complementares}) e consolidou a decisão
+metodológica adotada na análise de QA2 (Seção~\ref{sec:res_qa2}): reportar
+o RMSE par-a-par entre execuções que compartilham o mesmo mecanismo de
+navegação como medida primária de repetibilidade \cite{maset2022}, não o
+RMSE contra uma baseline gravada por um mecanismo distinto. A unificação
+do mecanismo de gravação da baseline com o do replay permanece como
+trabalho futuro (Seção~\ref{sec:futuros}).
+
 \section{QA1 — Automatização do Protocolo}
 \label{sec:res_qa1}
 
