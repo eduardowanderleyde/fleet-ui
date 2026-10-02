@@ -429,6 +429,23 @@ $T_i = \{(x_i^k, y_i^k)\}_{k=1}^{n}$ e $T_j = \{(x_j^k, y_j^k)\}_{k=1}^{n}$
 \label{eq:rmse_pairwise}
 \end{equation}
 
+Intuitivamente, o RMSE resume num único número a distância típica entre as
+duas trajetórias, ponto a ponto, ao longo de todo o percurso. A
+Figura~\ref{fig:rmse_conceito} ilustra essa ideia esquematicamente: cada
+segmento cinza conecta um ponto $k$ da trajetória $T_i$ ao ponto de mesmo
+índice $k$ (mesma posição relativa na grade de tempo normalizada, Seção~\ref{sec:interpolacao})
+em $T_j$; o RMSE é, essencialmente, o tamanho médio desses segmentos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{rmse_conceito.png}
+\caption{Ilustração esquemática (dados sintéticos, não experimentais) do
+RMSE entre duas trajetórias interpoladas na mesma grade de tempo
+normalizada: o RMSE é a raiz da média dos quadrados das distâncias
+ponto-a-ponto, como a destacada no ponto $k$.}
+\label{fig:rmse_conceito}
+\end{figure}
+
 Para uma frota com $N$ execuções, calcula-se a matriz $N \times N$ de RMSE
 pairwise, onde o elemento $(i, j)$ representa a distância entre as execuções
 $i$ e $j$. A diagonal é zero por construção; a simetria decorre da definição.
