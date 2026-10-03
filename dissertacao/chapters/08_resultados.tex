@@ -332,6 +332,131 @@ identifica como vantagem da simulação sobre o hardware real, e uma
 pré-condição, segundo \citeonline{bonsignorio2015}, para que resultados de
 robótica autônoma sejam replicáveis e mensuráveis.
 
+\section{Fonte de Trajetória: Odometria, SLAM e \textit{Ground Truth}}
+\label{sec:res_fonte_trajetoria}
+
+As análises de QA1--QA3 (Seções~\ref{sec:res_qa1}--\ref{sec:res_qa3}) usam
+\texttt{/\allowbreak odom} como fonte da trajetória, decisão já discutida
+criticamente na Seção~\ref{sec:res_bags}: trata-se de odometria por
+integração, sem correção por mapa, potencialmente sujeita a deriva que
+cresce com a distância percorrida. Esta seção reporta uma campanha adicional,
+fora do desenho formal QA1--QA4 (Seção~\ref{sec:questoes}) — portanto sem
+hipótese de pesquisa nem critério de aceitação pré-registrado associado —
+que compara diretamente \texttt{/\allowbreak odom}, \texttt{/\allowbreak pose}
+(corrigido pelo SLAM Toolbox) e a pose verdadeira do simulador
+(\textit{ground truth}, obtida do tópico nativo
+\texttt{dynamic\_\allowbreak pose/info} do Gazebo, sem exigir plugin
+adicional) contra uma mesma referência, em três geometrias de rota de
+complexidade crescente. Esta comparação era listada como trabalho futuro
+em uma versão anterior deste texto; a infraestrutura de coleta foi
+implementada e validada ainda durante a escrita, e a campanha completa foi
+executada antes da versão final da dissertação.
+
+\subsection{Protocolo}
+
+Três rotas foram definidas: Curta (\texttt{dissertation\_\allowbreak clean01},
+a mesma de QA1--QA3, $\approx$0,9\,m), Longa (reta de $\approx$4\,m seguida
+de uma curva de 90\textdegree, $\approx$7,7\,m percorridos) e Loop (quadrado
+fechado com quatro curvas de 90\textdegree, retornando ao ponto de partida,
+$\approx$11,3\,m percorridos). Para cada rota, dez réplicas independentes
+foram executadas com o mesmo rigor metodológico de QA1--QA3: a simulação, a
+pilha Nav2, o SLAM Toolbox e o coletor de sensores foram completamente
+relançados antes de cada réplica, com confirmação ativa (via varredura de
+processos do sistema operacional) de que nenhum processo da réplica
+anterior permanecia ativo antes do próximo relançamento — refinamento sobre
+o procedimento original (Seção~\ref{sec:procedimento}), motivado por uma
+contaminação de CPU por processos remanescentes observada ao vivo durante
+esta campanha. Um mecanismo de \textit{timeout} e nova tentativa foi
+adicionado para lidar com falhas espontâneas de ativação do Nav2/SLAM
+Toolbox sob disputa de recursos (fenômeno já discutido na
+Seção~\ref{sec:limitacoes}): das 30 réplicas, uma precisou de duas
+tentativas adicionais antes de ativar com sucesso; as demais 29 ativaram
+na primeira tentativa. Todas as 30 réplicas produziram dados válidos.
+
+O RMSE de cada fonte (\texttt{/\allowbreak odom}, \texttt{/\allowbreak pose})
+contra o \textit{ground truth} foi calculado interpolando o
+\textit{ground truth} — a fonte mais densa, publicada a mais de 50\,Hz —
+para os instantes de tempo exatos de cada amostra da fonte mais esparsa, em
+vez do inverso; interpolar uma fonte esparsa como \texttt{/\allowbreak pose}
+(frequência efetiva de apenas $\approx$0,3\,Hz, Tabela~\ref{tab:sensor_bags})
+arrisca subestimar sua distância real em trechos de maior curvatura.
+
+Um problema real de alinhamento temporal foi identificado e corrigido antes
+da análise final: comparar amostras de tópicos diferentes dentro do mesmo
+\textit{bag} usando o tempo decorrido desde a primeira mensagem de cada
+tópico individualmente — válido para comparar a mesma trajetória entre
+\textit{bags} diferentes, como em QA2 — produz desalinhamento artificial
+quando os tópicos começam a publicar em instantes absolutos diferentes.
+\texttt{/\allowbreak pose} só começa a publicar depois que o SLAM Toolbox é
+ativado (com atraso deliberado de 8\,s após o Gazebo, Seção~\ref{sec:res_qa1})
+e que o robô percorre a distância mínima exigida pelo parâmetro
+\texttt{minimum\_\allowbreak travel\_\allowbreak distance} do SLAM Toolbox
+\cite{macenski2021slam}. Sem corrigir esse desalinhamento, o RMSE aparente
+de \texttt{/\allowbreak pose} contra o \textit{ground truth} ficava entre
+50 e 66\,cm — valor suspeito por ser aproximadamente constante entre rotas
+de comprimento muito diferente, ao contrário do esperado para um erro de
+localização real. A análise foi corrigida para usar o tempo absoluto
+(\textit{sim time}) de cada amostra, não o tempo relativo à primeira
+mensagem de cada tópico.
+
+\subsection{Resultado}
+
+A Tabela~\ref{tab:fonte_trajetoria} e a Figura~\ref{fig:fonte_trajetoria}
+resumem o RMSE médio de cada fonte contra o \textit{ground truth}, com
+intervalo de confiança de 95\% (t de Student, $N=10$, mesma justificativa
+estatística de QA2).
+
+\begin{table}[H]
+\centering
+\caption{RMSE médio (cm) de \texttt{/odom} e \texttt{/pose} contra o \textit{ground truth}, por rota, com IC 95\% ($N=10$).}
+\label{tab:fonte_trajetoria}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Rota} & \textbf{RMSE \texttt{/odom} vs.\ GT (cm)} & \textbf{RMSE \texttt{/pose} vs.\ GT (cm)} \\
+\midrule
+Curta (\textasciitilde0,9\,m)            & 0,01 (IC [0,01; 0,01])  & 3,28 (IC [0,80; 5,75])  \\
+Longa (\textasciitilde7,7\,m, 1 curva)   & 5,18 (IC [4,93; 5,43])  & 2,25 (IC [1,46; 3,03])  \\
+Loop (\textasciitilde11,3\,m, 4 curvas)  & 14,27 (IC [13,78; 14,76]) & 2,45 (IC [1,83; 3,07]) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{fonte_trajetoria_rmse.png}
+\caption{RMSE médio contra o \textit{ground truth}, por fonte de trajetória
+e rota, com barras de erro de IC 95\% ($N=10$ réplicas por rota).}
+\label{fig:fonte_trajetoria}
+\end{figure}
+
+O erro de \texttt{/\allowbreak odom} cresce de forma monotônica com o
+comprimento/complexidade da rota — de essencialmente zero na rota Curta a
+14,27\,cm na rota Loop —, consistente com o comportamento esperado de
+deriva por integração: quanto mais distância e quantas mais curvas o robô
+percorre, mais o erro acumulado de odometria pura se afasta da pose
+verdadeira. Já o erro de \texttt{/\allowbreak pose} permanece baixo e
+estatisticamente equivalente entre as três rotas ($\approx$2--3\,cm,
+intervalos de confiança sobrepostos), o que é consistente com o papel do
+SLAM Toolbox de limitar esse erro através de correspondência de varredura
+(\textit{scan matching}) contra o mapa, independente da distância total
+percorrida.
+
+Essa assimetria tem uma implicação direta para a interpretação de QA1--QA3:
+na rota Curta usada nessas seções, a diferença entre usar
+\texttt{/\allowbreak odom} ou \texttt{/\allowbreak pose} como fonte é
+desprezível (ambas abaixo de 4\,cm), o que sustenta retroativamente a
+escolha de \texttt{/\allowbreak odom} feita no Procedimento
+(Seção~\ref{sec:procedimento}) para aquela rota específica. Em rotas mais
+longas e com mais curvas, porém, a diferença passa a ser substancial
+(14,27\,cm contra 2,45\,cm na rota Loop) — ao ponto de poder alterar a
+conclusão qualitativa sobre repetibilidade dependendo da fonte escolhida.
+Esse resultado responde à tensão identificada entre a limitação de
+\texttt{/\allowbreak odom} discutida nesta dissertação e a adoção dessa
+mesma fonte na campanha principal: para a rota curta efetivamente usada em
+QA1--QA3, a escolha não compromete a validade do resultado; para campanhas
+futuras com rotas mais longas, a escolha da fonte deixa de ser uma decisão
+neutra.
+
 \section{Considerações Finais}
 \label{sec:res_conclusao}
 

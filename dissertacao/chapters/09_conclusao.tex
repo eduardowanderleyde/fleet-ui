@@ -290,19 +290,48 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     real}, a extensão mais urgente deste trabalho, conforme discutido na
     Seção~\ref{sec:limitacoes}.
 
-    \item Ampliar a campanha controlada para múltiplas rotas, incluindo
-    trajetórias mais longas, curvas fechadas e obstáculos dinâmicos, com $N$
-    de réplicas por cenário na casa de 10--20 ou mais, para reduzir a
-    incerteza da estimativa de RMSE também fora da rota
-    \texttt{dissertation\_\allowbreak clean01}.
+    \item Ampliar a campanha controlada para múltiplas rotas com obstáculos
+    dinâmicos e $N$ de réplicas por cenário maior (15--20 ou mais), para
+    reduzir ainda mais a incerteza da estimativa de RMSE. A ampliação para
+    trajetórias mais longas e curvas fechadas, com $N=10$, já foi realizada
+    (Seção~\ref{sec:res_fonte_trajetoria}) como parte da comparação de
+    fontes de trajetória discutida no item seguinte.
 
-    \item Comparar \texttt{/\allowbreak odom}, pose estimada por SLAM e
-    \textit{ground truth} do Gazebo em uma mesma campanha para separar erro
-    de controle, erro de localização e erro de medição; infraestrutura de
-    coleta desse \textit{ground truth} (tópico nativo
-    \texttt{dynamic\_\allowbreak pose/info} do Gazebo, sem plugin adicional)
-    já implementada e validada em execução real ao final deste trabalho, com
-    piloto e campanha completa ainda pendentes.
+    \item \textbf{Comparar \texttt{/\allowbreak odom}, pose estimada por
+    SLAM e \textit{ground truth} do Gazebo — realizado}
+    (Seção~\ref{sec:res_fonte_trajetoria}): em três rotas de complexidade
+    crescente ($N=10$ cada), o erro de \texttt{/\allowbreak odom} contra o
+    \textit{ground truth} cresce de 0,01\,cm (rota curta) a 14,27\,cm (rota
+    em loop com quatro curvas), enquanto o erro de \texttt{/\allowbreak pose}
+    (corrigido pelo SLAM) permanece baixo e estatisticamente equivalente
+    entre rotas ($\approx$2--3\,cm). O que permanece como trabalho futuro
+    nessa frente é estender a comparação a mais geometrias de rota, a
+    cenários multi-robô, e re-executar o mesmo protocolo comparativo em
+    hardware físico (item anterior nesta lista) — o \textit{ground truth}
+    do simulador não tem equivalente direto fora da simulação, de modo que
+    essa validação em hardware exigiria um sistema de rastreamento externo
+    independente (ex.: captura de movimento ou RTK-GPS).
+
+    \item \textbf{Avaliar se a camada de orquestração por agentes de IA
+    (Seção~\ref{sec:agentes}) degrada a repetibilidade pairwise medida sem
+    ela.} Levantamento de literatura recente (2025--2026) mostra que
+    LLMs já são usados para orquestrar robôs móveis e frotas
+    \cite{li2025llmmultirobot}, inclusive sobre a mesma pilha
+    deste trabalho — TurtleBot4, Nav2 e ROS~2 —, mas medindo latência e
+    taxa de sucesso de tarefa, não repetibilidade de trajetória
+    \cite{das2026latency}. Como este framework já mede repetibilidade
+    pairwise de forma controlada (QA2, Seção~\ref{sec:res_qa2}), um
+    experimento natural é inserir a camada de comando em linguagem natural
+    entre a missão e o Nav2 e comparar o RMSE pairwise resultante contra a
+    baseline sem LLM — testando diretamente se a decisão não-determinística
+    adicional do agente de IA se soma, de forma mensurável, à variância já
+    caracterizada do controlador MPPI (Seção~\ref{sec:limitacoes}). Essa
+    direção também responde, de forma empírica, à preocupação levantada por
+    \citeonline{kim2026robocritics} de que decisões de LLM em sistemas
+    robóticos físicos são opacas e difíceis de verificar: medir o efeito
+    sobre a repetibilidade é uma forma concreta e quantificável de
+    verificação, complementar à abordagem de \textit{críticos}
+    especializados que os autores propõem.
 
     \item Avaliar também AMCL com mapa pré-construído
     (Seção~\ref{sec:localizacao_bayes}) como alternativa ao SLAM ao vivo em
