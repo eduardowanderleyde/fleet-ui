@@ -41,7 +41,7 @@ sete tópicos gz-transport com \texttt{/<namespace>}, comportamento idêntico ao
 original quando o namespace é vazio, validado isoladamente com
 \texttt{xacro ... namespace:=tb1} sem necessidade de subir o Gazebo. Cada robô
 (\texttt{tb1}, \texttt{tb2}, \texttt{tb3}) é então \textit{spawnado} com seu próprio bridge
-ROS↔Gazebo, gerado dinamicamente por \texttt{spawn\_\allowbreak multi\_\allowbreak tb4.\allowbreak launch.\allowbreak py},
+ROS$\leftrightarrow$Gazebo, gerado dinamicamente por \texttt{spawn\_\allowbreak multi\_\allowbreak tb4.\allowbreak launch.\allowbreak py},
 enquanto SLAM~Toolbox \cite{macenski2021slam} e Nav2 seguem rodando a partir dos launch files
 originais e intocados de \texttt{turtlebot4\_\allowbreak navigation}, que já suportam
 namespace de fábrica segundo a convenção padrão do Nav2 para multi-robô:
@@ -60,7 +60,7 @@ sustentou em testes posteriores sob carga mais realista: subir a pilha
 completa de Nav2 e SLAM Toolbox de dois ou três robôs simultaneamente faz o
 relógio simulado (\texttt{/clock}) saltar para trás sob carga, invalidando a
 árvore de TF antes que o Nav2 consiga uma leitura estável de
-\texttt{base\_\allowbreak link → map} dentro do prazo interno. Trata-se de contenção identificada
+\texttt{base\_\allowbreak link \textrightarrow{} map} dentro do prazo interno. Trata-se de contenção identificada
 como de CPU/DDS, não de GPU. Por isso a arquitetura foi redesenhada para
 ativar a pilha de navegação completa de um robô por vez em vez de manter
 duas (ou três) pilhas simultâneas como alvo suportado por padrão. A
@@ -96,7 +96,7 @@ viabiliza essa separação, não coberto naquele capítulo, é que
 \texttt{tf2\_\allowbreak ros.\allowbreak TransformListener} não permite escutar um tópico diferente
 do \texttt{/tf} global: por isso o orquestrador instancia manualmente um
 \texttt{Buffer} e uma inscrição por robô, uma para cada \texttt{/tb\{1,2,3\}/\allowbreak tf},
-consultando em cada uma a transformação \texttt{map → base\_\allowbreak link} sem prefixo.
+consultando em cada uma a transformação \texttt{map \textrightarrow{} base\_\allowbreak link} sem prefixo.
 
 
 \subsection{Exemplo: os Serviços \texttt{start\_\allowbreak record} e \texttt{stop\_\allowbreak record}}

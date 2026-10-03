@@ -27,8 +27,11 @@ dissertacao/**/*.aux
 dissertacao/**/*.log
 dissertacao/**/*.out
 dissertacao/**/*.toc
+dissertacao/**/*.lof
+dissertacao/**/*.lot
 dissertacao/**/*.bbl
 dissertacao/**/*.blg
 dissertacao/**/*.synctex.gz
 dissertacao/**/*.fdb_latexmk
 dissertacao/**/*.fls
+dissertacao/main.pdf
