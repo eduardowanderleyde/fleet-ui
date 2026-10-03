@@ -103,11 +103,12 @@ SLIDE 7 — Papéis Experimentais (MUUT / FUUT / SU)
 ────────────────────────────────────────────────────────────────────────────
 Pra testbeds distribuídos, defini três papéis. MUUT — Mobile Unit Under
 Test/Tasking — é o robô que navega autonomamente, grava e reproduz rotas, e
-coleta seus próprios sensores. FUUT — Fixed Unit Under Test/Tasking — tem
-posição fixa no ambiente, funciona como infraestrutura de rede ou relay ROS
-2, e não participa da navegação. SU — Support Unit — só coleta dados
-sensoriais, sem navegar nem gravar rotas; é fonte de trajetória repetível
-pra monitoramento ambiental ou do próprio sistema. E isso não é só
+coleta seus próprios sensores. FUUT — Fixed Unit Under Test/Tasking —
+permanece em posição fixa no ambiente, observando a passagem do MUUT, e
+coleta dados sensoriais de perspectiva externa, mas não recebe comandos de
+navegação. Já a SU — Support Unit — é infraestrutura de rede e
+monitoramento do sistema, como relay ou gateway ROS 2, sem participação
+direta na navegação ou na coleta de dados. E isso não é só
 documentação: pedidos de navegação vindos de um FUUT ou de um SU são
 bloqueados no nível do orquestrador — a restrição é estrutural, não uma
 convenção que dá pra ignorar.
@@ -150,10 +151,12 @@ SLIDE 10 — Distribuição do RMSE (10 Réplicas)
 ────────────────────────────────────────────────────────────────────────────
 Aqui está o detalhe réplica por réplica da campanha final, todas comparadas
 contra o replay 01 como referência: os valores vão de 1,65 até 4,76
-centímetros, com média de 3,35 e desvio-padrão de 1,10. Todos, sem exceção,
-ficaram bem abaixo da tolerância padrão de objetivo do Nav2, que é de 25
-centímetros — ou seja, o sistema reproduz a trajetória com precisão
-sub-decimétrica de forma consistente. O gráfico de overlay completo dessa
+centímetros, com média de 3,35 e desvio-padrão de 1,10 — baixa dispersão
+espacial entre as execuções. Como referência operacional, esses valores
+também ficam bem abaixo da tolerância padrão de chegada do Nav2, que é de
+25 centímetros, embora sejam métricas conceitualmente diferentes — uma mede
+erro ao longo da trajetória, a outra mede precisão de chegada no destino.
+O gráfico de overlay completo dessa
 campanha está disponível no repositório, na pasta de runs do
 dissertation_clean01.
 
@@ -202,11 +205,16 @@ todos os robôs ao mesmo tempo — resolvido com um fork do xacro prefixando
 todo tópico gz-transport pelo robot_id. O CI não testava a parte ROS de
 verdade: testes que dependiam de ROS eram pulados em silêncio, e o badge
 verde não provava nada — criei um job de CI novo que roda ROS 2 de verdade e
-falha se qualquer teste for pulado. Repetibilidade mal-medida: a análise
-usava odometria bruta em vez da pose corrigida do SLAM, o que inflava o RMSE
-por deriva de odometria, não por falta de repetibilidade real — corrigi
-priorizando a pose do SLAM, e documentei o MPPI como fonte de variância
-conhecida e esperada do próprio algoritmo de controle. E processos órfãos: a
+falha se qualquer teste for pulado. Repetibilidade mal-medida: o modo
+automático de detecção de tópico do script de análise ignorava
+silenciosamente a pose do SLAM Toolbox e caía direto pra odometria bruta,
+que acumula deriva sem correção — inflando RMSE por deriva, não por falta
+de repetibilidade real. Corrigi a prioridade de detecção automática
+(amcl_pose, depois pose do SLAM, só por último odom) e documentei o MPPI
+como fonte de variância conhecida e esperada do próprio algoritmo de
+controle; a campanha principal continua usando odom deliberadamente, uma
+escolha que valido mais adiante comparando contra o ground truth. E
+processos órfãos: a
 simulação antiga às vezes continuava rodando junto com uma nova, causando
 falhas imprevisíveis — resolvido com os.setsid mais os.killpg no painel de
 simulação, que mata a árvore de processos inteira, sem deixar nada pra trás.
