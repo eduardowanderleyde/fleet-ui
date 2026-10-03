@@ -1,0 +1,386 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-02-21-24-21-599696-eduardo-B550M-AORUS-ELITE-37628
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [xacro-1]: process started with pid [37648]
+[INFO] [parameter_bridge-2]: process started with pid [37649]
+[INFO] [image_bridge-3]: process started with pid [37650]
+[INFO] [image_bridge-4]: process started with pid [37651]
+[INFO] [create-5]: process started with pid [37652]
+[INFO] [gazebo-6]: process started with pid [37653]
+[INFO] [robot_state_publisher-7]: process started with pid [37654]
+[INFO] [rviz2-8]: process started with pid [37655]
+[INFO] [parameter_bridge-9]: process started with pid [37661]
+[INFO] [ground_truth_filter-10]: process started with pid [37663]
+[robot_state_publisher-7] [WARN] [1790987062.063787362] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-7] [INFO] [1790987062.063907540] [robot_state_publisher]: Robot initialized
+[create-5] [INFO] [1790987062.077256615] [ros_gz_sim]: Requesting list of world names.
+[parameter_bridge-9] [INFO] [1790987062.103935786] [bridge_ground_truth]: Creating GZ->ROS Bridge: [/world/warehouse/dynamic_pose/info (gz.msgs.Pose_V) -> /world/warehouse/dynamic_pose/info (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[INFO] [xacro-1]: process has finished cleanly [pid 37648]
+[rviz2-8] [INFO] [1790987062.309513169] [rviz2]: Stereo is NOT SUPPORTED
+[rviz2-8] [INFO] [1790987062.309665381] [rviz2]: OpenGl version: 4.6 (GLSL 4.6)
+[rviz2-8] [INFO] [1790987062.327521954] [rviz2]: Stereo is NOT SUPPORTED
+[create-5] [INFO] [1790987062.851963270] [ros_gz_sim]: Waiting messages on topic [robot_description].
+[create-5] [INFO] [1790987062.863321781] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-5]: process has finished cleanly [pid 37652]
+[parameter_bridge-2] [INFO] [1790987063.085807590] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790987063.086845206] [bridge_ros_gz]: Creating GZ->ROS Bridge: [joint_states (gz.msgs.Model) -> joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790987063.089116535] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/odom (gz.msgs.Odometry) -> odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790987063.090584353] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/tf (gz.msgs.Pose_V) -> tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790987063.092011280] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/imu (gz.msgs.IMU) -> imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790987063.092606038] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/scan (gz.msgs.LaserScan) -> scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790987063.093201678] [bridge_ros_gz]: Creating ROS->GZ Bridge: [cmd_vel (geometry_msgs/msg/Twist) -> /cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790987063.093827838] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[gazebo-6] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[INFO] [sync_slam_toolbox_node-11]: process started with pid [37945]
+[sync_slam_toolbox_node-11] [INFO] [1790987070.210985032] [slam_toolbox]: Node using stack size 40000000
+[sync_slam_toolbox_node-11] [INFO] [1790987070.419586340] [slam_toolbox]: Configuring
+[sync_slam_toolbox_node-11] [INFO] [1790987070.425761824] [slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[sync_slam_toolbox_node-11] [INFO] [1790987070.426038271] [slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[INFO] [launch.user]: [LifecycleLaunch] Slamtoolbox node is activating.
+[sync_slam_toolbox_node-11] [INFO] [1790987070.439242840] [slam_toolbox]: Activating
+[sync_slam_toolbox_node-11] Registering sensor: [Custom Described Lidar]
+[INFO] [controller_server-12]: process started with pid [37966]
+[INFO] [smoother_server-13]: process started with pid [37967]
+[INFO] [planner_server-14]: process started with pid [37968]
+[INFO] [route_server-15]: process started with pid [37969]
+[INFO] [behavior_server-16]: process started with pid [37970]
+[INFO] [bt_navigator-17]: process started with pid [37971]
+[INFO] [waypoint_follower-18]: process started with pid [37972]
+[INFO] [velocity_smoother-19]: process started with pid [37973]
+[INFO] [collision_monitor-20]: process started with pid [37974]
+[INFO] [opennav_docking-21]: process started with pid [37975]
+[INFO] [lifecycle_manager-22]: process started with pid [37976]
+[controller_server-12] [INFO] [1790987074.219026945] [controller_server]: 
+[controller_server-12] 	controller_server lifecycle node launched. 
+[controller_server-12] 	Waiting on external lifecycle transitions to activate
+[controller_server-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-22] [INFO] [1790987074.219682283] [lifecycle_manager_navigation]: Creating
+[bt_navigator-17] [INFO] [1790987074.221641244] [bt_navigator]: 
+[bt_navigator-17] 	bt_navigator lifecycle node launched. 
+[bt_navigator-17] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-17] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-17] [INFO] [1790987074.222792504] [bt_navigator]: Creating
+[controller_server-12] [INFO] [1790987074.223336352] [controller_server]: Creating controller server
+[waypoint_follower-18] [INFO] [1790987074.227251938] [waypoint_follower]: 
+[waypoint_follower-18] 	waypoint_follower lifecycle node launched. 
+[waypoint_follower-18] 	Waiting on external lifecycle transitions to activate
+[waypoint_follower-18] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-18] [INFO] [1790987074.227762390] [waypoint_follower]: Creating
+[lifecycle_manager-22] [INFO] [1790987074.228516964] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[planner_server-14] [INFO] [1790987074.229688455] [planner_server]: 
+[planner_server-14] 	planner_server lifecycle node launched. 
+[planner_server-14] 	Waiting on external lifecycle transitions to activate
+[planner_server-14] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[route_server-15] [INFO] [1790987074.230910887] [route_server]: 
+[route_server-15] 	route_server lifecycle node launched. 
+[route_server-15] 	Waiting on external lifecycle transitions to activate
+[route_server-15] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[velocity_smoother-19] [INFO] [1790987074.231261762] [velocity_smoother]: 
+[velocity_smoother-19] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-19] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-19] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790987074.231338614] [planner_server]: Creating
+[controller_server-12] [INFO] [1790987074.236367617] [local_costmap.local_costmap]: 
+[controller_server-12] 	local_costmap lifecycle node launched. 
+[controller_server-12] 	Waiting on external lifecycle transitions to activate
+[controller_server-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-12] [INFO] [1790987074.236876976] [local_costmap.local_costmap]: Creating Costmap
+[collision_monitor-20] [INFO] [1790987074.239237131] [collision_monitor]: 
+[collision_monitor-20] 	collision_monitor lifecycle node launched. 
+[collision_monitor-20] 	Waiting on external lifecycle transitions to activate
+[collision_monitor-20] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-13] [INFO] [1790987074.239541063] [smoother_server]: 
+[smoother_server-13] 	smoother_server lifecycle node launched. 
+[smoother_server-13] 	Waiting on external lifecycle transitions to activate
+[smoother_server-13] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-21] [INFO] [1790987074.240244106] [docking_server]: 
+[opennav_docking-21] 	docking_server lifecycle node launched. 
+[opennav_docking-21] 	Waiting on external lifecycle transitions to activate
+[opennav_docking-21] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-21] [INFO] [1790987074.240328804] [docking_server]: Creating docking_server
+[smoother_server-13] [INFO] [1790987074.240970605] [smoother_server]: Creating smoother server
+[behavior_server-16] [INFO] [1790987074.242430277] [behavior_server]: 
+[behavior_server-16] 	behavior_server lifecycle node launched. 
+[behavior_server-16] 	Waiting on external lifecycle transitions to activate
+[behavior_server-16] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790987074.244377975] [global_costmap.global_costmap]: 
+[planner_server-14] 	global_costmap lifecycle node launched. 
+[planner_server-14] 	Waiting on external lifecycle transitions to activate
+[planner_server-14] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790987074.244712859] [global_costmap.global_costmap]: Creating Costmap
+[lifecycle_manager-22] [INFO] [1790987075.050703060] [lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-22] [INFO] [1790987075.050738570] [lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[controller_server-12] [INFO] [1790987075.050982744] [controller_server]: Configuring controller interface
+[controller_server-12] [INFO] [1790987075.051001120] [controller_server]: getting progress checker plugins..
+[controller_server-12] [INFO] [1790987075.051168252] [controller_server]: getting goal checker plugins..
+[controller_server-12] [INFO] [1790987075.051266576] [controller_server]: Controller frequency set to 20.0000Hz
+[controller_server-12] [INFO] [1790987075.051301896] [local_costmap.local_costmap]: Configuring
+[controller_server-12] [INFO] [1790987075.058109292] [local_costmap.local_costmap]: Using plugin "static_layer"
+[controller_server-12] [INFO] [1790987075.061381284] [local_costmap.local_costmap]: Subscribing to the map topic (/map) with transient local durability
+[controller_server-12] [INFO] [1790987075.062611461] [local_costmap.local_costmap]: Initialized plugin "static_layer"
+[controller_server-12] [INFO] [1790987075.062623625] [local_costmap.local_costmap]: Using plugin "voxel_layer"
+[controller_server-12] [INFO] [1790987075.063144958] [local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-12] [INFO] [1790987075.070964959] [local_costmap.local_costmap]: Initialized plugin "voxel_layer"
+[controller_server-12] [INFO] [1790987075.070981692] [local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-12] [INFO] [1790987075.071489949] [local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-12] [INFO] [1790987075.083774685] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 436 X 301 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790987075.083849443] [controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-12] [INFO] [1790987075.084096924] [controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-12] [INFO] [1790987075.084453280] [controller_server]: Created goal checker : general_goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-12] [INFO] [1790987075.085037266] [controller_server]: Controller Server has general_goal_checker  goal checkers available.
+[controller_server-12] [INFO] [1790987075.086278766] [controller_server]: Created controller : FollowPath of type nav2_mppi_controller::MPPIController
+[controller_server-12] [INFO] [1790987075.088051989] [controller_server]: Controller period is equal to model dt. Control sequence shifting is ON
+[controller_server-12] [INFO] [1790987075.089114934] [controller_server]: ConstraintCritic instantiated with 1 power and 4.000000 weight.
+[controller_server-12] [INFO] [1790987075.089131828] [controller_server]: Critic loaded : mppi::critics::ConstraintCritic
+[controller_server-12] [INFO] [1790987075.089900761] [controller_server]: InflationCostCritic instantiated with 1 power and 300.000000 / 0.015000 weights. Critic will collision check based on footprint cost.
+[controller_server-12] [INFO] [1790987075.089919328] [controller_server]: Critic loaded : mppi::critics::CostCritic
+[controller_server-12] [INFO] [1790987075.090268219] [controller_server]: GoalCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-12] [INFO] [1790987075.090282828] [controller_server]: Critic loaded : mppi::critics::GoalCritic
+[controller_server-12] [INFO] [1790987075.090717579] [controller_server]: GoalAngleCritic instantiated with 1 power, 3.000000 weight, 0.500000 angular threshold and symmetric_yaw_tolerance disabled
+[controller_server-12] [INFO] [1790987075.090736106] [controller_server]: Critic loaded : mppi::critics::GoalAngleCritic
+[controller_server-12] [INFO] [1790987075.091380783] [controller_server]: ReferenceTrajectoryCritic instantiated with 1 power and 14.000000 weight
+[controller_server-12] [INFO] [1790987075.091399761] [controller_server]: Critic loaded : mppi::critics::PathAlignCritic
+[controller_server-12] [INFO] [1790987075.091794332] [controller_server]: Critic loaded : mppi::critics::PathFollowCritic
+[controller_server-12] [INFO] [1790987075.092417918] [controller_server]: PathAngleCritic instantiated with 1 power and 2.000000 weight. Mode set to: Forward Preference
+[controller_server-12] [INFO] [1790987075.092459480] [controller_server]: Critic loaded : mppi::critics::PathAngleCritic
+[controller_server-12] [INFO] [1790987075.092819653] [controller_server]: PreferForwardCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-12] [INFO] [1790987075.092835004] [controller_server]: Critic loaded : mppi::critics::PreferForwardCritic
+[controller_server-12] [INFO] [1790987075.094997758] [controller_server]: Optimizer reset
+[controller_server-12] [INFO] [1790987075.098117729] [MPPIController]: Configured MPPI Controller: FollowPath
+[controller_server-12] [INFO] [1790987075.098132939] [controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-22] [INFO] [1790987075.103897850] [lifecycle_manager_navigation]: [34m[1mConfiguring smoother_server[0m[0m
+[smoother_server-13] [INFO] [1790987075.383084170] [smoother_server]: Configuring smoother server
+[smoother_server-13] [INFO] [1790987075.393565003] [smoother_server]: Created smoother : simple_smoother of type nav2_smoother::SimpleSmoother
+[smoother_server-13] [INFO] [1790987075.394223217] [smoother_server]: Smoother Server has simple_smoother  smoothers available.
+[lifecycle_manager-22] [INFO] [1790987075.399691319] [lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-14] [INFO] [1790987075.399874973] [planner_server]: Configuring
+[planner_server-14] [INFO] [1790987075.399907818] [global_costmap.global_costmap]: Configuring
+[planner_server-14] [INFO] [1790987075.406456050] [global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-14] [INFO] [1790987075.409133955] [global_costmap.global_costmap]: Subscribing to the map topic (/map) with transient local durability
+[planner_server-14] [INFO] [1790987075.410267400] [global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-14] [INFO] [1790987075.410278582] [global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-14] [INFO] [1790987075.410975643] [global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-14] [INFO] [1790987075.414072708] [global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-14] [INFO] [1790987075.414085444] [global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-14] [INFO] [1790987075.414601727] [global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-14] [INFO] [1790987075.430560962] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 436 X 301 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790987075.430784835] [planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner
+[planner_server-14] [INFO] [1790987075.430805817] [planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[planner_server-14] [INFO] [1790987075.431432328] [planner_server]: Planner Server has GridBased  planners available.
+[lifecycle_manager-22] [INFO] [1790987075.439047674] [lifecycle_manager_navigation]: [34m[1mConfiguring route_server[0m[0m
+[route_server-15] [INFO] [1790987075.439233592] [route_server]: Configuring
+[route_server-15] [INFO] [1790987075.458052152] [route_server]: Created GraphFileLoader GeoJsonGraphFileLoader of type nav2_route::GeoJsonGraphFileLoader
+[route_server-15] [INFO] [1790987075.458078094] [route_server]: Configuring geojson graph file loader
+[route_server-15] [INFO] [1790987075.458085528] [route_server]: No graph file provided to load yet.
+[route_server-15] [INFO] [1790987075.459859462] [route_server]: Created edge cost function plugin DistanceScorer of type nav2_route::DistanceScorer
+[route_server-15] [INFO] [1790987075.459875645] [route_server]: Configuring distance scorer.
+[route_server-15] [INFO] [1790987075.460111111] [route_server]: Created edge cost function plugin DynamicEdgesScorer of type nav2_route::DynamicEdgesScorer
+[route_server-15] [INFO] [1790987075.460124297] [route_server]: Configuring adjust edges scorer.
+[route_server-15] [INFO] [1790987075.462257623] [route_server]: Created route operation AdjustSpeedLimit of type nav2_route::AdjustSpeedLimit
+[route_server-15] [INFO] [1790987075.462270379] [route_server]: Configuring Adjust speed limit operation.
+[route_server-15] [INFO] [1790987075.462979283] [route_server]: Created route operation ReroutingService of type nav2_route::ReroutingService
+[route_server-15] [INFO] [1790987075.462991237] [route_server]: Configuring Rerouting service operation.
+[lifecycle_manager-22] [INFO] [1790987075.464867824] [lifecycle_manager_navigation]: [34m[1mConfiguring behavior_server[0m[0m
+[behavior_server-16] [INFO] [1790987075.465047069] [behavior_server]: Configuring
+[behavior_server-16] [INFO] [1790987075.468810875] [behavior_server]: Creating behavior plugin spin of type nav2_behaviors::Spin
+[behavior_server-16] [INFO] [1790987075.469520331] [behavior_server]: Creating behavior plugin backup of type nav2_behaviors::BackUp
+[behavior_server-16] [INFO] [1790987075.470135490] [behavior_server]: Creating behavior plugin drive_on_heading of type nav2_behaviors::DriveOnHeading
+[behavior_server-16] [INFO] [1790987075.470734456] [behavior_server]: Creating behavior plugin assisted_teleop of type nav2_behaviors::AssistedTeleop
+[behavior_server-16] [INFO] [1790987075.472276882] [behavior_server]: Creating behavior plugin wait of type nav2_behaviors::Wait
+[behavior_server-16] [INFO] [1790987075.478506322] [behavior_server]: Configuring spin
+[behavior_server-16] [INFO] [1790987075.482822182] [behavior_server]: Configuring backup
+[behavior_server-16] [INFO] [1790987075.486112781] [behavior_server]: Configuring drive_on_heading
+[behavior_server-16] [INFO] [1790987075.489317920] [behavior_server]: Configuring assisted_teleop
+[behavior_server-16] [INFO] [1790987075.494170373] [behavior_server]: Configuring wait
+[lifecycle_manager-22] [INFO] [1790987075.497662290] [lifecycle_manager_navigation]: [34m[1mConfiguring velocity_smoother[0m[0m
+[velocity_smoother-19] [INFO] [1790987075.497830914] [velocity_smoother]: Configuring velocity smoother
+[lifecycle_manager-22] [INFO] [1790987075.501433261] [lifecycle_manager_navigation]: [34m[1mConfiguring collision_monitor[0m[0m
+[collision_monitor-20] [INFO] [1790987075.501630692] [collision_monitor]: Configuring
+[collision_monitor-20] [INFO] [1790987075.505821363] [collision_monitor]: [scan]: Creating Scan
+[collision_monitor-20] [INFO] [1790987075.507348228] [collision_monitor]: [FootprintApproach]: Creating Polygon
+[collision_monitor-20] [INFO] [1790987075.507511852] [collision_monitor]: [FootprintApproach]: Polygon points are not defined. Using dynamic subscription instead.
+[collision_monitor-20] [INFO] [1790987075.508315975] [collision_monitor]: [FootprintApproach]: Making footprint subscriber on local_costmap/published_footprint topic
+[lifecycle_manager-22] [INFO] [1790987075.516581750] [lifecycle_manager_navigation]: [34m[1mConfiguring bt_navigator[0m[0m
+[bt_navigator-17] [INFO] [1790987075.516805563] [bt_navigator]: Configuring
+[bt_navigator-17] [INFO] [1790987075.521927290] [bt_navigator]: Creating navigator id navigate_to_pose of type nav2_bt_navigator::NavigateToPoseNavigator
+[bt_navigator-17] [INFO] [1790987075.569801439] [bt_navigator]: Creating navigator id navigate_through_poses of type nav2_bt_navigator::NavigateThroughPosesNavigator
+[lifecycle_manager-22] [INFO] [1790987075.585191196] [lifecycle_manager_navigation]: [34m[1mConfiguring waypoint_follower[0m[0m
+[waypoint_follower-18] [INFO] [1790987075.585408566] [waypoint_follower]: Configuring
+[waypoint_follower-18] [INFO] [1790987075.600836028] [waypoint_follower]: Created waypoint_task_executor : wait_at_waypoint of type nav2_waypoint_follower::WaitAtWaypoint
+[lifecycle_manager-22] [INFO] [1790987075.601480395] [lifecycle_manager_navigation]: [34m[1mConfiguring docking_server[0m[0m
+[opennav_docking-21] [INFO] [1790987075.601690842] [docking_server]: Configuring docking_server
+[opennav_docking-21] [INFO] [1790987075.601724468] [docking_server]: Controller frequency set to 50.0000Hz
+[opennav_docking-21] [INFO] [1790987075.620650792] [docking_server]: Created charging dock plugin simple_charging_dock of type opennav_docking::SimpleChargingDock
+[opennav_docking-21] [WARN] [1790987075.624199311] [docking_server]: Dock database filepath nor dock parameters set. Docking actions can only be executed specifying the dock pose via the action request. Or update the dock database via the reload_database service.
+[opennav_docking-21] [INFO] [1790987075.624226846] [docking_server]: Docking Server has 1 dock types and 0 dock instances available.
+[lifecycle_manager-22] [INFO] [1790987075.625340161] [lifecycle_manager_navigation]: [34m[1mActivating controller_server[0m[0m
+[controller_server-12] [INFO] [1790987075.625468866] [controller_server]: Activating
+[controller_server-12] [INFO] [1790987075.625497653] [local_costmap.local_costmap]: Activating
+[controller_server-12] [INFO] [1790987075.625504837] [local_costmap.local_costmap]: Checking transform
+[controller_server-12] [INFO] [1790987075.625601930] [local_costmap.local_costmap]: start
+[controller_server-12] [WARN] [1790987075.876370324] [controller_server]: Parameter controller_server.verbose not found
+[controller_server-12] [INFO] [1790987075.878684969] [controller_server]: Optimizer reset
+[controller_server-12] [INFO] [1790987075.878869094] [MPPIController]: Activated MPPI Controller: FollowPath
+[controller_server-12] [INFO] [1790987075.878893793] [controller_server]: Creating bond (controller_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987075.983188161] [lifecycle_manager_navigation]: Server controller_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790987075.983220976] [lifecycle_manager_navigation]: [34m[1mActivating smoother_server[0m[0m
+[smoother_server-13] [INFO] [1790987075.983464859] [smoother_server]: Activating
+[smoother_server-13] [INFO] [1790987075.983492184] [smoother_server]: Creating bond (smoother_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987076.087425927] [lifecycle_manager_navigation]: Server smoother_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790987076.087456147] [lifecycle_manager_navigation]: [34m[1mActivating planner_server[0m[0m
+[planner_server-14] [INFO] [1790987076.087701573] [planner_server]: Activating
+[planner_server-14] [INFO] [1790987076.087732435] [global_costmap.global_costmap]: Activating
+[planner_server-14] [INFO] [1790987076.087740300] [global_costmap.global_costmap]: Checking transform
+[planner_server-14] [INFO] [1790987076.087843755] [global_costmap.global_costmap]: start
+[planner_server-14] [INFO] [1790987077.138825742] [planner_server]: Activating plugin GridBased of type NavfnPlanner
+[planner_server-14] [INFO] [1790987077.140366775] [planner_server]: Creating bond (planner_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987077.244091094] [lifecycle_manager_navigation]: Server planner_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790987077.244123238] [lifecycle_manager_navigation]: [34m[1mActivating route_server[0m[0m
+[route_server-15] [INFO] [1790987077.244396139] [route_server]: Activating
+[route_server-15] [INFO] [1790987077.244530415] [route_server]: Creating bond (route_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987077.348853570] [lifecycle_manager_navigation]: Server route_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790987077.348887938] [lifecycle_manager_navigation]: [34m[1mActivating behavior_server[0m[0m
+[behavior_server-16] [INFO] [1790987077.349183253] [behavior_server]: Activating
+[behavior_server-16] [INFO] [1790987077.349205618] [behavior_server]: Activating spin
+[behavior_server-16] [INFO] [1790987077.349215517] [behavior_server]: Activating backup
+[behavior_server-16] [INFO] [1790987077.349222822] [behavior_server]: Activating drive_on_heading
+[behavior_server-16] [INFO] [1790987077.349230226] [behavior_server]: Activating assisted_teleop
+[behavior_server-16] [INFO] [1790987077.349237912] [behavior_server]: Activating wait
+[behavior_server-16] [INFO] [1790987077.349248432] [behavior_server]: Creating bond (behavior_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987077.453444827] [lifecycle_manager_navigation]: Server behavior_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790987077.453479656] [lifecycle_manager_navigation]: [34m[1mActivating velocity_smoother[0m[0m
+[velocity_smoother-19] [INFO] [1790987077.453739741] [velocity_smoother]: Activating
+[velocity_smoother-19] [INFO] [1790987077.453789860] [velocity_smoother]: Creating bond (velocity_smoother) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987077.558364364] [lifecycle_manager_navigation]: Server velocity_smoother connected with bond.
+[lifecycle_manager-22] [INFO] [1790987077.558398602] [lifecycle_manager_navigation]: [34m[1mActivating collision_monitor[0m[0m
+[collision_monitor-20] [INFO] [1790987077.558671963] [collision_monitor]: Activating
+[collision_monitor-20] [INFO] [1790987077.558704908] [collision_monitor]: Creating bond (collision_monitor) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987077.663256737] [lifecycle_manager_navigation]: Server collision_monitor connected with bond.
+[lifecycle_manager-22] [INFO] [1790987077.663288560] [lifecycle_manager_navigation]: [34m[1mActivating bt_navigator[0m[0m
+[bt_navigator-17] [INFO] [1790987077.663536712] [bt_navigator]: Activating
+[bt_navigator-17] [INFO] [1790987077.706550242] [bt_navigator]: Creating bond (bt_navigator) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987077.810554005] [lifecycle_manager_navigation]: Server bt_navigator connected with bond.
+[lifecycle_manager-22] [INFO] [1790987077.810585658] [lifecycle_manager_navigation]: [34m[1mActivating waypoint_follower[0m[0m
+[waypoint_follower-18] [INFO] [1790987077.810870442] [waypoint_follower]: Activating
+[waypoint_follower-18] [INFO] [1790987077.810900792] [waypoint_follower]: Creating bond (waypoint_follower) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987077.915611495] [lifecycle_manager_navigation]: Server waypoint_follower connected with bond.
+[lifecycle_manager-22] [INFO] [1790987077.915643098] [lifecycle_manager_navigation]: [34m[1mActivating docking_server[0m[0m
+[opennav_docking-21] [INFO] [1790987077.915973893] [docking_server]: Activating docking_server
+[opennav_docking-21] [INFO] [1790987077.923184868] [docking_server]: Creating bond (docking_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790987078.027915190] [lifecycle_manager_navigation]: Server docking_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790987078.027956632] [lifecycle_manager_navigation]: [34m[1mManaged nodes are active[0m[0m
+[lifecycle_manager-22] [INFO] [1790987078.027965009] [lifecycle_manager_navigation]: [34m[1mCreating bond timer...[0m[0m
+[waypoint_follower-18] [INFO] [1790987088.887465584] [waypoint_follower]: Received follow waypoint request with 11 waypoints.
+[bt_navigator-17] [INFO] [1790987088.888106223] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.00, -0.00)
+[controller_server-12] [INFO] [1790987088.908831811] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [WARN] [1790987088.908871480] [controller_server]: No goal checker was specified in parameter 'current_goal_checker'. Server will use only plugin loaded general_goal_checker . This warning will appear once.
+[controller_server-12] [WARN] [1790987088.908887592] [controller_server]: No progress checker was specified in parameter 'current_progress_checker'. Server will use only plugin loaded progress_checker . This warning will appear once.
+[controller_server-12] [INFO] [1790987088.914439741] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987088.916005162] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987088.938372563] [bt_navigator]: Goal succeeded
+[parameter_bridge-2] [INFO] [1790987088.974565593] [bridge_ros_gz]: Passing message from ROS geometry_msgs/msg/Twist to Gazebo gz.msgs.Twist (showing msg only once per type)
+[waypoint_follower-18] [INFO] [1790987089.287612352] [waypoint_follower]: Succeeded processing waypoint 0, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987089.287644375] [waypoint_follower]: Arrived at 0'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790987089.487716927] [waypoint_follower]: Task execution at waypoint 0 succeeded
+[waypoint_follower-18] [INFO] [1790987089.488143643] [waypoint_follower]: Handled task execution on waypoint 0, moving to next.
+[bt_navigator-17] [INFO] [1790987089.488627261] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.11, 0.00)
+[controller_server-12] [INFO] [1790987089.509217531] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987089.513718177] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987089.513880498] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987089.539102965] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987089.889337475] [waypoint_follower]: Succeeded processing waypoint 1, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987089.889370169] [waypoint_follower]: Arrived at 1'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790987090.087793735] [waypoint_follower]: Task execution at waypoint 1 succeeded
+[waypoint_follower-18] [INFO] [1790987090.087829546] [waypoint_follower]: Handled task execution on waypoint 1, moving to next.
+[bt_navigator-17] [INFO] [1790987090.088197966] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.45, 0.00)
+[controller_server-12] [INFO] [1790987090.108706254] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987091.158828303] [controller_server]: Passing new path to controller.
+[controller_server-12] [INFO] [1790987091.262204566] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987091.262768513] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987091.288388247] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790987091.625750789] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 444 X 301 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790987091.942793164] [waypoint_follower]: Succeeded processing waypoint 2, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987091.942829035] [waypoint_follower]: Arrived at 2'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790987092.087960989] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 444 X 301 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790987092.142740891] [waypoint_follower]: Task execution at waypoint 2 succeeded
+[waypoint_follower-18] [INFO] [1790987092.142780589] [waypoint_follower]: Handled task execution on waypoint 2, moving to next.
+[bt_navigator-17] [INFO] [1790987092.143170662] [bt_navigator]: Begin navigating from current location (0.26, 0.01) to (0.23, 0.01)
+[controller_server-12] [INFO] [1790987092.163703849] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987092.167679906] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987092.168264965] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987092.193350791] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987092.543945838] [waypoint_follower]: Succeeded processing waypoint 3, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987092.543987200] [waypoint_follower]: Arrived at 3'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790987092.742888894] [waypoint_follower]: Task execution at waypoint 3 succeeded
+[waypoint_follower-18] [INFO] [1790987092.742935576] [waypoint_follower]: Handled task execution on waypoint 3, moving to next.
+[bt_navigator-17] [INFO] [1790987092.743356640] [bt_navigator]: Begin navigating from current location (0.26, 0.01) to (0.38, -0.00)
+[controller_server-12] [INFO] [1790987092.763841903] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987092.768094497] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987092.768290505] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987092.793538924] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987093.144087268] [waypoint_follower]: Succeeded processing waypoint 4, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987093.144122668] [waypoint_follower]: Arrived at 4'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790987093.342848925] [waypoint_follower]: Task execution at waypoint 4 succeeded
+[waypoint_follower-18] [INFO] [1790987093.342886028] [waypoint_follower]: Handled task execution on waypoint 4, moving to next.
+[bt_navigator-17] [INFO] [1790987093.343244809] [bt_navigator]: Begin navigating from current location (0.26, 0.01) to (0.75, 0.00)
+[controller_server-12] [INFO] [1790987093.363847755] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987094.413942017] [controller_server]: Passing new path to controller.
+[controller_server-12] [INFO] [1790987094.767884767] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987094.768093100] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987094.793461296] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987095.448675411] [waypoint_follower]: Succeeded processing waypoint 5, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987095.448715280] [waypoint_follower]: Arrived at 5'th waypoint, sleeping for 200 milliseconds
+[controller_server-12] [INFO] [1790987095.625750878] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 447 X 301 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790987095.649747026] [waypoint_follower]: Task execution at waypoint 5 succeeded
+[waypoint_follower-18] [INFO] [1790987095.649782025] [waypoint_follower]: Handled task execution on waypoint 5, moving to next.
+[bt_navigator-17] [INFO] [1790987095.650482613] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (0.50, -0.00)
+[controller_server-12] [INFO] [1790987095.670985621] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987095.675472680] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987095.676001407] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987095.700691690] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987096.050979911] [waypoint_follower]: Succeeded processing waypoint 6, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987096.051011904] [waypoint_follower]: Arrived at 6'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790987096.087969850] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 447 X 301 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790987096.249770216] [waypoint_follower]: Task execution at waypoint 6 succeeded
+[waypoint_follower-18] [INFO] [1790987096.249804835] [waypoint_follower]: Handled task execution on waypoint 6, moving to next.
+[bt_navigator-17] [INFO] [1790987096.250157634] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (0.62, -0.00)
+[controller_server-12] [INFO] [1790987096.270624059] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987096.274803569] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987096.275178732] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987096.300344918] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987096.650974716] [waypoint_follower]: Succeeded processing waypoint 7, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987096.651011549] [waypoint_follower]: Arrived at 7'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790987096.849681686] [waypoint_follower]: Task execution at waypoint 7 succeeded
+[waypoint_follower-18] [INFO] [1790987096.849723128] [waypoint_follower]: Handled task execution on waypoint 7, moving to next.
+[bt_navigator-17] [INFO] [1790987096.850110937] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (0.73, -0.00)
+[controller_server-12] [INFO] [1790987096.870582212] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987096.874858964] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987096.875064992] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987096.900307088] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987097.250910265] [waypoint_follower]: Succeeded processing waypoint 8, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987097.250944683] [waypoint_follower]: Arrived at 8'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790987097.449692795] [waypoint_follower]: Task execution at waypoint 8 succeeded
+[waypoint_follower-18] [INFO] [1790987097.449739648] [waypoint_follower]: Handled task execution on waypoint 8, moving to next.
+[bt_navigator-17] [INFO] [1790987097.450530825] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (1.05, 0.00)
+[controller_server-12] [INFO] [1790987097.471021589] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987098.521129067] [controller_server]: Passing new path to controller.
+[controller_server-12] [INFO] [1790987098.625749727] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 450 X 301 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790987098.724775414] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987098.725668322] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987098.750742476] [bt_navigator]: Goal succeeded
+[planner_server-14] [INFO] [1790987099.087964765] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 450 X 301 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790987099.405187464] [waypoint_follower]: Succeeded processing waypoint 9, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987099.405215049] [waypoint_follower]: Arrived at 9'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790987099.603796712] [waypoint_follower]: Task execution at waypoint 9 succeeded
+[waypoint_follower-18] [INFO] [1790987099.603830109] [waypoint_follower]: Handled task execution on waypoint 9, moving to next.
+[bt_navigator-17] [INFO] [1790987099.604186785] [bt_navigator]: Begin navigating from current location (0.85, 0.01) to (0.84, -0.00)
+[controller_server-12] [INFO] [1790987099.624649022] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790987099.629186521] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 452 X 322 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790987099.629238364] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790987099.629449161] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790987099.654377837] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790987100.004969472] [waypoint_follower]: Succeeded processing waypoint 10, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790987100.005002197] [waypoint_follower]: Arrived at 10'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790987100.087960703] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 452 X 322 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790987100.203685422] [waypoint_follower]: Task execution at waypoint 10 succeeded
+[waypoint_follower-18] [INFO] [1790987100.203723878] [waypoint_follower]: Handled task execution on waypoint 10, moving to next.
+[waypoint_follower-18] [INFO] [1790987100.203734139] [waypoint_follower]: Completed all 11 waypoints requested.

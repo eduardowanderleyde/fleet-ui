@@ -1,0 +1,32 @@
+{
+  "protocol_id": "coldstart_test_dryrun",
+  "route": "dissertation_clean01",
+  "world": "warehouse",
+  "repeat": 2,
+  "started_at": "2026-10-02T21:25:40.803474+00:00",
+  "replicas": [
+    {
+      "replicate_id": 1,
+      "retries_used": 0,
+      "boot_elapsed_sec": 23.5,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/coldstart_test_dryrun/replay_r01.json"
+    },
+    {
+      "replicate_id": 2,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/coldstart_test_dryrun/replay_r02.json"
+    }
+  ],
+  "finished_at": "2026-10-02T21:27:20.897501+00:00",
+  "summary": {
+    "replicas_ok": 2,
+    "replicas_total": 2,
+    "success_rate": 1.0,
+    "total_retries_used": 0
+  }
+}

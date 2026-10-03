@@ -1,0 +1,994 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-02-18-53-32-439740-eduardo-B550M-AORUS-ELITE-26795
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [xacro-1]: process started with pid [26815]
+[INFO] [parameter_bridge-2]: process started with pid [26816]
+[INFO] [image_bridge-3]: process started with pid [26817]
+[INFO] [image_bridge-4]: process started with pid [26818]
+[INFO] [create-5]: process started with pid [26819]
+[INFO] [gazebo-6]: process started with pid [26820]
+[INFO] [robot_state_publisher-7]: process started with pid [26821]
+[INFO] [rviz2-8]: process started with pid [26822]
+[INFO] [parameter_bridge-9]: process started with pid [26824]
+[INFO] [ground_truth_filter-10]: process started with pid [26825]
+[create-5] [INFO] [1790978012.910721339] [ros_gz_sim]: Requesting list of world names.
+[robot_state_publisher-7] [WARN] [1790978012.916227514] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-7] [INFO] [1790978012.916373693] [robot_state_publisher]: Robot initialized
+[parameter_bridge-9] [INFO] [1790978012.944012450] [bridge_ground_truth]: Creating GZ->ROS Bridge: [/world/warehouse/dynamic_pose/info (gz.msgs.Pose_V) -> /world/warehouse/dynamic_pose/info (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[INFO] [xacro-1]: process has finished cleanly [pid 26815]
+[rviz2-8] [INFO] [1790978013.157268418] [rviz2]: Stereo is NOT SUPPORTED
+[rviz2-8] [INFO] [1790978013.157382504] [rviz2]: OpenGl version: 4.6 (GLSL 4.6)
+[rviz2-8] [INFO] [1790978013.172927828] [rviz2]: Stereo is NOT SUPPORTED
+[create-5] [INFO] [1790978013.689007127] [ros_gz_sim]: Waiting messages on topic [robot_description].
+[create-5] [INFO] [1790978013.700117220] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-5]: process has finished cleanly [pid 26819]
+[parameter_bridge-2] [INFO] [1790978013.926244071] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790978013.927137492] [bridge_ros_gz]: Creating GZ->ROS Bridge: [joint_states (gz.msgs.Model) -> joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790978013.929415267] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/odom (gz.msgs.Odometry) -> odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790978013.930857596] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/tf (gz.msgs.Pose_V) -> tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790978013.932524380] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/imu (gz.msgs.IMU) -> imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790978013.933126383] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/scan (gz.msgs.LaserScan) -> scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790978013.933644641] [bridge_ros_gz]: Creating ROS->GZ Bridge: [cmd_vel (geometry_msgs/msg/Twist) -> /cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790978013.934308086] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[gazebo-6] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[INFO] [sync_slam_toolbox_node-11]: process started with pid [27112]
+[sync_slam_toolbox_node-11] [INFO] [1790978021.060528161] [slam_toolbox]: Node using stack size 40000000
+[sync_slam_toolbox_node-11] [INFO] [1790978021.467552483] [slam_toolbox]: Configuring
+[sync_slam_toolbox_node-11] [INFO] [1790978021.472895775] [slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[sync_slam_toolbox_node-11] [INFO] [1790978021.473085310] [slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[INFO] [launch.user]: [LifecycleLaunch] Slamtoolbox node is activating.
+[sync_slam_toolbox_node-11] [INFO] [1790978021.486599859] [slam_toolbox]: Activating
+[sync_slam_toolbox_node-11] [INFO] [1790978021.666132679] [slam_toolbox]: Message Filter dropping message: frame 'rplidar_link' at time 4.800 for reason 'discarding message because the queue is full'
+[sync_slam_toolbox_node-11] Registering sensor: [Custom Described Lidar]
+[INFO] [controller_server-12]: process started with pid [27134]
+[INFO] [smoother_server-13]: process started with pid [27135]
+[INFO] [planner_server-14]: process started with pid [27136]
+[INFO] [route_server-15]: process started with pid [27137]
+[INFO] [behavior_server-16]: process started with pid [27138]
+[INFO] [bt_navigator-17]: process started with pid [27139]
+[INFO] [waypoint_follower-18]: process started with pid [27140]
+[INFO] [velocity_smoother-19]: process started with pid [27141]
+[INFO] [collision_monitor-20]: process started with pid [27142]
+[INFO] [opennav_docking-21]: process started with pid [27143]
+[INFO] [lifecycle_manager-22]: process started with pid [27144]
+[velocity_smoother-19] [INFO] [1790978025.074662603] [velocity_smoother]: 
+[velocity_smoother-19] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-19] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-19] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790978025.079528519] [planner_server]: 
+[planner_server-14] 	planner_server lifecycle node launched. 
+[planner_server-14] 	Waiting on external lifecycle transitions to activate
+[planner_server-14] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-13] [INFO] [1790978025.080530525] [smoother_server]: 
+[smoother_server-13] 	smoother_server lifecycle node launched. 
+[smoother_server-13] 	Waiting on external lifecycle transitions to activate
+[smoother_server-13] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790978025.081232797] [planner_server]: Creating
+[smoother_server-13] [INFO] [1790978025.082363658] [smoother_server]: Creating smoother server
+[controller_server-12] [INFO] [1790978025.084659299] [controller_server]: 
+[controller_server-12] 	controller_server lifecycle node launched. 
+[controller_server-12] 	Waiting on external lifecycle transitions to activate
+[controller_server-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-22] [INFO] [1790978025.086797537] [lifecycle_manager_navigation]: Creating
+[waypoint_follower-18] [INFO] [1790978025.087194033] [waypoint_follower]: 
+[waypoint_follower-18] 	waypoint_follower lifecycle node launched. 
+[waypoint_follower-18] 	Waiting on external lifecycle transitions to activate
+[waypoint_follower-18] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[collision_monitor-20] [INFO] [1790978025.087564928] [collision_monitor]: 
+[collision_monitor-20] 	collision_monitor lifecycle node launched. 
+[collision_monitor-20] 	Waiting on external lifecycle transitions to activate
+[collision_monitor-20] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-18] [INFO] [1790978025.087615138] [waypoint_follower]: Creating
+[controller_server-12] [INFO] [1790978025.088168214] [controller_server]: Creating controller server
+[lifecycle_manager-22] [INFO] [1790978025.091231005] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[bt_navigator-17] [INFO] [1790978025.092436344] [bt_navigator]: 
+[bt_navigator-17] 	bt_navigator lifecycle node launched. 
+[bt_navigator-17] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-17] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-17] [INFO] [1790978025.093903172] [bt_navigator]: Creating
+[route_server-15] [INFO] [1790978025.096375933] [route_server]: 
+[route_server-15] 	route_server lifecycle node launched. 
+[route_server-15] 	Waiting on external lifecycle transitions to activate
+[route_server-15] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[behavior_server-16] [INFO] [1790978025.098217223] [behavior_server]: 
+[behavior_server-16] 	behavior_server lifecycle node launched. 
+[behavior_server-16] 	Waiting on external lifecycle transitions to activate
+[behavior_server-16] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-21] [INFO] [1790978025.099143579] [docking_server]: 
+[opennav_docking-21] 	docking_server lifecycle node launched. 
+[opennav_docking-21] 	Waiting on external lifecycle transitions to activate
+[opennav_docking-21] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-21] [INFO] [1790978025.099243517] [docking_server]: Creating docking_server
+[controller_server-12] [INFO] [1790978025.102192573] [local_costmap.local_costmap]: 
+[controller_server-12] 	local_costmap lifecycle node launched. 
+[controller_server-12] 	Waiting on external lifecycle transitions to activate
+[controller_server-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790978025.102434803] [global_costmap.global_costmap]: 
+[planner_server-14] 	global_costmap lifecycle node launched. 
+[planner_server-14] 	Waiting on external lifecycle transitions to activate
+[planner_server-14] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-12] [INFO] [1790978025.102551454] [local_costmap.local_costmap]: Creating Costmap
+[planner_server-14] [INFO] [1790978025.102753284] [global_costmap.global_costmap]: Creating Costmap
+[lifecycle_manager-22] [INFO] [1790978027.500138321] [lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-22] [INFO] [1790978027.500177318] [lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[controller_server-12] [INFO] [1790978027.500446943] [controller_server]: Configuring controller interface
+[controller_server-12] [INFO] [1790978027.500468816] [controller_server]: getting progress checker plugins..
+[controller_server-12] [INFO] [1790978027.500621870] [controller_server]: getting goal checker plugins..
+[controller_server-12] [INFO] [1790978027.500720856] [controller_server]: Controller frequency set to 20.0000Hz
+[controller_server-12] [INFO] [1790978027.500756747] [local_costmap.local_costmap]: Configuring
+[controller_server-12] [INFO] [1790978027.506944382] [local_costmap.local_costmap]: Using plugin "static_layer"
+[controller_server-12] [INFO] [1790978027.509649434] [local_costmap.local_costmap]: Subscribing to the map topic (/map) with transient local durability
+[controller_server-12] [INFO] [1790978027.510869703] [local_costmap.local_costmap]: Initialized plugin "static_layer"
+[controller_server-12] [INFO] [1790978027.510880915] [local_costmap.local_costmap]: Using plugin "voxel_layer"
+[controller_server-12] [INFO] [1790978027.511466355] [local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-12] [INFO] [1790978027.519175867] [local_costmap.local_costmap]: Initialized plugin "voxel_layer"
+[controller_server-12] [INFO] [1790978027.519191799] [local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-12] [INFO] [1790978027.519696028] [local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-12] [INFO] [1790978027.532986583] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 436 X 301 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978027.533049177] [controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-12] [INFO] [1790978027.533280415] [controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-12] [INFO] [1790978027.533695217] [controller_server]: Created goal checker : general_goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-12] [INFO] [1790978027.534205639] [controller_server]: Controller Server has general_goal_checker  goal checkers available.
+[controller_server-12] [INFO] [1790978027.535479554] [controller_server]: Created controller : FollowPath of type nav2_mppi_controller::MPPIController
+[controller_server-12] [INFO] [1790978027.537453867] [controller_server]: Controller period is equal to model dt. Control sequence shifting is ON
+[controller_server-12] [INFO] [1790978027.538533487] [controller_server]: ConstraintCritic instantiated with 1 power and 4.000000 weight.
+[controller_server-12] [INFO] [1790978027.538554870] [controller_server]: Critic loaded : mppi::critics::ConstraintCritic
+[controller_server-12] [INFO] [1790978027.539453992] [controller_server]: InflationCostCritic instantiated with 1 power and 300.000000 / 0.015000 weights. Critic will collision check based on footprint cost.
+[controller_server-12] [INFO] [1790978027.539476186] [controller_server]: Critic loaded : mppi::critics::CostCritic
+[controller_server-12] [INFO] [1790978027.539811521] [controller_server]: GoalCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-12] [INFO] [1790978027.539824697] [controller_server]: Critic loaded : mppi::critics::GoalCritic
+[controller_server-12] [INFO] [1790978027.540277264] [controller_server]: GoalAngleCritic instantiated with 1 power, 3.000000 weight, 0.500000 angular threshold and symmetric_yaw_tolerance disabled
+[controller_server-12] [INFO] [1790978027.540292254] [controller_server]: Critic loaded : mppi::critics::GoalAngleCritic
+[controller_server-12] [INFO] [1790978027.540933785] [controller_server]: ReferenceTrajectoryCritic instantiated with 1 power and 14.000000 weight
+[controller_server-12] [INFO] [1790978027.540950208] [controller_server]: Critic loaded : mppi::critics::PathAlignCritic
+[controller_server-12] [INFO] [1790978027.541399408] [controller_server]: Critic loaded : mppi::critics::PathFollowCritic
+[controller_server-12] [INFO] [1790978027.541970470] [controller_server]: PathAngleCritic instantiated with 1 power and 2.000000 weight. Mode set to: Forward Preference
+[controller_server-12] [INFO] [1790978027.542006702] [controller_server]: Critic loaded : mppi::critics::PathAngleCritic
+[controller_server-12] [INFO] [1790978027.542327167] [controller_server]: PreferForwardCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-12] [INFO] [1790978027.542339912] [controller_server]: Critic loaded : mppi::critics::PreferForwardCritic
+[controller_server-12] [INFO] [1790978027.544740812] [controller_server]: Optimizer reset
+[controller_server-12] [INFO] [1790978027.547940213] [MPPIController]: Configured MPPI Controller: FollowPath
+[controller_server-12] [INFO] [1790978027.547952027] [controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-22] [INFO] [1790978027.554052860] [lifecycle_manager_navigation]: [34m[1mConfiguring smoother_server[0m[0m
+[smoother_server-13] [INFO] [1790978027.554224590] [smoother_server]: Configuring smoother server
+[smoother_server-13] [INFO] [1790978027.565530400] [smoother_server]: Created smoother : simple_smoother of type nav2_smoother::SimpleSmoother
+[smoother_server-13] [INFO] [1790978027.566073306] [smoother_server]: Smoother Server has simple_smoother  smoothers available.
+[lifecycle_manager-22] [INFO] [1790978027.570693465] [lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-14] [INFO] [1790978027.570900485] [planner_server]: Configuring
+[planner_server-14] [INFO] [1790978027.570941757] [global_costmap.global_costmap]: Configuring
+[planner_server-14] [INFO] [1790978027.577347183] [global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-14] [INFO] [1790978027.580012216] [global_costmap.global_costmap]: Subscribing to the map topic (/map) with transient local durability
+[planner_server-14] [INFO] [1790978027.581126885] [global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-14] [INFO] [1790978027.581137617] [global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-14] [INFO] [1790978027.581608250] [global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-14] [INFO] [1790978027.584253393] [global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-14] [INFO] [1790978027.584267411] [global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-14] [INFO] [1790978027.584725508] [global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-14] [INFO] [1790978027.599830740] [planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner
+[planner_server-14] [INFO] [1790978027.599859377] [planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[planner_server-14] [INFO] [1790978027.600503063] [planner_server]: Planner Server has GridBased  planners available.
+[lifecycle_manager-22] [INFO] [1790978027.607158625] [lifecycle_manager_navigation]: [34m[1mConfiguring route_server[0m[0m
+[route_server-15] [INFO] [1790978027.607381908] [route_server]: Configuring
+[route_server-15] [INFO] [1790978027.628707850] [route_server]: Created GraphFileLoader GeoJsonGraphFileLoader of type nav2_route::GeoJsonGraphFileLoader
+[route_server-15] [INFO] [1790978027.628730906] [route_server]: Configuring geojson graph file loader
+[route_server-15] [INFO] [1790978027.628736507] [route_server]: No graph file provided to load yet.
+[route_server-15] [INFO] [1790978027.630696341] [route_server]: Created edge cost function plugin DistanceScorer of type nav2_route::DistanceScorer
+[route_server-15] [INFO] [1790978027.630712583] [route_server]: Configuring distance scorer.
+[route_server-15] [INFO] [1790978027.630935355] [route_server]: Created edge cost function plugin DynamicEdgesScorer of type nav2_route::DynamicEdgesScorer
+[route_server-15] [INFO] [1790978027.630948511] [route_server]: Configuring adjust edges scorer.
+[route_server-15] [INFO] [1790978027.633465560] [route_server]: Created route operation AdjustSpeedLimit of type nav2_route::AdjustSpeedLimit
+[route_server-15] [INFO] [1790978027.633479929] [route_server]: Configuring Adjust speed limit operation.
+[route_server-15] [INFO] [1790978027.634191760] [route_server]: Created route operation ReroutingService of type nav2_route::ReroutingService
+[route_server-15] [INFO] [1790978027.634202421] [route_server]: Configuring Rerouting service operation.
+[lifecycle_manager-22] [INFO] [1790978027.636439034] [lifecycle_manager_navigation]: [34m[1mConfiguring behavior_server[0m[0m
+[behavior_server-16] [INFO] [1790978027.636615163] [behavior_server]: Configuring
+[behavior_server-16] [INFO] [1790978027.640212735] [behavior_server]: Creating behavior plugin spin of type nav2_behaviors::Spin
+[behavior_server-16] [INFO] [1790978027.641069934] [behavior_server]: Creating behavior plugin backup of type nav2_behaviors::BackUp
+[behavior_server-16] [INFO] [1790978027.641794299] [behavior_server]: Creating behavior plugin drive_on_heading of type nav2_behaviors::DriveOnHeading
+[behavior_server-16] [INFO] [1790978027.642578524] [behavior_server]: Creating behavior plugin assisted_teleop of type nav2_behaviors::AssistedTeleop
+[behavior_server-16] [INFO] [1790978027.644095561] [behavior_server]: Creating behavior plugin wait of type nav2_behaviors::Wait
+[behavior_server-16] [INFO] [1790978027.651385531] [behavior_server]: Configuring spin
+[behavior_server-16] [INFO] [1790978027.656022643] [behavior_server]: Configuring backup
+[behavior_server-16] [INFO] [1790978027.659010756] [behavior_server]: Configuring drive_on_heading
+[behavior_server-16] [INFO] [1790978027.662451325] [behavior_server]: Configuring assisted_teleop
+[behavior_server-16] [INFO] [1790978027.667726552] [behavior_server]: Configuring wait
+[lifecycle_manager-22] [INFO] [1790978027.671380515] [lifecycle_manager_navigation]: [34m[1mConfiguring velocity_smoother[0m[0m
+[velocity_smoother-19] [INFO] [1790978027.671559951] [velocity_smoother]: Configuring velocity smoother
+[lifecycle_manager-22] [INFO] [1790978027.674959850] [lifecycle_manager_navigation]: [34m[1mConfiguring collision_monitor[0m[0m
+[collision_monitor-20] [INFO] [1790978027.675136690] [collision_monitor]: Configuring
+[collision_monitor-20] [INFO] [1790978027.679838911] [collision_monitor]: [scan]: Creating Scan
+[collision_monitor-20] [INFO] [1790978027.681932090] [collision_monitor]: [FootprintApproach]: Creating Polygon
+[collision_monitor-20] [INFO] [1790978027.682096917] [collision_monitor]: [FootprintApproach]: Polygon points are not defined. Using dynamic subscription instead.
+[collision_monitor-20] [INFO] [1790978027.682771073] [collision_monitor]: [FootprintApproach]: Making footprint subscriber on local_costmap/published_footprint topic
+[lifecycle_manager-22] [INFO] [1790978027.691661566] [lifecycle_manager_navigation]: [34m[1mConfiguring bt_navigator[0m[0m
+[bt_navigator-17] [INFO] [1790978027.691832595] [bt_navigator]: Configuring
+[bt_navigator-17] [INFO] [1790978027.696590095] [bt_navigator]: Creating navigator id navigate_to_pose of type nav2_bt_navigator::NavigateToPoseNavigator
+[bt_navigator-17] [INFO] [1790978027.749075601] [bt_navigator]: Creating navigator id navigate_through_poses of type nav2_bt_navigator::NavigateThroughPosesNavigator
+[lifecycle_manager-22] [INFO] [1790978027.766389951] [lifecycle_manager_navigation]: [34m[1mConfiguring waypoint_follower[0m[0m
+[waypoint_follower-18] [INFO] [1790978027.766610047] [waypoint_follower]: Configuring
+[waypoint_follower-18] [INFO] [1790978027.784140546] [waypoint_follower]: Created waypoint_task_executor : wait_at_waypoint of type nav2_waypoint_follower::WaitAtWaypoint
+[lifecycle_manager-22] [INFO] [1790978027.784848650] [lifecycle_manager_navigation]: [34m[1mConfiguring docking_server[0m[0m
+[opennav_docking-21] [INFO] [1790978027.785041562] [docking_server]: Configuring docking_server
+[opennav_docking-21] [INFO] [1790978027.785073866] [docking_server]: Controller frequency set to 50.0000Hz
+[opennav_docking-21] [INFO] [1790978027.804230458] [docking_server]: Created charging dock plugin simple_charging_dock of type opennav_docking::SimpleChargingDock
+[opennav_docking-21] [WARN] [1790978027.807574807] [docking_server]: Dock database filepath nor dock parameters set. Docking actions can only be executed specifying the dock pose via the action request. Or update the dock database via the reload_database service.
+[opennav_docking-21] [INFO] [1790978027.807596700] [docking_server]: Docking Server has 1 dock types and 0 dock instances available.
+[lifecycle_manager-22] [INFO] [1790978027.808632995] [lifecycle_manager_navigation]: [34m[1mActivating controller_server[0m[0m
+[controller_server-12] [INFO] [1790978027.808764345] [controller_server]: Activating
+[controller_server-12] [INFO] [1790978027.808793352] [local_costmap.local_costmap]: Activating
+[controller_server-12] [INFO] [1790978027.808800837] [local_costmap.local_costmap]: Checking transform
+[controller_server-12] [INFO] [1790978027.808905114] [local_costmap.local_costmap]: start
+[controller_server-12] [WARN] [1790978028.009721169] [controller_server]: Parameter controller_server.verbose not found
+[controller_server-12] [INFO] [1790978028.012162628] [controller_server]: Optimizer reset
+[controller_server-12] [INFO] [1790978028.012374879] [MPPIController]: Activated MPPI Controller: FollowPath
+[controller_server-12] [INFO] [1790978028.012401351] [controller_server]: Creating bond (controller_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978028.117345690] [lifecycle_manager_navigation]: Server controller_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790978028.117376832] [lifecycle_manager_navigation]: [34m[1mActivating smoother_server[0m[0m
+[smoother_server-13] [INFO] [1790978028.117614503] [smoother_server]: Activating
+[smoother_server-13] [INFO] [1790978028.117642328] [smoother_server]: Creating bond (smoother_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978028.221464042] [lifecycle_manager_navigation]: Server smoother_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790978028.221503470] [lifecycle_manager_navigation]: [34m[1mActivating planner_server[0m[0m
+[planner_server-14] [INFO] [1790978028.284245637] [planner_server]: Activating
+[planner_server-14] [INFO] [1790978028.284335795] [global_costmap.global_costmap]: Activating
+[planner_server-14] [INFO] [1790978028.284348961] [global_costmap.global_costmap]: Checking transform
+[planner_server-14] [INFO] [1790978028.284397918] [global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-14] [INFO] [1790978028.362505261] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 436 X 301 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978028.784545613] [global_costmap.global_costmap]: start
+[planner_server-14] [INFO] [1790978029.785636347] [planner_server]: Activating plugin GridBased of type NavfnPlanner
+[planner_server-14] [INFO] [1790978029.787359492] [planner_server]: Creating bond (planner_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978029.891116077] [lifecycle_manager_navigation]: Server planner_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790978029.891157299] [lifecycle_manager_navigation]: [34m[1mActivating route_server[0m[0m
+[route_server-15] [INFO] [1790978029.891494637] [route_server]: Activating
+[route_server-15] [INFO] [1790978029.891629895] [route_server]: Creating bond (route_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978029.996031919] [lifecycle_manager_navigation]: Server route_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790978029.996074082] [lifecycle_manager_navigation]: [34m[1mActivating behavior_server[0m[0m
+[behavior_server-16] [INFO] [1790978029.996346452] [behavior_server]: Activating
+[behavior_server-16] [INFO] [1790978029.996369538] [behavior_server]: Activating spin
+[behavior_server-16] [INFO] [1790978029.996379518] [behavior_server]: Activating backup
+[behavior_server-16] [INFO] [1790978029.996387313] [behavior_server]: Activating drive_on_heading
+[behavior_server-16] [INFO] [1790978029.996394467] [behavior_server]: Activating assisted_teleop
+[behavior_server-16] [INFO] [1790978029.996408024] [behavior_server]: Activating wait
+[behavior_server-16] [INFO] [1790978029.996419307] [behavior_server]: Creating bond (behavior_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978030.100846050] [lifecycle_manager_navigation]: Server behavior_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790978030.100879065] [lifecycle_manager_navigation]: [34m[1mActivating velocity_smoother[0m[0m
+[velocity_smoother-19] [INFO] [1790978030.101152848] [velocity_smoother]: Activating
+[velocity_smoother-19] [INFO] [1790978030.101201945] [velocity_smoother]: Creating bond (velocity_smoother) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978030.205595792] [lifecycle_manager_navigation]: Server velocity_smoother connected with bond.
+[lifecycle_manager-22] [INFO] [1790978030.205627656] [lifecycle_manager_navigation]: [34m[1mActivating collision_monitor[0m[0m
+[collision_monitor-20] [INFO] [1790978030.205897701] [collision_monitor]: Activating
+[collision_monitor-20] [INFO] [1790978030.205938131] [collision_monitor]: Creating bond (collision_monitor) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978030.310689747] [lifecycle_manager_navigation]: Server collision_monitor connected with bond.
+[lifecycle_manager-22] [INFO] [1790978030.310720428] [lifecycle_manager_navigation]: [34m[1mActivating bt_navigator[0m[0m
+[bt_navigator-17] [INFO] [1790978030.310976396] [bt_navigator]: Activating
+[bt_navigator-17] [INFO] [1790978030.357213566] [bt_navigator]: Creating bond (bt_navigator) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978030.461265566] [lifecycle_manager_navigation]: Server bt_navigator connected with bond.
+[lifecycle_manager-22] [INFO] [1790978030.461298311] [lifecycle_manager_navigation]: [34m[1mActivating waypoint_follower[0m[0m
+[waypoint_follower-18] [INFO] [1790978030.461664076] [waypoint_follower]: Activating
+[waypoint_follower-18] [INFO] [1790978030.461702432] [waypoint_follower]: Creating bond (waypoint_follower) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978030.568043208] [lifecycle_manager_navigation]: Server waypoint_follower connected with bond.
+[lifecycle_manager-22] [INFO] [1790978030.568074701] [lifecycle_manager_navigation]: [34m[1mActivating docking_server[0m[0m
+[opennav_docking-21] [INFO] [1790978030.568384004] [docking_server]: Activating docking_server
+[opennav_docking-21] [INFO] [1790978030.575297748] [docking_server]: Creating bond (docking_server) to lifecycle manager.
+[lifecycle_manager-22] [INFO] [1790978030.679411751] [lifecycle_manager_navigation]: Server docking_server connected with bond.
+[lifecycle_manager-22] [INFO] [1790978030.679444245] [lifecycle_manager_navigation]: [34m[1mManaged nodes are active[0m[0m
+[lifecycle_manager-22] [INFO] [1790978030.679452141] [lifecycle_manager_navigation]: [34m[1mCreating bond timer...[0m[0m
+[waypoint_follower-18] [INFO] [1790978040.115808307] [waypoint_follower]: Received follow waypoint request with 75 waypoints.
+[bt_navigator-17] [INFO] [1790978040.116368207] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.00, -0.00)
+[controller_server-12] [INFO] [1790978040.137025032] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [WARN] [1790978040.137057747] [controller_server]: No goal checker was specified in parameter 'current_goal_checker'. Server will use only plugin loaded general_goal_checker . This warning will appear once.
+[controller_server-12] [WARN] [1790978040.137068318] [controller_server]: No progress checker was specified in parameter 'current_progress_checker'. Server will use only plugin loaded progress_checker . This warning will appear once.
+[controller_server-12] [INFO] [1790978040.142734870] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978040.144198191] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978040.166648511] [bt_navigator]: Goal succeeded
+[parameter_bridge-2] [INFO] [1790978040.172023956] [bridge_ros_gz]: Passing message from ROS geometry_msgs/msg/Twist to Gazebo gz.msgs.Twist (showing msg only once per type)
+[waypoint_follower-18] [INFO] [1790978040.515947948] [waypoint_follower]: Succeeded processing waypoint 0, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978040.515980433] [waypoint_follower]: Arrived at 0'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978040.715068477] [waypoint_follower]: Task execution at waypoint 0 succeeded
+[waypoint_follower-18] [INFO] [1790978040.715107224] [waypoint_follower]: Handled task execution on waypoint 0, moving to next.
+[bt_navigator-17] [INFO] [1790978040.715758936] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.11, -0.00)
+[controller_server-12] [INFO] [1790978040.736286896] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978040.741149965] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978040.741385201] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978040.765951846] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978041.116547543] [waypoint_follower]: Succeeded processing waypoint 1, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978041.116576160] [waypoint_follower]: Arrived at 1'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978041.315088363] [waypoint_follower]: Task execution at waypoint 1 succeeded
+[waypoint_follower-18] [INFO] [1790978041.315129544] [waypoint_follower]: Handled task execution on waypoint 1, moving to next.
+[bt_navigator-17] [INFO] [1790978041.315490390] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.24, -0.00)
+[controller_server-12] [INFO] [1790978041.336002468] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978041.340143887] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978041.340647345] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978041.365713570] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978041.716327463] [waypoint_follower]: Succeeded processing waypoint 2, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978041.716360479] [waypoint_follower]: Arrived at 2'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978041.915139721] [waypoint_follower]: Task execution at waypoint 2 succeeded
+[waypoint_follower-18] [INFO] [1790978041.915173868] [waypoint_follower]: Handled task execution on waypoint 2, moving to next.
+[bt_navigator-17] [INFO] [1790978041.915542409] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.35, -0.00)
+[controller_server-12] [INFO] [1790978041.936058174] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978042.689295890] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978042.689971199] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978042.715725618] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978043.368825123] [waypoint_follower]: Succeeded processing waypoint 3, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978043.368870092] [waypoint_follower]: Arrived at 3'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978043.568099225] [waypoint_follower]: Task execution at waypoint 3 succeeded
+[waypoint_follower-18] [INFO] [1790978043.568150958] [waypoint_follower]: Handled task execution on waypoint 3, moving to next.
+[bt_navigator-17] [INFO] [1790978043.568650618] [bt_navigator]: Begin navigating from current location (0.09, -0.00) to (0.46, -0.01)
+[controller_server-12] [INFO] [1790978043.589155552] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978043.609029435] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 439 X 301 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978043.784677928] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 439 X 301 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978044.392724510] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978044.393353106] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978044.418850125] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978045.072030168] [waypoint_follower]: Succeeded processing waypoint 4, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978045.072059927] [waypoint_follower]: Arrived at 4'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978045.272062272] [waypoint_follower]: Task execution at waypoint 4 succeeded
+[waypoint_follower-18] [INFO] [1790978045.272099245] [waypoint_follower]: Handled task execution on waypoint 4, moving to next.
+[bt_navigator-17] [INFO] [1790978045.272468617] [bt_navigator]: Begin navigating from current location (0.23, -0.00) to (0.58, -0.01)
+[controller_server-12] [INFO] [1790978045.292935015] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978045.996416402] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978045.996937555] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978046.022662055] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978046.609032759] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 443 X 301 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978046.675545067] [waypoint_follower]: Succeeded processing waypoint 5, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978046.675575146] [waypoint_follower]: Arrived at 5'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790978046.784679558] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 443 X 301 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978046.874043851] [waypoint_follower]: Task execution at waypoint 5 succeeded
+[waypoint_follower-18] [INFO] [1790978046.874083610] [waypoint_follower]: Handled task execution on waypoint 5, moving to next.
+[bt_navigator-17] [INFO] [1790978046.874474334] [bt_navigator]: Begin navigating from current location (0.40, 0.01) to (0.72, -0.01)
+[controller_server-12] [INFO] [1790978046.894938087] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978047.498175332] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978047.498663810] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978047.524673856] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978048.177393212] [waypoint_follower]: Succeeded processing waypoint 6, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978048.177427029] [waypoint_follower]: Arrived at 6'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978048.377089550] [waypoint_follower]: Task execution at waypoint 6 succeeded
+[waypoint_follower-18] [INFO] [1790978048.377123537] [waypoint_follower]: Handled task execution on waypoint 6, moving to next.
+[bt_navigator-17] [INFO] [1790978048.377505354] [bt_navigator]: Begin navigating from current location (0.49, 0.00) to (0.82, -0.01)
+[controller_server-12] [INFO] [1790978048.397968345] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978049.102219082] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978049.102431243] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978049.127694519] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978049.780583329] [waypoint_follower]: Succeeded processing waypoint 7, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978049.780612807] [waypoint_follower]: Arrived at 7'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978049.979049797] [waypoint_follower]: Task execution at waypoint 7 succeeded
+[waypoint_follower-18] [INFO] [1790978049.979090197] [waypoint_follower]: Handled task execution on waypoint 7, moving to next.
+[bt_navigator-17] [INFO] [1790978049.979441885] [bt_navigator]: Begin navigating from current location (0.59, -0.01) to (0.98, -0.01)
+[controller_server-12] [INFO] [1790978049.999899094] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978051.003236452] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978051.003405787] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978051.029624005] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978051.609031553] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 451 X 308 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978051.683331005] [waypoint_follower]: Succeeded processing waypoint 8, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978051.683360584] [waypoint_follower]: Arrived at 8'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790978051.784681105] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 451 X 308 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978051.884057162] [waypoint_follower]: Task execution at waypoint 8 succeeded
+[waypoint_follower-18] [INFO] [1790978051.884090298] [waypoint_follower]: Handled task execution on waypoint 8, moving to next.
+[bt_navigator-17] [INFO] [1790978051.884455241] [bt_navigator]: Begin navigating from current location (0.80, 0.00) to (1.12, -0.01)
+[controller_server-12] [INFO] [1790978051.904892842] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978052.609558768] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978052.609852199] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978052.634664611] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978053.287657172] [waypoint_follower]: Succeeded processing waypoint 9, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978053.287691601] [waypoint_follower]: Arrived at 9'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978053.486015085] [waypoint_follower]: Task execution at waypoint 9 succeeded
+[waypoint_follower-18] [INFO] [1790978053.486056658] [waypoint_follower]: Handled task execution on waypoint 9, moving to next.
+[bt_navigator-17] [INFO] [1790978053.486399257] [bt_navigator]: Begin navigating from current location (0.90, 0.00) to (1.23, -0.01)
+[controller_server-12] [INFO] [1790978053.506847448] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978053.610356938] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 460 X 332 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978053.784677505] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 460 X 332 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978054.260166639] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978054.260396244] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978054.286591327] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978054.939752921] [waypoint_follower]: Succeeded processing waypoint 10, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978054.939782009] [waypoint_follower]: Arrived at 10'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978055.139055346] [waypoint_follower]: Task execution at waypoint 10 succeeded
+[waypoint_follower-18] [INFO] [1790978055.139087770] [waypoint_follower]: Handled task execution on waypoint 10, moving to next.
+[bt_navigator-17] [INFO] [1790978055.139446190] [bt_navigator]: Begin navigating from current location (1.01, 0.00) to (1.40, -0.01)
+[controller_server-12] [INFO] [1790978055.159897447] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978056.113160863] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978056.114150825] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978056.139653845] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978056.609068787] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 461 X 383 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978056.784678830] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 461 X 383 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978056.793239298] [waypoint_follower]: Succeeded processing waypoint 11, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978056.793263325] [waypoint_follower]: Arrived at 11'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978056.993135408] [waypoint_follower]: Task execution at waypoint 11 succeeded
+[waypoint_follower-18] [INFO] [1790978056.993171189] [waypoint_follower]: Handled task execution on waypoint 11, moving to next.
+[bt_navigator-17] [INFO] [1790978056.993560641] [bt_navigator]: Begin navigating from current location (1.17, -0.01) to (1.51, -0.01)
+[controller_server-12] [INFO] [1790978057.014053120] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978057.717863944] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978057.718585073] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978057.743759593] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978058.396769473] [waypoint_follower]: Succeeded processing waypoint 12, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978058.396798961] [waypoint_follower]: Arrived at 12'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978058.595141020] [waypoint_follower]: Task execution at waypoint 12 succeeded
+[waypoint_follower-18] [INFO] [1790978058.595174827] [waypoint_follower]: Handled task execution on waypoint 12, moving to next.
+[bt_navigator-17] [INFO] [1790978058.595556143] [bt_navigator]: Begin navigating from current location (1.28, -0.01) to (1.61, -0.01)
+[controller_server-12] [INFO] [1790978058.616038893] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978059.319333813] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978059.319820938] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978059.345754332] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978059.609391374] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 462 X 387 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978059.784675208] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 462 X 387 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978059.998700213] [waypoint_follower]: Succeeded processing waypoint 13, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978059.998729671] [waypoint_follower]: Arrived at 13'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978060.197019546] [waypoint_follower]: Task execution at waypoint 13 succeeded
+[waypoint_follower-18] [INFO] [1790978060.197062251] [waypoint_follower]: Handled task execution on waypoint 13, moving to next.
+[bt_navigator-17] [INFO] [1790978060.197382776] [bt_navigator]: Begin navigating from current location (1.40, 0.00) to (1.71, -0.01)
+[controller_server-12] [INFO] [1790978060.217795517] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978060.871593617] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978060.871869954] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978060.897586698] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978061.550905567] [waypoint_follower]: Succeeded processing waypoint 14, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978061.550943422] [waypoint_follower]: Arrived at 14'th waypoint, sleeping for 200 milliseconds
+[controller_server-12] [INFO] [1790978061.609032772] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 471 X 389 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978061.751034206] [waypoint_follower]: Task execution at waypoint 14 succeeded
+[waypoint_follower-18] [INFO] [1790978061.751068625] [waypoint_follower]: Handled task execution on waypoint 14, moving to next.
+[bt_navigator-17] [INFO] [1790978061.751448457] [bt_navigator]: Begin navigating from current location (1.49, 0.00) to (2.00, 0.00)
+[controller_server-12] [INFO] [1790978061.771974883] [controller_server]: Received a goal, begin computing control effort.
+[planner_server-14] [INFO] [1790978061.784676930] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 471 X 389 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978062.822101562] [controller_server]: Passing new path to controller.
+[controller_server-12] [INFO] [1790978063.075362866] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978063.075795213] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978063.101644299] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978063.609031592] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 472 X 389 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978063.755984600] [waypoint_follower]: Succeeded processing waypoint 15, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978063.756014659] [waypoint_follower]: Arrived at 15'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790978063.784674256] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 472 X 389 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978063.956049963] [waypoint_follower]: Task execution at waypoint 15 succeeded
+[waypoint_follower-18] [INFO] [1790978063.956085614] [waypoint_follower]: Handled task execution on waypoint 15, moving to next.
+[bt_navigator-17] [INFO] [1790978063.956476649] [bt_navigator]: Begin navigating from current location (1.80, -0.01) to (1.85, -0.01)
+[controller_server-12] [INFO] [1790978063.977008616] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978063.980498263] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978063.980671015] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978064.006661371] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978064.357229138] [waypoint_follower]: Succeeded processing waypoint 16, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978064.357258105] [waypoint_follower]: Arrived at 16'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978064.556073861] [waypoint_follower]: Task execution at waypoint 16 succeeded
+[waypoint_follower-18] [INFO] [1790978064.556109442] [waypoint_follower]: Handled task execution on waypoint 16, moving to next.
+[bt_navigator-17] [INFO] [1790978064.556468814] [bt_navigator]: Begin navigating from current location (1.80, -0.01) to (1.96, -0.01)
+[controller_server-12] [INFO] [1790978064.577059227] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978064.580751836] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978064.581096760] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978064.606652694] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978064.957224609] [waypoint_follower]: Succeeded processing waypoint 17, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978064.957257494] [waypoint_follower]: Arrived at 17'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978065.156031087] [waypoint_follower]: Task execution at waypoint 17 succeeded
+[waypoint_follower-18] [INFO] [1790978065.156070565] [waypoint_follower]: Handled task execution on waypoint 17, moving to next.
+[bt_navigator-17] [INFO] [1790978065.156452091] [bt_navigator]: Begin navigating from current location (1.80, -0.01) to (2.09, -0.00)
+[controller_server-12] [INFO] [1790978065.176930662] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978065.731344114] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978065.731622055] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978065.756650354] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978066.409399047] [waypoint_follower]: Succeeded processing waypoint 18, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978066.409434146] [waypoint_follower]: Arrived at 18'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978066.608044294] [waypoint_follower]: Task execution at waypoint 18 succeeded
+[waypoint_follower-18] [INFO] [1790978066.608078492] [waypoint_follower]: Handled task execution on waypoint 18, moving to next.
+[bt_navigator-17] [INFO] [1790978066.608435840] [bt_navigator]: Begin navigating from current location (1.87, -0.01) to (2.22, 0.00)
+[controller_server-12] [INFO] [1790978066.628930233] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978067.382440655] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978067.382623528] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978067.408639124] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978067.609032776] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 472 X 389 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978067.784681863] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 472 X 389 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978068.061856143] [waypoint_follower]: Succeeded processing waypoint 19, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978068.061888888] [waypoint_follower]: Arrived at 19'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978068.261060558] [waypoint_follower]: Task execution at waypoint 19 succeeded
+[waypoint_follower-18] [INFO] [1790978068.261096870] [waypoint_follower]: Handled task execution on waypoint 19, moving to next.
+[bt_navigator-17] [INFO] [1790978068.261447545] [bt_navigator]: Begin navigating from current location (1.99, 0.01) to (2.33, 0.01)
+[controller_server-12] [INFO] [1790978068.281938090] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978069.035138596] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978069.035647545] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978069.061651117] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978069.609034931] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 483 X 389 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978069.714814608] [waypoint_follower]: Succeeded processing waypoint 20, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978069.714848015] [waypoint_follower]: Arrived at 20'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790978069.784676623] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 483 X 389 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978069.914093160] [waypoint_follower]: Task execution at waypoint 20 succeeded
+[waypoint_follower-18] [INFO] [1790978069.914130985] [waypoint_follower]: Handled task execution on waypoint 20, moving to next.
+[bt_navigator-17] [INFO] [1790978069.914502842] [bt_navigator]: Begin navigating from current location (2.12, -0.00) to (2.49, 0.01)
+[controller_server-12] [INFO] [1790978069.935040711] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978070.788934760] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978070.789531833] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978070.814694960] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978071.468507876] [waypoint_follower]: Succeeded processing waypoint 21, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978071.468543737] [waypoint_follower]: Arrived at 21'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978071.669057025] [waypoint_follower]: Task execution at waypoint 21 succeeded
+[waypoint_follower-18] [INFO] [1790978071.669097425] [waypoint_follower]: Handled task execution on waypoint 21, moving to next.
+[bt_navigator-17] [INFO] [1790978071.669468762] [bt_navigator]: Begin navigating from current location (2.27, 0.00) to (2.64, 0.01)
+[controller_server-12] [INFO] [1790978071.689936531] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978072.493287616] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978072.493485509] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978072.519670580] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978073.174469239] [waypoint_follower]: Succeeded processing waypoint 22, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978073.174498537] [waypoint_follower]: Arrived at 22'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978073.373050818] [waypoint_follower]: Task execution at waypoint 22 succeeded
+[waypoint_follower-18] [INFO] [1790978073.373098813] [waypoint_follower]: Handled task execution on waypoint 22, moving to next.
+[bt_navigator-17] [INFO] [1790978073.373504116] [bt_navigator]: Begin navigating from current location (2.42, 0.00) to (2.79, 0.01)
+[controller_server-12] [INFO] [1790978073.393973128] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978074.148252716] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978074.148545016] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978074.173711639] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978074.826701760] [waypoint_follower]: Succeeded processing waypoint 23, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978074.826728814] [waypoint_follower]: Arrived at 23'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978075.026049618] [waypoint_follower]: Task execution at waypoint 23 succeeded
+[waypoint_follower-18] [INFO] [1790978075.026082373] [waypoint_follower]: Handled task execution on waypoint 23, moving to next.
+[bt_navigator-17] [INFO] [1790978075.026427747] [bt_navigator]: Begin navigating from current location (2.56, 0.00) to (2.89, 0.01)
+[controller_server-12] [INFO] [1790978075.046857100] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978075.701063612] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978075.701314569] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978075.726642271] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978076.379460110] [waypoint_follower]: Succeeded processing waypoint 24, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978076.379492284] [waypoint_follower]: Arrived at 24'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978076.580087262] [waypoint_follower]: Task execution at waypoint 24 succeeded
+[waypoint_follower-18] [INFO] [1790978076.580126149] [waypoint_follower]: Handled task execution on waypoint 24, moving to next.
+[bt_navigator-17] [INFO] [1790978076.580522936] [bt_navigator]: Begin navigating from current location (2.67, 0.01) to (3.03, 0.02)
+[controller_server-12] [INFO] [1790978076.601023991] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978076.609030160] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 487 X 393 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978076.784676668] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 487 X 393 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978077.505474659] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978077.506031142] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978077.530730999] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978078.184407969] [waypoint_follower]: Succeeded processing waypoint 25, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978078.184438289] [waypoint_follower]: Arrived at 25'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978078.383051850] [waypoint_follower]: Task execution at waypoint 25 succeeded
+[waypoint_follower-18] [INFO] [1790978078.383084745] [waypoint_follower]: Handled task execution on waypoint 25, moving to next.
+[bt_navigator-17] [INFO] [1790978078.383439989] [bt_navigator]: Begin navigating from current location (2.81, 0.01) to (3.17, 0.03)
+[controller_server-12] [INFO] [1790978078.403969400] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978078.609026412] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 495 X 393 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978078.784678491] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 495 X 393 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978079.258167410] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978079.258392446] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978079.283653185] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978079.937106419] [waypoint_follower]: Succeeded processing waypoint 26, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978079.937142119] [waypoint_follower]: Arrived at 26'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978080.138038444] [waypoint_follower]: Task execution at waypoint 26 succeeded
+[waypoint_follower-18] [INFO] [1790978080.138074806] [waypoint_follower]: Handled task execution on waypoint 26, moving to next.
+[bt_navigator-17] [INFO] [1790978080.138464148] [bt_navigator]: Begin navigating from current location (2.96, 0.02) to (3.31, 0.04)
+[controller_server-12] [INFO] [1790978080.158909101] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978080.963675411] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978080.964297634] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978080.988659742] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978081.609031884] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 501 X 395 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978081.641969259] [waypoint_follower]: Succeeded processing waypoint 27, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978081.641994369] [waypoint_follower]: Arrived at 27'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790978081.784676728] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 501 X 395 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978081.842058623] [waypoint_follower]: Task execution at waypoint 27 succeeded
+[waypoint_follower-18] [INFO] [1790978081.842092651] [waypoint_follower]: Handled task execution on waypoint 27, moving to next.
+[bt_navigator-17] [INFO] [1790978081.842458957] [bt_navigator]: Begin navigating from current location (3.09, 0.02) to (3.44, 0.03)
+[controller_server-12] [INFO] [1790978081.862910143] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978082.666473505] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978082.666703301] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978082.692654719] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978083.345887673] [waypoint_follower]: Succeeded processing waypoint 28, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978083.345917201] [waypoint_follower]: Arrived at 28'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978083.546055612] [waypoint_follower]: Task execution at waypoint 28 succeeded
+[waypoint_follower-18] [INFO] [1790978083.546095261] [waypoint_follower]: Handled task execution on waypoint 28, moving to next.
+[bt_navigator-17] [INFO] [1790978083.546494873] [bt_navigator]: Begin navigating from current location (3.22, 0.03) to (3.55, 0.03)
+[controller_server-12] [INFO] [1790978083.567042600] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978083.609047627] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 518 X 395 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978083.784678082] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 518 X 395 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978084.271616054] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978084.271911019] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978084.296688550] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978084.949563262] [waypoint_follower]: Succeeded processing waypoint 29, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978084.949593321] [waypoint_follower]: Arrived at 29'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978085.148009188] [waypoint_follower]: Task execution at waypoint 29 succeeded
+[waypoint_follower-18] [INFO] [1790978085.148048726] [waypoint_follower]: Handled task execution on waypoint 29, moving to next.
+[bt_navigator-17] [INFO] [1790978085.148678294] [bt_navigator]: Begin navigating from current location (3.33, 0.03) to (3.68, 0.02)
+[controller_server-12] [INFO] [1790978085.169178647] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978085.923939344] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978085.924220371] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978085.948885269] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978086.602337013] [waypoint_follower]: Succeeded processing waypoint 30, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978086.602370429] [waypoint_follower]: Arrived at 30'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978086.801078093] [waypoint_follower]: Task execution at waypoint 30 succeeded
+[waypoint_follower-18] [INFO] [1790978086.801119576] [waypoint_follower]: Handled task execution on waypoint 30, moving to next.
+[bt_navigator-17] [INFO] [1790978086.801484479] [bt_navigator]: Begin navigating from current location (3.46, 0.03) to (4.00, 0.00)
+[controller_server-12] [INFO] [1790978086.821996405] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978087.872177666] [controller_server]: Passing new path to controller.
+[controller_server-12] [INFO] [1790978088.226866096] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978088.227589390] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978088.251674428] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978088.906311328] [waypoint_follower]: Succeeded processing waypoint 31, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978088.906341358] [waypoint_follower]: Arrived at 31'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978089.105043099] [waypoint_follower]: Task execution at waypoint 31 succeeded
+[waypoint_follower-18] [INFO] [1790978089.105081105] [waypoint_follower]: Handled task execution on waypoint 31, moving to next.
+[bt_navigator-17] [INFO] [1790978089.105433974] [bt_navigator]: Begin navigating from current location (3.78, 0.02) to (3.79, 0.01)
+[controller_server-12] [INFO] [1790978089.125872675] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978089.129541206] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978089.130074002] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978089.155615147] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978089.506237326] [waypoint_follower]: Succeeded processing waypoint 32, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978089.506270813] [waypoint_follower]: Arrived at 32'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978089.705060118] [waypoint_follower]: Task execution at waypoint 32 succeeded
+[waypoint_follower-18] [INFO] [1790978089.705098424] [waypoint_follower]: Handled task execution on waypoint 32, moving to next.
+[bt_navigator-17] [INFO] [1790978089.705454089] [bt_navigator]: Begin navigating from current location (3.78, 0.02) to (3.74, 0.01)
+[controller_server-12] [INFO] [1790978089.725872750] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978089.729906094] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978089.730158374] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978089.755627366] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978090.106213534] [waypoint_follower]: Succeeded processing waypoint 33, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978090.106245417] [waypoint_follower]: Arrived at 33'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978090.305068098] [waypoint_follower]: Task execution at waypoint 33 succeeded
+[waypoint_follower-18] [INFO] [1790978090.305104490] [waypoint_follower]: Handled task execution on waypoint 33, moving to next.
+[bt_navigator-17] [INFO] [1790978090.305505365] [bt_navigator]: Begin navigating from current location (3.78, 0.02) to (3.74, 0.01)
+[controller_server-12] [INFO] [1790978090.325960168] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978090.329431127] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978090.329641454] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978090.355696747] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978090.706226603] [waypoint_follower]: Succeeded processing waypoint 34, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978090.706259378] [waypoint_follower]: Arrived at 34'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978090.905061799] [waypoint_follower]: Task execution at waypoint 34 succeeded
+[waypoint_follower-18] [INFO] [1790978090.905096829] [waypoint_follower]: Handled task execution on waypoint 34, moving to next.
+[bt_navigator-17] [INFO] [1790978090.905491411] [bt_navigator]: Begin navigating from current location (3.78, 0.02) to (3.74, 0.01)
+[controller_server-12] [INFO] [1790978090.925919200] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978091.829803273] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978091.830019140] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978091.855691445] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978092.509113203] [waypoint_follower]: Succeeded processing waypoint 35, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978092.509144625] [waypoint_follower]: Arrived at 35'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978092.708046853] [waypoint_follower]: Task execution at waypoint 35 succeeded
+[waypoint_follower-18] [INFO] [1790978092.708080890] [waypoint_follower]: Handled task execution on waypoint 35, moving to next.
+[bt_navigator-17] [INFO] [1790978092.708495071] [bt_navigator]: Begin navigating from current location (3.75, 0.02) to (3.75, 0.01)
+[controller_server-12] [INFO] [1790978092.728951477] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978093.432391243] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978093.432579466] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978093.458723916] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978094.111705520] [waypoint_follower]: Succeeded processing waypoint 36, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978094.111735018] [waypoint_follower]: Arrived at 36'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978094.310113788] [waypoint_follower]: Task execution at waypoint 36 succeeded
+[waypoint_follower-18] [INFO] [1790978094.310148086] [waypoint_follower]: Handled task execution on waypoint 36, moving to next.
+[bt_navigator-17] [INFO] [1790978094.310510474] [bt_navigator]: Begin navigating from current location (3.75, 0.02) to (3.76, 0.02)
+[controller_server-12] [INFO] [1790978094.330942642] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978095.335126691] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978095.335374883] [controller_server]: Optimizer reset
+[controller_server-12] [INFO] [1790978095.341073217] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978095.344636750] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978095.344784102] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978095.370756592] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978096.014441086] [waypoint_follower]: Succeeded processing waypoint 37, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978096.014469703] [waypoint_follower]: Arrived at 37'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978096.215113601] [waypoint_follower]: Task execution at waypoint 37 succeeded
+[waypoint_follower-18] [INFO] [1790978096.215155875] [waypoint_follower]: Handled task execution on waypoint 37, moving to next.
+[bt_navigator-17] [INFO] [1790978096.215520829] [bt_navigator]: Begin navigating from current location (3.76, 0.02) to (3.77, 0.03)
+[controller_server-12] [INFO] [1790978096.236015651] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978096.939872249] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978096.940083537] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978096.965737325] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978097.618679316] [waypoint_follower]: Succeeded processing waypoint 38, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978097.618707783] [waypoint_follower]: Arrived at 38'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978097.817036302] [waypoint_follower]: Task execution at waypoint 38 succeeded
+[waypoint_follower-18] [INFO] [1790978097.817075580] [waypoint_follower]: Handled task execution on waypoint 38, moving to next.
+[bt_navigator-17] [INFO] [1790978097.817495131] [bt_navigator]: Begin navigating from current location (3.77, 0.02) to (3.77, 0.04)
+[controller_server-12] [INFO] [1790978097.837942810] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978098.491855383] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978098.492439110] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978098.517700209] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978099.170551549] [waypoint_follower]: Succeeded processing waypoint 39, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978099.170598152] [waypoint_follower]: Arrived at 39'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978099.371042444] [waypoint_follower]: Task execution at waypoint 39 succeeded
+[waypoint_follower-18] [INFO] [1790978099.371081030] [waypoint_follower]: Handled task execution on waypoint 39, moving to next.
+[bt_navigator-17] [INFO] [1790978099.371494319] [bt_navigator]: Begin navigating from current location (3.77, 0.03) to (3.79, 0.07)
+[controller_server-12] [INFO] [1790978099.391967448] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978100.196017993] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978100.196356754] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978100.221729935] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978100.875057537] [waypoint_follower]: Succeeded processing waypoint 40, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978100.875088669] [waypoint_follower]: Arrived at 40'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978101.075067839] [waypoint_follower]: Task execution at waypoint 40 succeeded
+[waypoint_follower-18] [INFO] [1790978101.075107307] [waypoint_follower]: Handled task execution on waypoint 40, moving to next.
+[bt_navigator-17] [INFO] [1790978101.075511809] [bt_navigator]: Begin navigating from current location (3.79, 0.04) to (3.80, 0.09)
+[controller_server-12] [INFO] [1790978101.095997252] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978101.700261888] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978101.700485050] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978101.725702703] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978102.378496415] [waypoint_follower]: Succeeded processing waypoint 41, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978102.378527497] [waypoint_follower]: Arrived at 41'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978102.578045191] [waypoint_follower]: Task execution at waypoint 41 succeeded
+[waypoint_follower-18] [INFO] [1790978102.578085692] [waypoint_follower]: Handled task execution on waypoint 41, moving to next.
+[bt_navigator-17] [INFO] [1790978102.578497478] [bt_navigator]: Begin navigating from current location (3.80, 0.06) to (3.83, 0.13)
+[controller_server-12] [INFO] [1790978102.598994183] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978103.352970744] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978103.353404564] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978103.378727445] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978104.031794919] [waypoint_follower]: Succeeded processing waypoint 42, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978104.031832764] [waypoint_follower]: Arrived at 42'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978104.231032417] [waypoint_follower]: Task execution at waypoint 42 succeeded
+[waypoint_follower-18] [INFO] [1790978104.231073048] [waypoint_follower]: Handled task execution on waypoint 42, moving to next.
+[bt_navigator-17] [INFO] [1790978104.231463321] [bt_navigator]: Begin navigating from current location (3.82, 0.10) to (3.85, 0.23)
+[controller_server-12] [INFO] [1790978104.251904256] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978104.609066249] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 519 X 395 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978104.784674353] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 519 X 395 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978105.206358011] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978105.206629840] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978105.231674870] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978105.885167073] [waypoint_follower]: Succeeded processing waypoint 43, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978105.885195198] [waypoint_follower]: Arrived at 43'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978106.085304334] [waypoint_follower]: Task execution at waypoint 43 succeeded
+[waypoint_follower-18] [INFO] [1790978106.085336298] [waypoint_follower]: Handled task execution on waypoint 43, moving to next.
+[bt_navigator-17] [INFO] [1790978106.085724407] [bt_navigator]: Begin navigating from current location (3.85, 0.16) to (3.82, 0.39)
+[controller_server-12] [INFO] [1790978106.106236132] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978106.710011253] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978106.710393761] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978106.735943832] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978107.389394792] [waypoint_follower]: Succeeded processing waypoint 44, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978107.389428498] [waypoint_follower]: Arrived at 44'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978107.588067049] [waypoint_follower]: Task execution at waypoint 44 succeeded
+[waypoint_follower-18] [INFO] [1790978107.588099613] [waypoint_follower]: Handled task execution on waypoint 44, moving to next.
+[bt_navigator-17] [INFO] [1790978107.588483093] [bt_navigator]: Begin navigating from current location (3.88, 0.22) to (3.82, 0.49)
+[controller_server-12] [INFO] [1790978107.608950361] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978108.064109346] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978108.064387677] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978108.088692641] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978108.740965514] [waypoint_follower]: Succeeded processing waypoint 45, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978108.740992648] [waypoint_follower]: Arrived at 45'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978108.941186460] [waypoint_follower]: Task execution at waypoint 45 succeeded
+[waypoint_follower-18] [INFO] [1790978108.941222211] [waypoint_follower]: Handled task execution on waypoint 45, moving to next.
+[bt_navigator-17] [INFO] [1790978108.941589229] [bt_navigator]: Begin navigating from current location (3.88, 0.27) to (3.83, 0.61)
+[controller_server-12] [INFO] [1790978108.962153999] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978109.766418615] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978109.767009727] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978109.791801876] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978110.444968869] [waypoint_follower]: Succeeded processing waypoint 46, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978110.445000612] [waypoint_follower]: Arrived at 46'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978110.645031551] [waypoint_follower]: Task execution at waypoint 46 succeeded
+[waypoint_follower-18] [INFO] [1790978110.645064557] [waypoint_follower]: Handled task execution on waypoint 46, moving to next.
+[bt_navigator-17] [INFO] [1790978110.645482595] [bt_navigator]: Begin navigating from current location (3.90, 0.38) to (3.83, 0.71)
+[controller_server-12] [INFO] [1790978110.666040061] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978111.470705359] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978111.471218125] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978111.495680230] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978112.149468303] [waypoint_follower]: Succeeded processing waypoint 47, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978112.149499264] [waypoint_follower]: Arrived at 47'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978112.349067596] [waypoint_follower]: Task execution at waypoint 47 succeeded
+[waypoint_follower-18] [INFO] [1790978112.349100391] [waypoint_follower]: Handled task execution on waypoint 47, moving to next.
+[bt_navigator-17] [INFO] [1790978112.349502649] [bt_navigator]: Begin navigating from current location (3.90, 0.50) to (3.82, 0.86)
+[controller_server-12] [INFO] [1790978112.370005606] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978113.274806655] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978113.275021140] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978113.299692349] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978113.953101238] [waypoint_follower]: Succeeded processing waypoint 48, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978113.953133562] [waypoint_follower]: Arrived at 48'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978114.152067396] [waypoint_follower]: Task execution at waypoint 48 succeeded
+[waypoint_follower-18] [INFO] [1790978114.152103838] [waypoint_follower]: Handled task execution on waypoint 48, moving to next.
+[bt_navigator-17] [INFO] [1790978114.152496286] [bt_navigator]: Begin navigating from current location (3.90, 0.66) to (3.83, 1.02)
+[controller_server-12] [INFO] [1790978114.173012279] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978115.076680931] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978115.077337222] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978115.102682637] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978115.756106544] [waypoint_follower]: Succeeded processing waypoint 49, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978115.756139630] [waypoint_follower]: Arrived at 49'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978115.955011360] [waypoint_follower]: Task execution at waypoint 49 succeeded
+[waypoint_follower-18] [INFO] [1790978115.955050157] [waypoint_follower]: Handled task execution on waypoint 49, moving to next.
+[bt_navigator-17] [INFO] [1790978115.955429829] [bt_navigator]: Begin navigating from current location (3.89, 0.81) to (3.83, 1.12)
+[controller_server-12] [INFO] [1790978115.975940773] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978116.630575970] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978116.631444972] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978116.655640308] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978117.308566927] [waypoint_follower]: Succeeded processing waypoint 50, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978117.308598009] [waypoint_follower]: Arrived at 50'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978117.509052846] [waypoint_follower]: Task execution at waypoint 50 succeeded
+[waypoint_follower-18] [INFO] [1790978117.509087525] [waypoint_follower]: Handled task execution on waypoint 50, moving to next.
+[bt_navigator-17] [INFO] [1790978117.509443360] [bt_navigator]: Begin navigating from current location (3.88, 0.90) to (3.85, 1.26)
+[controller_server-12] [INFO] [1790978117.529894114] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978118.334123720] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978118.334586527] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978118.359635986] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978119.012844683] [waypoint_follower]: Succeeded processing waypoint 51, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978119.012878931] [waypoint_follower]: Arrived at 51'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978119.213058182] [waypoint_follower]: Task execution at waypoint 51 succeeded
+[waypoint_follower-18] [INFO] [1790978119.213093221] [waypoint_follower]: Handled task execution on waypoint 51, moving to next.
+[bt_navigator-17] [INFO] [1790978119.213421752] [bt_navigator]: Begin navigating from current location (3.92, 1.03) to (3.86, 1.36)
+[controller_server-12] [INFO] [1790978119.233886183] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978120.038037472] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978120.038257397] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978120.063600879] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978120.716963670] [waypoint_follower]: Succeeded processing waypoint 52, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978120.716991825] [waypoint_follower]: Arrived at 52'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978120.917058262] [waypoint_follower]: Task execution at waypoint 52 succeeded
+[waypoint_follower-18] [INFO] [1790978120.917096808] [waypoint_follower]: Handled task execution on waypoint 52, moving to next.
+[bt_navigator-17] [INFO] [1790978120.917463796] [bt_navigator]: Begin navigating from current location (3.93, 1.15) to (3.87, 1.47)
+[controller_server-12] [INFO] [1790978120.937917185] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978121.692191674] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978121.692950739] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978121.717653320] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978122.370885981] [waypoint_follower]: Succeeded processing waypoint 53, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978122.370915469] [waypoint_follower]: Arrived at 53'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978122.570057874] [waypoint_follower]: Task execution at waypoint 53 succeeded
+[waypoint_follower-18] [INFO] [1790978122.570093534] [waypoint_follower]: Handled task execution on waypoint 53, moving to next.
+[bt_navigator-17] [INFO] [1790978122.570506513] [bt_navigator]: Begin navigating from current location (3.93, 1.25) to (3.90, 1.58)
+[controller_server-12] [INFO] [1790978122.590967757] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978123.295004552] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978123.295904516] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978123.320699039] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978123.973682074] [waypoint_follower]: Succeeded processing waypoint 54, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978123.973710912] [waypoint_follower]: Arrived at 54'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978124.172052298] [waypoint_follower]: Task execution at waypoint 54 succeeded
+[waypoint_follower-18] [INFO] [1790978124.172090213] [waypoint_follower]: Handled task execution on waypoint 54, moving to next.
+[bt_navigator-17] [INFO] [1790978124.172438824] [bt_navigator]: Begin navigating from current location (3.95, 1.36) to (3.91, 1.69)
+[controller_server-12] [INFO] [1790978124.192900870] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978124.896965168] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978124.897517873] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978124.922646759] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978125.575589773] [waypoint_follower]: Succeeded processing waypoint 55, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978125.575626947] [waypoint_follower]: Arrived at 55'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978125.774062940] [waypoint_follower]: Task execution at waypoint 55 succeeded
+[waypoint_follower-18] [INFO] [1790978125.774099002] [waypoint_follower]: Handled task execution on waypoint 55, moving to next.
+[bt_navigator-17] [INFO] [1790978125.774458624] [bt_navigator]: Begin navigating from current location (3.96, 1.46) to (4.00, 2.00)
+[controller_server-12] [INFO] [1790978125.794979537] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978126.845107867] [controller_server]: Passing new path to controller.
+[controller_server-12] [INFO] [1790978127.200352367] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978127.200654355] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978127.224686457] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978127.879464456] [waypoint_follower]: Succeeded processing waypoint 56, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978127.879499916] [waypoint_follower]: Arrived at 56'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978128.078092349] [waypoint_follower]: Task execution at waypoint 56 succeeded
+[waypoint_follower-18] [INFO] [1790978128.078128360] [waypoint_follower]: Handled task execution on waypoint 56, moving to next.
+[bt_navigator-17] [INFO] [1790978128.078491470] [bt_navigator]: Begin navigating from current location (3.98, 1.79) to (3.92, 1.80)
+[controller_server-12] [INFO] [1790978128.098958786] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978128.103151937] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978128.103330251] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978128.128690986] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978128.479408131] [waypoint_follower]: Succeeded processing waypoint 57, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978128.479436407] [waypoint_follower]: Arrived at 57'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978128.678036545] [waypoint_follower]: Task execution at waypoint 57 succeeded
+[waypoint_follower-18] [INFO] [1790978128.678076113] [waypoint_follower]: Handled task execution on waypoint 57, moving to next.
+[bt_navigator-17] [INFO] [1790978128.678449333] [bt_navigator]: Begin navigating from current location (3.98, 1.79) to (3.93, 1.93)
+[controller_server-12] [INFO] [1790978128.698897732] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978128.703115902] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978128.703346890] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978128.728652256] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978129.079236307] [waypoint_follower]: Succeeded processing waypoint 58, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978129.079267579] [waypoint_follower]: Arrived at 58'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978129.278048806] [waypoint_follower]: Task execution at waypoint 58 succeeded
+[waypoint_follower-18] [INFO] [1790978129.278089216] [waypoint_follower]: Handled task execution on waypoint 58, moving to next.
+[bt_navigator-17] [INFO] [1790978129.278522775] [bt_navigator]: Begin navigating from current location (3.98, 1.79) to (3.95, 2.09)
+[controller_server-12] [INFO] [1790978129.299055431] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978129.903166355] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978129.903360620] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978129.928734030] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978130.581409919] [waypoint_follower]: Succeeded processing waypoint 59, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978130.581439177] [waypoint_follower]: Arrived at 59'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978130.781039106] [waypoint_follower]: Task execution at waypoint 59 succeeded
+[waypoint_follower-18] [INFO] [1790978130.781077162] [waypoint_follower]: Handled task execution on waypoint 59, moving to next.
+[bt_navigator-17] [INFO] [1790978130.781533997] [bt_navigator]: Begin navigating from current location (3.98, 1.87) to (3.91, 2.24)
+[controller_server-12] [INFO] [1790978130.802028477] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978131.756139031] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978131.756314749] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978131.781742958] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978132.435412766] [waypoint_follower]: Succeeded processing waypoint 60, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978132.435451933] [waypoint_follower]: Arrived at 60'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978132.635091640] [waypoint_follower]: Task execution at waypoint 60 succeeded
+[waypoint_follower-18] [INFO] [1790978132.635124816] [waypoint_follower]: Handled task execution on waypoint 60, moving to next.
+[bt_navigator-17] [INFO] [1790978132.635490350] [bt_navigator]: Begin navigating from current location (3.97, 2.03) to (3.91, 2.34)
+[controller_server-12] [INFO] [1790978132.655953208] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978133.360820538] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978133.361103249] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978133.385728837] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978134.038854364] [waypoint_follower]: Succeeded processing waypoint 61, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978134.038892219] [waypoint_follower]: Arrived at 61'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978134.237138974] [waypoint_follower]: Task execution at waypoint 61 succeeded
+[waypoint_follower-18] [INFO] [1790978134.237178803] [waypoint_follower]: Handled task execution on waypoint 61, moving to next.
+[bt_navigator-17] [INFO] [1790978134.237578075] [bt_navigator]: Begin navigating from current location (3.97, 2.13) to (3.90, 2.45)
+[controller_server-12] [INFO] [1790978134.258164938] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978135.012379192] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978135.012587264] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978135.037794214] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978135.691250014] [waypoint_follower]: Succeeded processing waypoint 62, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978135.691288521] [waypoint_follower]: Arrived at 62'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978135.890025427] [waypoint_follower]: Task execution at waypoint 62 succeeded
+[waypoint_follower-18] [INFO] [1790978135.890070296] [waypoint_follower]: Handled task execution on waypoint 62, moving to next.
+[bt_navigator-17] [INFO] [1790978135.890466992] [bt_navigator]: Begin navigating from current location (3.96, 2.24) to (3.91, 2.55)
+[controller_server-12] [INFO] [1790978135.911057813] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978136.615699322] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978136.615990198] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978136.640727808] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978137.294362391] [waypoint_follower]: Succeeded processing waypoint 63, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978137.294391859] [waypoint_follower]: Arrived at 63'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978137.495061707] [waypoint_follower]: Task execution at waypoint 63 succeeded
+[waypoint_follower-18] [INFO] [1790978137.495096285] [waypoint_follower]: Handled task execution on waypoint 63, moving to next.
+[bt_navigator-17] [INFO] [1790978137.495556908] [bt_navigator]: Begin navigating from current location (3.96, 2.34) to (3.91, 2.69)
+[controller_server-12] [INFO] [1790978137.516039745] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978138.321274808] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978138.321437371] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978138.345755389] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978138.998974176] [waypoint_follower]: Succeeded processing waypoint 64, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978138.999002281] [waypoint_follower]: Arrived at 64'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978139.199029234] [waypoint_follower]: Task execution at waypoint 64 succeeded
+[waypoint_follower-18] [INFO] [1790978139.199074844] [waypoint_follower]: Handled task execution on waypoint 64, moving to next.
+[bt_navigator-17] [INFO] [1790978139.199973385] [bt_navigator]: Begin navigating from current location (3.97, 2.47) to (3.91, 2.80)
+[controller_server-12] [INFO] [1790978139.220505449] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978139.924592356] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978139.924785749] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978139.950206704] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978140.603240572] [waypoint_follower]: Succeeded processing waypoint 65, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978140.603279289] [waypoint_follower]: Arrived at 65'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978140.804073281] [waypoint_follower]: Task execution at waypoint 65 succeeded
+[waypoint_follower-18] [INFO] [1790978140.804112709] [waypoint_follower]: Handled task execution on waypoint 65, moving to next.
+[bt_navigator-17] [INFO] [1790978140.804467773] [bt_navigator]: Begin navigating from current location (3.97, 2.57) to (3.91, 2.91)
+[controller_server-12] [INFO] [1790978140.824930420] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978141.579067423] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978141.579269634] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978141.604658575] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978142.257982066] [waypoint_follower]: Succeeded processing waypoint 66, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978142.258013418] [waypoint_follower]: Arrived at 66'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978142.457916764] [waypoint_follower]: Task execution at waypoint 66 succeeded
+[waypoint_follower-18] [INFO] [1790978142.457965411] [waypoint_follower]: Handled task execution on waypoint 66, moving to next.
+[bt_navigator-17] [INFO] [1790978142.458402658] [bt_navigator]: Begin navigating from current location (3.96, 2.69) to (3.92, 3.07)
+[controller_server-12] [INFO] [1790978142.478958319] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978143.383000681] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978143.383270345] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978143.408692702] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978144.062096631] [waypoint_follower]: Succeeded processing waypoint 67, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978144.062131049] [waypoint_follower]: Arrived at 67'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978144.263029357] [waypoint_follower]: Task execution at waypoint 67 succeeded
+[waypoint_follower-18] [INFO] [1790978144.263070168] [waypoint_follower]: Handled task execution on waypoint 67, moving to next.
+[bt_navigator-17] [INFO] [1790978144.263462766] [bt_navigator]: Begin navigating from current location (3.96, 2.85) to (3.91, 3.18)
+[controller_server-12] [INFO] [1790978144.283993708] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978144.989409824] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978144.989675180] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978145.013678774] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978145.666731445] [waypoint_follower]: Succeeded processing waypoint 68, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978145.666763078] [waypoint_follower]: Arrived at 68'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978145.865122624] [waypoint_follower]: Task execution at waypoint 68 succeeded
+[waypoint_follower-18] [INFO] [1790978145.865176290] [waypoint_follower]: Handled task execution on waypoint 68, moving to next.
+[bt_navigator-17] [INFO] [1790978145.865572585] [bt_navigator]: Begin navigating from current location (3.96, 2.96) to (3.91, 3.32)
+[controller_server-12] [INFO] [1790978145.886111533] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978146.689953495] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978146.690230584] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978146.715781346] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978147.369182265] [waypoint_follower]: Succeeded processing waypoint 69, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978147.369211974] [waypoint_follower]: Arrived at 69'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978147.569072394] [waypoint_follower]: Task execution at waypoint 69 succeeded
+[waypoint_follower-18] [INFO] [1790978147.569113565] [waypoint_follower]: Handled task execution on waypoint 69, moving to next.
+[bt_navigator-17] [INFO] [1790978147.569527125] [bt_navigator]: Begin navigating from current location (3.96, 3.11) to (3.93, 3.43)
+[controller_server-12] [INFO] [1790978147.590057787] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978148.294144043] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978148.294399890] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978148.319723070] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978148.972723204] [waypoint_follower]: Succeeded processing waypoint 70, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978148.972752231] [waypoint_follower]: Arrived at 70'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978149.171087157] [waypoint_follower]: Task execution at waypoint 70 succeeded
+[waypoint_follower-18] [INFO] [1790978149.171119411] [waypoint_follower]: Handled task execution on waypoint 70, moving to next.
+[bt_navigator-17] [INFO] [1790978149.171551357] [bt_navigator]: Begin navigating from current location (3.96, 3.21) to (3.93, 3.54)
+[controller_server-12] [INFO] [1790978149.192085495] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978149.846035952] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978149.846242721] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978149.871769695] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978150.524584009] [waypoint_follower]: Succeeded processing waypoint 71, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978150.524619680] [waypoint_follower]: Arrived at 71'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978150.725078284] [waypoint_follower]: Task execution at waypoint 71 succeeded
+[waypoint_follower-18] [INFO] [1790978150.725113634] [waypoint_follower]: Handled task execution on waypoint 71, moving to next.
+[bt_navigator-17] [INFO] [1790978150.725518918] [bt_navigator]: Begin navigating from current location (3.96, 3.31) to (3.93, 3.66)
+[controller_server-12] [INFO] [1790978150.745963438] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978151.499978318] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978151.500179587] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978151.525733946] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978152.178815678] [waypoint_follower]: Succeeded processing waypoint 72, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978152.178848854] [waypoint_follower]: Arrived at 72'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978152.378067590] [waypoint_follower]: Task execution at waypoint 72 succeeded
+[waypoint_follower-18] [INFO] [1790978152.378102910] [waypoint_follower]: Handled task execution on waypoint 72, moving to next.
+[bt_navigator-17] [INFO] [1790978152.378501961] [bt_navigator]: Begin navigating from current location (3.97, 3.44) to (4.00, 4.00)
+[controller_server-12] [INFO] [1790978152.399004316] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978153.449136331] [controller_server]: Passing new path to controller.
+[controller_server-12] [INFO] [1790978153.609027671] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 519 X 398 at 0.050000 m/pix
+[planner_server-14] [INFO] [1790978153.784673216] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 519 X 398 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790978153.953181295] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978153.953680785] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978153.978719681] [bt_navigator]: Goal succeeded
+[controller_server-12] [INFO] [1790978154.609036281] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 519 X 401 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978154.633741055] [waypoint_follower]: Succeeded processing waypoint 73, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978154.633767748] [waypoint_follower]: Arrived at 73'th waypoint, sleeping for 200 milliseconds
+[planner_server-14] [INFO] [1790978154.784680192] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 519 X 401 at 0.050000 m/pix
+[waypoint_follower-18] [INFO] [1790978154.832091720] [waypoint_follower]: Task execution at waypoint 73 succeeded
+[waypoint_follower-18] [INFO] [1790978154.832135096] [waypoint_follower]: Handled task execution on waypoint 73, moving to next.
+[bt_navigator-17] [INFO] [1790978154.832478617] [bt_navigator]: Begin navigating from current location (3.97, 3.80) to (3.93, 3.79)
+[controller_server-12] [INFO] [1790978154.852956193] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-12] [INFO] [1790978154.857675397] [controller_server]: Reached the goal!
+[controller_server-12] [INFO] [1790978154.857907827] [controller_server]: Optimizer reset
+[bt_navigator-17] [INFO] [1790978154.882689524] [bt_navigator]: Goal succeeded
+[waypoint_follower-18] [INFO] [1790978155.233313791] [waypoint_follower]: Succeeded processing waypoint 74, processing waypoint task execution
+[waypoint_follower-18] [INFO] [1790978155.233344652] [waypoint_follower]: Arrived at 74'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-18] [INFO] [1790978155.432417839] [waypoint_follower]: Task execution at waypoint 74 succeeded
+[waypoint_follower-18] [INFO] [1790978155.432451456] [waypoint_follower]: Handled task execution on waypoint 74, moving to next.
+[waypoint_follower-18] [INFO] [1790978155.432457398] [waypoint_follower]: Completed all 75 waypoints requested.

@@ -1,0 +1,32 @@
+{
+  "protocol_id": "test_loop_fechado",
+  "route": "loop_fechado",
+  "world": "warehouse",
+  "repeat": 2,
+  "started_at": "2026-10-02T21:59:07.646042+00:00",
+  "replicas": [
+    {
+      "replicate_id": 1,
+      "retries_used": 0,
+      "boot_elapsed_sec": 24.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/test_loop_fechado/replay_r01.json"
+    },
+    {
+      "replicate_id": 2,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/test_loop_fechado/replay_r02.json"
+    }
+  ],
+  "finished_at": "2026-10-02T22:06:44.129367+00:00",
+  "summary": {
+    "replicas_ok": 2,
+    "replicas_total": 2,
+    "success_rate": 1.0,
+    "total_retries_used": 0
+  }
+}

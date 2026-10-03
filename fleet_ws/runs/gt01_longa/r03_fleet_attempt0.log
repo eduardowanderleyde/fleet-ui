@@ -1,0 +1,6 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-02-21-34-38-959427-eduardo-B550M-AORUS-ELITE-44968
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [fleet_orchestrator-1]: process started with pid [44987]
+[INFO] [sensor_collector-2]: process started with pid [44988]
+[sensor_collector-2] [INFO] [1790987679.388028032] [sensor_collector]: sensor_collector ready robots=[''] dir=collections
+[fleet_orchestrator-1] [INFO] [1790987679.878770835] [fleet_orchestrator]: fleet_orchestrator ready robots=[''] shared_map=True

@@ -1,0 +1,66 @@
+{
+  "command": "replay",
+  "robot_id": "",
+  "route": "loop_fechado",
+  "expected_route_yaml": "routes/default/loop_fechado.yaml",
+  "topics": [
+    "odom",
+    "pose",
+    "ground_truth_pose_clean"
+  ],
+  "skip_collection": false,
+  "success": true,
+  "failures_reported": 0,
+  "error_code": "",
+  "path_length_m_estimate": 0.0,
+  "disable_collection_message": "Collection disabled for default. Bag: collections/default/2026-10-02_21-59-33_110857_6658c393",
+  "rosbag_path": "collections/default/2026-10-02_21-59-33_110857_6658c393",
+  "sensor_summary": {
+    "/pose": {
+      "msgs": 75,
+      "hz_est": 0.4
+    },
+    "/ground_truth_pose_clean": {
+      "msgs": 10929,
+      "hz_est": 55.5
+    },
+    "/odom": {
+      "msgs": 5469,
+      "hz_est": 27.8
+    }
+  },
+  "bag_metrics": {
+    "duration_s": 196.85,
+    "odom_path_length_m": 11.369,
+    "odom_avg_speed_ms": 0.058
+  },
+  "protocol_metadata": {
+    "protocol_id": "test_loop_fechado",
+    "replicate_id": 1,
+    "replicate_total": 2,
+    "argv": [
+      "scripts/experiment_repeatability.py",
+      "replay",
+      "--single-robot",
+      "--route",
+      "loop_fechado",
+      "--topics",
+      "odom",
+      "pose",
+      "ground_truth_pose_clean",
+      "--protocol-id",
+      "test_loop_fechado",
+      "--replicate-id",
+      "1",
+      "--replicate-total",
+      "2",
+      "--export",
+      "/home/eduardo/fleet-ui/fleet_ws/runs/test_loop_fechado/replay_r01.json"
+    ]
+  },
+  "finished_at": "2026-10-02T22:02:50.305149+00:00",
+  "git": {
+    "commit": "675f22afcde271d42014ce2e2b4a3959a4e6fcfd",
+    "dirty": true
+  }
+}

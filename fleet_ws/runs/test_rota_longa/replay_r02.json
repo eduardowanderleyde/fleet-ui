@@ -1,0 +1,66 @@
+{
+  "command": "replay",
+  "robot_id": "",
+  "route": "rota_longa_curva",
+  "expected_route_yaml": "routes/default/rota_longa_curva.yaml",
+  "topics": [
+    "odom",
+    "pose",
+    "ground_truth_pose_clean"
+  ],
+  "skip_collection": false,
+  "success": true,
+  "failures_reported": 0,
+  "error_code": "",
+  "path_length_m_estimate": 0.0,
+  "disable_collection_message": "Collection disabled for default. Bag: collections/default/2026-10-02_21-56-28_002046_00b5a6a2",
+  "rosbag_path": "collections/default/2026-10-02_21-56-28_002046_00b5a6a2",
+  "sensor_summary": {
+    "/pose": {
+      "msgs": 50,
+      "hz_est": 0.4
+    },
+    "/ground_truth_pose_clean": {
+      "msgs": 6770,
+      "hz_est": 55.6
+    },
+    "/odom": {
+      "msgs": 3385,
+      "hz_est": 27.8
+    }
+  },
+  "bag_metrics": {
+    "duration_s": 121.84,
+    "odom_path_length_m": 7.712,
+    "odom_avg_speed_ms": 0.063
+  },
+  "protocol_metadata": {
+    "protocol_id": "test_rota_longa",
+    "replicate_id": 2,
+    "replicate_total": 2,
+    "argv": [
+      "scripts/experiment_repeatability.py",
+      "replay",
+      "--single-robot",
+      "--route",
+      "rota_longa_curva",
+      "--topics",
+      "odom",
+      "pose",
+      "ground_truth_pose_clean",
+      "--protocol-id",
+      "test_rota_longa",
+      "--replicate-id",
+      "2",
+      "--replicate-total",
+      "2",
+      "--export",
+      "/home/eduardo/fleet-ui/fleet_ws/runs/test_rota_longa/replay_r02.json"
+    ]
+  },
+  "finished_at": "2026-10-02T21:58:30.055960+00:00",
+  "git": {
+    "commit": "675f22afcde271d42014ce2e2b4a3959a4e6fcfd",
+    "dirty": true
+  }
+}

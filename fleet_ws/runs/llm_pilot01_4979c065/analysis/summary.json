@@ -1,0 +1,222 @@
+{
+  "generated_at": "2026-10-03T02:23:49.396836+00:00",
+  "reference_run_index": 0,
+  "reference_label": "baseline",
+  "runs": [
+    {
+      "label": "baseline",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-10-03_02-17-36_192696_b997c008",
+      "traj_topic": "/pose",
+      "num_poses": 6,
+      "duration_sec": 3.701999999999998,
+      "path_length_m": 0.6857136029347144,
+      "start_xy": [
+        0.04696676531991877,
+        -0.009724628680113931
+      ],
+      "end_xy": [
+        0.7314994973941494,
+        -0.0030922769823889464
+      ],
+      "static_traj_warn": false
+    },
+    {
+      "label": "replay_01",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-10-03_02-17-52_972554_233a10c2",
+      "traj_topic": "/pose",
+      "num_poses": 15,
+      "duration_sec": 58.101,
+      "path_length_m": 1.6924716537227014,
+      "start_xy": [
+        0.6174424350994909,
+        -0.031870257370719794
+      ],
+      "end_xy": [
+        0.7975927938152708,
+        0.031318753296505526
+      ],
+      "static_traj_warn": false
+    },
+    {
+      "label": "replay_02",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-10-03_02-19-03_486049_6d32edcb",
+      "traj_topic": "/pose",
+      "num_poses": 16,
+      "duration_sec": 58.40100000000001,
+      "path_length_m": 1.776831500270765,
+      "start_xy": [
+        0.6935227120395631,
+        0.04438276483013856
+      ],
+      "end_xy": [
+        0.790193533401377,
+        0.042036051758246956
+      ],
+      "static_traj_warn": false
+    },
+    {
+      "label": "replay_03",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-10-03_02-20-15_722187_9e14c246",
+      "traj_topic": "/pose",
+      "num_poses": 15,
+      "duration_sec": 58.200000000000045,
+      "path_length_m": 1.6791584691329668,
+      "start_xy": [
+        0.6694745959651741,
+        0.05612382905604708
+      ],
+      "end_xy": [
+        0.7789656122906697,
+        0.0390102170966226
+      ],
+      "static_traj_warn": false
+    },
+    {
+      "label": "replay_04",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-10-03_02-21-27_262159_c438fe10",
+      "traj_topic": "/pose",
+      "num_poses": 16,
+      "duration_sec": 59.202,
+      "path_length_m": 1.7412374339770205,
+      "start_xy": [
+        0.6952455950491654,
+        0.05415526699689492
+      ],
+      "end_xy": [
+        0.7667925538666203,
+        0.04442098076553536
+      ],
+      "static_traj_warn": false
+    },
+    {
+      "label": "replay_05",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-10-03_02-22-39_239775_172112ab",
+      "traj_topic": "/pose",
+      "num_poses": 15,
+      "duration_sec": 59.09999999999991,
+      "path_length_m": 1.7268635672392683,
+      "start_xy": [
+        0.6846137375345652,
+        0.0719010872300304
+      ],
+      "end_xy": [
+        0.6923062046176176,
+        0.04247135571594111
+      ],
+      "static_traj_warn": false
+    }
+  ],
+  "pairwise_rmse_m": [
+    [
+      0.0,
+      0.38414787667286493,
+      0.39545475633542926,
+      0.3787393395221477,
+      0.3894922897950502,
+      0.42613845691082053
+    ],
+    [
+      0.38414787667286493,
+      0.0,
+      0.4316574499152306,
+      0.4236341421121063,
+      0.4310912414235523,
+      0.4486753228742987
+    ],
+    [
+      0.39545475633542926,
+      0.4316574499152306,
+      0.0,
+      0.024190236578571677,
+      0.014186819996503092,
+      0.05036717614861816
+    ],
+    [
+      0.3787393395221477,
+      0.4236341421121063,
+      0.024190236578571677,
+      0.0,
+      0.023343205170118602,
+      0.06773389231620215
+    ],
+    [
+      0.3894922897950502,
+      0.4310912414235523,
+      0.014186819996503092,
+      0.023343205170118602,
+      0.0,
+      0.055774565541143115
+    ],
+    [
+      0.42613845691082053,
+      0.4486753228742987,
+      0.05036717614861816,
+      0.06773389231620215,
+      0.055774565541143115,
+      0.0
+    ]
+  ],
+  "vs_reference": [
+    {
+      "label": "baseline",
+      "final_endpoint_error_m": 0.0,
+      "duration_sec": 3.701999999999998,
+      "duration_ratio_vs_ref": 1.0,
+      "rmse_vs_ref_m": 0.0,
+      "mean_pointwise_distance_vs_ref_m": 0.0
+    },
+    {
+      "label": "replay_01",
+      "final_endpoint_error_m": 0.07451471557125619,
+      "duration_sec": 58.101,
+      "duration_ratio_vs_ref": 15.694489465153978,
+      "rmse_vs_ref_m": 0.38414787667286493,
+      "mean_pointwise_distance_vs_ref_m": 0.37101632933075257
+    },
+    {
+      "label": "replay_02",
+      "final_endpoint_error_m": 0.07403753046759885,
+      "duration_sec": 58.40100000000001,
+      "duration_ratio_vs_ref": 15.77552674230147,
+      "rmse_vs_ref_m": 0.39545475633542926,
+      "mean_pointwise_distance_vs_ref_m": 0.3851704654574191
+    },
+    {
+      "label": "replay_03",
+      "final_endpoint_error_m": 0.06344802653387155,
+      "duration_sec": 58.200000000000045,
+      "duration_ratio_vs_ref": 15.721231766612663,
+      "rmse_vs_ref_m": 0.3787393395221477,
+      "mean_pointwise_distance_vs_ref_m": 0.36830851383313123
+    },
+    {
+      "label": "replay_04",
+      "final_endpoint_error_m": 0.05918707204271643,
+      "duration_sec": 59.202,
+      "duration_ratio_vs_ref": 15.991896272285258,
+      "rmse_vs_ref_m": 0.3894922897950502,
+      "mean_pointwise_distance_vs_ref_m": 0.37980480589307625
+    },
+    {
+      "label": "replay_05",
+      "final_endpoint_error_m": 0.06010123811815588,
+      "duration_sec": 59.09999999999991,
+      "duration_ratio_vs_ref": 15.96434359805509,
+      "rmse_vs_ref_m": 0.42613845691082053,
+      "mean_pointwise_distance_vs_ref_m": 0.41863251845599875
+    }
+  ],
+  "labels": [
+    "baseline",
+    "replay_01",
+    "replay_02",
+    "replay_03",
+    "replay_04",
+    "replay_05"
+  ],
+  "resampling": {
+    "mode": "time",
+    "samples": 100,
+    "time_grid": "normalised_0_1"
+  }
+}

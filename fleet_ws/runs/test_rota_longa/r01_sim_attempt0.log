@@ -1,0 +1,182 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-02-18-52-03-566365-eduardo-B550M-AORUS-ELITE-25635
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [xacro-1]: process started with pid [25655]
+[INFO] [parameter_bridge-2]: process started with pid [25656]
+[INFO] [image_bridge-3]: process started with pid [25657]
+[INFO] [image_bridge-4]: process started with pid [25658]
+[INFO] [create-5]: process started with pid [25659]
+[INFO] [gazebo-6]: process started with pid [25660]
+[INFO] [robot_state_publisher-7]: process started with pid [25661]
+[INFO] [rviz2-8]: process started with pid [25662]
+[INFO] [parameter_bridge-9]: process started with pid [25666]
+[INFO] [ground_truth_filter-10]: process started with pid [25667]
+[robot_state_publisher-7] [WARN] [1790977924.041991853] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-7] [INFO] [1790977924.042146440] [robot_state_publisher]: Robot initialized
+[create-5] [INFO] [1790977924.048987572] [ros_gz_sim]: Requesting list of world names.
+[parameter_bridge-9] [INFO] [1790977924.071208272] [bridge_ground_truth]: Creating GZ->ROS Bridge: [/world/warehouse/dynamic_pose/info (gz.msgs.Pose_V) -> /world/warehouse/dynamic_pose/info (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[INFO] [xacro-1]: process has finished cleanly [pid 25655]
+[rviz2-8] [INFO] [1790977924.279421805] [rviz2]: Stereo is NOT SUPPORTED
+[rviz2-8] [INFO] [1790977924.279526112] [rviz2]: OpenGl version: 4.6 (GLSL 4.6)
+[rviz2-8] [INFO] [1790977924.297246551] [rviz2]: Stereo is NOT SUPPORTED
+[create-5] [INFO] [1790977924.821883201] [ros_gz_sim]: Waiting messages on topic [robot_description].
+[create-5] [INFO] [1790977924.833348150] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-5]: process has finished cleanly [pid 25659]
+[parameter_bridge-2] [INFO] [1790977925.052917745] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790977925.053898248] [bridge_ros_gz]: Creating GZ->ROS Bridge: [joint_states (gz.msgs.Model) -> joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790977925.056173499] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/odom (gz.msgs.Odometry) -> odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790977925.057614766] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/tf (gz.msgs.Pose_V) -> tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790977925.059024240] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/imu (gz.msgs.IMU) -> imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790977925.059566916] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/scan (gz.msgs.LaserScan) -> scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790977925.060044513] [bridge_ros_gz]: Creating ROS->GZ Bridge: [cmd_vel (geometry_msgs/msg/Twist) -> /cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1790977925.060681556] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[gazebo-6] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[INFO] [sync_slam_toolbox_node-11]: process started with pid [25958]
+[sync_slam_toolbox_node-11] [INFO] [1790977932.178376288] [slam_toolbox]: Node using stack size 40000000
+[sync_slam_toolbox_node-11] [INFO] [1790977932.520005679] [slam_toolbox]: Configuring
+[sync_slam_toolbox_node-11] [INFO] [1790977932.524707820] [slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[sync_slam_toolbox_node-11] [INFO] [1790977932.524855032] [slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[INFO] [launch.user]: [LifecycleLaunch] Slamtoolbox node is activating.
+[sync_slam_toolbox_node-11] [INFO] [1790977932.538624799] [slam_toolbox]: Activating
+[sync_slam_toolbox_node-11] Registering sensor: [Custom Described Lidar]
+[INFO] [controller_server-12]: process started with pid [25979]
+[INFO] [smoother_server-13]: process started with pid [25980]
+[INFO] [planner_server-14]: process started with pid [25981]
+[INFO] [route_server-15]: process started with pid [25982]
+[INFO] [behavior_server-16]: process started with pid [25983]
+[INFO] [bt_navigator-17]: process started with pid [25984]
+[INFO] [waypoint_follower-18]: process started with pid [25985]
+[INFO] [velocity_smoother-19]: process started with pid [25986]
+[INFO] [collision_monitor-20]: process started with pid [25987]
+[INFO] [opennav_docking-21]: process started with pid [25988]
+[INFO] [lifecycle_manager-22]: process started with pid [25989]
+[velocity_smoother-19] [INFO] [1790977936.171893886] [velocity_smoother]: 
+[velocity_smoother-19] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-19] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-19] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[route_server-15] [INFO] [1790977936.193869119] [route_server]: 
+[route_server-15] 	route_server lifecycle node launched. 
+[route_server-15] 	Waiting on external lifecycle transitions to activate
+[route_server-15] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[collision_monitor-20] [INFO] [1790977936.194706289] [collision_monitor]: 
+[collision_monitor-20] 	collision_monitor lifecycle node launched. 
+[collision_monitor-20] 	Waiting on external lifecycle transitions to activate
+[collision_monitor-20] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[behavior_server-16] [INFO] [1790977936.195587335] [behavior_server]: 
+[behavior_server-16] 	behavior_server lifecycle node launched. 
+[behavior_server-16] 	Waiting on external lifecycle transitions to activate
+[behavior_server-16] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-21] [INFO] [1790977936.196986128] [docking_server]: 
+[opennav_docking-21] 	docking_server lifecycle node launched. 
+[opennav_docking-21] 	Waiting on external lifecycle transitions to activate
+[opennav_docking-21] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-21] [INFO] [1790977936.197080335] [docking_server]: Creating docking_server
+[planner_server-14] [INFO] [1790977936.197007921] [planner_server]: 
+[planner_server-14] 	planner_server lifecycle node launched. 
+[planner_server-14] 	Waiting on external lifecycle transitions to activate
+[planner_server-14] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790977936.198524698] [planner_server]: Creating
+[waypoint_follower-18] [INFO] [1790977936.205298977] [waypoint_follower]: 
+[waypoint_follower-18] 	waypoint_follower lifecycle node launched. 
+[waypoint_follower-18] 	Waiting on external lifecycle transitions to activate
+[waypoint_follower-18] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-22] [INFO] [1790977936.205342403] [lifecycle_manager_navigation]: Creating
+[smoother_server-13] [INFO] [1790977936.205713860] [smoother_server]: 
+[smoother_server-13] 	smoother_server lifecycle node launched. 
+[smoother_server-13] 	Waiting on external lifecycle transitions to activate
+[smoother_server-13] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-18] [INFO] [1790977936.205941421] [waypoint_follower]: Creating
+[smoother_server-13] [INFO] [1790977936.206811135] [smoother_server]: Creating smoother server
+[lifecycle_manager-22] [INFO] [1790977936.210755634] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[controller_server-12] [INFO] [1790977936.213556537] [controller_server]: 
+[controller_server-12] 	controller_server lifecycle node launched. 
+[controller_server-12] 	Waiting on external lifecycle transitions to activate
+[controller_server-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-17] [INFO] [1790977936.215863400] [bt_navigator]: 
+[bt_navigator-17] 	bt_navigator lifecycle node launched. 
+[bt_navigator-17] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-17] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-12] [INFO] [1790977936.216855387] [controller_server]: Creating controller server
+[bt_navigator-17] [INFO] [1790977936.216947910] [bt_navigator]: Creating
+[planner_server-14] [INFO] [1790977936.217332873] [global_costmap.global_costmap]: 
+[planner_server-14] 	global_costmap lifecycle node launched. 
+[planner_server-14] 	Waiting on external lifecycle transitions to activate
+[planner_server-14] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-14] [INFO] [1790977936.217668098] [global_costmap.global_costmap]: Creating Costmap
+[controller_server-12] [INFO] [1790977936.226446389] [local_costmap.local_costmap]: 
+[controller_server-12] 	local_costmap lifecycle node launched. 
+[controller_server-12] 	Waiting on external lifecycle transitions to activate
+[controller_server-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-12] [INFO] [1790977936.226790602] [local_costmap.local_costmap]: Creating Costmap
+[lifecycle_manager-22] [INFO] [1790977936.621888844] [lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-22] [INFO] [1790977936.621928252] [lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[controller_server-12] [INFO] [1790977936.622151405] [controller_server]: Configuring controller interface
+[controller_server-12] [INFO] [1790977936.622175412] [controller_server]: getting progress checker plugins..
+[controller_server-12] [INFO] [1790977936.622367643] [controller_server]: getting goal checker plugins..
+[controller_server-12] [INFO] [1790977936.622506168] [controller_server]: Controller frequency set to 20.0000Hz
+[controller_server-12] [INFO] [1790977936.622547269] [local_costmap.local_costmap]: Configuring
+[controller_server-12] [INFO] [1790977936.629003278] [local_costmap.local_costmap]: Using plugin "static_layer"
+[controller_server-12] [INFO] [1790977936.631774922] [local_costmap.local_costmap]: Subscribing to the map topic (/map) with transient local durability
+[controller_server-12] [INFO] [1790977936.633140569] [local_costmap.local_costmap]: Initialized plugin "static_layer"
+[controller_server-12] [INFO] [1790977936.633152723] [local_costmap.local_costmap]: Using plugin "voxel_layer"
+[controller_server-12] [INFO] [1790977936.633616683] [local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-12] [INFO] [1790977936.642836981] [local_costmap.local_costmap]: Initialized plugin "voxel_layer"
+[controller_server-12] [INFO] [1790977936.642859616] [local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-12] [INFO] [1790977936.643432081] [local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-12] [INFO] [1790977936.655433212] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 436 X 301 at 0.050000 m/pix
+[controller_server-12] [INFO] [1790977936.655525254] [controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-12] [INFO] [1790977936.655753497] [controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-12] [INFO] [1790977936.656129813] [controller_server]: Created goal checker : general_goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-12] [INFO] [1790977936.656506760] [controller_server]: Controller Server has general_goal_checker  goal checkers available.
+[controller_server-12] [INFO] [1790977936.657621971] [controller_server]: Created controller : FollowPath of type nav2_mppi_controller::MPPIController
+[controller_server-12] [INFO] [1790977936.659344636] [controller_server]: Controller period is equal to model dt. Control sequence shifting is ON
+[controller_server-12] [INFO] [1790977936.660600275] [controller_server]: ConstraintCritic instantiated with 1 power and 4.000000 weight.
+[controller_server-12] [INFO] [1790977936.660620745] [controller_server]: Critic loaded : mppi::critics::ConstraintCritic
+[controller_server-12] [INFO] [1790977936.661454508] [controller_server]: InflationCostCritic instantiated with 1 power and 300.000000 / 0.015000 weights. Critic will collision check based on footprint cost.
+[controller_server-12] [INFO] [1790977936.661474017] [controller_server]: Critic loaded : mppi::critics::CostCritic
+[controller_server-12] [INFO] [1790977936.661778370] [controller_server]: GoalCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-12] [INFO] [1790977936.661795093] [controller_server]: Critic loaded : mppi::critics::GoalCritic
+[controller_server-12] [INFO] [1790977936.662259644] [controller_server]: GoalAngleCritic instantiated with 1 power, 3.000000 weight, 0.500000 angular threshold and symmetric_yaw_tolerance disabled
+[controller_server-12] [INFO] [1790977936.662278382] [controller_server]: Critic loaded : mppi::critics::GoalAngleCritic
+[controller_server-12] [INFO] [1790977936.662898260] [controller_server]: ReferenceTrajectoryCritic instantiated with 1 power and 14.000000 weight
+[controller_server-12] [INFO] [1790977936.662915535] [controller_server]: Critic loaded : mppi::critics::PathAlignCritic
+[controller_server-12] [INFO] [1790977936.663308954] [controller_server]: Critic loaded : mppi::critics::PathFollowCritic
+[controller_server-12] [INFO] [1790977936.663847632] [controller_server]: PathAngleCritic instantiated with 1 power and 2.000000 weight. Mode set to: Forward Preference
+[controller_server-12] [INFO] [1790977936.663889004] [controller_server]: Critic loaded : mppi::critics::PathAngleCritic
+[controller_server-12] [INFO] [1790977936.664225802] [controller_server]: PreferForwardCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-12] [INFO] [1790977936.664240581] [controller_server]: Critic loaded : mppi::critics::PreferForwardCritic
+[controller_server-12] [INFO] [1790977936.666526192] [controller_server]: Optimizer reset
+[controller_server-12] [INFO] [1790977936.669506130] [MPPIController]: Configured MPPI Controller: FollowPath
+[controller_server-12] [INFO] [1790977936.669519767] [controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-22] [INFO] [1790977936.675005331] [lifecycle_manager_navigation]: [34m[1mConfiguring smoother_server[0m[0m
+[smoother_server-13] [INFO] [1790977936.675188354] [smoother_server]: Configuring smoother server
+[smoother_server-13] [INFO] [1790977936.684571094] [smoother_server]: Created smoother : simple_smoother of type nav2_smoother::SimpleSmoother
+[smoother_server-13] [INFO] [1790977936.685234419] [smoother_server]: Smoother Server has simple_smoother  smoothers available.
+[lifecycle_manager-22] [INFO] [1790977936.689653199] [lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-14] [INFO] [1790977936.689854237] [planner_server]: Configuring
+[planner_server-14] [INFO] [1790977936.689885910] [global_costmap.global_costmap]: Configuring
+[planner_server-14] [INFO] [1790977936.696450814] [global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-14] [INFO] [1790977936.698909778] [global_costmap.global_costmap]: Subscribing to the map topic (/map) with transient local durability
+[planner_server-14] [INFO] [1790977936.699929701] [global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-14] [INFO] [1790977936.699941424] [global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-14] [INFO] [1790977936.700273292] [global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-14] [INFO] [1790977936.702587559] [global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-14] [INFO] [1790977936.702599803] [global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-14] [INFO] [1790977936.702937994] [global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-14] [INFO] [1790977936.718298103] [planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner
+[planner_server-14] [INFO] [1790977936.718324285] [planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[planner_server-14] [INFO] [1790977936.718821882] [planner_server]: Planner Server has GridBased  planners available.
+[lifecycle_manager-22] [INFO] [1790977936.734245136] [lifecycle_manager_navigation]: [34m[1mConfiguring route_server[0m[0m
+[route_server-15] [INFO] [1790977936.734444181] [route_server]: Configuring
+[route_server-15] [INFO] [1790977936.757423364] [route_server]: Created GraphFileLoader GeoJsonGraphFileLoader of type nav2_route::GeoJsonGraphFileLoader
+[route_server-15] [INFO] [1790977936.757448554] [route_server]: Configuring geojson graph file loader
+[route_server-15] [INFO] [1790977936.757454676] [route_server]: No graph file provided to load yet.
+[route_server-15] [INFO] [1790977936.759403580] [route_server]: Created edge cost function plugin DistanceScorer of type nav2_route::DistanceScorer
+[route_server-15] [INFO] [1790977936.759422928] [route_server]: Configuring distance scorer.
+[route_server-15] [INFO] [1790977936.759604228] [route_server]: Created edge cost function plugin DynamicEdgesScorer of type nav2_route::DynamicEdgesScorer
+[route_server-15] [INFO] [1790977936.759617825] [route_server]: Configuring adjust edges scorer.
+[route_server-15] [INFO] [1790977936.762024285] [route_server]: Created route operation AdjustSpeedLimit of type nav2_route::AdjustSpeedLimit
+[route_server-15] [INFO] [1790977936.762039105] [route_server]: Configuring Adjust speed limit operation.
+[route_server-15] [INFO] [1790977936.762787879] [route_server]: Created route operation ReroutingService of type nav2_route::ReroutingService
+[route_server-15] [INFO] [1790977936.762801556] [route_server]: Configuring Rerouting service operation.
+[route_server-15] [WARN] [1790977936.864663314] [route_server.rclcpp]: failed to send response to /route_server/change_state (timeout): client will not receive response, at ./src/rmw_response.cpp:153, at ./src/rcl/service.c:400
+[planner_server-14] [INFO] [1790977939.514395925] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 436 X 301 at 0.050000 m/pix

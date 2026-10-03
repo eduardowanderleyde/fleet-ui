@@ -1,0 +1,66 @@
+{
+  "command": "replay",
+  "robot_id": "",
+  "route": "dissertation_clean01",
+  "expected_route_yaml": "routes/default/dissertation_clean01.yaml",
+  "topics": [
+    "odom",
+    "pose",
+    "ground_truth_pose_clean"
+  ],
+  "skip_collection": false,
+  "success": true,
+  "failures_reported": 0,
+  "error_code": "",
+  "path_length_m_estimate": 0.0,
+  "disable_collection_message": "Collection disabled for default. Bag: collections/default/2026-10-02_21-26-07_271711_e61c5e59",
+  "rosbag_path": "collections/default/2026-10-02_21-26-07_271711_e61c5e59",
+  "sensor_summary": {
+    "/pose": {
+      "msgs": 5,
+      "hz_est": 0.3
+    },
+    "/ground_truth_pose_clean": {
+      "msgs": 991,
+      "hz_est": 55.6
+    },
+    "/odom": {
+      "msgs": 495,
+      "hz_est": 27.8
+    }
+  },
+  "bag_metrics": {
+    "duration_s": 17.82,
+    "odom_path_length_m": 0.834,
+    "odom_avg_speed_ms": 0.047
+  },
+  "protocol_metadata": {
+    "protocol_id": "coldstart_test_dryrun",
+    "replicate_id": 1,
+    "replicate_total": 2,
+    "argv": [
+      "scripts/experiment_repeatability.py",
+      "replay",
+      "--single-robot",
+      "--route",
+      "dissertation_clean01",
+      "--topics",
+      "odom",
+      "pose",
+      "ground_truth_pose_clean",
+      "--protocol-id",
+      "coldstart_test_dryrun",
+      "--replicate-id",
+      "1",
+      "--replicate-total",
+      "2",
+      "--export",
+      "/home/eduardo/fleet-ui/fleet_ws/runs/coldstart_test_dryrun/replay_r01.json"
+    ]
+  },
+  "finished_at": "2026-10-02T21:26:25.190352+00:00",
+  "git": {
+    "commit": "65518b44596dc972e2f25f82f73d7aedc61f65b8",
+    "dirty": true
+  }
+}

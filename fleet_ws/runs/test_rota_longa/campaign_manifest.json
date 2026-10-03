@@ -1,0 +1,32 @@
+{
+  "protocol_id": "test_rota_longa",
+  "route": "rota_longa_curva",
+  "world": "warehouse",
+  "repeat": 2,
+  "started_at": "2026-10-02T21:52:00.557755+00:00",
+  "replicas": [
+    {
+      "replicate_id": 1,
+      "retries_used": 2,
+      "boot_elapsed_sec": 112.3,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/test_rota_longa/replay_r01.json"
+    },
+    {
+      "replicate_id": 2,
+      "retries_used": 0,
+      "boot_elapsed_sec": 22.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/test_rota_longa/replay_r02.json"
+    }
+  ],
+  "finished_at": "2026-10-02T21:58:36.658879+00:00",
+  "summary": {
+    "replicas_ok": 2,
+    "replicas_total": 2,
+    "success_rate": 1.0,
+    "total_retries_used": 2
+  }
+}
