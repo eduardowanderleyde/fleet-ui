@@ -188,6 +188,18 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   `dissertation_clean01`). Falta testar `run_ground_truth_campaign.py`
   com essas 2 rotas antes da campanha completa. Ver `implementacao.md`.
 
+### 2026-10-02 — feito: campanha validada nas 3 rotas, retry provado numa falha real
+
+- **[dds_tuning]** `run_ground_truth_campaign.py` testado nas 3 rotas
+  (curta, longa, loop) — 8/8 réplicas ok no total, ground truth sem
+  congelamento em nenhuma. Na rota longa, a réplica 1 bateu de verdade
+  no problema de ~70% de sucesso (2 timeouts de `change_state` em nós
+  diferentes, retry corrigiu sozinho na 3ª tentativa) — primeira prova
+  real de que o mecanismo funciona numa falha de verdade, não só no
+  caminho feliz. Bug achado e corrigido no caminho: nomes de log sem o
+  número da réplica faziam a réplica 2 sobrescrever o log da réplica 1.
+  Ver `implementacao.md` ("Feito") e `conhecimento/dds_tuning.md`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

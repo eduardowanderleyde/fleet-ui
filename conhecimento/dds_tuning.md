@@ -271,3 +271,19 @@ active" em N segundos, matar tudo e tentar de novo, contando quantas
 réplicas precisaram de retry — é um dado relevante pra reportar a taxa
 real de sucesso). Nenhuma dessas duas coisas existe hoje no script de
 campanha, até onde verificado nesta sessão.
+
+### 2026-10-02 — O retry foi implementado e já se provou necessário na prática
+
+`fleet_ws/scripts/run_ground_truth_campaign.py` (ver `implementacao.md`)
+implementa exatamente a ação sugerida acima. Testando-o nas rotas
+longa/loop recém-criadas, a réplica 1 da rota longa bateu o problema de
+verdade: 2 tentativas de boot seguidas falharam por timeout em
+`change_state` (`route_server` na 1ª, `controller_server` na 2ª — nó
+diferente a cada vez, reforçando que não é um nó específico com bug, é
+contenção de recursos durante a rajada de ativação, consistente com o
+que já se sabia). O script matou tudo e tentou de novo automaticamente,
+terminando ok na 3ª tentativa, sem intervenção manual. Essa é a primeira
+confirmação real (não só hipotética) de que o mecanismo de retry
+funciona numa falha de verdade — antes disso, só tínhamos a suspeita
+(~70% de sucesso) e o código do retry, nunca os dois juntos numa falha
+ao vivo.

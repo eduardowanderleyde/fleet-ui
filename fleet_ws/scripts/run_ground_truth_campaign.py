@@ -142,13 +142,16 @@ def wait_for_log(log_path: Path, ready_all: tuple, fail_any: tuple, timeout_s: f
     return "timeout"
 
 
-def boot_stack(world: str, timeout_s: float, max_retries: int, run_dir: Path) -> tuple:
+def boot_stack(world: str, timeout_s: float, max_retries: int, run_dir: Path, replicate_id: int) -> tuple:
     """Retorna (sim_proc, fleet_proc, retries_usados) ou (None, None, retries_usados)
     se esgotar as tentativas sem ficar pronto."""
     for attempt in range(max_retries + 1):
         kill_all_sim_processes()
-        sim_log = run_dir / f"sim_attempt{attempt}.log"
-        fleet_log = run_dir / f"fleet_attempt{attempt}.log"
+        # replicate_id no nome do log -- sem isso, a replica 2 sobrescreve o
+        # log da replica 1 (mesmo "attempt0"), perdendo o diagnostico de
+        # qual replica especifica teve problema (achado ao vivo nesta sessao).
+        sim_log = run_dir / f"r{replicate_id:02d}_sim_attempt{attempt}.log"
+        fleet_log = run_dir / f"r{replicate_id:02d}_fleet_attempt{attempt}.log"
         sim_cmd = f"ros2 launch fleet_orchestrator turtlebot4_sim.launch.py world:={world} headless:=True"
         sim_proc = launch_bash(sim_cmd, sim_log)
         status = wait_for_log(sim_log, (SIM_READY,), SIM_FAIL, timeout_s)
@@ -221,7 +224,7 @@ def main() -> int:
     for rid in range(1, args.repeat + 1):
         print(f"=== Réplica {rid}/{args.repeat} ===")
         t0 = time.monotonic()
-        sim_proc, fleet_proc, retries = boot_stack(args.world, args.boot_timeout, args.max_retries, run_dir)
+        sim_proc, fleet_proc, retries = boot_stack(args.world, args.boot_timeout, args.max_retries, run_dir, rid)
         boot_elapsed = time.monotonic() - t0
 
         entry = {

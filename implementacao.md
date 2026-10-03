@@ -14,15 +14,6 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
-- [ ] **Testar `run_ground_truth_campaign.py` nas 2 rotas novas
-  (`rota_longa_curva`, `loop_fechado`), não só na curta** (origem: achado
-  real do autor, 2026-10-02, ao criar as rotas — ver "Feito" abaixo). O
-  script só foi validado com `dissertation_clean01` (mini-campanha de 2
-  réplicas). Rotas mais longas (7,7m e 11,3m vs. ~0,9m da curta) podem
-  expor timeouts diferentes — `--boot-timeout` é só sobre o bringup da
-  simulação, não sobre a duração do replay em si, então não deveria
-  precisar de ajuste, mas isso não foi confirmado na prática. Fazer antes
-  da campanha completa de 30 réplicas.
 
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
@@ -75,6 +66,23 @@ código) confirmando o efeito.
 
 ## Feito
 
+- [x] **Testar `run_ground_truth_campaign.py` nas 2 rotas novas
+  (`rota_longa_curva`, `loop_fechado`)** (origem: achado real do autor,
+  2026-10-02, ao criar as rotas; feito em 2026-10-02). Mini-campanhas de
+  2 réplicas em cada rota, 4/4 ok no total. **Achado valioso no
+  caminho**: a réplica 1 da rota longa precisou de 2 retries — as duas
+  tentativas falharam exatamente como o problema já documentado
+  (`route_server`/`controller_server` dando timeout em `change_state`,
+  o mesmo padrão de ~70% de sucesso), e o mecanismo de retry do script
+  detectou e corrigiu sozinho, terminando ok na 3ª tentativa. Essa é a
+  primeira confirmação real (não hipotética) de que o retry funciona
+  numa falha de verdade, não só no caminho feliz. Ground truth
+  acompanhou `/odom` corretamente nas 4 réplicas (sem congelamento).
+  **Bug real achado e corrigido no caminho**: os nomes de log
+  (`sim_attempt{N}.log`) não incluíam o número da réplica — a réplica 2
+  sobrescrevia o log da réplica 1 (mesmo "attempt0"), perdendo o
+  diagnóstico de qual réplica específica teve problema. Corrigido
+  (`r{replicate_id:02d}_sim_attempt{N}.log`).
 - [x] **Criar as rotas longa (com curva 90°) e loop fechado** (origem:
   plano em `orquestracion.md`, "Plano: campanha /odom vs. /pose vs.
   ground truth", passo 3; feito em 2026-10-02). Mapeei os obstáculos
