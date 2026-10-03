@@ -241,3 +241,57 @@ run_id `llm_pilot01_4979c065` pra investigar a réplica 1 especificamente,
 e (b) repetir com N maior (10+, como as outras campanhas desta sessão).
 Autor decidiu (2026-10-02) manter isso só como registro de conhecimento
 por enquanto, sem levar pra dissertação ainda.
+
+### 2026-10-03 — Primeiro resultado real de `run_fleet` multi-robô (2 robôs, agentes independentes)
+
+Depois de corrigir o `waypoint_follower` ausente (ver
+`conhecimento/dds_tuning.md`), rodei `run_fleet` de verdade com tb1 e
+tb2, cada um com sua própria instrução em linguagem natural (1 baseline
++ 3 réplicas, rota curta de ~1m perto do spawn de cada robô). Dois
+reinícios inesperados do ambiente interromperam as duas primeiras
+tentativas no meio da execução (não é achado de pesquisa, é
+instabilidade da máquina — ver `implementacao.md`); a 3ª tentativa
+completou as 4 execuções (1 baseline + 3 réplicas) para os dois robôs
+sem falha operacional.
+
+**Resultado (ambos os agentes recusaram inventar análise com dados ruins
+e sinalizaram os problemas sozinhos, sem eu pedir):**
+
+- **tb1**: RMSE vs. baseline 0,259–0,269m (bem acima do limiar de
+  0,05m do próprio `analyze_experiment`). RMSE **entre as 3 réplicas**
+  (a comparação metodologicamente correta, mesmo mecanismo) também alto:
+  0,177–0,337m — ou seja, nem as réplicas concordam bem entre si pro
+  tb1. O agente notou sozinho que os replays começaram em x≈0,63–0,75,
+  não na origem onde o baseline começou — ou seja, o robô não voltou
+  pro ponto de partida entre as chamadas de replay dentro da mesma
+  campanha.
+- **tb2**: RMSE vs. baseline 0,153–0,176m, mas RMSE **entre as 3
+  réplicas** ficou baixo e consistente: 0,038–0,048m — isto é, as
+  réplicas concordam bem entre si, só o baseline é que ficou
+  desalinhado. O agente notou que o baseline teve só 3 amostras de
+  `/pose` em 1,0s (contra ~40s de duração real do bag) e que essas
+  poses ficaram perto da origem, longe dos waypoints reais — sugerindo
+  que a referência de pose do baseline specifically é que não presta,
+  não a repetibilidade do robô.
+
+**Achado metodológico real (não específico de LLM):** `run_campaign`
+(a ferramenta que os agentes usam) grava 1 baseline e reproduz N vezes
+**sem relançar a simulação nem resetar a pose do robô entre as
+chamadas** — diferente de `run_ground_truth_campaign.py` (criado nesta
+sessão), que relança a stack inteira antes de cada réplica
+especificamente para evitar esse problema. Isso significa que
+`run_campaign` herda o mesmo "gap de mecanismo de navegação"
+(baseline via `go_to_point`, replay via `play_route`/`FollowWaypoints`)
+já documentado no Cap. 08 da dissertação, PLUS um problema adicional de
+deriva de posição entre réplicas sucessivas dentro da mesma campanha —
+que o protocolo mais rigoroso usado no resto desta sessão evita por
+construção.
+
+**Ação sugerida:** o RMSE alto medido aqui **não deve ser interpretado
+como "LLM multi-robô piora repetibilidade"** — a causa mais provável é
+a limitação metodológica de `run_campaign` em si (sem reset de pose
+entre réplicas), não o agente de IA. Pra isolar o efeito do LLM de
+verdade, seria preciso ou (a) estender `run_campaign` pra relançar/
+resetar entre réplicas como `run_ground_truth_campaign.py` já faz, ou
+(b) rodar réplicas via chamadas separadas de `run_experiment` com reset
+explícito de pose entre cada uma. Nenhuma das duas foi feita ainda.

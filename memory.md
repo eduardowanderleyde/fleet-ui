@@ -241,6 +241,15 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   coletado. O fix está seguro no git; falta só repetir a campanha do
   zero. Ver `implementacao.md` ("Em andamento") e `conhecimento/dds_tuning.md`.
 
+### 2026-10-03 — piloto run_fleet multi-robô completo (3ª tentativa, 2 reinícios da máquina no meio)
+
+- **[mcp_orchestration]** `run_fleet` com tb1+tb2 (agentes independentes)
+  completou de verdade: RMSE entre réplicas baixo pro tb2 (0,038–0,048m),
+  alto pro tb1 (0,18–0,34m), mas a causa mais provável não é o LLM — é
+  que `run_campaign` não reseta a pose do robô entre réplicas (diferente
+  de `run_ground_truth_campaign.py`, que faz isso de propósito). Ver
+  `implementacao.md` ("Feito") e `conhecimento/mcp_orchestration.md`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
