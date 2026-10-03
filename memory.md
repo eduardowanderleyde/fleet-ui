@@ -215,6 +215,19 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   `implementacao.md` ("Feito"). Decisão pendente: levar isso pra
   dissertação (Cap. 08).
 
+### 2026-10-02 — piloto: camada de agentes de IA rodada pela primeira vez nesta sessão
+
+- **[mcp_orchestration]** Primeira execução real de `backend/agents/`
+  (Planner/Executor) — exigiu criar `backend/venv/` e corrigir um bug real
+  (incompatibilidade `anthropic` SDK + `brotli` do sistema, mascarado como
+  "erro de conexão"). Piloto N=5 via `/api/agent/run`: agente recusou
+  corretamente inventar parâmetros ambíguos 2x, depois rodou 1 baseline +
+  5 réplicas sem falhas. RMSE pairwise entre réplicas: 4/5 entre
+  0,014–0,068m, 1 outlier (0,42–0,45m, não investigado). Autor decidiu
+  manter só como registro, não levar pra dissertação ainda (N pequeno,
+  outlier sem explicação). Ver `implementacao.md` ("Em andamento") e
+  `conhecimento/mcp_orchestration.md`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

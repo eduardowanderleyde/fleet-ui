@@ -182,3 +182,62 @@ próxima vez que alguém for *decidir*, não só pesquisar:
   `yutarop/ros-mcp`, `wise-vision/mcp_server_ros_2` e
   `gavindev14/mcp_server_ros_2` (vistos só em busca, não abertos) antes
   de citar qualquer um deles como referência de design.
+
+### 2026-10-02 — Primeira execução real da camada de agentes (Planner/Executor) nesta sessão: 2 bugs de setup + 1 achado de repetibilidade
+
+Não é pesquisa — é execução real, pela primeira vez nesta sessão, da
+camada de orquestração por IA já existente (`backend/agents/`), motivada
+pelo item de trabalho futuro "avaliar se a camada de agentes degrada a
+repetibilidade pairwise" (ver `dissertacao` branch, Cap. 09). Dois bugs de
+infraestrutura e um achado real de repetibilidade, nessa ordem:
+
+1. **`backend/venv/` não existia** — `httpx`/`anthropic` não instalados
+   (nem no sistema, nem em lugar nenhum). `requirements.txt` existe mas
+   nunca tinha sido realmente usado pra criar o venv nesta máquina.
+   Resolvido: `python3 -m venv --system-site-packages backend/venv`
+   (`--system-site-packages` é necessário pra herdar `rclpy` do ROS) +
+   `pip install -r backend/requirements.lock.txt` (não o `.txt` solto —
+   ver achado 2).
+2. **Bug real de incompatibilidade de versão, mascarado como erro de
+   rede**: com `anthropic==1.11.0` (a versão mais nova, instalada por
+   engano antes de notar o `requirements.lock.txt`), toda chamada à API
+   falhava com `anthropic.APIConnectionError: Connection error.` — uma
+   mensagem enganosa. A causa real, só visível com traceback completo:
+   `httpx2/_decoders.py` (dependência interna do SDK) chama
+   `brotli_decompressor.process(data, output_buffer_limit=...)`, e o
+   pacote `brotli` herdado do sistema (`/usr/lib/python3/dist-packages/brotli.py`,
+   via apt `python3-brotli`) é velho demais pra aceitar esse argumento —
+   `TypeError: process() takes no keyword arguments`, capturado e
+   re-levantado pelo SDK como erro de conexão genérico. Resolvido
+   instalando `pip install --ignore-installed Brotli` (pacote PyPI,
+   letra maiúscula, versão 1.2.0) dentro do venv, sobrescrevendo o do
+   sistema só ali. Reinstalar com `requirements.lock.txt` sozinho **não
+   resolveu** — o `brotli` do sistema nem está no lock file, é uma
+   dependência transitiva opcional do `httpx`/`httpx2`.
+3. **Achado real de repetibilidade** (N=5, rota curta ~1m nova
+   `llm_pilot01`, não mexeu em `dissertation_clean01`): o Planner
+   corretamente **recusou duas vezes** inventar parâmetros (`robot_id`
+   e waypoints da rota) quando a instrução inicial era ambígua/incompleta
+   — pediu esclarecimento em vez de alucinar, incluindo a frase explícita
+   "Não vou inventar coordenadas, porque o robô se moveria de verdade."
+   Com os parâmetros corretos, rodou `run_campaign` (1 baseline +
+   5 réplicas) sem nenhuma falha operacional. O RMSE calculado pela
+   própria ferramenta (`analyze_experiment`, que usa `/pose` como fonte,
+   auto-detectado) comparando réplica vs. baseline ficou alto (~0,39m) —
+   mas isso reproduz exatamente o gap de mecanismo de navegação já
+   documentado na dissertação (`go_to_point` na baseline vs.
+   `play_route`/`FollowWaypoints` no replay — durações de 3,7s vs. ~58s
+   pra mesma rota nominal). Recalculando pairwise **entre réplicas**
+   (mesmo mecanismo, metodologia já estabelecida na dissertação): 4 das
+   5 réplicas ficaram entre 0,014 e 0,068m de RMSE entre si — mas a
+   réplica 1 destoou das outras 4 em 0,42–0,45m, um outlier não
+   explicado até o fim desta execução (não rodei `diagnose_experiment`
+   pra investigar a causa).
+
+**Ação sugerida:** N=5 com 1 outlier não explicado é pouco pra uma
+conclusão — antes de considerar isso evidência real sobre o efeito do
+LLM na repetibilidade, valeria (a) rodar `diagnose_experiment` no
+run_id `llm_pilot01_4979c065` pra investigar a réplica 1 especificamente,
+e (b) repetir com N maior (10+, como as outras campanhas desta sessão).
+Autor decidiu (2026-10-02) manter isso só como registro de conhecimento
+por enquanto, sem levar pra dissertação ainda.

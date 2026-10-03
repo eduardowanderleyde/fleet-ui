@@ -63,6 +63,24 @@ código) confirmando o efeito.
   do RMSE contra a baseline — isso exige Gazebo/Nav2 reais de pé, não foi
   executado ainda. Uso: `NAV2_MPPI_REGENERATE_NOISES=false ros2 launch
   fleet_orchestrator turtlebot4_sim.launch.py ...`.
+- [~] **Pilotar se a camada de agentes de IA degrada a repetibilidade
+  pairwise** (origem: item de trabalho futuro criado nesta sessão na
+  dissertação, Cap. 09; piloto em 2026-10-02). Primeira execução real da
+  camada `backend/agents/` (Planner/Executor) nesta sessão — exigiu criar
+  `backend/venv/` (não existia) e corrigir um bug real de incompatibilidade
+  entre `anthropic` SDK e o pacote `brotli` do sistema, mascarado como
+  "erro de conexão" (ver `conhecimento/mcp_orchestration.md` pro
+  diagnóstico completo). Rodado via `/api/agent/run`, N=5, rota nova
+  `llm_pilot01` (não mexeu em `dissertation_clean01`): o agente recusou
+  corretamente inventar parâmetros ambíguos duas vezes antes de executar;
+  rodou 1 baseline + 5 réplicas sem falhas operacionais. RMSE pairwise
+  entre réplicas (metodologia correta, mesmo mecanismo de navegação): 4
+  de 5 ficaram entre 0,014–0,068m; a réplica 1 destoou das outras 4 em
+  0,42–0,45m (outlier não investigado). **Decisão do autor (2026-10-02)**:
+  por ora fica só como registro de conhecimento, não entra na dissertação
+  — N=5 com 1 outlier não explicado é insuficiente pra conclusão. Falta:
+  rodar `diagnose_experiment` no run_id `llm_pilot01_4979c065` pra
+  investigar a réplica 1, e repetir com N maior antes de reconsiderar.
 
 ## Feito
 
