@@ -81,6 +81,25 @@ código) confirmando o efeito.
   — N=5 com 1 outlier não explicado é insuficiente pra conclusão. Falta:
   rodar `diagnose_experiment` no run_id `llm_pilot01_4979c065` pra
   investigar a réplica 1, e repetir com N maior antes de reconsiderar.
+- [~] **Pilotar `run_fleet` multi-robô (path 3 do trabalho futuro, 2
+  robôs, agentes independentes)** (origem: extensão do item acima pro
+  Cap. 09 da dissertação, commit `e43ff2e`; tentado em 2026-10-03).
+  Simulação multi-robô (tb1+tb2) ativada com sucesso via
+  `/api/simulation/activate_robot` sequencial. **Achado real no
+  caminho** (bloqueante, já corrigido): `play_route`/replay falhava nos
+  dois robôs com "Nav2 follow_waypoints not available" — causa raiz
+  confirmada (não DDS, nó `waypoint_follower` literalmente ausente do
+  launch file de ativação sequencial, cortado por engano de escopo em
+  2026-09-30). Corrigido e verificado (`db5ce66`,
+  `conhecimento/dds_tuning.md`). Depois do fix, disparei `run_fleet` de
+  verdade (2 instruções em linguagem natural, 1 por robô, cada uma 1
+  baseline + 3 réplicas) — **a sessão foi interrompida no meio da
+  execução** (reinício inesperado do ambiente) antes de qualquer
+  resultado de RMSE ser persistido. Nenhum dado de repetibilidade
+  multi-robô obtido ainda. Falta: repetir a campanha completa do zero
+  (boot limpo → ativar tb1 → ativar tb2 → `run_fleet`) agora que o bug
+  do `waypoint_follower` está corrigido — deve ser mais direto desta
+  vez, já que a causa da falha original foi eliminada.
 
 ## Feito
 

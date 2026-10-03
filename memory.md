@@ -228,6 +228,19 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   outlier sem explicação). Ver `implementacao.md` ("Em andamento") e
   `conhecimento/mcp_orchestration.md`.
 
+### 2026-10-03 — bug real achado e corrigido pilotando run_fleet multi-robô; sessão interrompida no meio
+
+- **[dds_tuning]** Primeiro teste real de `run_fleet` (2 robôs, agente
+  independente por robô). `play_route`/replay falhava nos dois com "Nav2
+  follow_waypoints not available" — causa raiz: `waypoint_follower`
+  literalmente ausente do launch de ativação sequencial multi-robô
+  (cortado por engano em 2026-09-30, nunca testado contra `play_route`
+  até agora). Corrigido e verificado (commit `db5ce66`). Depois do fix,
+  tb1+tb2 ativaram e `run_fleet` foi disparado de verdade — mas a sessão
+  foi interrompida no meio da execução (reinício inesperado), sem RMSE
+  coletado. O fix está seguro no git; falta só repetir a campanha do
+  zero. Ver `implementacao.md` ("Em andamento") e `conhecimento/dds_tuning.md`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

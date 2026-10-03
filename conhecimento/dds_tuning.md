@@ -287,3 +287,39 @@ confirmação real (não só hipotética) de que o mecanismo de retry
 funciona numa falha de verdade — antes disso, só tínhamos a suspeita
 (~70% de sucesso) e o código do retry, nunca os dois juntos numa falha
 ao vivo.
+
+### 2026-10-03 — Bug real achado pilotando run_fleet multi-robô: waypoint_follower faltando, não DDS
+
+Não é pesquisa — é achado ao vivo, primeira vez que `run_fleet` (2 robôs,
+agente de IA independente por robô) foi testado de verdade. Os dois
+agentes gravaram baseline com sucesso (`go_to_point`), mas o replay
+falhou nos dois com "Nav2 follow_waypoints not available". Diagnóstico
+com `ros2 action info` mostrou a action listada mas com **0 servidores**
+respondendo, e `ros2 lifecycle get .../waypoint_follower` devolveu "Node
+not found" — o nó simplesmente não existia, não era timing de descoberta
+DDS. Causa: `nav2_minimal.launch.py` (usado só por
+`activate_robot_nav.launch.py`, o caminho de ativação sequencial
+multi-robô) tinha sido enxugado em 2026-09-30 pra reduzir a rajada de nós
+na ativação (o próprio achado de contenção DDS/CPU documentado acima), e
+`waypoint_follower` foi cortado junto por engano de escopo — na época só
+se pensava em `go_to_point`, sem considerar que `play_route`/replay
+(usado o tempo todo no resto do projeto, inclusive pelas campanhas de
+ground truth desta sessão) depende dele. Corrigido reintroduzindo o nó
+(commit `db5ce66`). Depois do fix, tb1 e tb2 ativaram com sucesso sem
+retry, `ros2 action info` confirmou 1 servidor real pros dois.
+
+Também confirmado DE NOVO, separadamente, o problema de contenção
+DDS/CPU já conhecido: numa tentativa de ativação (ANTES do fix acima ser
+testado), tb1 ficou preso num loop de "jump back in time" sem nunca ficar
+pronto — matei tudo, esperei a carga normalizar, e a segunda tentativa
+funcionou de primeira. Mesmo padrão já documentado, não é achado novo em
+si, só mais uma ocorrência real registrada.
+
+**Ação sugerida:** nenhuma pendente — o fix já foi aplicado e verificado.
+Só sinalizando que esse tipo de corte "enxuto só pro caso de uso X"
+(já usado 2x neste projeto: `nav2_minimal.launch.py` original, cortando
+`route_server`/`docking_server`/`waypoint_follower`) corre risco real de
+quebrar um caso de uso diferente (replay) que ninguém testou contra esse
+caminho de ativação até agora — vale revisar se há outros cortes
+semelhantes no projeto que nunca foram testados contra todos os usos
+reais (`go_to_point` E `play_route`).
