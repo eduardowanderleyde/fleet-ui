@@ -358,6 +358,34 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     quantitativa de RMSE sob essa operação), respondendo diretamente à
     limitação de escopo single-robot registrada na mesma seção.
 
+    \item \textbf{Estender o piloto de repetibilidade sob agente de IA
+    (item anterior sobre LLM) para o cenário multi-robô acima.} O
+    \texttt{POST~/\allowbreak api/\allowbreak agent/\allowbreak run\_\allowbreak fleet}
+    (Seção~\ref{sec:agentes}) já existe e já roda um \texttt{Planner}
+    independente por robô em paralelo — mas, como o próprio texto da
+    Seção~\ref{sec:agentes} é explícito, são agentes independentes, \textbf{sem
+    coordenação entre si}: cada um decide sozinho a sequência de ferramentas
+    pro seu robô, sem noção do que os outros estão fazendo. Isso é
+    exatamente o nível que \citeonline{li2025llmmultirobot} identificam como
+    menos maduro na literatura de LLM para sistemas multi-robô — a maior
+    parte do que existe atua em alocação de tarefa centralizada ou geração
+    de ação de baixo nível por um único robô, não coordenação descentralizada
+    entre múltiplos agentes de IA independentes. Dois experimentos ficam em
+    aberto, em ordem crescente de ambição: (a) o mais direto — rodar
+    \texttt{run\_\allowbreak fleet} com uma instrução equivalente por robô (dois
+    agentes independentes, duas missões paralelas) e medir se o RMSE pairwise
+    por robô se mantém igual ao medido sem LLM (item anterior), agora também
+    na presença da contenção de CPU/DDS da ativação sequencial
+    (Seção~\ref{sec:limitacoes}) — testando se as duas fontes de variância
+    (agente de IA, ativação sequencial) se somam ou interagem; (b) o mais
+    ambicioso — e fora do que a arquitetura atual suporta sem mudança de
+    design — introduzir coordenação real entre os agentes (ex.: um
+    \texttt{Planner} supervisor que aloca rotas entre os robôs disponíveis a
+    partir de uma única instrução de missão, não um mapa
+    robô~\textrightarrow{}~instrução já decidido por um humano), o que
+    posicionaria o framework no nível que a literatura atual trata como
+    gap aberto, não resolvido.
+
     \item Integrar câmera OAK-D para coleta de dados visuais sincronizados
     com trajetória.
 \end{itemize}
