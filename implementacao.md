@@ -66,6 +66,39 @@ código) confirmando o efeito.
 
 ## Feito
 
+- [x] **Rodar a campanha completa /odom vs /pose vs ground truth (30
+  réplicas: 10 × 3 rotas) e analisar o resultado** (origem: todo o plano
+  em `orquestracion.md`, "Plano: campanha..."; feito em 2026-10-02). As
+  30 réplicas correram: 30/30 ok, 0 retries na curta e no loop, 2 retries
+  numa réplica da longa (problema de ativação já conhecido, corrigido
+  pelo próprio script). **Resultado real da pergunta de pesquisa** (N=10
+  por rota, IC95% t de Student):
+  | Rota | RMSE odom vs. GT | RMSE pose vs. GT |
+  |---|---|---|
+  | Curta (~0,9m) | 0,01cm | 3,28cm |
+  | Longa (~7,7m, 1 curva) | 5,18cm | 2,25cm |
+  | Loop (~11,3m, 4 curvas) | 14,27cm | 2,45cm |
+  Erro de `/odom` cresce com a complexidade da rota; erro de `/pose`
+  (SLAM) fica baixo e praticamente constante — o SLAM efetivamente limita
+  o erro de localização, a odometria crua não. Detalhe completo em
+  `conhecimento/stats_methodology.md`.
+  **Bug sério achado e corrigido antes de confiar nesses números**: a
+  primeira rodada da análise deu RMSE de `/pose` vs. ground truth de
+  ~50-66cm (constante entre rotas — sinal de artefato, não erro real).
+  Causa: `_read_traj_xy` (`analyze_runs.py`) rebaseava o tempo de cada
+  tópico pro seu próprio t=0, o que é errado ao comparar tópicos
+  diferentes no mesmo bag quando eles não começam a publicar junto
+  (`/pose` começa ~8-10s depois do ground truth — SLAM Toolbox tem
+  `TimerAction` de 8s no launch + tempo até o robô andar os 10cm mínimos
+  de `minimum_travel_distance`). Corrigido com um parâmetro novo
+  `rebase=False` (tempo absoluto) usado pelas comparações cross-tópico;
+  `analyze_runs.py` original (baseline-vs-replay) não foi afetado
+  (continua `rebase=True` por padrão). Novo script
+  `fleet_ws/scripts/analyze_ground_truth_campaign.py` faz a agregação
+  com IC95%.
+  **Decisão pendente pro autor**: se esse resultado deve entrar na
+  dissertação (Cap. 08) e se a decisão metodológica já tomada (RMSE
+  pairwise citando maset2022) deveria ser revisitada à luz dele.
 - [x] **Testar `run_ground_truth_campaign.py` nas 2 rotas novas
   (`rota_longa_curva`, `loop_fechado`)** (origem: achado real do autor,
   2026-10-02, ao criar as rotas; feito em 2026-10-02). Mini-campanhas de

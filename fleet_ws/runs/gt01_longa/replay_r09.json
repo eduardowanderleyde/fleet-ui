@@ -1,0 +1,82 @@
+{
+  "command": "replay",
+  "robot_id": "",
+  "route": "rota_longa_curva",
+  "expected_route_yaml": "routes/default/rota_longa_curva.yaml",
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose",
+    "ground_truth_pose_clean"
+  ],
+  "skip_collection": false,
+  "success": true,
+  "failures_reported": 0,
+  "error_code": "",
+  "path_length_m_estimate": 0.0,
+  "disable_collection_message": "Collection disabled for default. Bag: collections/default/2026-10-03_00-50-08_683846_8caba479",
+  "rosbag_path": "collections/default/2026-10-03_00-50-08_683846_8caba479",
+  "sensor_summary": {
+    "/pose": {
+      "msgs": 50,
+      "hz_est": 0.4
+    },
+    "/ground_truth_pose_clean": {
+      "msgs": 6782,
+      "hz_est": 55.6
+    },
+    "/imu": {
+      "msgs": 24418,
+      "hz_est": 200.0
+    },
+    "/odom": {
+      "msgs": 3392,
+      "hz_est": 27.8
+    },
+    "/scan": {
+      "msgs": 1220,
+      "hz_est": 10.0
+    }
+  },
+  "bag_metrics": {
+    "duration_s": 122.08,
+    "odom_path_length_m": 7.626,
+    "odom_avg_speed_ms": 0.062,
+    "scan_avg_valid_points": 352.0,
+    "scan_min_valid_points": 336,
+    "imu_accel_mean_ms2": 9.813,
+    "imu_accel_variance_ms2": 0.0351
+  },
+  "protocol_metadata": {
+    "protocol_id": "gt01_longa",
+    "replicate_id": 9,
+    "replicate_total": 10,
+    "argv": [
+      "scripts/experiment_repeatability.py",
+      "replay",
+      "--single-robot",
+      "--route",
+      "rota_longa_curva",
+      "--topics",
+      "scan",
+      "odom",
+      "imu",
+      "pose",
+      "ground_truth_pose_clean",
+      "--protocol-id",
+      "gt01_longa",
+      "--replicate-id",
+      "9",
+      "--replicate-total",
+      "10",
+      "--export",
+      "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_longa/replay_r09.json"
+    ]
+  },
+  "finished_at": "2026-10-03T00:52:11.654486+00:00",
+  "git": {
+    "commit": "628d08146f30778bfdc4ff6c0ee5ea099c1c8839",
+    "dirty": true
+  }
+}

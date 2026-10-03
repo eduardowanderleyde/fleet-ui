@@ -57,13 +57,14 @@ def main() -> int:
         if counts.get(topic, 0) == 0:
             print(f"[AVISO] {topic} tem 0 mensagens nesse bag -- regrave com --topics incluindo {topic.lstrip('/')}")
             continue
-        # use_header_stamp=True: as 3 fontes estao no MESMO bag, todas com
-        # /clock de sim time em comum -- o header.stamp de cada mensagem e
-        # mais correto aqui que o tempo de gravacao no bag, que inclui
-        # latencia de processamento que varia por fonte (SLAM Toolbox
-        # demora mais pra computar /pose do que o bridge leva pra
-        # republicar ground truth).
-        _name, t, x, y, dur = _read_traj_xy(bag_dir, topic, use_header_stamp=True)
+        # use_header_stamp=True, rebase=False: as 3 fontes estao no MESMO
+        # bag, todas com /clock de sim time em comum -- precisa do tempo
+        # ABSOLUTO (rebase=False), nao relativo ao t=0 de cada topico. Achado
+        # real desta sessao: /pose comeca a publicar bem depois do ground
+        # truth (SLAM Toolbox tem delay de 8s no launch + tempo até o robô
+        # andar os 10cm minimos) -- rebasear cada fonte pro seu proprio t=0
+        # produzia ~60cm de erro artificial ao comparar.
+        _name, t, x, y, dur = _read_traj_xy(bag_dir, topic, use_header_stamp=True, rebase=False)
         n = len(t)
         hz = (n - 1) / dur if dur and dur > 0 else float("nan")
         data[key] = {"t": t, "xy": np.stack([x, y], axis=1), "hz": hz, "n": n}

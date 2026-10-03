@@ -1,0 +1,25 @@
+
+=== Fase B: reproduzir percurso (coleta + play_route) ===
+robot='' route=loop_fechado
+topics=['scan', 'odom', 'imu', 'pose', 'ground_truth_pose_clean'] skip_collection=False export='/home/eduardo/fleet-ui/fleet_ws/runs/gt01_loop/replay_r09.json'
+[TRACE] Chamando service enable_collection ...
+[OK] enable_collection — Collection enabled. Bag: collections/default/2026-10-03_01-25-50_926630_3b48ba4f
+[TRACE] Warmup após enable_collection (sleep 5s) ...
+[TRACE] Chamando service play_route ...
+[OK] play_route — Navigation started
+[OK] navegação iniciou (navigating)
+[OK] navegação terminou (idle)
+[TRACE] Chamando service disable_collection ...
+[OK] disable_collection — Collection disabled for default. Bag: collections/default/2026-10-03_01-25-50_926630_3b48ba4f
+
+Resumo: sem falhas
+
+[TRACE] Sensor summary (mcap):
+  /pose: 76 msgs  ~0.4 Hz
+  /ground_truth_pose_clean: 10936 msgs  ~55.6 Hz
+  /imu: 39368 msgs  ~200.0 Hz
+  /odom: 5468 msgs  ~27.8 Hz
+  /scan: 1968 msgs  ~10.0 Hz
+[TRACE] bag_metrics: odom=5468 msgs  path=11.3361 m  scan=1968  imu=39368
+
+[OK] Resumo exportado: /home/eduardo/fleet-ui/fleet_ws/runs/gt01_loop/replay_r09.json

@@ -1,0 +1,217 @@
+{
+  "routes": [
+    {
+      "route": "dissertation_clean01",
+      "protocol_id": "gt01_curta",
+      "n": 10,
+      "odom_vs_gt_rmse_cm": {
+        "mean": 0.01,
+        "ci95": [
+          0.01,
+          0.01
+        ]
+      },
+      "pose_vs_gt_rmse_cm": {
+        "mean": 3.28,
+        "ci95": [
+          0.8,
+          5.75
+        ]
+      },
+      "per_replica": [
+        {
+          "replicate_id": 1,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 9.62
+        },
+        {
+          "replicate_id": 2,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 1.02
+        },
+        {
+          "replicate_id": 3,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 9.93
+        },
+        {
+          "replicate_id": 4,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 2.46
+        },
+        {
+          "replicate_id": 5,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 1.87
+        },
+        {
+          "replicate_id": 6,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 1.72
+        },
+        {
+          "replicate_id": 7,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 0.81
+        },
+        {
+          "replicate_id": 8,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 1.59
+        },
+        {
+          "replicate_id": 9,
+          "odom_vs_gt_rmse_cm": 0.01,
+          "pose_vs_gt_rmse_cm": 1.47
+        },
+        {
+          "replicate_id": 10,
+          "odom_vs_gt_rmse_cm": 0.0,
+          "pose_vs_gt_rmse_cm": 2.28
+        }
+      ]
+    },
+    {
+      "route": "rota_longa_curva",
+      "protocol_id": "gt01_longa",
+      "n": 10,
+      "odom_vs_gt_rmse_cm": {
+        "mean": 5.18,
+        "ci95": [
+          4.93,
+          5.43
+        ]
+      },
+      "pose_vs_gt_rmse_cm": {
+        "mean": 2.25,
+        "ci95": [
+          1.46,
+          3.03
+        ]
+      },
+      "per_replica": [
+        {
+          "replicate_id": 1,
+          "odom_vs_gt_rmse_cm": 5.34,
+          "pose_vs_gt_rmse_cm": 1.19
+        },
+        {
+          "replicate_id": 2,
+          "odom_vs_gt_rmse_cm": 5.55,
+          "pose_vs_gt_rmse_cm": 1.32
+        },
+        {
+          "replicate_id": 3,
+          "odom_vs_gt_rmse_cm": 5.1,
+          "pose_vs_gt_rmse_cm": 3.7
+        },
+        {
+          "replicate_id": 4,
+          "odom_vs_gt_rmse_cm": 4.69,
+          "pose_vs_gt_rmse_cm": 1.59
+        },
+        {
+          "replicate_id": 5,
+          "odom_vs_gt_rmse_cm": 4.58,
+          "pose_vs_gt_rmse_cm": 2.0
+        },
+        {
+          "replicate_id": 6,
+          "odom_vs_gt_rmse_cm": 5.51,
+          "pose_vs_gt_rmse_cm": 4.26
+        },
+        {
+          "replicate_id": 7,
+          "odom_vs_gt_rmse_cm": 5.21,
+          "pose_vs_gt_rmse_cm": 3.36
+        },
+        {
+          "replicate_id": 8,
+          "odom_vs_gt_rmse_cm": 5.56,
+          "pose_vs_gt_rmse_cm": 1.83
+        },
+        {
+          "replicate_id": 9,
+          "odom_vs_gt_rmse_cm": 5.26,
+          "pose_vs_gt_rmse_cm": 1.48
+        },
+        {
+          "replicate_id": 10,
+          "odom_vs_gt_rmse_cm": 5.0,
+          "pose_vs_gt_rmse_cm": 1.72
+        }
+      ]
+    },
+    {
+      "route": "loop_fechado",
+      "protocol_id": "gt01_loop",
+      "n": 10,
+      "odom_vs_gt_rmse_cm": {
+        "mean": 14.27,
+        "ci95": [
+          13.78,
+          14.76
+        ]
+      },
+      "pose_vs_gt_rmse_cm": {
+        "mean": 2.45,
+        "ci95": [
+          1.83,
+          3.07
+        ]
+      },
+      "per_replica": [
+        {
+          "replicate_id": 1,
+          "odom_vs_gt_rmse_cm": 14.66,
+          "pose_vs_gt_rmse_cm": 3.92
+        },
+        {
+          "replicate_id": 2,
+          "odom_vs_gt_rmse_cm": 14.92,
+          "pose_vs_gt_rmse_cm": 1.47
+        },
+        {
+          "replicate_id": 3,
+          "odom_vs_gt_rmse_cm": 14.21,
+          "pose_vs_gt_rmse_cm": 1.6
+        },
+        {
+          "replicate_id": 4,
+          "odom_vs_gt_rmse_cm": 13.88,
+          "pose_vs_gt_rmse_cm": 2.7
+        },
+        {
+          "replicate_id": 5,
+          "odom_vs_gt_rmse_cm": 15.68,
+          "pose_vs_gt_rmse_cm": 2.42
+        },
+        {
+          "replicate_id": 6,
+          "odom_vs_gt_rmse_cm": 13.36,
+          "pose_vs_gt_rmse_cm": 1.91
+        },
+        {
+          "replicate_id": 7,
+          "odom_vs_gt_rmse_cm": 13.98,
+          "pose_vs_gt_rmse_cm": 1.79
+        },
+        {
+          "replicate_id": 8,
+          "odom_vs_gt_rmse_cm": 14.5,
+          "pose_vs_gt_rmse_cm": 2.86
+        },
+        {
+          "replicate_id": 9,
+          "odom_vs_gt_rmse_cm": 13.88,
+          "pose_vs_gt_rmse_cm": 2.03
+        },
+        {
+          "replicate_id": 10,
+          "odom_vs_gt_rmse_cm": 13.62,
+          "pose_vs_gt_rmse_cm": 3.81
+        }
+      ]
+    }
+  ]
+}

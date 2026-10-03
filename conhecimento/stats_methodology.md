@@ -438,3 +438,64 @@ pesquisa, conforme regra do papel.)
   cresce com a complexidade da rota" quando na verdade é um artefato de
   reamostragem. Recomendo decidir o tratamento disso (achado 14) antes de
   interpretar qualquer resultado do piloto sobre essa pergunta específica.
+
+### 2026-10-02 — Campanha completa rodada (30 réplicas, 3 rotas): resultado real da pergunta de pesquisa, e um bug sério de alinhamento temporal corrigido no caminho
+
+Não é achado de literatura — é o resultado real da campanha
+/odom vs /pose vs ground truth (10 réplicas × 3 rotas, ver
+`implementacao.md` e `run_ground_truth_campaign.py`), rodada pela primeira
+vez nesta sessão, com a análise feita por `analyze_ground_truth_campaign.py`
+(novo).
+
+**Bug sério achado e corrigido antes de confiar em qualquer número:**
+`_read_traj_xy` (`analyze_runs.py`) calculava o tempo de cada tópico
+RELATIVO à primeira mensagem DAQUELE tópico (`t - t[0]`). Isso é correto
+pra comparar a MESMA trajetória entre bags diferentes (uso original da
+função), mas é **errado** pra comparar tópicos diferentes dentro do MESMO
+bag quando eles não começam a publicar no mesmo instante absoluto —
+`/pose` só começa a publicar ~8-10s depois do ground truth (SLAM Toolbox
+tem um `TimerAction` de 8s no próprio launch, mais o tempo até o robô
+andar os 10cm mínimos exigidos por `minimum_travel_distance`). Rebasear
+cada fonte pro seu próprio t=0 antes de comparar produzia um RMSE de
+`/pose` vs. ground truth de **~50-66cm** — um número grande, suspeito, e
+sistematicamente ~constante entre rotas (não crescia com a complexidade),
+o que por si só já era um sinal de artefato, não de erro real. Busca por
+deslocamento temporal que minimiza o erro confirmou: deslocar `/pose` por
++7,5 a +10,5s (variável entre execuções, mas constante DENTRO de cada
+execução — não é acúmulo de processamento, é desalinhamento de
+referencial) derruba o RMSE pra 1-6cm. **Corrigido** adicionando um
+parâmetro `rebase` a `_read_traj_xy` (default `True`, preserva o
+comportamento original; `rebase=False` retorna tempo absoluto, usado
+pelas comparações cross-tópico).
+
+**Resultado real da campanha, com a correção aplicada (N=10 por rota, IC
+95% via t de Student):**
+
+| Rota | Comprimento | RMSE odom vs. GT | RMSE pose vs. GT |
+|---|---|---|---|
+| Curta (`dissertation_clean01`) | ~0,9m | 0,01cm (IC [0,01; 0,01]) | 3,28cm (IC [0,80; 5,75]) |
+| Longa (`rota_longa_curva`) | ~7,7m, 1 curva 90° | 5,18cm (IC [4,93; 5,43]) | 2,25cm (IC [1,46; 3,03]) |
+| Loop (`loop_fechado`) | ~11,3m, 4 curvas 90° | 14,27cm (IC [13,78; 14,76]) | 2,45cm (IC [1,83; 3,07]) |
+
+**Interpretação:** o erro de `/odom` vs. ground truth cresce claramente
+com o comprimento/complexidade da rota (deriva de odometria acumula com a
+distância percorrida, como esperado fisicamente). O erro de `/pose`
+(corrigido pelo SLAM) vs. ground truth fica baixo e **praticamente
+constante** independente da rota — o SLAM Toolbox efetivamente limita o
+erro de localização, enquanto a odometria crua não. Isso responde
+diretamente à pergunta que motivou a campanha (ver
+`orquestracion.md`): a fonte usada para representar a trajetória importa
+cada vez mais conforme a rota fica mais longa/complexa — numa rota curta
+a diferença é desprezível (ambas < 4cm), mas numa rota de ~11m com curvas
+a diferença chega a ~12cm (14,27 vs. 2,45cm), o que pode mudar
+qualitativamente a conclusão sobre repetibilidade dependendo de qual
+fonte for usada.
+
+**Ação sugerida:** este resultado parece maduro o suficiente pra entrar
+na dissertação (Cap. 08, talvez como nova seção QA3, ou integrado à
+Seção~\ref{sec:res_validacao_preliminar}) — decisão do autor, não tomada
+aqui. Recomendo também considerar se a decisão metodológica já tomada
+(RMSE pairwise entre execuções de mesmo mecanismo, citando maset2022)
+deveria ser revisitada à luz deste resultado, já que agora há dados reais
+mostrando que `/odom` sozinho pode estar superestimando a divergência
+real em rotas longas.

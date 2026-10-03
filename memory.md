@@ -200,6 +200,21 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   número da réplica faziam a réplica 2 sobrescrever o log da réplica 1.
   Ver `implementacao.md` ("Feito") e `conhecimento/dds_tuning.md`.
 
+### 2026-10-02 — RESULTADO FINAL da campanha de ground truth (30 réplicas) + bug de alinhamento corrigido
+
+- **[stats_methodology]** Campanha completa rodou (10 réplicas × 3 rotas,
+  30/30 ok). Resultado real: RMSE `/odom` vs. ground truth cresce com a
+  rota (0,01→5,18→14,27cm); RMSE `/pose` (SLAM) vs. ground truth fica
+  baixo e quase constante (3,28→2,25→2,45cm) — SLAM limita o erro de
+  localização, odometria crua não. Responde diretamente à pergunta que
+  motivou toda essa campanha. No caminho, achei e corrigi um bug sério
+  na própria análise: `_read_traj_xy` rebaseava cada tópico pro seu
+  próprio t=0, inválido ao comparar `/pose` (começa ~8-10s depois do
+  ground truth) contra ground truth — produzia ~60cm de erro artificial
+  antes da correção. Ver `conhecimento/stats_methodology.md` e
+  `implementacao.md` ("Feito"). Decisão pendente: levar isso pra
+  dissertação (Cap. 08).
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

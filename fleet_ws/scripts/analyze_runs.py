@@ -231,8 +231,9 @@ def _read_traj_xy(
     topic: str,
     *,
     use_header_stamp: bool = False,
+    rebase: bool = True,
 ) -> Tuple[str, np.ndarray, np.ndarray, np.ndarray, float]:
-    """Retorna (topic, t_sec_rel, x, y, duration_sec).
+    """Retorna (topic, t_sec, x, y, duration_sec).
 
     Por padrão (use_header_stamp=False), ordenação e duração pelo timestamp
     de gravação no rosbag (3.º campo de read_next) — correto pra comparar a
@@ -240,14 +241,21 @@ def _read_traj_xy(
     importa é a sequência real de gravação de cada bag.
 
     Com use_header_stamp=True, usa o header.stamp da própria mensagem (sim
-    time) em vez do tempo de gravação no bag — mais correto pra comparar
-    tópicos DIFERENTES DENTRO DO MESMO bag (ex.: campanha /odom vs /pose vs
-    ground truth, ver pilot_ground_truth_check.py), já que o tempo de
-    gravação inclui latência de processamento que varia por tópico (SLAM
-    Toolbox demora mais pra computar /pose do que o bridge leva pra
-    republicar ground truth) — comparar por tempo de gravação nesse caso
-    introduz desalinhamento artificial entre fontes, não só ruído de
-    medição.
+    time) em vez do tempo de gravação no bag.
+
+    rebase=True (default) subtrai t[0] do próprio tópico, retornando tempo
+    RELATIVO à primeira mensagem DAQUELE tópico — correto quando o tópico
+    comparado é o mesmo dos dois lados (baseline vs replay). rebase=False
+    retorna o tempo ABSOLUTO (sim time), sem subtrair nada — obrigatório
+    quando se compara tópicos DIFERENTES dentro do MESMO bag (ex.: campanha
+    /odom vs /pose vs ground truth, ver analyze_ground_truth_campaign.py):
+    achado ao vivo nesta sessão (2026-10-02) — com rebase=True, comparar
+    /pose (que só começa a publicar ~8-10s depois do ground truth: SLAM
+    Toolbox tem um TimerAction de 8s no launch, mais o tempo até o robô
+    andar os 10cm mínimos exigidos por minimum_travel_distance) contra
+    ground truth (que publica desde t=0) produzia um RMSE de ~60cm,
+    inteiramente artefato desse desalinhamento de referencial — com
+    rebase=False (tempo absoluto correto), o mesmo RMSE cai pra 1-6cm.
     """
     from nav_msgs.msg import Odometry
     from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
@@ -305,11 +313,11 @@ def _read_traj_xy(
         rows.sort(key=lambda r: r[0])
         bag_ns_arr = np.array([r[0] for r in rows], dtype=np.int64)
         t_arr = bag_ns_arr.astype(np.float64) * 1e-9
-    t_rel = t_arr - t_arr[0]
     duration_wall_sec = float(t_arr[-1] - t_arr[0])
+    t_out = t_arr - t_arr[0] if rebase else t_arr
     xs = np.array([r[2] for r in rows], dtype=np.float64)
     ys = np.array([r[3] for r in rows], dtype=np.float64)
-    return topic, t_rel, xs, ys, duration_wall_sec
+    return topic, t_out, xs, ys, duration_wall_sec
 
 
 def _path_length(x: np.ndarray, y: np.ndarray) -> float:

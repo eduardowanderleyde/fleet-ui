@@ -1,0 +1,96 @@
+{
+  "protocol_id": "gt01_curta",
+  "route": "dissertation_clean01",
+  "world": "warehouse",
+  "repeat": 10,
+  "started_at": "2026-10-03T00:21:03.344119+00:00",
+  "replicas": [
+    {
+      "replicate_id": 1,
+      "retries_used": 0,
+      "boot_elapsed_sec": 22.5,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r01.json"
+    },
+    {
+      "replicate_id": 2,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r02.json"
+    },
+    {
+      "replicate_id": 3,
+      "retries_used": 0,
+      "boot_elapsed_sec": 20.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r03.json"
+    },
+    {
+      "replicate_id": 4,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r04.json"
+    },
+    {
+      "replicate_id": 5,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r05.json"
+    },
+    {
+      "replicate_id": 6,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r06.json"
+    },
+    {
+      "replicate_id": 7,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r07.json"
+    },
+    {
+      "replicate_id": 8,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r08.json"
+    },
+    {
+      "replicate_id": 9,
+      "retries_used": 0,
+      "boot_elapsed_sec": 21.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r09.json"
+    },
+    {
+      "replicate_id": 10,
+      "retries_used": 0,
+      "boot_elapsed_sec": 23.4,
+      "boot_success": true,
+      "record_success": true,
+      "export_path": "/home/eduardo/fleet-ui/fleet_ws/runs/gt01_curta/replay_r10.json"
+    }
+  ],
+  "finished_at": "2026-10-03T00:29:13.166109+00:00",
+  "summary": {
+    "replicas_ok": 10,
+    "replicas_total": 10,
+    "success_rate": 1.0,
+    "total_retries_used": 0
+  }
+}
