@@ -2,8 +2,12 @@ FALA DA APRESENTAÇÃO — Seminário de Andamento
 Framework para Experimentos de Repetibilidade em Robótica Móvel com ROS 2 (Fleet UI)
 Eduardo Wanderley — Mestrado em Robótica, 2026
 
-Revisado em 2026-09-25 para bater com a versão atual da dissertação (campanha
-dissertation_clean01, 10 réplicas) em vez dos números antigos de Val01/Val02.
+Revisado em 2026-10-03: adicionado o Slide 11 (resultado novo de fonte de
+trajetória — odom vs. pose vs. ground truth, 3 rotas, 30 réplicas) e
+atualizado o Trabalho Futuro (Slide 14) pra refletir que a campanha com N
+maior já foi feita, trocando por um item novo sobre a camada de agentes de
+IA. Revisão anterior em 2026-09-25 bateu a fala com a campanha
+dissertation_clean01 (10 réplicas) em vez dos números antigos de Val01/Val02.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 1 — Título
@@ -126,6 +130,8 @@ contra uma baseline gravada com um mecanismo diferente — go_to_point em vez
 de play_route — o RMSE sobe pra quase 14 centímetros, quase sete vezes mais.
 Isso não é falha de repetibilidade do robô — é a prova de que a métrica
 certa precisa comparar execuções que usam o mesmo mecanismo de navegação.
+Mais adiante eu mostro um resultado mais completo sobre essa mesma questão,
+comparando as fontes de trajetória contra a pose verdadeira do simulador.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 10 — Distribuição do RMSE (10 Réplicas)
@@ -140,7 +146,27 @@ campanha está disponível no repositório, na pasta de runs do
 dissertation_clean01.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 11 — Desafios Técnicos Superados
+SLIDE 11 — Fonte de Trajetória: Odometria, SLAM e Ground Truth
+────────────────────────────────────────────────────────────────────────────
+Fiz um experimento adicional pra responder uma pergunta que ficou em aberto
+nos resultados anteriores: será que a fonte usada pra representar a
+trajetória — odometria crua ou a pose corrigida pelo SLAM — importa pra
+interpretação da repetibilidade? Comparei as duas contra a pose verdadeira
+do simulador, o ground truth nativo do Gazebo, em três rotas de
+complexidade crescente, com dez réplicas em cada uma: uma rota curta de
+menos de um metro, uma rota de sete metros com uma curva de noventa graus,
+e um loop fechado de onze metros com quatro curvas. O resultado: o erro da
+odometria crua cresce com o tamanho da rota — de praticamente zero na rota
+curta até quatorze centímetros no loop fechado. Já o erro da pose corrigida
+pelo SLAM fica baixo e praticamente constante nas três rotas, entre dois e
+três centímetros. Ou seja: numa rota curta, como a da campanha principal, a
+escolha da fonte não faz diferença prática — o que valida a decisão
+metodológica que tomei lá atrás. Mas numa rota mais longa e com mais
+curvas, a diferença passa a ser substancial, a ponto de poder mudar a
+conclusão sobre repetibilidade dependendo de qual fonte for usada.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 12 — Desafios Técnicos Superados
 ────────────────────────────────────────────────────────────────────────────
 Quatro problemas técnicos reais que precisei resolver. Primeiro, TF
 namespaceado: o SLAM publicava em /tb1/tf, mas o buffer TF global só
@@ -156,7 +182,7 @@ flag e derrubava o programa — resolvi exigindo a sintaxe --points=VALOR, sem
 ambiguidade.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 12 — Desafios Recentes: Multi-Robô, CI e Confiabilidade
+SLIDE 13 — Desafios Recentes: Multi-Robô, CI e Confiabilidade
 ────────────────────────────────────────────────────────────────────────────
 Mais quatro desafios, esses mais recentes. O xacro multi-robô: o DiffDrive
 original do TurtleBot4 publicava /cmd_vel de forma global — um comando movia
@@ -174,18 +200,22 @@ falhas imprevisíveis — resolvido com os.setsid mais os.killpg no painel de
 simulação, que mata a árvore de processos inteira, sem deixar nada pra trás.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 13 — Trabalho Futuro e Conclusão
+SLIDE 14 — Trabalho Futuro e Conclusão
 ────────────────────────────────────────────────────────────────────────────
 Pra fechar: o framework está funcional em simulação, com RMSE médio de 3,35
 centímetros — máximo de 4,76 — entre réplicas, muito abaixo da tolerância do
-Nav2. O modo multi-robô está operacional com 2 robôs simultâneos validados,
-mais a camada de agentes de IA por cima. O CI agora valida a parte ROS de
-verdade a cada push, não só um badge verde vazio. Como próximos passos:
-definir uma metodologia de baseline via play_route em vez de só go_to_point
-sequencial, pra eliminar de vez o viés de mecanismo que mostrei nos
-resultados; migrar o backend pra falar ROS 2 nativamente em vez de depender
-de subprocess; rodar uma campanha com N maior — de 10 a 20 réplicas — pra
-significância estatística; validar em hardware real, com um TurtleBot4
-físico; implementar conexão SSH real pra robôs na rede; e fazer uma análise
+Nav2; e o resultado novo que mostrei agora há pouco confirma que essa
+escolha metodológica se sustenta pra rota curta, mas precisa de cuidado em
+rotas mais longas. O modo multi-robô está operacional com 2 robôs
+simultâneos validados, mais a camada de agentes de IA por cima. O CI agora
+valida a parte ROS de verdade a cada push, não só um badge verde vazio.
+Como próximos passos: definir uma metodologia de baseline via play_route em
+vez de só go_to_point sequencial, pra eliminar de vez o viés de mecanismo
+que mostrei nos resultados; migrar o backend pra falar ROS 2 nativamente em
+vez de depender de subprocess; avaliar se a própria camada de agentes de IA
+que mostrei lá no início — ao orquestrar uma missão por linguagem natural,
+sozinha ou coordenando os dois robôs — degrada essa repetibilidade que
+venho de mostrar; validar em hardware real, com um TurtleBot4 físico;
+implementar conexão SSH real pra robôs na rede; e fazer uma análise
 estatística multi-sessão, olhando variabilidade entre dias diferentes.
 Obrigado — fico à disposição pra perguntas.
