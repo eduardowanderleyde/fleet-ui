@@ -6,8 +6,14 @@ Revisado em 2026-10-03: adicionado o Slide 11 (resultado novo de fonte de
 trajetória — odom vs. pose vs. ground truth, 3 rotas, 30 réplicas) e
 atualizado o Trabalho Futuro (Slide 14) pra refletir que a campanha com N
 maior já foi feita, trocando por um item novo sobre a camada de agentes de
-IA. Revisão anterior em 2026-09-25 bateu a fala com a campanha
-dissertation_clean01 (10 réplicas) em vez dos números antigos de Val01/Val02.
+IA. Corrigida também uma discrepância real com o Capítulo 9 (Limitações):
+os Slides 5 e 14 afirmavam "2 robôs simultâneos validados/operacional",
+mas a dissertação deixa explícito que essa conclusão preliminar foi
+invalidada (bug de salto no relógio simulado sob Nav2 simultâneo) e que a
+arquitetura final usa ativação sequencial, com 70% de taxa de sucesso —
+corrigido em ambos os slides pra não contradizer o texto escrito. Revisão
+anterior em 2026-09-25 bateu a fala com a campanha dissertation_clean01
+(10 réplicas) em vez dos números antigos de Val01/Val02.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 1 — Título
@@ -60,11 +66,17 @@ SLIDE 5 — Arquitetura do Sistema
 ────────────────────────────────────────────────────────────────────────────
 O framework é organizado em camadas. No topo, a interface web — o Fleet UI —
 em React e Vite, com backend em FastAPI, um editor de configuração em JSON,
-painel multi-robô e o painel de agentes de IA que vou detalhar no próximo
-slide. Abaixo, o orquestrador — fleet_orchestrator — expõe 7 serviços ROS 2
-pra record, replay, e chama as actions do Nav2; suporta até 3 robôs
-simultâneos por design, embora o par validado como estável nesta máquina
-sejam 2. Em seguida, a coleta de dados grava bags MCAP por robô, com QoS
+painel multi-robô, o painel Missão Coordenada — que lança ou encerra a
+simulação inteira com um botão só, sem precisar abrir terminal — e o
+painel de agentes de IA que vou detalhar no próximo slide. Abaixo, o
+orquestrador — fleet_orchestrator — expõe 7 serviços ROS 2 pra record,
+replay, e chama as actions do Nav2, com suporte a múltiplos robôs por
+design. Ativar a pilha completa de Nav2 de dois robôs ao mesmo tempo nessa
+máquina se mostrou instável — um bug de salto no relógio simulado
+invalidava o buffer de TF — então tanto o orquestrador quanto o painel
+Missão Coordenada ativam um robô de cada vez, sequencialmente, com taxa de
+sucesso de 70% por ativação. Em seguida, a coleta de dados grava bags MCAP
+por robô, com QoS
 adaptado pros tópicos scan, odom, imu e pose. A navegação usa Nav2 com SLAM
 Toolbox, com TF namespaceado por robô. E na base, a simulação roda no Gazebo
 Harmonic, com TurtleBots4, usando um xacro namespaceado e tópicos
@@ -206,8 +218,10 @@ Pra fechar: o framework está funcional em simulação, com RMSE médio de 3,35
 centímetros — máximo de 4,76 — entre réplicas, muito abaixo da tolerância do
 Nav2; e o resultado novo que mostrei agora há pouco confirma que essa
 escolha metodológica se sustenta pra rota curta, mas precisa de cuidado em
-rotas mais longas. O modo multi-robô está operacional com 2 robôs
-simultâneos validados, mais a camada de agentes de IA por cima. O CI agora
+rotas mais longas. O modo multi-robô está operacional via ativação
+sequencial de 2 robôs — 70% de taxa de sucesso por ativação, ainda sem
+avaliação quantitativa de repetibilidade sob essa operação — mais a camada
+de agentes de IA por cima. O CI agora
 valida a parte ROS de verdade a cada push, não só um badge verde vazio.
 Como próximos passos: definir uma metodologia de baseline via play_route em
 vez de só go_to_point sequencial, pra eliminar de vez o viés de mecanismo
