@@ -6,18 +6,24 @@ sem múltiplos waypoints, sem doca) realmente usa.
 
 Cortado em relação ao original (confirmado contra a árvore de
 comportamento padrão do Nav2, navigate_to_pose_w_replanning_and_recovery.xml,
-que não referencia nenhum dos três):
+que não referencia nenhum dos dois):
   - route_server       (navegação por grafo de rotas nomeadas — não é o
-                         que go_to_point faz)
-  - waypoint_follower   (múltiplos waypoints em sequência — go_to_point
-                         manda 1 pose por vez)
+                         que go_to_point nem play_route fazem)
   - docking_server      (auto-doca — não usado)
 
 Mantido (controller_server, smoother_server, planner_server,
 behavior_server, bt_navigator, velocity_smoother, collision_monitor,
-lifecycle_manager) — a árvore padrão chama smoother_server (SmoothPath) e
-behavior_server (spin/backup/wait de recuperação), cortar esses quebraria
-a navegação de verdade.
+waypoint_follower, lifecycle_manager) — a árvore padrão chama
+smoother_server (SmoothPath) e behavior_server (spin/backup/wait de
+recuperação), cortar esses quebraria a navegação de verdade.
+`waypoint_follower` foi cortado originalmente (2026-09-30) por engano de
+escopo — corrigido em 2026-10-03: `play_route` (campanhas de
+repetibilidade via `FollowWaypoints`, não só `go_to_point`) também passa
+por este arquivo quando a navegação é ativada via
+`activate_robot_nav.launch.py`, e sem `waypoint_follower` a action fica
+listada mas sem nenhum servidor respondendo (`Nav2 follow_waypoints not
+available`). Achado ao vivo rodando uma campanha multi-robô pela
+primeira vez neste caminho.
 
 Existe porque nav2_bringup/launch/navigation_launch.py não expõe nenhum
 jeito de desligar servidor individual via argumento de launch — a lista
@@ -53,6 +59,7 @@ LIFECYCLE_NODES = [
     'velocity_smoother',
     'collision_monitor',
     'bt_navigator',
+    'waypoint_follower',
 ]
 
 
@@ -111,6 +118,17 @@ def _launch_setup(context, *args, **kwargs):
         Node(package='nav2_velocity_smoother', executable='velocity_smoother', name='velocity_smoother',
              remappings=remappings + [('cmd_vel', 'cmd_vel_nav')], **common_node_kwargs),
         Node(package='nav2_collision_monitor', executable='collision_monitor', name='collision_monitor',
+             remappings=remappings, **common_node_kwargs),
+        # Reintroduzido (2026-10-03, ver orquestracion.md): a ativacao
+        # sequencial multi-robo so precisava de go_to_point (NavigateToPose,
+        # 1 pose por vez) quando este arquivo foi enxugado em 2026-09-30, por
+        # isso waypoint_follower tinha sido cortado -- mas play_route/replay
+        # (campanhas de repetibilidade, inclusive via agente de IA) usa
+        # FollowWaypoints, que depende deste no. Sem ele, play_route falha
+        # com "Nav2 follow_waypoints not available" (action listada mas sem
+        # servidor nenhum atendendo -- confirmado com
+        # `ros2 action info .../follow_waypoints` mostrando 0 servers).
+        Node(package='nav2_waypoint_follower', executable='waypoint_follower', name='waypoint_follower',
              remappings=remappings, **common_node_kwargs),
         Node(
             package='nav2_lifecycle_manager', executable='lifecycle_manager',
