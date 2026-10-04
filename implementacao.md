@@ -146,22 +146,6 @@ código) confirmando o efeito.
      abaixo do limite de 50GB/registro do Zenodo, confirmado em fonte
      primária em 2026-10-03).
   7. Adicionar o DOI resultante ao `CITATION.cff` e citar na dissertação.
-- [ ] **Versionar os arquivos de rota (`fleet_ws/routes/*.yaml`) que
-  correspondem às campanhas já commitadas** (origem: achado real desta
-  sessão, `artifact_publishing`, 2026-10-03 — ver
-  `conhecimento/artifact_publishing.md`). Hoje `fleet_ws/.gitignore` ignora
-  `routes/` por completo, então `dissertation_clean01.yaml`,
-  `rota_longa_curva.yaml`, `loop_fechado.yaml`, `llm_pilot01.yaml`,
-  `fleet_pilot_tb1_v2.yaml`, `fleet_pilot_tb1_v3.yaml`,
-  `fleet_pilot_tb2_v2.yaml`, `fleet_pilot_tb2_v3.yaml` (as rotas usadas
-  pelos resultados já commitados em `fleet_ws/runs/`) nunca foram
-  versionados — um clone novo do GitHub (ou o zip que o Zenodo arquivaria)
-  não teria essas rotas, só os resultados processados que as referenciam
-  pelo nome. Bloqueante pro item da Release acima ficar completo (não
-  bloqueante pra criar a Release em si). Duas opções, decisão do autor:
-  (a) `git add -f` nos 8 arquivos específicos (mantém `routes/` ignorado
-  por padrão pra rotas de teste/scratch futuras); (b) mover esses 8 pra um
-  diretório novo fora do gitignore (ex. `fleet_ws/routes_archive/`).
 - [ ] **Decidir se a dissertação (Cap. 09, Limitações) deve mencionar
   explicitamente que os dados brutos da campanha oficial não foram
   preservados** (origem: achado real desta sessão, 2026-10-02 — não é
@@ -229,6 +213,19 @@ código) confirmando o efeito.
   rodar `diagnose_experiment` no run_id `llm_pilot01_4979c065` pra
   investigar a réplica 1, e repetir com N maior antes de reconsiderar.
 ## Feito
+
+- [x] **Versionar os arquivos de rota (`fleet_ws/routes/*.yaml`) que
+  correspondem às campanhas já commitadas** (origem: achado real,
+  `artifact_publishing`, 2026-10-03; feito em 2026-10-03). `routes/`
+  continua ignorado por padrão em `fleet_ws/.gitignore` (pra rotas de
+  teste/scratch futuras), mas os 8 arquivos usados pelos resultados já
+  commitados (`dissertation_clean01.yaml`, `rota_longa_curva.yaml`,
+  `loop_fechado.yaml`, `llm_pilot01.yaml`, `fleet_pilot_tb1_v2.yaml`,
+  `fleet_pilot_tb1_v3.yaml`, `fleet_pilot_tb2_v2.yaml`,
+  `fleet_pilot_tb2_v3.yaml`) foram adicionados via `git add -f` (opção
+  (a) das duas levantadas pelo agente). Como consequência, a afirmação em
+  `fleet_ws/docs/REPLICATION.md` de que a rota "existe no repositório"
+  voltou a ser verdadeira sem precisar reescrever o texto.
 
 - [x] **Pilotar `run_fleet` multi-robô (path 3 do trabalho futuro, 2
   robôs, agentes independentes)** (origem: extensão do item acima pro
