@@ -18,6 +18,39 @@ do formato SDF (`<sensor><noise type="gaussian">`), não precisa de plugin
 de terceiros — só não documentamos isso antes. Bindings Python de
 gz-transport via apt continuam inexistentes para Jazzy/Harmonic (reconfirmado).
 
+**Atualização 2026-10-03 (ground truth agora é resultado publicado, não só
+infraestrutura — 3 perguntas novas):** (1) achei a causa raiz EXATA (lendo o
+código-fonte do `gz-sim` e do `ros_gz_bridge` linha a linha) de por que o
+nome da entidade se perde no bridge: o Gazebo (`SceneBroadcaster`) **já
+coloca o nome de cada entidade** (`pose.name()`) em todo item de
+`dynamic_pose/info`, só que o `ros_gz_bridge` procura o `child_frame_id` num
+lugar diferente (dentro de `header().data()` de cada Pose individual, que o
+Gazebo nunca preenche) — é um descompasso de dois códigos que nunca olham
+pro mesmo campo, não falta de dado na fonte. Isso é novo em relação ao
+achado de 2026-10-02 (que só confirmou "não tem correção no changelog", sem
+saber o mecanismo exato). Também achei que `dynamic_pose/info` é limitado a
+60Hz por padrão (configurável, `dynamic_pose_hertz` no SDF do mundo deste
+projeto não foi localizado/confirmado) e que o timestamp real da física
+(`simTime`) existe no nível do `Pose_V` mas se perde na conversão por causa
+do mesmo descompasso — o `ground_truth_filter` deste projeto já contorna
+isso usando o clock da simulação no momento do recebimento, o que é
+correto, mas não é exatamente o instante em que a física calculou aquela
+pose (ver achado detalhado, inclui "Ação sugerida" sobre mencionar isso como
+ameaça à validade). (2) **Reavaliação do `WheelSlip`: dado que a dissertação
+é só-simulação (sem comparação com robô real nesta versão), a recomendação
+mudou de "avaliar se vale implementar" para "não vale o esforço agora,
+melhor deixar só como limitação documentada"** — sem dado real de slip pra
+calibrar `slip_compliance_lateral/longitudinal`, adicionar o plugin só troca
+um parâmetro não-modelado por um parâmetro modelado-mas-arbitrário, não
+aumenta fidelidade de verdade. `implementacao.md` atualizado. (3) Ruído
+Gaussiano de LiDAR via SDF: confirmado que **continua não usado** — e o
+motivo é que nunca foi usado nem no pacote vendor de onde este projeto faz
+fork (`nav2_minimal_tb4_description`, upstream oficial do Nav2/TurtleBot4);
+não é uma lacuna introduzida por este projeto. Achado lateral: o IMU deste
+mesmo robô **tem** blocos `<noise type="gaussian">` (também herdados do
+vendor), mas com `stddev="0.0"` em todos os eixos — presentes na estrutura,
+mas sem efeito nenhum (equivalente a não ter ruído).
+
 **Atualização 2026-10-02 (pergunta de alinhamento de frames pro piloto):**
 pesquisei de verdade (código-fonte do `gz-math`/`gz-sim`, código-fonte do
 `slam_toolbox`, REP-103, REP-105) a dúvida registrada em `orquestracion.md`
@@ -391,3 +424,170 @@ conteúdo diferente. Não tentei (nem consegui, sem GUI) validar
 visualmente com `headless:=False`; a validação foi analítica (geometria
 do SDF) + empírica (gravação real sem avisos de colisão/recovery nos
 logs do Nav2).
+
+### 2026-10-03 — Mecanismo exato da perda de nome no bridge + limitações reais de `dynamic_pose/info` como ground truth (pergunta 1 do pedido)
+
+Contexto: a campanha de ground truth (3 rotas × N=10) já rodou de verdade e
+o resultado (RMSE de `/odom` crescendo 0→5,18cm→14,27cm; `/pose` estável em
+~2-3cm) já está publicado na dissertação (Seção 8.6) usando exatamente este
+mecanismo (`dynamic_pose/info` → `ground_truth_filter`). A pergunta era se
+existe alguma limitação de fidelidade/latência/frequência desse tópico
+específico, vs. um plugin de ground truth dedicado, que mereça virar ameaça
+à validade no texto.
+
+- **Causa raiz exata (não só "não tem fix no changelog", mas o mecanismo
+  linha a linha) de por que o bridge perde o nome da entidade.** Li o
+  código-fonte real dos dois lados:
+  - `gz-sim` (`SceneBroadcaster.cc`, função `PoseUpdate`, repo
+    `gazebosim/gz-sim`, branch `gz-sim8`, lido via `WebFetch` direto no
+    `raw.githubusercontent.com`): para cada entidade,
+    `dyPose->set_name(_nameComp->Data()); dyPose->set_id(_entity);` — ou
+    seja, **o nome da entidade está lá**, no campo `pose.name()` de cada
+    item do `Pose_V`. O timestamp real da simulação
+    (`_info.simTime`) é escrito uma vez só, no header do `Pose_V` como um
+    todo (`dyPoseMsg->mutable_header()->mutable_stamp()`), não em cada
+    Pose individual.
+  - `ros_gz_bridge` (`ros_gz_bridge/src/convert/geometry_msgs.cpp`, função
+    `convert_gz_to_ros` especializada pra `gz::msgs::Pose` →
+    `geometry_msgs::msg::TransformStamped`, lida via `WebFetch`): essa
+    função **não lê `pose.name()` em nenhum momento**. Em vez disso, só
+    preenche `child_frame_id` procurando uma chave `"child_frame_id"`
+    dentro de `gz_msg.header().data()` (pares chave-valor genéricos do
+    header de cada Pose individual) — campo que o `SceneBroadcaster`
+    **nunca preenche** pra `dynamic_pose/info` (confirmado no mesmo trecho
+    de `PoseUpdate`: não há nenhuma linha setando header/data em cada
+    Pose). O mesmo vale pro timestamp: essa função delega
+    `convert_gz_to_ros(gz_msg.header(), ros_msg.header)` usando o header da
+    Pose INDIVIDUAL (vazio), não o header do `Pose_V` (que tem o
+    `simTime` real) — isso explica exatamente o "`header.stamp` sempre
+    zerado" que o achado de 2026-10-02 já tinha constatado empiricamente
+    (`gz topic -e`), agora com o porquê exato no código.
+  - **Conclusão**: não é falta de dado na fonte (o Gazebo manda o nome e
+    manda um timestamp real), é um descompasso entre dois códigos que
+    olham pra campos diferentes do protobuf — o `ros_gz_bridge` foi
+    escrito pensando em mensagens que carregam `child_frame_id`/timestamp
+    DENTRO do header de cada Pose (padrão usado por outros publishers),
+    não no padrão que o `SceneBroadcaster` usa pra `dynamic_pose/info`
+    (nome no campo `name()`, timestamp só no header externo do array).
+    Reforça a conclusão já registrada em 2026-10-02: não vai vir uma
+    correção upstream genérica pra isso tão cedo, porque não é "bug" no
+    sentido de dado faltando — é incompatibilidade de convenção entre dois
+    subsistemas de projetos diferentes (`gz-sim` vs. `ros_gz`).
+  - Fontes primárias (lidas via `WebFetch` no conteúdo real, não resumo de
+    busca):
+    `https://raw.githubusercontent.com/gazebosim/gz-sim/gz-sim8/src/systems/scene_broadcaster/SceneBroadcaster.cc`,
+    `https://raw.githubusercontent.com/gazebosim/ros_gz/ros2/ros_gz_bridge/src/convert/geometry_msgs.cpp`,
+    `https://raw.githubusercontent.com/gazebosim/ros_gz/ros2/ros_gz_bridge/src/convert/tf2_msgs.cpp`.
+
+- **`dynamic_pose/info` é limitado por padrão a 60Hz, e isso É uma
+  característica real do tópico, não um detalhe irrelevante.** Confirmado
+  no mesmo `SceneBroadcaster.cc`: `public: int dyPoseHertz{60};`, lido do
+  SDF via `_sdf->Get<int>("dynamic_pose_hertz", 60)` (configurável por
+  mundo, mas com esse default). A publicação só ocorre se há subscriber
+  (`HasConnections()`), o que não é problema aqui (o bridge/filtro deste
+  projeto sempre está assinando). **Isso é uma amostragem discreta da
+  trajetória real, não um ground truth contínuo** — equivalente, em
+  espírito, a qualquer plugin de ground truth dedicado que também
+  precisaria escolher uma taxa de publicação (a física roda bem mais
+  rápido, tipicamente passo de 1ms = 1000Hz) — ou seja, 60Hz não é uma
+  limitação exclusiva deste mecanismo específico vs. um plugin dedicado,
+  qualquer publisher teria essa mesma escolha de trade-off taxa-vs-custo.
+  **Discrepância não resolvida**: as taxas medidas ao vivo em 2026-10-02
+  (~55-111Hz em `/ground_truth_pose_clean`, pós-filtro) excedem o default
+  de 60Hz documentado no código-fonte. Não investiguei se o SDF do mundo
+  deste projeto (`nav2_minimal_tb4_sim/warehouse.sdf`, pacote vendor fora
+  deste repositório, não localizado nesta sessão) define um
+  `dynamic_pose_hertz` mais alto explicitamente, ou se o filtro por índice
+  fixo deste projeto reamostra/duplica mensagens de alguma forma — **não
+  confirmado**, registro como lacuna aberta, não como achado.
+
+- **Limitação real a registrar como ameaça à validade (resposta à
+  pergunta 1): o timestamp de `/ground_truth_pose_clean` usado pela
+  campanha não é o instante exato em que a física calculou aquela pose,
+  é o instante em que o nó `ground_truth_filter` recebeu a mensagem.**
+  Isso decorre diretamente do achado acima — o timestamp real
+  (`simTime`) existe no Gazebo mas se perde na conversão genérica do
+  bridge, e o `ground_truth_filter` deste projeto contorna isso
+  corretamente (usa `self.get_clock().now()` com `use_sim_time`, não
+  wall-clock de verdade — isso já estava certo), mas ainda assim introduz
+  uma pequena defasagem de pipeline (bridge + filtro) entre "quando a
+  pose foi calculada" e "quando foi timestampada". Pra RMSEs na faixa de
+  2-14cm com um robô se movendo a velocidade de navegação típica do Nav2
+  (dezenas de cm/s), essa defasagem (sub-período de 60Hz ⇒ <17ms, mais
+  processamento de bridge/filtro, provavelmente poucos ms adicionais) é
+  pequena mas não nula — na mesma ordem de grandeza de "ruído de
+  medição" que poderia, em teoria, contribuir um pouco para o RMSE medido
+  (mais em `/odom`, que é mais rápido e mais sensível a pequenos
+  deslocamentos, que em `/pose`, que já é esparso por natureza).
+  **Ação sugerida**: considerar mencionar essa defasagem de pipeline
+  (bridge→filtro) como uma ameaça à validade de medição menor na Seção
+  8.6/Limitações — não invalida o resultado (a defasagem é pequena e
+  sistemática, não teria por que favorecer uma rota sobre outra), mas é
+  uma fonte de imprecisão do "ground truth" que hoje o texto (pelo que foi
+  reportado a este agente) provavelmente trata como perfeito/instantâneo.
+  Não é uma correção do experimento, é um reforço de honestidade
+  metodológica — decisão de incluir ou não é do autor.
+
+### 2026-10-03 — Reavaliação do `WheelSlip` (pergunta 2): dissertação é só-simulação, recomendação mudou
+
+O item pendente em `implementacao.md` (origem: achado de 2026-10-02) estava
+formulado como pergunta aberta ("vale o esforço pra este experimento, ou
+fica como limitação documentada?"). Reavaliando à luz do fato confirmado
+pelo pedido desta rodada — a dissertação nesta versão é só-simulação, sem
+comparação com robô real —: **a recomendação muda para "não vale o
+esforço agora, melhor ficar só como limitação documentada"**.
+
+Raciocínio (não é pesquisa nova de fonte, é análise do que já foi
+levantado): o plugin `WheelSlip` exige valores de `slip_compliance_lateral`/
+`slip_compliance_longitudinal` (adimensionais) pra funcionar. Sem um robô
+real (ou pelo menos uma medição/estimativa publicada de slip do TurtleBot4
+real em piso similar) pra calibrar esses valores, qualquer número usado
+seria arbitrário — e simular slip arbitrário não torna a simulação mais
+fiel à realidade, só troca "o simulador não modela slip" (limitação clara
+e defensável) por "o simulador modela slip, mas com um valor inventado"
+(limitação na prática pior, porque parece mais rigoroso do que é). Esse
+tipo de mitigação só faz sentido quando há dado real para calibrar — ou
+seja, ficaria genuinamente valioso se o projeto algum dia ganhar uma etapa
+de comparação com hardware real (não é o caso hoje). Até lá, a limitação
+documentada ("DiffDrive não modela slip de roda") já é a descrição mais
+honesta disponível. `implementacao.md` atualizado para refletir essa
+reavaliação (item não movido para "Feito" nem "Em andamento" — a decisão
+final de reformular ou não o texto da dissertação continua sendo do
+autor).
+
+### 2026-10-03 — Ruído Gaussiano de LiDAR (pergunta 3): confirmado que continua não usado, e nunca foi usado nem no vendor upstream
+
+Verifiquei diretamente nos arquivos do projeto (não só memória de
+2026-10-02): `fleet_ws/src/fleet_orchestrator/urdf/tb4/sensors/rplidar.urdf.xacro`
+e o macro `ray_sensor` que ele usa, em
+`fleet_ws/src/fleet_orchestrator/urdf/tb4/icreate/common_properties.urdf.xacro`
+— nenhum dos dois tem elemento `<noise>` ou parâmetro relacionado a ruído.
+Confirmado lendo o conteúdo real dos dois arquivos nesta sessão.
+
+- **Achado novo: isso não é uma lacuna introduzida por este projeto — o
+  pacote vendor de onde ele faz fork também nunca teve ruído no LiDAR.**
+  Comparei com o upstream oficial do Nav2
+  (`ros-navigation/nav2_minimal_turtlebot_simulation`, confirmado como o
+  repositório real via busca — página ROS index cita esse repo e mantainer
+  Steve Macenski, versão 1.2.0/2026-04-28): tanto
+  `nav2_minimal_tb4_description/urdf/sensors/rplidar.urdf.xacro` quanto o
+  macro `ray_sensor` em `.../icreate/common_properties.urdf.xacro`
+  (lidos via `WebFetch` em
+  `https://raw.githubusercontent.com/ros-navigation/nav2_minimal_turtlebot_simulation/main/...`)
+  também não têm nenhum elemento de ruído. Ou seja: o achado de
+  2026-10-02 ("ruído gaussiano é nativo do SDF, só não documentamos que dá
+  pra usar") continua válido como possibilidade técnica, mas a ausência de
+  uso neste projeto é herdada do vendor, não uma omissão específica deste
+  fork.
+- **Achado lateral: o IMU do mesmo robô TEM blocos de ruído Gaussiano
+  estruturalmente presentes, mas zerados (sem efeito).**
+  `fleet_ws/src/fleet_orchestrator/urdf/tb4/icreate/sensors/imu.urdf.xacro`
+  tem `<noise type="gaussian"><mean>0.0</mean><stddev>0.0</stddev></noise>`
+  nos 6 eixos (velocidade angular x/y/z, aceleração linear x/y/z) — também
+  herdado do vendor (o comentário no topo do arquivo diz que a única
+  mudança deste fork foi o parâmetro de namespace, não os blocos de
+  ruído). `stddev=0.0` significa, na prática, ruído nulo — equivalente
+  funcionalmente a não ter noise nenhum, mas estruturalmente mais fácil de
+  "ativar" (bastaria mudar um número) do que o caso do LiDAR (que
+  precisaria do elemento inteiro adicionado). Não testei nenhum efeito ao
+  vivo — achado é só leitura estática dos arquivos XML.

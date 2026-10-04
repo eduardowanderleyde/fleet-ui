@@ -2,6 +2,41 @@
 
 ## TL;DR
 
+**Atualização (2026-10-03, terceira rodada — avaliação retrospectiva da
+Seção 8.6 já publicada):**
+
+- A campanha de 3 fontes (`/odom` vs. `/pose` vs. ground truth) já rodou e
+  já está na dissertação (Cap. 08, Seção 8.6 "Fonte de Trajetória"). O item
+  "bloqueante" da rodada anterior (escolher o enquadramento ANTES do
+  piloto) está **fechado/obsoleto** — não dá mais pra decidir antes,
+  decidiram na prática.
+- **O que foi de fato usado é defensável, e não é nem Bland-Altman nem
+  ANOVA/Friedman — é RMSE escalar por réplica + IC 95% t de Student (N=10),
+  comparando cada fonte contra o ground truth separadamente.** Isso é, na
+  prática, o padrão-ouro da área de robótica/SLAM (erro de trajetória tipo
+  ATE/RMSE, o mesmo usado em benchmarks como TUM RGB-D e KITTI), não uma
+  adaptação da estatística clínica (Bland-Altman). É também exatamente a
+  mesma metodologia já usada e já justificada no Cap. 05 pra QA2 — ou seja,
+  é uma análise nova mas com método **já validado no resto da
+  dissertação**, não inventado especificamente pra essa seção.
+  Além disso, essa análise seguiu à risca duas recomendações da rodada
+  anterior deste agente: interpolar só o ground truth (a série densa) para
+  os timestamps da fonte esparsa, e usar 1 RMSE por réplica (não pontos
+  agrupados) — ambas reduzem riscos reais que tinham sido sinalizados antes
+  do piloto.
+- **Mas achei um problema real e concreto, de baixo esforço pra corrigir:**
+  o texto afirma que `/pose` fica "estatisticamente equivalente" entre as
+  3 rotas só porque os IC 95% se sobrepõem visualmente — isso não é um
+  teste de equivalência de verdade (nenhum ANOVA/Kruskal-Wallis/teste de
+  equivalência foi rodado em lugar nenhum da dissertação, confirmado por
+  busca no texto). "IC se sobrepõem" é uma heurística estatisticamente
+  **não confiável** pra concluir "sem diferença" — é um erro documentado
+  na literatura (Gelman & Stern, 2006). **Recomendo trocar a palavra
+  "estatisticamente equivalente" por uma frase mais honesta** (ex. "não
+  indica diferença perceptível com os dados disponíveis") — é uma correção
+  de texto, sem precisar rodar nada de novo, e dá pra fazer antes da
+  defesa com baixo risco.
+
 **Atualização (2026-10-02, segunda rodada — sincronização temporal pré-piloto):**
 
 - **Taxa de `/odom` confirmada com fonte real do próprio projeto: 30Hz
@@ -499,3 +534,163 @@ aqui. Recomendo também considerar se a decisão metodológica já tomada
 deveria ser revisitada à luz deste resultado, já que agora há dados reais
 mostrando que `/odom` sozinho pode estar superestimando a divergência
 real em rotas longas.
+
+### 2026-10-03 — Avaliação retrospectiva da Seção 8.6 já publicada: enquadramento é defensável, mas achei uma frase estatisticamente frágil
+
+Contexto desta rodada: a campanha de 3 fontes (achado acima) já rodou e já
+está na dissertação (`dissertacao/chapters/08_resultados.tex`, Seção 8.6
+"Fonte de Trajetória: Odometria, SLAM e *Ground Truth*", label
+`sec:res_fonte_trajetoria`). Esta rodada NÃO é mais uma decisão a tomar
+antes do piloto — é checar se o que foi de fato escrito se sustenta frente
+a uma banca.
+
+**Nota de método desta rodada:** a branch `dissertacao` não está checked
+out neste worktree (`mission-coordinate-large-scale`), e esta execução não
+teve acesso a uma ferramenta de shell/git para trocar de branch ou rodar
+`git show`. O texto da Seção 8.6, da Seção 2.3.1 do Cap. 05
+(`eq:ic_95`) e uma varredura do Cap. 09 foram obtidos via
+`raw.githubusercontent.com/eduardowanderleyde/fleet-ui/dissertacao/...`
+(fetch HTTP do conteúdo real da branch no GitHub, repositório remoto
+confirmado em `.git/config`) — é o conteúdo real do repositório remoto,
+não uma reconstrução a partir de memória ou de PDFs antigos no disco (o
+PDF local mais recente, `~/Downloads/dissertacao_overleaf_2026_10_01.pdf`,
+é de antes da campanha ter rodado e NÃO contém a Seção 8.6 — não foi usado
+como fonte dos achados abaixo).
+
+17. **O enquadramento de fato usado é defensável — não é literalmente
+    Bland-Altman nem ANOVA/Friedman (a tensão da primeira rodada, achado 3),
+    é a métrica padrão-ouro de erro de trajetória em robótica/SLAM (RMSE
+    escalar por réplica) aplicada separadamente a cada fonte contra o
+    ground truth, com IC 95% t de Student (N=10) — a MESMA metodologia já
+    justificada no Cap. 05 pra QA2.** Texto confirmado verbatim (Seção 8.6):
+    "A Tabela~\ref{tab:fonte_trajetoria} ... resumem o RMSE médio de cada
+    fonte contra o *ground truth*, com intervalo de confiança de 95\% (t de
+    Student, $N=10$, mesma justificativa estatística de QA2)." A
+    justificativa do Cap. 05 (Seção 2.3.1, `eq:ic_95`, confirmada verbatim)
+    diz que $t$ é usado "por ser mais apropriada para amostras pequenas
+    ($N<30$), onde a variância populacional é desconhecida" — é a mesma
+    justificativa genérica já avaliada como correta na primeira rodada
+    deste agente (achado 1), não uma justificativa nova específica pra
+    Seção 8.6. **Isto não é Bland-Altman** (que reporta viés/bias médio +
+    limites de concordância a partir da diferença pareada ponto-a-ponto) —
+    é RMSE (que combina viés² + variância num único escalar), o que é a
+    convenção padrão de avaliação de trajetória em robótica/SLAM (erro
+    estilo ATE/RMSE, o mesmo paradigma de benchmarks consagrados como TUM
+    RGB-D e KITTI — não confirmado nesta rodada se a Seção 8.6 cita
+    explicitamente esses benchmarks, só que o *tipo* de métrica usada é o
+    mesmo). **Conclusão: isto resolve, na prática, a tensão sinalizada no
+    achado 3 da primeira rodada** — não porque o autor escolheu entre as
+    duas opções que eu tinha levantado, mas porque usou uma terceira opção
+    (a própria métrica já validada no resto da dissertação), que cumpre o
+    mesmo objetivo metodológico (comparar cada fonte contra a referência,
+    separadamente, não um teste simétrico de 3 grupos) com consistência
+    interna ao texto. **Isto também confirma, com o texto real publicado,
+    que as duas recomendações concretas da segunda rodada foram seguidas**:
+    (a) interpolar só o ground truth (a série densa) para os timestamps da
+    fonte esparsa a avaliar — texto confirmado: "o RMSE de cada fonte ...
+    foi calculado interpolando o *ground truth* ... para os instantes de
+    tempo exatos de cada amostra da fonte mais esparsa, em vez do inverso";
+    (b) 1 observação (RMSE) por réplica, não pontos-tempo agrupados — a
+    Tabela~\ref{tab:fonte_trajetoria} reporta N=10 por rota, consistente
+    com o que já estava em `analyze_ground_truth_campaign.py`. Não achei
+    nada nesta rodada que enfraqueça a validade dos números já registrados
+    no achado anterior (RMSE 0,01/5,18/14,27cm pra `/odom`, 3,28/2,25/2,45cm
+    pra `/pose`).
+
+18. **Achado real e concreto: a frase "estatisticamente equivalente" no
+    texto da Seção 8.6 não é sustentada por nenhum teste formal — só por
+    sobreposição visual de IC 95%, uma heurística estatisticamente não
+    confiável.** Texto confirmado verbatim: "o erro de `/pose` permanece
+    baixo e estatisticamente equivalente entre as três rotas ($\approx$2–3
+    cm, intervalos de confiança sobrepostos)". Os três IC realmente se
+    sobrepõem par-a-par (Curta [0,80;5,75], Longa [1,46;3,03], Loop
+    [1,83;3,07] — todos os pares têm interseção não-vazia), então a
+    observação factual está correta, mas a palavra "estatisticamente
+    equivalente" implica um teste de equivalência formal (ex. TOST) ou, no
+    mínimo, um teste de diferença (ex. ANOVA one-way ou Kruskal-Wallis
+    comparando as 3 rotas como grupos independentes — **não** ANOVA de
+    medidas repetidas/Friedman, porque aqui rota é um fator
+    *entre-grupos*: cada réplica pertence a uma única rota, não é a mesma
+    réplica medida nas 3 rotas) — e nenhum desses testes foi rodado.
+    Confirmado por busca no Cap. 09 (`09_conclusao.tex`, fetch do conteúdo
+    real da branch): nenhuma menção a "Bland-Altman", "ANOVA", "Friedman"
+    ou "equivalência estatística" em lugar nenhum do texto pesquisado — a
+    afirmação de equivalência se apoia inteiramente na sobreposição visual
+    dos IC. **"IC se sobrepõem" não é um teste de (não-)diferença
+    confiável** — é um erro estatístico documentado na literatura:
+    Gelman, A.; Stern, H., "The Difference Between 'Significant' and 'Not
+    Significant' is not Itself Statistically Significant", *The American
+    Statistician*, 60(4):328-331, 2006 (confirmado real via busca web;
+    DOI/link exato não verificado nesta sessão, mas a citação bibliográfica
+    — autores, título, periódico, volume, páginas, ano — está confirmada
+    por múltiplas fontes concordantes na busca) — o paper mostra que
+    sobreposição/não-sobreposição de IC não equivale de forma confiável a
+    significância/não-significância de uma diferença, podendo errar nos
+    dois sentidos.
+    **Isto é urgente mas de baixíssimo risco/esforço pra corrigir antes da
+    defesa, sem precisar rodar nenhum experimento de novo.**
+
+    **Ação sugerida (mínima, recomendada antes da defesa):** trocar a
+    frase "permanece baixo e estatisticamente equivalente entre as três
+    rotas" por uma formulação que não implique teste formal — ex. "permanece
+    baixo e não indica diferença perceptível entre as três rotas, com
+    intervalos de confiança sobrepostos" ou "permanece baixo e dentro da
+    mesma faixa de incerteza nas três rotas". É só uma mudança de texto em
+    `dissertacao/chapters/08_resultados.tex` (branch `dissertacao`), não
+    muda nenhum número da Tabela~\ref{tab:fonte_trajetoria} nem a
+    interpretação central da seção (que `/odom` cresce com a rota e
+    `/pose` fica baixo e estável).
+
+    **Ação sugerida (opcional, mais trabalho, não necessária antes da
+    defesa):** se o autor quiser sustentar a afirmação de equivalência com
+    um teste de verdade, rodar um ANOVA one-way (ou Kruskal-Wallis, dado
+    N=10 por grupo e possível não-normalidade de RMSE) comparando o RMSE de
+    `/pose` vs. GT entre as 3 rotas como grupos independentes — **não**
+    Friedman/ANOVA de medidas repetidas (rota aqui é entre-grupos, não
+    dentro-do-sujeito, ao contrário do caso de 3 *fontes* na mesma réplica
+    discutido nos achados 3-4 da primeira rodada, que continua sendo um
+    cenário diferente). Isto é uma sugestão de análise adicional, não uma
+    decisão — o autor pode preferir simplesmente suavizar o texto (opção
+    acima) dado o prazo da defesa.
+
+19. **Não achei nenhum outro problema estatístico na Seção 8.6 além do
+    achado 18.** Especificamente verifiquei e não encontrei: (a) nenhuma
+    alegação de causalidade além do que os dados sustentam; (b) nenhuma
+    comparação pareada entre `/odom` e `/pose` que devesse ter sido testada
+    formalmente e não foi (o texto compara cada um contra o ground truth
+    separadamente e deixa a comparação `/odom` vs. `/pose` implícita na
+    magnitude dos números, sem alegar significância estatística entre
+    eles — isso é apropriado, a diferença de 14,27cm vs. 2,45cm na rota
+    Loop, com IC que não se sobrepõem [13,78;14,76] vs. [1,83;3,07], é
+    suficientemente grande pra não precisar de teste formal pra ser
+    convincente); (c) nenhum problema de múltiplas comparações não
+    endereçado que pareça grave (6 IC reportados — 2 fontes × 3 rotas —
+    sem correção, mas a seção é explicitamente descritiva/exploratória,
+    "fora do desenho formal QA1–QA4 ... sem hipótese de pesquisa nem
+    critério de aceitação pré-registrado associado", texto confirmado
+    verbatim — essa transparência já mitiga a crítica de "fishing", é uma
+    prática editorial honesta que uma banca dificilmente vai penalizar).
+    **Veredito geral: a Seção 8.6, como um todo, é estatisticamente
+    defensável para N=10 por rota — o único ponto fraco real e concreto é
+    a palavra "estatisticamente equivalente" do achado 18.**
+
+## Ação sugerida (consolidado desta rodada, 2026-10-03)
+
+- **Baixo esforço, recomendado antes da defesa:** trocar a frase
+  "estatisticamente equivalente" na Seção 8.6
+  (`dissertacao/chapters/08_resultados.tex`) por uma formulação que não
+  implique teste formal de equivalência — ver texto sugerido no achado 18.
+  Decisão e execução são do autor (ou de uma tarefa de implementação na
+  branch `dissertacao`, fora do escopo deste agente que trabalha na branch
+  de código).
+- **Opcional, não bloqueante:** considerar rodar um ANOVA one-way/
+  Kruskal-Wallis comparando RMSE de `/pose` entre as 3 rotas (grupos
+  independentes) se o autor quiser sustentar a alegação de equivalência
+  com um teste formal em vez de só suavizar o texto (achado 18).
+- **Item "bloqueante" da rodada anterior em `implementacao.md`
+  (decidir Bland-Altman vs. ANOVA antes do piloto) está obsoleto — o
+  piloto e a campanha completa já rodaram usando uma terceira abordagem
+  (RMSE + IC t-Student por fonte, já validada no resto da dissertação),
+  que cumpre o mesmo objetivo metodológico. Fechado nesta rodada em
+  `implementacao.md`, substituído por um item novo e mais específico (a
+  correção de texto do achado 18).**

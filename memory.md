@@ -24,6 +24,84 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-03 — rodada 3, `experiment-gazebo-tracking`: mecanismo exato da perda de nome/timestamp no ground truth + reavaliação do `WheelSlip` + LiDAR noise confirmado não-usado
+
+- **[gazebo_tracking]** Lendo o código-fonte real do `gz-sim`
+  (`SceneBroadcaster.cc`) e do `ros_gz_bridge` (`convert/geometry_msgs.cpp`):
+  o Gazebo já manda o nome da entidade (`pose.name()`) e um timestamp real
+  de física em `dynamic_pose/info`, mas o bridge genérico procura esses
+  dois campos num lugar que o Gazebo nunca preenche (header por-Pose, não
+  o campo `name()` nem o header do array) — por isso ambos se perdem.
+  Ação sugerida: mencionar na Seção 8.6/Limitações que o timestamp do
+  ground truth reflete o recebimento pelo `ground_truth_filter`, não o
+  instante exato da física (defasagem pequena, <~17ms). Reavaliação do
+  `WheelSlip` (pendente desde 2026-10-02): dado que a dissertação é
+  só-simulação, recomendação agora é NÃO implementar (sem dado real pra
+  calibrar, só trocaria uma limitação honesta por uma arbitrária).
+  Confirmado que ruído Gaussiano de LiDAR continua não usado, e nunca foi
+  usado nem no vendor upstream (`nav2_minimal_turtlebot_simulation`) — não
+  é lacuna deste fork. → `conhecimento/gazebo_tracking.md`
+
+### 2026-10-03 — rodada 3, `experiment-dds-tuning`: qual mitigação tentar antes da defesa (70% agora citado formalmente no Cap. 09)
+
+- **[dds_tuning]** Respondendo à pergunta direta (prazo curto até a
+  defesa): das 3 hipóteses (RMW swap, `ROS_DISCOVERY_SERVER`,
+  `ComposableNodeContainer`), a troca de `RMW_IMPLEMENTATION` pra
+  `rmw_cyclonedds_cpp` é a de melhor esforço/risco — confirmado no
+  código que não exige nenhuma mudança (backend e script de campanha já
+  herdam o ambiente do processo pai), só precisa instalar o pacote apt
+  (não está no `Dockerfile`) e testar em A/B. `ComposableNodeContainer`
+  (maior potencial, maior risco de regressão nos mesmos launch files que
+  já quebraram 1x nesta sessão) e `ROS_DISCOVERY_SERVER` (ganho não
+  confirmado em localhost) ficam recomendados como trabalho futuro
+  documentado, não tentar antes da defesa. Corrigi no caminho uma
+  suposição errada que quase registrei (TurtleBot4 real NÃO usa Cyclone
+  DDS por padrão — confirmado no manual oficial, default é Fast DDS
+  igual ao ROS 2 puro; Cyclone é só uma alternativa suportada). →
+  `conhecimento/dds_tuning.md` (achado 2026-10-03)
+
+### 2026-10-03 — rodada 3, `experiment-mcp-orchestration`: pilotos reais confirmam tool-calling direto; CLiMRS como referência nova de coordenação multi-robô
+
+- **[mcp_orchestration]** Os dois pilotos reais da camada de agentes
+  (single-robô e multi-robô, rodados nesta sessão) confirmaram na
+  prática a decisão de manter tool-calling direto — isolamento por
+  robô e recusa de parâmetro ambíguo já funcionam por construção do
+  código, não dependem de protocolo MCP. A limitação real observada no
+  piloto multi-robô ("Planners independentes, sem coordenação") agora
+  tem referência mais específica e recente: CLiMRS (arXiv 2602.06967),
+  que propõe negociação em subgrupos entre agentes LLM um-por-robô —
+  mais específico que Li et al. 2025 já citado na dissertação. →
+  `conhecimento/mcp_orchestration.md`
+
+### 2026-10-03 — rodada 3, `experiment-nav2-tracking`: explicação alternativa pro resultado da Seção 8.6 + recomendação sobre `regenerate_noises`
+
+- **[nav2_tracking]** O crescimento do erro de `/odom` com a complexidade
+  da rota (Seção 8.6, 0cm→5,18cm→14,27cm) provavelmente não é sobre o
+  MPPI — não achei issue/discussão do Nav2 sobre isso, mas achei que é
+  um fenômeno clássico de odometria de rodas (Borenstein & Feng, 1996:
+  erro de orientação em curvas vira erro de posição sem limite), não
+  um comportamento do controlador. Candidato a citação na Seção 8.6.
+  Também: recomendo NÃO rodar agora a campanha
+  `regenerate_noises: false` vs. baseline antes da defesa (risco de
+  tempo alto, ganho incerto) — deixar como trabalho futuro com a
+  infraestrutura já pronta. → `conhecimento/nav2_tracking.md`
+
+### 2026-10-03 — `experiment-slam-toolbox-tracking`: ameaça à validade na constância do erro de `/pose`
+
+- **[slam_toolbox_tracking]** O resultado novo do Cap. 08 (Seção 8.6) —
+  erro de `/pose` constante (~2-3cm) entre 0,9m e um loop de 11,3m,
+  enquanto `/odom` cresce até 14cm — tem uma explicação mecanística real
+  (correção contínua por scan-matching, confirmada no README oficial e no
+  paper `macenski2021slam`), mas foi testado só até 11,3m num mapa
+  pequeno sem corredores repetidos; 3 mecanismos conhecidos (janela de
+  busca limitada do scan matcher, aliasing perceptual em ambientes
+  repetitivos como o `warehouse.sdf` do projeto, e o efeito específico de
+  loop closure só na rota que fecha loop) poderiam derrubar essa
+  constância em rotas/mapas maiores — vale registrar como limitação no
+  Cap. 09. Também reconfirmado: o bug de lifecycle #884 (achado
+  2026-10-02) continua sem nenhum release upstream que o inclua. Detalhe
+  completo em `conhecimento/slam_toolbox_tracking.md`.
+
 ### 2026-10-02 — rodada 2, `experiment-stats-methodology`: sincronização temporal pro piloto
 
 - **[stats_methodology]** `/odom` confirmado publicando a 30Hz exato (fonte
@@ -249,6 +327,41 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   que `run_campaign` não reseta a pose do robô entre réplicas (diferente
   de `run_ground_truth_campaign.py`, que faz isso de propósito). Ver
   `implementacao.md` ("Feito") e `conhecimento/mcp_orchestration.md`.
+
+### 2026-10-03 — avaliação retrospectiva: Seção 8.6 já publicada é defensável, mas uma frase precisa de correção antes da defesa
+
+- **[stats_methodology]** O item "bloqueante" anterior (escolher
+  Bland-Altman vs. ANOVA antes do piloto) está obsoleto — a campanha já
+  rodou e já está na dissertação (Cap. 08, Seção 8.6). O que foi de fato
+  usado (RMSE escalar por réplica + IC 95% t de Student, N=10, cada fonte
+  vs. ground truth separadamente, mesma metodologia já validada pra QA2
+  no Cap. 05) é defensável e segue as recomendações anteriores deste
+  agente (interpolar só ground truth, 1 observação por réplica). **Achado
+  real e concreto**: o texto afirma `/pose` "estatisticamente equivalente"
+  entre as 3 rotas só por sobreposição visual de IC — nenhum teste formal
+  foi rodado, e isso é um erro estatístico documentado (Gelman & Stern,
+  2006). Correção sugerida é textual, de baixo esforço/risco (não muda
+  nenhum número). Ver `implementacao.md` ("Pendente") e
+  `conhecimento/stats_methodology.md` (achados 17-19).
+
+### 2026-10-03 — pacote de replicacao pro Zenodo + reavaliacao do achado "dados perdidos"
+
+- **[artifact_publishing]** Confirmado: ainda nao existe nenhuma Release no
+  GitHub do fleet-ui. Recomendacao concreta: repositorio git completo (sem
+  os bags brutos de `collections/`, ~36MB, regeneraveis) e o pacote certo
+  pra arquivar no Zenodo, com roteiro passo-a-passo detalhado em
+  `implementacao.md`. Achado real no caminho: as rotas YAML
+  (`fleet_ws/routes/*.yaml`) usadas pelas campanhas ja commitadas
+  (`gt01_curta/longa/loop`, pilotos de IA) nunca foram versionadas
+  (gitignored) - um clone/Release nao as incluiria, so os resultados
+  processados. Reavaliacao do achado de 2026-10-02 ("dados da campanha
+  oficial perdidos"): continua valido e nao corrigido (a campanha
+  `dissertation_clean01_final_manual` original segue irrecuperavel), mas a
+  mitigacao aplicada entao (`_git_provenance()`) esta confirmada
+  funcionando de verdade - lida direto no `gt01_curta/replay_r01.json`
+  committed, campo `"git": {"commit": "628d0814...", "dirty": true}`
+  populado. Ver `implementacao.md` ("Pendente") e
+  `conhecimento/artifact_publishing.md`.
 
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo

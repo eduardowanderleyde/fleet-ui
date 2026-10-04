@@ -2,6 +2,33 @@
 
 ## TL;DR
 
+(atualizado 2026-10-03) **Pergunta direta respondida nesta rodada:** dado
+o prazo curto até a defesa, das 3 hipóteses levantadas, a de melhor
+relação esforço/risco/chance é **trocar `RMW_IMPLEMENTATION` pra
+`rmw_cyclonedds_cpp` e testar em A/B contra o padrão atual** — é literalmente
+1 variável de ambiente (confirmado no código: tanto o backend quanto o
+script de campanha herdam o ambiente do processo pai sem filtrar nada,
+então nem precisa mudar 1 linha de código), 100% reversível (só
+desfazer a variável), e testável com as ferramentas que já existem
+(`run_ground_truth_campaign.py` já conta retries). O `ComposableNodeContainer`
+continua sendo a hipótese com maior potencial teórico de resolver a
+causa raiz de verdade (reduz ~9 participantes DDS por robô pra 1-2), mas
+é mudança de arquitetura de launch files — fica recomendado como
+**trabalho futuro documentado**, não pra tentar antes da defesa (o
+projeto já se queimou uma vez cortando nó demais num launch "enxuto"
+sem testar todos os usos, ver achado de 2026-10-03 abaixo sobre
+`waypoint_follower` — editar esses mesmos arquivos de novo sob prazo
+curto é risco real). `ROS_DISCOVERY_SERVER` fica em último lugar: além
+do esforço (processo novo pra manter vivo e saudável durante 30 réplicas
+de campanha), a pesquisa não achou nenhuma fonte confirmando ganho real
+em localhost/shared-memory (o benefício de até 93% medido é pra tráfego
+de rede real, não pra 1 máquina só). Achado novo relevante no caminho:
+o próprio TurtleBot4 real tem suporte oficial, documentado no manual do
+usuário, pra alternar entre Fast DDS (padrão) e Cyclone DDS via
+ferramenta de setup — ou seja, essa troca é um caminho conhecido e
+testado pelo próprio fabricante da plataforma, não uma combinação
+exótica.
+
 (atualizado 2026-10-02) O ROS 2 Jazzy usa Fast DDS por padrão — mas
 não há confirmação ao vivo de qual RMW este projeto usa de fato (não
 está fixado em nenhum script/Dockerfile do repo); é só inferência pelo
@@ -323,3 +350,113 @@ quebrar um caso de uso diferente (replay) que ninguém testou contra esse
 caminho de ativação até agora — vale revisar se há outros cortes
 semelhantes no projeto que nunca foram testados contra todos os usos
 reais (`go_to_point` E `play_route`).
+
+### 2026-10-03 — Pergunta direta: qual hipótese tentar ANTES da defesa (prazo curto)? RMW swap vence por esforço/risco/reversibilidade
+
+Contexto da pergunta: o número de 70% (7/10) deixou de ser observação
+informal e passou a estar citado como resultado quantitativo no Cap. 09
+(Limitações) da dissertação (branch `dissertacao`, não acessível direto
+deste checkout na branch de código — não pude ler o `.tex` nesta sessão,
+mas a informação foi dada no pedido da rodada e é consistente com o que
+já se sabia). Isso eleva a prioridade de qualquer mitigação barata.
+
+**Comparação das 3 hipóteses, com achados novos confirmados nesta rodada:**
+
+1. **`RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` (troca de RMW via variável
+   de ambiente) — recomendação: tentar antes da defesa.**
+   - **Confirmado por leitura direta do código (não suposição) que o
+     teste exige ZERO mudança de código:** `backend/ros_bridge.py:21-25`
+     (`ros_env()`) monta o ambiente dos subprocessos com `**os.environ`
+     (herda tudo do processo pai) só sobrescrevendo `ROS_DOMAIN_ID`;
+     `fleet_ws/scripts/run_ground_truth_campaign.py:102-109`
+     (`launch_bash`) chama `subprocess.Popen(["bash", "-c", full], ...)`
+     **sem passar `env=` nenhum**, o que em Python significa herdar o
+     ambiente do processo pai automaticamente. Ou seja: exportar
+     `RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` no shell antes de rodar o
+     backend OU o script de campanha já propaga pra toda a árvore de
+     processos `ros2 launch`, sem tocar em nenhum `.py`.
+   - **Pré-requisito real, confirmado pelo `Dockerfile` (raiz do repo,
+     linha 38): só `ros-${ROS_DISTRO}-desktop` é instalado — isso NÃO
+     inclui `ros-jazzy-rmw-cyclonedds-cpp`** (é um pacote apt separado
+     do metapacote desktop). Testar exige primeiro
+     `apt-get install ros-jazzy-rmw-cyclonedds-cpp` (1 linha, baixo
+     risco, pacote oficial do mesmo repositório apt já configurado no
+     Dockerfile) — sem isso, setar a variável só faz o `ros2 launch`
+     falhar ao carregar o RMW.
+   - **Achado novo, bem confirmado (fonte primária oficial — corrige uma
+     suposição que eu quase assumi errada):** o manual oficial do
+     usuário do TurtleBot4
+     ([turtlebot.github.io/turtlebot4-user-manual/software/turtlebot4_setup.html](https://turtlebot.github.io/turtlebot4-user-manual/software/turtlebot4_setup.html))
+     confirma que a ferramenta de setup do robô real tem uma opção
+     explícita `RMW_IMPLEMENTATION` com 2 valores (`rmw_fastrtps_cpp` —
+     **default** —, `rmw_cyclonedds_cpp`), com a única ressalva de que
+     o RMW escolhido precisa bater com o que o firmware do Create 3
+     suporta. **Correção de uma busca anterior nesta mesma rodada:** um
+     resumo de busca inicial sugeriu que "o TurtleBot4 usa Cyclone DDS
+     por padrão" — isso é falso, fui conferir na fonte primária (o
+     manual oficial) antes de registrar, e o default real é Fast DDS,
+     igual ao ROS 2 Jazzy puro. O que FICA confirmado e é útil mesmo
+     assim: alternar pra Cyclone DDS no TurtleBot4 é um caminho
+     oficialmente suportado e documentado pelo próprio fabricante da
+     plataforma (não uma combinação exótica/não testada), o que reduz o
+     risco de incompatibilidade.
+   - **Achado correlato, registrado como NÃO CONFIRMADO (não achei fonte
+     primária que bata o número exato):** uma thread no fórum do ROS
+     ([discourse.openrobotics.org/t/how-many-dds-participants-are-currently-used-allowed-by-rmw/49976](https://discourse.openrobotics.org/t/how-many-dds-participants-are-currently-used-allowed-by-rmw/49976))
+     discute um limite de participantes (um usuário cita "32" associado
+     a `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST`/`maxInitialPeersRange`
+     do Fast DDS) e afirma que Fast DDS falha silenciosamente ao bater
+     esse limite (nós somem de `ros2 node list` sem aviso) enquanto
+     Cyclone DDS emite aviso no console. Tentei confirmar o número "32"
+     direto na documentação oficial do Fast DDS e no `.rst` oficial do
+     ROS 2 sobre `ROS_AUTOMATIC_DISCOVERY_RANGE` — **nenhum dos dois
+     menciona esse número**; a doc oficial do ROS 2 não cita limite
+     numérico nenhum. Registro isso como pista NÃO CONFIRMADA, não como
+     fato: *se* for real, seria um mecanismo plausível pra explicar por
+     que as falhas não têm padrão limpo (ora o 1º robô, ora o 2º —
+     consistente com "cruzar um limiar de contagem de participantes de
+     forma não-determinística conforme o timing de cleanup de DDS dos
+     processos anteriores", não um bug fixo em um nó específico). Mas
+     isso é hipótese, não achado verificado — não deve ser citado na
+     dissertação como fato.
+
+2. **`ComposableNodeContainer` — recomendação: manter como trabalho
+   futuro documentado, não tentar antes da defesa.**
+   É a hipótese com o mecanismo mais diretamente confirmado (achado
+   de 2026-10-02: Nav2 upstream já usa por padrão, SLAM Toolbox suporta,
+   números reais de CPU no fórum mostram overhead por participante), mas
+   exige reescrever `nav2_minimal.launch.py`/`activate_robot_nav.launch.py`
+   de verdade — os mesmos arquivos que, há 3 dias, já causaram uma
+   regressão real neste projeto (corte do `waypoint_follower` por engano
+   de escopo, só descoberto ao vivo rodando `run_fleet`, ver achado de
+   2026-10-03 acima). Editar esses arquivos de novo, sob prazo curto, sem
+   tempo de testar AMBOS os casos de uso (`go_to_point` e `play_route`)
+   de novo, é o tipo exato de risco que já se materializou uma vez aqui.
+   Esforço alto + risco real de regressão nova perto da defesa > ganho
+   potencial não comprovado em cenário localhost especificamente.
+
+3. **`ROS_DISCOVERY_SERVER` — recomendação: manter como trabalho futuro
+   documentado, prioridade mais baixa que as outras duas.**
+   Sem mudança no achado de 2026-10-02 (ganho de até 93% medido é pra
+   tráfego de rede real/SDP, nenhuma fonte encontrada confirma ganho em
+   localhost/shared-memory). Esforço aqui é maior que a troca de RMW
+   (precisa de um processo servidor novo, vivo e saudável durante toda
+   uma campanha de 30 réplicas, com seu próprio risco de ponto único de
+   falha) sem evidência de que o ganho se aplica ao cenário real deste
+   projeto (1 máquina só).
+
+**Ação sugerida (resumo pra decisão do autor):** rodar um A/B antes da
+defesa — N réplicas (sugestão: igual ou maior que as 10 já usadas na
+campanha de ground truth) da ativação sequencial multi-robô com o
+default atual vs. com `RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` exportada
+antes de subir o backend/script, usando a infraestrutura de retry que
+já existe (`run_ground_truth_campaign.py` ou o piloto de ativação
+sequencial) pra contar quantas tentativas cada réplica precisou — isso
+dá um número real pra comparar contra os 7/10 já citados na dissertação,
+não só "testamos e parece melhor". Pré-requisito: instalar
+`ros-jazzy-rmw-cyclonedds-cpp` (não está no `Dockerfile` hoje). Se não
+houver tempo nem pra esse teste simples antes da defesa, a alternativa
+mais honesta é documentar os 70% como limitação conhecida (já é o caso)
+e citar `ComposableNodeContainer`/`ROS_DISCOVERY_SERVER`/troca de RMW
+como trabalho futuro no texto já existente — não inventar um resultado
+de mitigação que não foi medido.

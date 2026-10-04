@@ -2,6 +2,21 @@
 
 ## TL;DR
 
+**Atualização rodada 3 (2026-10-03)**: os dois pilotos reais da camada
+de agentes (single-robô e multi-robô, rodados pela primeira vez nesta
+sessão) **confirmaram na prática** a decisão de manter tool-calling
+direto — nenhum dos dois expôs uma dor real que um servidor MCP teria
+resolvido; isolamento por robô e recusa de parâmetro ambíguo já
+funcionam hoje por construção do próprio código Python, não dependem de
+protocolo. Já a limitação real observada no piloto multi-robô (dois
+agentes `Planner` totalmente independentes, sem nenhuma coordenação
+entre si) agora tem uma referência mais específica e recente que a já
+citada na dissertação: o paper CLiMRS (dez/2025 ou fev/2026, data com
+pequena inconsistência não resolvida) ataca exatamente esse cenário
+("um LLM por robô, sem coordenação") propondo negociação em subgrupos —
+boa referência pra "trabalhos futuros", se o autor quiser, mas não é
+ação pra implementar agora.
+
 Primeira rodada de pesquisa (2026-10-02). Resumo em português simples:
 
 - O spec do MCP **não ficou mais simples** — pelo contrário: desde a
@@ -39,6 +54,18 @@ Primeira rodada de pesquisa (2026-10-02). Resumo em português simples:
   próximo passo do projeto — mas nenhum desses exemplos resolve
   orquestração multi-robô coordenada, que é o ponto fraco desta frota
   hoje.
+- **Atualização 2026-10-03** (rodada 3, depois dos dois pilotos reais
+  rodarem pela primeira vez): a experiência prática **confirmou** a
+  recomendação de manter tool-calling direto — nada no uso real (nem no
+  piloto single-robô, nem no multi-robô) expôs uma dor que um servidor
+  MCP resolveria. Isolamento por robô já existe por construção no
+  código (`robot_id` obrigatório em cada tool + um `Planner` por robô
+  rodando em paralelo via `asyncio.gather`), não é um problema de
+  protocolo. Por outro lado, a limitação real observada no piloto
+  multi-robô (dois `Planner`s totalmente independentes, sem nenhuma
+  coordenação entre si) agora tem nome e literatura específica mais
+  recente que o survey genérico de Li et al. 2025 citado na dissertação
+  — ver achado 7 abaixo.
 
 Este arquivo é mantido pelo agente `experiment-mcp-orchestration`
 (`.claude/agents/experiment-mcp-orchestration.md`) — cada execução lê
@@ -295,3 +322,131 @@ verdade, seria preciso ou (a) estender `run_campaign` pra relançar/
 resetar entre réplicas como `run_ground_truth_campaign.py` já faz, ou
 (b) rodar réplicas via chamadas separadas de `run_experiment` com reset
 explícito de pose entre cada uma. Nenhuma das duas foi feita ainda.
+
+### 2026-10-03 — rodada 3: pilotos reais confirmam tool-calling direto; literatura nova sobre coordenação multi-robô LLM
+
+Motivada pela pergunta direta: agora que os dois pilotos da camada de
+agentes rodaram de verdade (single-robô `llm_pilot01` e multi-robô
+`fleet_pilot_tb1/tb2_v2/v3`, ver entradas acima), a experiência
+operacional muda a recomendação sobre MCP? E a literatura de
+coordenação multi-agente mudou desde a última pesquisa (2026-10-02)?
+
+7. **Análise do próprio código (não é busca web) — confirma que o
+   isolamento por robô e a recusa de parâmetro ambíguo nunca foram
+   problemas de protocolo de tool-calling, e por isso um servidor MCP
+   não teria ajudado em nenhum dos dois.**
+   Lido diretamente em `backend/main.py` (endpoint `/api/agent/run_fleet`,
+   linha ~1185) e `backend/agents/executor.py`: o isolamento por robô no
+   piloto multi-robô não depende de protocolo nenhum — é
+   `asyncio.gather` disparando um `Planner`/`Executor` **por robô**,
+   cada um com seu próprio `robot_id` fixo no momento da chamada
+   (`_execute_planner(..., robot_id=rid)`), e toda tool em
+   `backend/agents/tools.py` já exige `robot_id` como parâmetro
+   obrigatório no schema. MCP (como qualquer outro transporte) não
+   mudaria isso — o isolamento é decisão de arquitetura da aplicação
+   Python, não uma capacidade que falta no tool-calling direto.
+   Da mesma forma, a recusa do Planner em inventar `robot_id`/waypoints
+   quando a instrução era ambígua (achado de 2026-10-02, item 3) foi
+   comportamento do próprio modelo seguindo o *system prompt*/instruções
+   — não depende de nenhuma feature de protocolo MCP (como
+   elicitation). Um servidor MCP exporia as mesmas tools com o mesmo
+   schema JSON; a decisão de recusar preencher um parâmetro ambíguo
+   continuaria sendo do modelo, não do protocolo.
+   **Conclusão da rodada**: a experiência real **confirma** a
+   recomendação da rodada 1 — nenhum dos dois pilotos revelou uma dor
+   operacional real que um servidor MCP resolveria. Os bugs reais
+   encontrados nos dois pilotos (venv/Brotli, `waypoint_follower`
+   removido do launch, falta de reset de pose entre réplicas em
+   `run_campaign`) são todos ortogonais à escolha de protocolo —
+   aconteceriam exatamente igual com ou sem MCP.
+
+8. **Paper real, bem recente e diretamente relevante: CLiMRS (arXiv
+   2602.06967).** "Leveraging Adaptive Group Negotiation for
+   Heterogeneous Multi-Robot Collaboration with Large Language
+   Models", Siqi Song, Xuanbing Xie, Zonglin Li, Yuqiang Li, Shijie
+   Wang, Biqing Qi. Confirmado por leitura direta do abstract/página
+   arXiv. **Nota de verificação**: a página mostra "v1 Mon, 29 Dec
+   2025" no histórico de submissão, mas o identificador `2602.06967`
+   segue a convenção `AAMM` do arXiv e corresponderia a fevereiro de
+   2026 — há uma inconsistência entre o identificador e a data de
+   submissão mostrada que não investiguei a fundo (pode ser atraso de
+   moderação/anúncio, é comum no arXiv, mas não confirmei a causa
+   exata). Registro a data como vista na página, com essa ressalva
+   explícita.
+   O ponto central do paper é exatamente a limitação observada no
+   piloto deste projeto: parte de uma arquitetura onde **cada robô tem
+   seu próprio agente LLM** (igual ao `run_fleet` daqui — um `Planner`
+   por `robot_id`) e argumenta que isso sozinho não basta; propõe
+   `CLiMRS`, que forma subgrupos dinâmicos de robôs que **negociam**
+   entre si via diálogo multi-LLM perceptivo antes de executar, com
+   ciclo de replanejamento por feedback de execução. Avaliado em
+   `CLiMBench` (benchmark novo de tarefas de montagem com robôs
+   heterogêneos), com "mais de 40% de eficiência" em tarefas complexas
+   vs. baseline, mantendo taxa de sucesso em tarefas simples.
+   **Relevância pro fleet-ui**: é a primeira referência encontrada (nas
+   3 rodadas deste agente) que nomeia e ataca especificamente o cenário
+   "N agentes LLM independentes, um por robô, sem coordenação" como
+   limitação conhecida — e não só como categoria genérica de survey
+   (como o achado 4 da rodada 1, Li et al. 2025). É uma referência mais
+   específica e mais nova do que a já citada na dissertação pra esse
+   ponto exato.
+
+9. **Taxonomia confirmada (mas não nova) via busca: centralizado vs.
+   descentralizado vs. híbrido pra coordenação multi-robô com LLM.**
+   "Scalable Multi-Robot Collaboration with Large Language Models:
+   Centralized or Decentralized Systems?" (arXiv 2309.15943) — paper de
+   2023 (NeurIPS 2023), não é achado novo desta rodada, mas apareceu nas
+   buscas como a referência que estabeleceu essa taxonomia (decentralizado
+   = um LLM por robô com turnos de diálogo; centralizado = um único LLM
+   decide a próxima ação de todos). Útil como vocabulário pra descrever
+   o próprio `run_fleet` deste projeto: na taxonomia dele, o `run_fleet`
+   atual é "descentralizado sem negociação" — a variante mais simples e
+   também a que menos resolve coordenação.
+
+10. **Survey mais amplo, confirmado mas pouco específico pra robótica:
+    "Multi-Agent Coordination across Diverse Applications: A Survey"
+    (arXiv 2502.14743, v2 fev/2025).** Confirmado via abstract. Propõe
+    taxonomia de 4 perguntas (o quê, por quê, com quem, como coordenar)
+    cobrindo busca-e-resgate, logística, robôs humanoides, satélites e
+    LLMs como aplicação emergente — mas trata "LLM-based MAS" como
+    direção futura, não com o mesmo nível de detalhe que o survey de Li
+    et al. 2025 (já citado na dissertação) dá especificamente pra
+    multi-robô. Não muda a avaliação anterior; só confirma que o tema
+    "LLM coordenando múltiplos agentes" ainda está em estágio de
+    survey/categorização geral na maior parte da literatura, com CLiMRS
+    (achado 8) sendo a exceção mais concreta e recente encontrada até
+    agora.
+
+11. **Survey adicional visto na busca, ângulo diferente (não é sobre
+    coordenação de agentes, é sobre orquestração de recursos):**
+    "Advancing Multi-Robot Networks via MLLM-Driven Sensing,
+    Communication, and Computation: A Comprehensive Survey" (arXiv
+    2604.00061, submetido 31/mar/2026, confirmado por leitura direta do
+    abstract). Trata como MLLMs guiam alocação de sensor/banda/
+    computação entre robôs, edge e cloud a partir de instrução em
+    linguagem natural — "problema de orquestração intenção-pra-recurso".
+    Não é sobre coordenação de *planejamento* entre agentes LLM
+    independentes (o problema do `run_fleet`), é sobre orquestração de
+    *infraestrutura* de rede entre robôs. Relevância pro fleet-ui é
+    baixa/indireta — registrado só pra não perder a referência, não
+    muda nenhuma conclusão.
+
+**Ação sugerida (rodada 3):**
+
+- Confirma-se: **não revisitar** a decisão de tool-calling direto vs.
+  MCP por causa dos pilotos reais — nenhuma dor real surgiu que pedisse
+  isso. Isso reforça, com experiência prática, o que a rodada 1 já tinha
+  concluído por análise de spec/código.
+- Se o autor algum dia quiser investigar a limitação real observada
+  ("Planners independentes, sem coordenação, no piloto multi-robô")
+  como trabalho futuro — não nesta rodada, é decisão do autor — o
+  `CLiMRS` (achado 8) é hoje a referência mais específica e recente
+  encontrada pelas 3 rodadas deste agente pra esse problema exato
+  (mais específica que Li et al. 2025, já citado), e a taxonomia
+  centralizado/descentralizado/híbrido (achado 9) é vocabulário útil
+  pra nomear o que o `run_fleet` atual já é ("descentralizado sem
+  negociação") no texto da dissertação, se quiserem discutir a
+  limitação em "trabalhos futuros" sem implementar nada agora.
+- Pesquisa futura em aberto: confirmar a data real de submissão do
+  CLiMRS (achado 8) — a inconsistência entre o identificador arXiv e a
+  data mostrada na página não foi resolvida nesta rodada.

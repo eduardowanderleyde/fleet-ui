@@ -37,6 +37,37 @@ Resumo em linguagem simples (2026-10-02):
   10 pra 7 nós no `nav2_minimal.launch.py`), mas isso só está no branch
   `main` (futuro), ainda não chegou no Jazzy que usamos.
 
+Atualização (2026-10-03), respondendo duas perguntas específicas sobre o
+resultado real da Seção 8.6 da dissertação (campanha /odom vs /pose vs
+ground truth, erro de `/odom` crescendo de ~0 pra 14,27cm conforme a rota
+fica mais longa/com mais curvas):
+
+- **Achado mais importante desta rodada**: não encontrei nenhuma
+  issue/discussão específica do Nav2/MPPI dizendo que o *controlador*
+  perde precisão em rotas mais longas ou com mais curvas. Em vez disso,
+  achei a explicação mais provável num lugar diferente: isso é um
+  fenômeno **clássico e bem documentado de odometria de rodas (dead
+  reckoning)**, não um comportamento do MPPI — faz sentido, porque
+  `/odom` é só a integração das rodas, computada pelo plugin `DiffDrive`
+  do Gazebo, e não depende de qual controlador está dirigindo o robô. O
+  artigo fundador da área (Borenstein & Feng, 1996, "Measurement and
+  Correction of Systematic Odometry Errors in Mobile Robots", IEEE
+  Transactions on Robotics and Automation, vol. 12, n. 5) diz
+  textualmente: "orientation errors are the main source of concern
+  because once they are incurred they grow without bound into lateral
+  position errors" — ou seja, erro de orientação (que acontece
+  principalmente em curvas, por escorregamento/"skidding" e incerteza
+  sobre a distância real entre as rodas) se transforma em erro de
+  posição que cresce sem limite, e MAIS rotas com curva vão acumular
+  mais desse erro de orientação do que uma rota reta curta. Isso bate
+  exatamente com o padrão medido (rota curta sem curva: ~0cm; rota longa
+  com 1 curva: 5,18cm; loop com 4 curvas: 14,27cm). Recomendo considerar
+  esta citação como fundamentação pra Seção 8.6 — ver "Ação sugerida"
+  abaixo.
+- **Resposta à pergunta sobre rodar o experimento `regenerate_noises:
+  false` vs. baseline antes da defesa**: não recomendo rodar agora. Ver
+  achado específico mais abaixo.
+
 ## Achados
 
 ### 2026-10-02 — Issue #81 (turtlebot4_simulator): corrigida upstream, mas é sobre o bringup do fabricante, não o nosso pacote mínimo
@@ -280,3 +311,127 @@ o YAML gerado) nos dois launch files — o mecanismo funciona.
 variância do RMSE entre réplicas contra a baseline (`regenerate_noises:
 true`, resultados já reportados) — isso ainda não foi executado. Ver
 `implementacao.md`, seção "Em andamento".
+
+### 2026-10-03 — Recomendação sobre rodar `regenerate_noises: false` vs. baseline agora (antes da defesa) ou só documentar como trabalho futuro
+
+Pergunta direta de quem conduz o projeto: dado o tempo que resta até a
+defesa, vale rodar essa campanha real agora, ou é melhor deixar só a
+infraestrutura pronta (já está, ver achado acima) e documentar como
+trabalho futuro? Isto é uma recomendação, não uma decisão — quem decide
+é o autor.
+
+**Recomendação: não rodar agora, documentar como trabalho futuro com a
+infraestrutura pronta.** Razões, nenhuma delas pesquisa nova (são
+avaliação de custo/risco/benefício a partir do que já está registrado
+neste arquivo e em `implementacao.md`/`dds_tuning.md`):
+
+1. **Risco de tempo real, não hipotético**: a ativação sequencial deste
+   projeto tem taxa de sucesso histórica de ~70% (`dds_tuning.md`) — uma
+   campanha nova com N suficiente pra comparar variância (a própria
+   campanha já feita de odom/pose/GT usou N=10 por rota) provavelmente
+   vai exigir várias tentativas com retry, consumindo tempo de máquina e
+   de atenção que é escasso perto da defesa.
+2. **O ganho esperado é incerto, não claramente positivo**: a própria
+   documentação oficial do Nav2 (citada no achado de 2026-10-02 acima)
+   descreve `regenerate_noises: false` como uma otimização de **jitter
+   de CPU** ("reduces compute jittering at run-time due to thread
+   wake-ups to resample normal distribution"), não como uma garantia de
+   reduzir variância *entre execuções diferentes*. Com `false`, o ruído
+   ainda é sorteado aleatoriamente uma vez (na inicialização do
+   controller_server) — cada processo/réplica nova ainda começa com uma
+   semente diferente. Não há, nos achados já registrados aqui (incluindo
+   as tentativas abandonadas de "ruído colorido" no PR #6151), nenhuma
+   evidência de que `regenerate_noises: false` *de fato* reduza o RMSE
+   pairwise entre réplicas — é uma hipótese testável, mas sem sinal
+   forte de que vai funcionar. Gastar o tempo escasso pré-defesa numa
+   aposta sem sinal forte é um risco que não parece valer a pena agora.
+3. **Já está listado como trabalho futuro na dissertação** (ver
+   contexto original deste agente) e a infraestrutura de teste (env var
+   `NAV2_MPPI_REGENERATE_NOISES`) já está no código e testada
+   isoladamente — ou seja, documentar como trabalho futuro não perde
+   nada: quem quiser reproduzir o experimento depois da defesa já tem o
+   mecanismo pronto, só falta rodar.
+4. **Precedente direto deste mesmo projeto**: o piloto multi-robô da
+   camada de IA (`implementacao.md`, "Em andamento") também ficou só
+   como registro de conhecimento por decisão do autor, por N insuficiente
+   e tempo — mesma lógica se aplica aqui.
+
+**Se o autor decidir rodar mesmo assim**, o menor risco seria uma
+campanha pequena (N=5-10, 1 rota só, a mesma rota curta já usada na
+campanha de odom/pose/GT pra reaproveitar contexto) em vez de replicar o
+desenho completo de 3 rotas × N=10 — mas essa é uma escolha de desenho
+experimental pro autor, não decido isso.
+
+**Ação sugerida:** manter o item em `implementacao.md` como "Em
+andamento" mas adicionar a recomendação acima (feito nesta rodada); não
+mover para "Feito" nem iniciar a campanha. Se o autor quiser revisitar
+depois da defesa, a infraestrutura documentada acima continua válida.
+
+### 2026-10-03 — Explicação alternativa (não-MPPI) pro crescimento do erro de `/odom` com a complexidade da rota (Seção 8.6)
+
+- **Fonte primária, confirmada por leitura direta do PDF (não resumo de
+  busca)**: Borenstein, J.; Feng, L. "Measurement and Correction of
+  Systematic Odometry Errors in Mobile Robots". IEEE Transactions on
+  Robotics and Automation, vol. 12, n. 5, outubro 1996. PDF lido
+  diretamente via `https://cs.au.dk/~ocaprani/legolab/DigitalControl.dir/NXT/Lesson10.dir/paper58.pdf`
+  (cabeçalho confirma "IEEE Transactions on Robotics and Automation, Vol
+  12, No 5, October 1996", autores Johann Borenstein e Liqiang Feng,
+  University of Michigan — é o artigo real, não uma cópia corrompida ou
+  errada).
+- Citações diretas relevantes (texto exato do PDF, página 2 e página 5):
+  - Abstract: "This paper introduces practical methods for measuring and
+    reducing odometry errors that are caused by the two dominant error
+    sources in differential-drive mobile robots: (a) uncertainty about
+    the effective wheelbase and (b) unequal wheel diameters."
+  - "The well known disadvantage of odometry is that it is inaccurate
+    with an unbounded accumulation of errors. Typical odometry errors
+    will become so large that the robot's internal position estimate is
+    totally wrong after as little as 10 m of travel [Gourley and
+    Trivedi, 1994]."
+  - **A citação mais diretamente relevante pro nosso resultado**:
+    "Finally, we note that in order to reduce overall odometry errors,
+    orientation errors are the main source of concern because once they
+    are incurred they grow without bound into lateral position errors
+    [Crowley, 1989; Feng et al., 1993]."
+  - Lista de erros não-sistemáticos (página 4) inclui explicitamente
+    "fast turning (skidding)" como fonte de erro de escorregamento de
+    roda — ou seja, curvas rápidas são citadas de forma nominal como
+    fonte de erro de odometria, não só o acúmulo de distância.
+- **Por que isso é relevante pra Seção 8.6**: o padrão medido na
+  campanha real (rota curta ~0,9m sem curva: erro de `/odom` vs. ground
+  truth ~0cm; rota longa ~7,7m com 1 curva de 90°: 5,18cm; loop ~11,3m
+  com 4 curvas: 14,27cm) é exatamente o padrão que a literatura clássica
+  de odometria prevê: erro de orientação (concentrado nas curvas) se
+  converte em erro de posição lateral que cresce sem limite, então
+  rotas com mais curvas E mais distância acumulam mais erro. **Isso é
+  independente do controlador usado (MPPI, DWB, regulated pure
+  pursuit, etc.)** — `/odom` é a integração pura dos encoders de roda
+  pelo plugin `DiffDrive` do Gazebo (confirmado em código-fonte por
+  `experiment-gazebo-tracking`, `conhecimento/gazebo_tracking.md`), que
+  não tem nenhuma dependência de qual controlador do Nav2 está dirigindo
+  o robô. Não encontrei (busquei ativamente) nenhuma issue/discussão do
+  Nav2/MPPI especificamente sobre o controlador perder precisão em
+  rotas mais longas/com mais curvas — e isso faz sentido, porque o
+  resultado de 8.6 provavelmente não é sobre o controlador, é sobre
+  odometria de rodas.
+
+**Achado em tensão potencial com o texto atual da dissertação (não
+verifiquei o texto exato do Cap. 08 nesta rodada — estou noutra branch,
+`mission-coordinate-large-scale`, a dissertação vive em `dissertacao`):**
+se a Seção 8.6 atribuir o crescimento do erro de `/odom` ao
+comportamento do Nav2/MPPI (controlador), isso seria uma atribuição
+possivelmente imprecisa — a explicação mais direta e melhor fundamentada
+é a odometria de rodas em si (fenômeno de 1996, bem anterior e
+independente do Nav2). Se a Seção 8.6 já atribui o crescimento a
+"odometria/dead-reckoning" (sem mencionar o controlador), então não há
+tensão nenhuma — só não verifiquei qual das duas é o caso. **Não alterei
+a dissertação** (fora de escopo deste agente) — só sinalizo pro autor
+conferir o texto do Cap. 08 contra esta citação.
+
+**Ação sugerida:** considerar citar Borenstein & Feng (1996) na Seção
+8.6 como fundamentação pro padrão observado (erro crescendo com
+distância/curvas), reforçando que é um fenômeno de odometria de rodas
+bem estabelecido na literatura, não um comportamento específico do
+Nav2/MPPI ou uma peculiaridade do simulador. Decisão de conteúdo da
+dissertação cabe ao autor (ou a um agente `chapter-*` na branch
+`dissertacao`) — não é algo que decido ou edito aqui.

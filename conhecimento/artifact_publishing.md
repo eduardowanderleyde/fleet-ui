@@ -39,6 +39,25 @@ perguntas que motivaram o agente:
    obtidos. Isso pode ser usado como estrutura prática pro README que
    falta (ver Ação sugerida).
 
+**Atualização 2026-10-03** (responde a duas perguntas novas, sem contradizer
+os 3 pontos acima): (a) **o pacote certo pro Zenodo é o repositório git
+completo, sem os bags brutos** — isso já seria automático ao criar uma
+Release no GitHub (ainda não existe nenhuma, confirmado nesta data), mas
+falta um ajuste antes: os arquivos de rota (`fleet_ws/routes/*.yaml`) usados
+pelas campanhas já commitadas (`gt01_curta/longa/loop`, pilotos de IA) nunca
+foram versionados (gitignorados) — sem eles, quem baixar o artefato do
+Zenodo teria os resultados processados, mas não a entrada exata (a rota)
+que os gerou. Ver o roteiro passo-a-passo completo no achado "O que deveria
+entrar no pacote de replicação mínimo..." mais abaixo. (b) **O achado de
+2026-10-02 sobre "dados brutos da campanha oficial perdidos" continua
+válido e não foi corrigido** — os bags da campanha original do Cap. 8
+continuam irrecuperáveis, nada mudou aí. Mas a mitigação aplicada então
+(gravar commit git em cada export) está agora **confirmada funcionando de
+verdade** em campanhas novas e reais (`gt01_curta` etc., verificado lendo o
+JSON committed), não só testada isoladamente como antes. Em compensação,
+apareceu uma lacuna nova e menor do mesmo tipo: as rotas dessas campanhas
+novas também não estão versionadas (ver item (a)).
+
 ## Achados
 
 ### 2026-10-02 — ACM Artifact Review and Badging: definições oficiais
@@ -210,6 +229,10 @@ confirmado**, só o resumo circulado em múltiplas fontes de indexação.
    detalhados, e tentar confirmar a versão atual (não "1.0 not current")
    da política ACM via fonte primária (tentar Google cache ou outra
    rota, já que o fetch direto deu 403).
+6. **(2026-10-03) Antes de criar a Release/Zenodo:** versionar os arquivos
+   de rota em `fleet_ws/routes/` que correspondem às campanhas já
+   commitadas (ver achado "Pacote de replicação mínimo" abaixo) — hoje
+   eles ficam de fora do que a integração Zenodo-GitHub arquiva.
 
 ### 2026-10-02 — Ação aplicada: `CITATION.cff` criado
 
@@ -250,3 +273,187 @@ dissertação (Seção de Limitações, Cap. 09) mencionando que os dados brutos
 da campanha original não foram preservados — por ora a dissertação não
 afirma explicitamente que os dados estão disponíveis, então não há uma
 afirmação falsa a corrigir, só uma omissão a considerar.
+
+### 2026-10-03 — Zenodo: limites de upload confirmados em fonte primária
+
+Fonte primária confirmada via fetch direto (200 OK, sem bloqueio desta vez):
+`support.zenodo.org/help/en-gb/1-upload-deposit/80-what-are-the-size-limitations-of-zenodo`.
+Limites atuais: **50GB por registro** (soma de todos os arquivos), **máximo
+100 arquivos por registro**, com possibilidade de solicitar aumento único de
+quota até 200GB por registro (caso a caso). Zenodo explicitamente proíbe
+dividir um dataset grande em vários registros só pra contornar o limite de
+50GB. **Relevante pro fleet-ui:** irrelevante como bloqueio — mesmo somando
+tudo que existe hoje (`fleet_ws/runs/*` committed + os ~36MB de
+`collections/` ainda fora do git), fica muito abaixo de 50GB. Quota não é
+motivo pra excluir nada do pacote de replicação.
+
+### 2026-10-03 — Zenodo: como adicionar arquivos extras a um depósito já criado via GitHub (não confirmado em fonte primária direta)
+
+Tentei `help.zenodo.org/docs/deposit/manage-files/quota-increase` (fonte
+primária) — retornou HTTP 404 (página não existe mais nesse caminho, ou
+mudou de URL). **Não confirmado em fonte primária direta desta vez.** Via
+busca, encontrei convergência entre fontes secundárias consistentes
+(documentação do `zenodo-client` em `zenodo-client.readthedocs.io`, FAIR
+Cookbook da ELIXIR-Europe em `faircookbook.elixir-europe.org`): depois que
+um registro Zenodo é publicado, os arquivos dele não podem mais ser editados
+diretamente; pra adicionar arquivos novos ao mesmo registro (por exemplo,
+depois que a integração GitHub→Zenodo já criou o depósito a partir de uma
+Release), o caminho é usar a função "New version" do próprio Zenodo (cria
+uma nova versão do mesmo registro, com DOI de versão novo, mas ligado ao
+mesmo DOI "guarda-chuva"), e fazer upload manual dos arquivos extras ali —
+não precisa de uma nova GitHub Release pra isso. **Registro como achado
+plausível, mas não confirmado por fonte primária Zenodo nesta rodada** —
+se isso for decisivo pra uma ação do autor, vale confirmar direto na UI do
+Zenodo antes de depender disso.
+
+### 2026-10-03 — Confirmado: ainda não existe nenhuma GitHub Release no fleet-ui
+
+Verificado via fetch direto de `github.com/eduardowanderleyde/fleet-ui/releases`
+(2026-10-03): a página mostra "There aren't any releases here" — nenhuma
+Release foi criada ainda. Consistente com o item "Pendente" já registrado em
+`implementacao.md` desde 2026-10-02 (segue pendente, sem mudança).
+
+### 2026-10-03 — Achado real do projeto (não é pesquisa externa): as rotas YAML usadas pelas campanhas já commitadas NÃO estão no git
+
+Ao avaliar o que exatamente entraria no arquivamento Zenodo via a integração
+GitHub (que arquiva o conteúdo exato do repositório git na tag da Release,
+não o working tree local), confirmei no disco (`fleet_ws/.gitignore` ainda
+lista `routes/` como ignorado, consistente com o que uma sessão anterior já
+havia documentado em `implementacao.md`) que **os arquivos de rota em
+`fleet_ws/routes/default/` e `fleet_ws/routes/tb1|tb2/` nunca foram
+versionados** — incluindo `dissertation_clean01.yaml`, `rota_longa_curva.yaml`,
+`loop_fechado.yaml`, `llm_pilot01.yaml`, `fleet_pilot_tb1_v2.yaml`,
+`fleet_pilot_tb1_v3.yaml`, `fleet_pilot_tb2_v2.yaml`, `fleet_pilot_tb2_v3.yaml`
+— exatamente os nomes de rota referenciados dentro dos resultados que ESTÃO
+commitados (`fleet_ws/runs/gt01_curta|gt01_longa|gt01_loop/*.json`,
+`fleet_ws/runs/fleet_pilot_tb*_v*/analysis/*`). Essas rotas existem hoje só
+no working tree local de quem já as gravou — **um clone novo do GitHub (ou o
+zip que o Zenodo arquiva a partir de uma Release) não traria esses arquivos**.
+
+Isso é diferente do caso dos bags MCAP brutos (`collections/`): os bags são
+*saída* da execução do protocolo (regenerável relançando a simulação com a
+mesma rota), enquanto o YAML da rota é *entrada* do desenho experimental —
+não existe como "regerar" `dissertation_clean01.yaml` exatamente igual sem o
+próprio arquivo (os waypoints de `rota_longa_curva` e `loop_fechado` felizmente
+estão documentados em texto dentro de `implementacao.md`, mas os de
+`dissertation_clean01` não estão escritos em lugar nenhum fora do YAML
+gitignored). **Isso é uma lacuna real, do mesmo tipo (mas de magnitude menor)
+do que o achado de 2026-10-02 sobre os dados da campanha original perdidos**
+— ver "Ação sugerida" abaixo e reavaliação logo a seguir.
+
+**Tensão com `REPLICATION.md`:** o documento afirma, na Seção 1, que a rota
+"existe no repositório" — isso é verdade só no sentido de "existe no
+working tree de quem está lendo isto no disco", não no sentido de "está no
+histórico git / seria baixado num clone fresco". Vale o autor decidir se
+quer corrigir essa frase pra deixar isso explícito, ou (melhor) resolver a
+causa versionando os arquivos (ver Ação sugerida).
+
+### 2026-10-03 — Reavaliação do achado "dados brutos da campanha oficial perdidos" (2026-10-02), à luz do que foi commitado desde então
+
+Resposta direta à pergunta: **a omissão original não foi corrigida — ela
+continua real e específica da campanha `dissertation_clean01_final_manual`
+do Capítulo 8**. Nada recuperou esses bags; nenhum commit novo os contém.
+Isso não mudou.
+
+O que mudou de fato, verificado diretamente nesta rodada (não é inferência,
+é leitura de arquivo): **o padrão geral do projeto em preservar dados de
+campanhas novas melhorou, e a mitigação aplicada em 2026-10-02
+(`_git_provenance()`) está empiricamente confirmada funcionando num
+commit real**, não só testada isoladamente como o achado anterior registrava.
+Li diretamente `fleet_ws/runs/gt01_curta/replay_r01.json` (committed) e
+confirmei o campo populado:
+```
+"git": {"commit": "628d08146f30778bfdc4ff6c0ee5ea099c1c8839", "dirty": true}
+```
+— ou seja, qualquer um que baixe o repositório hoje sabe exatamente de qual
+commit (e se a árvore estava suja) cada réplica da campanha `gt01_curta` veio.
+Isso NÃO existia pra campanha original do Cap. 8 (causa raiz do achado de
+2026-10-02) e agora existe de verdade pras campanhas novas (`gt01_curta`,
+`gt01_longa`, `gt01_loop`) e pros pilotos de agente multi-robô mais recentes
+(`fleet_ws/agent_runs/fleet_*.json`, também com o campo `git` populado,
+confirmado por busca). **Nuance que ainda fica como lacuna residual pequena**:
+`dirty: true` significa que havia mudanças não commitadas no momento do
+registro — o commit sozinho não reconstitui 100% do estado exato (o diff
+sujo em si não é capturado em lugar nenhum). Os pilotos mais antigos
+(`fleet_ws/agent_runs/single_*.json`, da primeira execução da camada de
+agentes em 2026-10-02) não têm o campo `git` — rodaram antes da mitigação
+existir no código, consistente com a cronologia já registrada.
+
+**Conclusão prática:** o achado de 2026-10-02 continua válido tal como
+escrito (específico à campanha original) — não precisa ser marcado como
+desatualizado, só complementado. O que esta rodada acrescenta é: (a) a
+mitigação funciona de verdade, não só em teste isolado; (b) existe uma
+lacuna *nova e distinta* a reportar (as rotas YAML não versionadas, achado
+acima) que é do mesmo "sabor" (artefato de entrada não preservado), mas
+afeta as campanhas *novas*, não a original.
+
+### 2026-10-03 — O que deveria entrar no pacote de replicação mínimo arquivado no Zenodo
+
+Pergunta respondida: **repositório git completo (sem os bags brutos) é a
+recomendação certa — não é preciso nada mais seletivo, mas falta um ajuste
+concreto antes de criar a Release.**
+
+Raciocínio: a integração GitHub→Zenodo (confirmada em fonte primária em
+2026-10-02, ver achado acima) arquiva exatamente o conteúdo do repositório
+git na tag da Release — não o working tree local, não os diretórios
+gitignored. Hoje, o que está commitado e entraria automaticamente é:
+código completo (`fleet_ws/src`, `backend/`, `frontend/`), `CITATION.cff`,
+`LICENSE` (MIT), `README.md`, `orquestracion.md`, `conhecimento/*.md`,
+`implementacao.md`, `fleet_ws/docs/REPLICATION.md` e
+`EXPERIMENT_PROTOCOL.md`, e os resultados já processados das campanhas
+recentes (`fleet_ws/runs/gt01_curta|gt01_longa|gt01_loop/*` — manifests,
+exports JSON com proveniência git, logs; `fleet_ws/runs/fleet_pilot_tb*_v*/
+analysis/*` e `fleet_ws/runs/dissertacao_teste1_*/analysis/*` — summary.json,
+CSVs de trajetória, PNG do overlay; `fleet_ws/agent_runs/*.json`). Ficam de
+fora, corretamente: `build/`, `install/`, `log/` (artefatos de build, não
+dados de pesquisa), `collections/` (bags MCAP brutos, ~36MB, regeneráveis
+relançando o protocolo documentado em `REPLICATION.md`), e — **ponto a
+corrigir antes da Release** — `fleet_ws/routes/*` (ver achado acima).
+
+**Roteiro concreto recomendado pro autor** (nenhum passo exige mudar
+código, só decisões de versionamento + ações na UI do GitHub/Zenodo, que só
+o autor logado pode fazer):
+
+1. Decidir se quer versionar os arquivos de rota (resolve a lacuna do
+   achado acima). Caminho de menor esforço: `git add -f` nos 8 arquivos
+   específicos listados no achado acima (não remover o `routes/` do
+   `.gitignore` por inteiro, que continuaria bloqueando rotas futuras de
+   teste/scratch — só liberar os que correspondem a campanhas já
+   publicadas/commitadas). Alternativa: mover esses 8 arquivos pra um
+   diretório novo não coberto pelo gitignore (ex.
+   `fleet_ws/routes_archive/`) e referenciar os dois diretórios na
+   documentação. Decisão e execução ficam com o autor.
+2. Confirmar que o commit/tag escolhido pra Release é o estado desejado
+   (sugestão: depois do merge de `mission-coordinate-large-scale` pra
+   `main`, ou a branch que o autor decidir ser a "oficial" — a Zenodo
+   arquiva o que estiver no tag, independente de branch default).
+3. No GitHub: criar uma **Release** nova (não só uma tag) — "Releases" →
+   "Draft a new release", escolher/criar a tag (ex. `v1.0.0` ou
+   `dissertacao-cap08-cap09`), preencher título e notas descrevendo o que
+   essa versão representa (ex. "código + campanha de ground truth
+   odom/pose/GT + pilotos da camada de agentes de IA, Capítulos 8-9").
+4. Login em Zenodo com "Log in with GitHub", autorizar o app, ir à página
+   de configurações do GitHub dentro do Zenodo, ligar o toggle do repo
+   `fleet-ui` ANTES de publicar a Release (ou publicar de novo depois de
+   ligar o toggle — o arquivamento automático só acontece em Releases
+   criadas com o toggle já ligado, conforme o processo já confirmado em
+   2026-10-02).
+5. Depois de publicado, o Zenodo gera 2 DOIs: um específico da versão
+   (a Release) e um "guarda-chuva" (concept DOI) que sempre aponta pra
+   versão mais recente — citar o DOI "guarda-chuva" na dissertação é mais
+   seguro (continua válido se o autor criar uma v1.1 depois).
+6. Opcional, não obrigatório: se depois quiser incluir também os bags
+   brutos específicos usados nas campanhas `gt01_*`/pilotos (não a íntegra
+   de `collections/`, só os relevantes), usar "New version" na UI do
+   Zenodo pra fazer upload manual deles no mesmo registro (ver achado
+   acima — não confirmado em fonte primária direta, confirmar na UI antes
+   de depender disso). Não é necessário pro pacote mínimo — 36MB de bags
+   são regeneráveis seguindo `REPLICATION.md`.
+7. Adicionar o DOI resultante ao `CITATION.cff` (campo `doi:` ou
+   `identifiers:`) e citar na dissertação.
+
+**Ação sugerida:** passos 1 (versionar as rotas) e 3-7 (criar a Release/
+Zenodo) ficam como itens concretos em `implementacao.md`, "Pendente" — o
+passo 1 é novo nesta rodada, os passos 3-7 só detalham o item que já
+existia desde 2026-10-02, que seguia vago ("criar a Release e conectar o
+Zenodo") e agora tem o roteiro exato.

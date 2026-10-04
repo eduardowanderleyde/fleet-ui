@@ -14,30 +14,154 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
+- [ ] **Registrar no Cap. 09 (Limitações) que a constância do erro de
+  `/pose` (Seção 8.6, campanha de ground truth) foi observada só até
+  ~11,3m, num mapa pequeno e sem estrutura repetitiva** (origem:
+  `slam_toolbox_tracking`, 2026-10-03). Pesquisa na fonte primária
+  (`macenski2021slam`, já citado) confirma que "erro cresce com
+  distância/escala" é um problema conhecido e central do campo de SLAM
+  (não hipótese exótica), e que o mecanismo que explica o resultado atual
+  (correção contínua por scan-matching, não só fechamento de loop) tem 3
+  limites conhecidos — janela de busca da correlação, aliasing perceptual
+  em ambientes repetitivos (relevante porque o `warehouse.sdf` do projeto
+  tem corredores repetidos), e o efeito específico de loop closure na
+  rota em loop — que não foram testados pelas rotas atuais. Não é um erro
+  na análise existente, é uma questão de escopo de generalização.
+  Detalhe completo com citações em `conhecimento/slam_toolbox_tracking.md`
+  (achado "2026-10-03"). Risco: baixo (só texto de limitação, não exige
+  rodar experimento novo) — só rodar uma rota bem mais longa (>30-50m)
+  seria necessário pra validar experimentalmente, o que é opcional.
 
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
   real dos 70% de sucesso na ativação sequencial multi-robô. Risco: médio
-  (mudança de arquitetura de launch, não só parâmetro).
-- [ ] **Decidir o enquadramento estatístico da campanha /odom vs /pose vs
-  ground truth ANTES do piloto** (origem: `stats_methodology`,
-  2026-10-02). Escolher entre: (a) concordância de método estilo
-  Bland-Altman (cada fonte vs. ground truth, separadamente) ou (b) teste
-  simétrico entre 3 grupos (ANOVA de medidas repetidas/Friedman) — ou
-  ambos, respondendo perguntas diferentes. Bloqueante: mudar depois do
-  piloto é retrabalho.
+  (mudança de arquitetura de launch, não só parâmetro). **Atualização
+  2026-10-03**: dado o prazo curto até a defesa, recomendado como
+  trabalho futuro documentado, NÃO tentar antes da defesa — ver item
+  abaixo (RMW swap) pra alternativa de menor risco/esforço a testar
+  primeiro. Risco reforçado por precedente real: os mesmos launch files
+  já causaram 1 regressão real nesta sessão (corte do `waypoint_follower`
+  por engano, commit `db5ce66`).
+- [ ] **Testar `RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` em A/B contra o
+  default (Fast DDS) na ativação sequencial multi-robô** (origem:
+  `dds_tuning`, 2026-10-03, respondendo diretamente à pergunta "o que
+  tentar antes da defesa"). Candidata de menor esforço/risco das 3
+  hipóteses levantadas: zero mudança de código (confirmado lendo
+  `backend/ros_bridge.py` e `run_ground_truth_campaign.py` — ambos
+  herdam o ambiente do processo pai sem filtrar nada), 100% reversível
+  (desfazer a variável), testável com a infraestrutura de retry que já
+  existe (`run_ground_truth_campaign.py`). Pré-requisito: `apt-get
+  install ros-jazzy-rmw-cyclonedds-cpp` (não está no `Dockerfile` hoje —
+  só `ros-jazzy-desktop`, que não inclui esse pacote). Sugestão de
+  teste: N réplicas (≥10) da ativação sequencial com e sem a variável,
+  comparando quantos retries cada config precisou, antes de decidir se
+  muda o número de 70% já citado na dissertação. Risco: baixo. Chance de
+  funcionar: não comprovada (nenhuma fonte prova que resolve o "jump
+  back in time" especificamente) — é um experimento de diagnóstico/
+  mitigação barato, não uma correção garantida. Ver `conhecimento/dds_tuning.md`
+  (achado 2026-10-03) pro detalhe completo e as fontes.
+- [ ] **Suavizar a frase "estatisticamente equivalente" na Seção 8.6 da
+  dissertação** (origem: `stats_methodology`, 2026-10-03, avaliação
+  retrospectiva da seção já publicada — branch `dissertacao`,
+  `dissertacao/chapters/08_resultados.tex`, label
+  `sec:res_fonte_trajetoria`). O texto afirma que `/pose` fica
+  "estatisticamente equivalente" entre as 3 rotas só porque os IC 95% se
+  sobrepõem visualmente — nenhum teste formal (ANOVA one-way, Kruskal-
+  Wallis, TOST) foi rodado, e sobreposição de IC é uma heurística
+  estatisticamente não confiável (Gelman & Stern, 2006). Baixo
+  esforço/risco: é só trocar a frase por algo como "não indica diferença
+  perceptível ... com intervalos de confiança sobrepostos", sem mudar
+  nenhum número. Opcional/mais trabalho: rodar o teste formal (ANOVA
+  one-way ou Kruskal-Wallis, rota como grupo independente — não Friedman)
+  se o autor quiser sustentar a alegação com um teste de verdade. Urgente
+  dado que a defesa está próxima, mas não bloqueante (correção textual,
+  não muda resultado). Detalhe completo em
+  `conhecimento/stats_methodology.md`, achado 18.
 - [ ] **Avaliar adicionar o plugin `WheelSlip` ao modelo do Gazebo**
-  (origem: `gazebo_tracking`, 2026-10-02). Hoje a dissertação registra
-  "DiffDrive não modela slip" como limitação; existe plugin oficial que
-  mitigaria isso. Decisão: vale o esforço pra este experimento, ou fica
-  como limitação documentada mesmo?
+  (origem: `gazebo_tracking`, 2026-10-02; reavaliado em 2026-10-03). Hoje
+  a dissertação registra "DiffDrive não modela slip" como limitação;
+  existe plugin oficial que mitigaria isso. **Reavaliação 2026-10-03**:
+  dado que a dissertação nesta versão é só-simulação (sem comparação com
+  robô real), a recomendação do agente mudou de "decidir" para "não vale
+  o esforço agora" — sem dado real de slip pra calibrar
+  `slip_compliance_lateral/longitudinal`, o plugin só troca uma limitação
+  honesta ("não modela slip") por uma limitação arbitrária ("modela slip
+  com valor inventado"), sem ganho real de fidelidade. Ficaria valioso só
+  se o projeto algum dia ganhar uma etapa de comparação com hardware real.
+  Decisão final de reformular ou não o texto da dissertação continua
+  sendo do autor — ver `conhecimento/gazebo_tracking.md`, achado
+  2026-10-03, pergunta 2.
+- [ ] **Considerar mencionar, na Seção 8.6/Limitações, que o timestamp do
+  ground truth usado na campanha (`/ground_truth_pose_clean`) não é o
+  instante exato da física, é o instante em que o `ground_truth_filter`
+  recebeu a mensagem** (origem: `gazebo_tracking`, 2026-10-03). Achado via
+  leitura do código-fonte real do `gz-sim` (`SceneBroadcaster.cc`) e do
+  `ros_gz_bridge` (`convert/geometry_msgs.cpp`): o Gazebo gera um
+  timestamp real de física (`simTime`) pra cada lote de poses, mas esse
+  timestamp fica só no header do array `Pose_V` inteiro — a conversão
+  genérica do bridge pra `TransformStamped`/`TFMessage` lê o header de
+  cada Pose INDIVIDUAL (que o Gazebo nunca preenche), então chega sempre
+  zerado do outro lado. O `ground_truth_filter` já contorna isso
+  corretamente usando o clock da simulação no recebimento — mas isso
+  ainda introduz uma pequena defasagem de pipeline (bridge + nó filtro)
+  entre "quando a pose foi calculada" e "quando foi timestampada", na
+  faixa de poucos ms a <17ms (período de 60Hz, taxa padrão de
+  `dynamic_pose/info`). Não invalida o resultado já publicado (defasagem
+  pequena e sistemática, não favorece nenhuma rota), mas é uma fonte de
+  imprecisão de medição que o texto atual provavelmente não menciona.
+  Risco: muito baixo (só texto, não exige rerodar a campanha). Detalhe
+  completo em `conhecimento/gazebo_tracking.md`, achado 2026-10-03,
+  pergunta 1.
 - [ ] **Arquivar uma Release do GitHub no Zenodo pra gerar DOI** (origem:
-  `artifact_publishing`, 2026-10-02). Baixo esforço, baixo risco, não
-  exige mudar código — só criar a Release e conectar o Zenodo (exige
-  login do autor no Zenodo, não pode ser feito por um agente). `CITATION.cff`
-  já existe (ver "Feito") — falta só criar a Release no GitHub e ligar a
-  conta do Zenodo a ela. Fazer antes da defesa pra poder citar o
-  repositório com DOI na dissertação.
+  `artifact_publishing`, 2026-10-02; roteiro detalhado em 2026-10-03).
+  Baixo esforço, baixo risco, não exige mudar código — só criar a Release e
+  conectar o Zenodo (exige login do autor no Zenodo, não pode ser feito
+  por um agente). `CITATION.cff` já existe (ver "Feito"). Confirmado em
+  2026-10-03: ainda não existe nenhuma Release no GitHub do fleet-ui.
+  **Roteiro exato** (detalhe completo e justificativa em
+  `conhecimento/artifact_publishing.md`, achado "O que deveria entrar no
+  pacote de replicação mínimo..."):
+  1. (Opcional mas recomendado — ver item separado abaixo sobre as rotas
+     YAML) resolver a lacuna das rotas não versionadas ANTES de criar a
+     Release, senão o artefato arquivado fica sem as entradas exatas do
+     experimento.
+  2. Confirmar o commit/branch desejado (ex. depois do merge de
+     `mission-coordinate-large-scale` pra `main`).
+  3. No GitHub: "Releases" → "Draft a new release" → criar uma tag nova
+     (ex. `v1.0.0` ou `dissertacao-cap08-cap09`) → preencher título/notas
+     descrevendo o que a versão representa → publicar.
+  4. Login em Zenodo com "Log in with GitHub", autorizar o app, ir à
+     página de configurações do GitHub dentro do Zenodo, ligar o toggle
+     do repo `fleet-ui` — precisa estar ligado ANTES de publicar a
+     Release (ou publicar de novo depois de ligar) pro arquivamento
+     automático funcionar.
+  5. Depois de publicado: Zenodo gera um DOI de versão + um DOI
+     "guarda-chuva" (concept DOI, sempre aponta pra versão mais recente) —
+     citar o guarda-chuva na dissertação é mais seguro.
+  6. Opcional: incluir os bags MCAP brutos relevantes (não a íntegra de
+     `collections/`) via "New version" na UI do Zenodo (upload manual,
+     sem precisar de outra Release do GitHub) — mecanismo não confirmado
+     em fonte primária Zenodo nesta rodada, confirmar na UI antes de
+     depender disso. Não é necessário pro pacote mínimo (36MB está muito
+     abaixo do limite de 50GB/registro do Zenodo, confirmado em fonte
+     primária em 2026-10-03).
+  7. Adicionar o DOI resultante ao `CITATION.cff` e citar na dissertação.
+- [ ] **Versionar os arquivos de rota (`fleet_ws/routes/*.yaml`) que
+  correspondem às campanhas já commitadas** (origem: achado real desta
+  sessão, `artifact_publishing`, 2026-10-03 — ver
+  `conhecimento/artifact_publishing.md`). Hoje `fleet_ws/.gitignore` ignora
+  `routes/` por completo, então `dissertation_clean01.yaml`,
+  `rota_longa_curva.yaml`, `loop_fechado.yaml`, `llm_pilot01.yaml`,
+  `fleet_pilot_tb1_v2.yaml`, `fleet_pilot_tb1_v3.yaml`,
+  `fleet_pilot_tb2_v2.yaml`, `fleet_pilot_tb2_v3.yaml` (as rotas usadas
+  pelos resultados já commitados em `fleet_ws/runs/`) nunca foram
+  versionados — um clone novo do GitHub (ou o zip que o Zenodo arquivaria)
+  não teria essas rotas, só os resultados processados que as referenciam
+  pelo nome. Bloqueante pro item da Release acima ficar completo (não
+  bloqueante pra criar a Release em si). Duas opções, decisão do autor:
+  (a) `git add -f` nos 8 arquivos específicos (mantém `routes/` ignorado
+  por padrão pra rotas de teste/scratch futuras); (b) mover esses 8 pra um
+  diretório novo fora do gitignore (ex. `fleet_ws/routes_archive/`).
 - [ ] **Decidir se a dissertação (Cap. 09, Limitações) deve mencionar
   explicitamente que os dados brutos da campanha oficial não foram
   preservados** (origem: achado real desta sessão, 2026-10-02 — não é
@@ -45,6 +169,19 @@ código) confirmando o efeito.
   `conhecimento/artifact_publishing.md`). A dissertação hoje não afirma
   que os dados estão disponíveis, então não há afirmação falsa a corrigir
   — é só uma omissão a considerar.
+- [ ] **Considerar citar CLiMRS (arXiv 2602.06967) como referência mais
+  específica pra "trabalhos futuros" sobre coordenação multi-robô**
+  (origem: `mcp_orchestration`, 2026-10-03). Candidato, não decisão: a
+  limitação real observada no piloto `run_fleet` (dois `Planner`s
+  independentes, sem coordenação) corresponde exatamente ao cenário que
+  o CLiMRS ataca (propõe negociação em subgrupos entre agentes LLM, um
+  por robô). Mais específico que o survey de Li et al. 2025 já citado.
+  Baixo esforço (é só uma citação de texto, não mudança de código) —
+  mas a data de submissão do paper tem uma inconsistência não resolvida
+  (ver `conhecimento/mcp_orchestration.md`, achado 8) que valeria
+  confirmar antes de citar. Nenhuma mudança de arquitetura/código
+  sugerida — a pesquisa confirmou que o `run_fleet` atual (tool-calling
+  direto, sem MCP) não precisa mudar por causa disso.
 
 ## Em andamento
 
@@ -63,6 +200,16 @@ código) confirmando o efeito.
   do RMSE contra a baseline — isso exige Gazebo/Nav2 reais de pé, não foi
   executado ainda. Uso: `NAV2_MPPI_REGENERATE_NOISES=false ros2 launch
   fleet_orchestrator turtlebot4_sim.launch.py ...`.
+  **Recomendação (2026-10-03, `nav2_tracking`)**: não rodar essa
+  campanha agora, antes da defesa — risco de tempo real (ativação
+  sequencial tem ~70% de sucesso histórico, ver `dds_tuning.md`, pode
+  exigir vários retries) contra um ganho incerto (a doc oficial do Nav2
+  descreve `regenerate_noises: false` como otimização de jitter de CPU,
+  não garantia de reduzir variância entre execuções diferentes — não há
+  evidência registrada de que isso reduza o RMSE pairwise). Deixar como
+  trabalho futuro já com a infraestrutura pronta é a recomendação; ver
+  `conhecimento/nav2_tracking.md` pro raciocínio completo. Decisão final
+  continua do autor.
 - [~] **Pilotar se a camada de agentes de IA degrada a repetibilidade
   pairwise** (origem: item de trabalho futuro criado nesta sessão na
   dissertação, Cap. 09; piloto em 2026-10-02). Primeira execução real da
