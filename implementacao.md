@@ -14,24 +14,6 @@ código) confirmando o efeito.
 
 ## Pendente (aguardando decisão do autor)
 
-- [ ] **Registrar no Cap. 09 (Limitações) que a constância do erro de
-  `/pose` (Seção 8.6, campanha de ground truth) foi observada só até
-  ~11,3m, num mapa pequeno e sem estrutura repetitiva** (origem:
-  `slam_toolbox_tracking`, 2026-10-03). Pesquisa na fonte primária
-  (`macenski2021slam`, já citado) confirma que "erro cresce com
-  distância/escala" é um problema conhecido e central do campo de SLAM
-  (não hipótese exótica), e que o mecanismo que explica o resultado atual
-  (correção contínua por scan-matching, não só fechamento de loop) tem 3
-  limites conhecidos — janela de busca da correlação, aliasing perceptual
-  em ambientes repetitivos (relevante porque o `warehouse.sdf` do projeto
-  tem corredores repetidos), e o efeito específico de loop closure na
-  rota em loop — que não foram testados pelas rotas atuais. Não é um erro
-  na análise existente, é uma questão de escopo de generalização.
-  Detalhe completo com citações em `conhecimento/slam_toolbox_tracking.md`
-  (achado "2026-10-03"). Risco: baixo (só texto de limitação, não exige
-  rodar experimento novo) — só rodar uma rota bem mais longa (>30-50m)
-  seria necessário pra validar experimentalmente, o que é opcional.
-
 - [ ] **Avaliar composição de nós (`ComposableNodeContainer`) pra Nav2 e
   SLAM Toolbox** (origem: `dds_tuning`, 2026-10-02). Hipótese pro problema
   real dos 70% de sucesso na ativação sequencial multi-robô. Risco: médio
@@ -60,23 +42,6 @@ código) confirmando o efeito.
   back in time" especificamente) — é um experimento de diagnóstico/
   mitigação barato, não uma correção garantida. Ver `conhecimento/dds_tuning.md`
   (achado 2026-10-03) pro detalhe completo e as fontes.
-- [ ] **Suavizar a frase "estatisticamente equivalente" na Seção 8.6 da
-  dissertação** (origem: `stats_methodology`, 2026-10-03, avaliação
-  retrospectiva da seção já publicada — branch `dissertacao`,
-  `dissertacao/chapters/08_resultados.tex`, label
-  `sec:res_fonte_trajetoria`). O texto afirma que `/pose` fica
-  "estatisticamente equivalente" entre as 3 rotas só porque os IC 95% se
-  sobrepõem visualmente — nenhum teste formal (ANOVA one-way, Kruskal-
-  Wallis, TOST) foi rodado, e sobreposição de IC é uma heurística
-  estatisticamente não confiável (Gelman & Stern, 2006). Baixo
-  esforço/risco: é só trocar a frase por algo como "não indica diferença
-  perceptível ... com intervalos de confiança sobrepostos", sem mudar
-  nenhum número. Opcional/mais trabalho: rodar o teste formal (ANOVA
-  one-way ou Kruskal-Wallis, rota como grupo independente — não Friedman)
-  se o autor quiser sustentar a alegação com um teste de verdade. Urgente
-  dado que a defesa está próxima, mas não bloqueante (correção textual,
-  não muda resultado). Detalhe completo em
-  `conhecimento/stats_methodology.md`, achado 18.
 - [ ] **Avaliar adicionar o plugin `WheelSlip` ao modelo do Gazebo**
   (origem: `gazebo_tracking`, 2026-10-02; reavaliado em 2026-10-03). Hoje
   a dissertação registra "DiffDrive não modela slip" como limitação;
@@ -91,27 +56,6 @@ código) confirmando o efeito.
   Decisão final de reformular ou não o texto da dissertação continua
   sendo do autor — ver `conhecimento/gazebo_tracking.md`, achado
   2026-10-03, pergunta 2.
-- [ ] **Considerar mencionar, na Seção 8.6/Limitações, que o timestamp do
-  ground truth usado na campanha (`/ground_truth_pose_clean`) não é o
-  instante exato da física, é o instante em que o `ground_truth_filter`
-  recebeu a mensagem** (origem: `gazebo_tracking`, 2026-10-03). Achado via
-  leitura do código-fonte real do `gz-sim` (`SceneBroadcaster.cc`) e do
-  `ros_gz_bridge` (`convert/geometry_msgs.cpp`): o Gazebo gera um
-  timestamp real de física (`simTime`) pra cada lote de poses, mas esse
-  timestamp fica só no header do array `Pose_V` inteiro — a conversão
-  genérica do bridge pra `TransformStamped`/`TFMessage` lê o header de
-  cada Pose INDIVIDUAL (que o Gazebo nunca preenche), então chega sempre
-  zerado do outro lado. O `ground_truth_filter` já contorna isso
-  corretamente usando o clock da simulação no recebimento — mas isso
-  ainda introduz uma pequena defasagem de pipeline (bridge + nó filtro)
-  entre "quando a pose foi calculada" e "quando foi timestampada", na
-  faixa de poucos ms a <17ms (período de 60Hz, taxa padrão de
-  `dynamic_pose/info`). Não invalida o resultado já publicado (defasagem
-  pequena e sistemática, não favorece nenhuma rota), mas é uma fonte de
-  imprecisão de medição que o texto atual provavelmente não menciona.
-  Risco: muito baixo (só texto, não exige rerodar a campanha). Detalhe
-  completo em `conhecimento/gazebo_tracking.md`, achado 2026-10-03,
-  pergunta 1.
 - [ ] **Arquivar uma Release do GitHub no Zenodo pra gerar DOI** (origem:
   `artifact_publishing`, 2026-10-02; roteiro detalhado em 2026-10-03).
   Baixo esforço, baixo risco, não exige mudar código — só criar a Release e
@@ -153,20 +97,6 @@ código) confirmando o efeito.
   `conhecimento/artifact_publishing.md`). A dissertação hoje não afirma
   que os dados estão disponíveis, então não há afirmação falsa a corrigir
   — é só uma omissão a considerar.
-- [ ] **Considerar citar CLiMRS (arXiv 2602.06967) como referência mais
-  específica pra "trabalhos futuros" sobre coordenação multi-robô**
-  (origem: `mcp_orchestration`, 2026-10-03). Candidato, não decisão: a
-  limitação real observada no piloto `run_fleet` (dois `Planner`s
-  independentes, sem coordenação) corresponde exatamente ao cenário que
-  o CLiMRS ataca (propõe negociação em subgrupos entre agentes LLM, um
-  por robô). Mais específico que o survey de Li et al. 2025 já citado.
-  Baixo esforço (é só uma citação de texto, não mudança de código) —
-  mas a data de submissão do paper tem uma inconsistência não resolvida
-  (ver `conhecimento/mcp_orchestration.md`, achado 8) que valeria
-  confirmar antes de citar. Nenhuma mudança de arquitetura/código
-  sugerida — a pesquisa confirmou que o `run_fleet` atual (tool-calling
-  direto, sem MCP) não precisa mudar por causa disso.
-
 ## Em andamento
 
 - [~] **Testar `regenerate_noises: false` no MPPI do Nav2** (origem:
@@ -213,6 +143,30 @@ código) confirmando o efeito.
   rodar `diagnose_experiment` no run_id `llm_pilot01_4979c065` pra
   investigar a réplica 1, e repetir com N maior antes de reconsiderar.
 ## Feito
+
+- [x] **Suavizar "estatisticamente equivalente" na Seção 8.6** (origem:
+  `stats_methodology`; feito 2026-10-03, commit `c3ede78`). Trocado por
+  "sem diferença perceptível" nos dois lugares (Cap. 08 e Cap. 09) —
+  nenhum número mudou.
+
+- [x] **Mencionar a defasagem de timestamp do ground truth** (origem:
+  `gazebo_tracking`; feito 2026-10-03, commit `a729674`). Uma frase na
+  Seção 8.6: timestamp é hora de recepção pelo filtro, não da física
+  (<17ms).
+
+- [x] **Registrar a ressalva de escala do SLAM Toolbox** (origem:
+  `slam_toolbox_tracking`; feito 2026-10-03, commit `a729674`). Uma frase
+  na Seção 8.6: conclusão testada só até 11,3m.
+
+- [x] **Citar CLiMRS como referência de coordenação multi-robô** (origem:
+  `mcp_orchestration`; feito 2026-10-03, commit `59d0b38`). Bib + 1 frase
+  no Cap. 09, trabalho futuro. Data de submissão (2025) confirmada em
+  fonte primária, inconsistência com o ID do arXiv documentada no .bib.
+
+- [x] **Citar Borenstein & Feng (1996) fundamentando a deriva de odometria**
+  (origem: `nav2_tracking`, proposto como "Ação sugerida" sem checkbox
+  próprio; feito 2026-10-03, commit `d67cf65`). Bib + 1 frase na Seção
+  8.6. DOI/páginas não confirmados em fonte primária, omitidos.
 
 - [x] **Versionar os arquivos de rota (`fleet_ws/routes/*.yaml`) que
   correspondem às campanhas já commitadas** (origem: achado real,
