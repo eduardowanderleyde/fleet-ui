@@ -438,8 +438,9 @@ comprimento/complexidade da rota — de essencialmente zero na rota Curta a
 14,27\,cm na rota Loop —, consistente com o comportamento esperado de
 deriva por integração \cite{borenstein1996}: quanto mais distância e
 quantas mais curvas o robô percorre, mais o erro acumulado de odometria
-pura se afasta da pose verdadeira. Já o erro de \texttt{/\allowbreak pose} permanece baixo e sem
-diferença perceptível entre as três rotas ($\approx$2--3\,cm, intervalos
+pura se afasta da pose verdadeira. Já o erro de
+\texttt{/\allowbreak pose} permanece baixo e sem diferença perceptível
+entre as três rotas ($\approx$2--3\,cm, intervalos
 de confiança sobrepostos), o que é consistente com o papel do
 SLAM Toolbox de limitar esse erro através de correspondência de varredura
 (\textit{scan matching}) contra o mapa, independente da distância total
@@ -460,9 +461,9 @@ mesma fonte na campanha principal: para a rota curta efetivamente usada em
 QA1--QA3, a escolha não compromete a validade do resultado; para campanhas
 futuras com rotas mais longas, a escolha da fonte deixa de ser uma decisão
 neutra. Ressalva de escala: essa conclusão foi testada em até 11,3\,m; a
-janela de busca limitada do \textit{scan matching} e a sensibilidade a
-ambientes com estrutura repetida \cite{macenski2021slam} podem não
-generalizar para mapas/rotas substancialmente maiores.
+janela de busca limitada do \textit{scan matching} \cite{macenski2021slam}
+e a sensibilidade a ambientes com estrutura repetida, risco genérico de
+SLAM, podem não generalizar para mapas/rotas substancialmente maiores.
 
 \section{Considerações Finais}
 \label{sec:res_conclusao}
