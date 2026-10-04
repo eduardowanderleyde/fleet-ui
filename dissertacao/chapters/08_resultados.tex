@@ -397,7 +397,11 @@ de \texttt{/\allowbreak pose} contra o \textit{ground truth} ficava entre
 de comprimento muito diferente, ao contrário do esperado para um erro de
 localização real. A análise foi corrigida para usar o tempo absoluto
 (\textit{sim time}) de cada amostra, não o tempo relativo à primeira
-mensagem de cada tópico.
+mensagem de cada tópico. Resíduo conhecido e não corrigido: o
+\textit{ground truth} é republicado com o instante de recepção pelo nó
+filtro, não o instante exato da física do Gazebo, uma defasagem
+de sistema estimada abaixo de 17\,ms que não foi tratada como fonte de
+erro adicional.
 
 \subsection{Resultado}
 
@@ -458,7 +462,10 @@ Esse resultado responde à tensão identificada entre a limitação de
 mesma fonte na campanha principal: para a rota curta efetivamente usada em
 QA1--QA3, a escolha não compromete a validade do resultado; para campanhas
 futuras com rotas mais longas, a escolha da fonte deixa de ser uma decisão
-neutra.
+neutra. Ressalva de escala: essa conclusão foi testada em até 11,3\,m; a
+janela de busca limitada do \textit{scan matching} e a sensibilidade a
+ambientes com estrutura repetida \cite{macenski2021slam} podem não
+generalizar para mapas/rotas substancialmente maiores.
 
 \section{Considerações Finais}
 \label{sec:res_conclusao}
