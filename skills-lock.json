@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "robot-bringup": {
+      "source": "arpitg1304/robotics-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/robot-bringup/SKILL.md",
+      "computedHash": "68992e2e97daf0ce73f98e80438e19ff1fd7548363611691369683a05901614f"
+    },
+    "ros2": {
+      "source": "arpitg1304/robotics-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ros2/SKILL.md",
+      "computedHash": "8d0c5be6de5ea3cc4c143932adeda870bb07b66bdb900fb318294c8ce6ce13a3"
+    }
+  }
+}
