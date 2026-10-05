@@ -363,6 +363,46 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   populado. Ver `implementacao.md` ("Pendente") e
   `conhecimento/artifact_publishing.md`.
 
+### 2026-10-05 — skills.sh: 4 skills de terceiros instaladas (não é achado de agente, registro de sessão)
+
+- **[sessão]** Explorado `skills.sh` (marketplace de skills pra agentes de
+  IA, roda na Vercel). Todo candidato foi inspecionado via API do GitHub
+  antes de instalar (arquivos/tamanho, procura por padrão malicioso/
+  prompt injection) — não instalado às cegas. Instala via `npx skills add
+  <owner/repo> --skill <nome>`, exige Node >=22 (sistema tem v18; Node 22
+  instalado via `nvm` nesta sessão, sem mexer no Node do sistema).
+  - Na branch `dissertacao`: `paper-audit` e `bib-search-citation`
+    (`bahayonghang/academic-writing-skills`). `paper-audit` testado
+    contra `main.tex` e se mostrou pouco útil nesse teste específico —
+    calibrado pra inglês/chinês, deu só falso positivo numa tese ABNT em
+    português (travessão, parágrafo "longo" que era um `\usepackage`,
+    siglas que eram título de seção em maiúsculas). `bib-search-citation`
+    funcionou bem (parseia `.bib`, busca por tema/autor/ano, gera
+    `\cite{}` pronto) — mas nenhuma entrada do `.bib` tem campo
+    `abstract` preenchido, o que limita busca por conteúdo.
+  - Nesta branch (`mission-coordinate-large-scale`): `ros2` e
+    `robot-bringup` (`arpitg1304/robotics-agent-skills`, pacote com 1,7K
+    installs). Ambas markdown puro, sem script. **Potencialmente
+    relevante pro problema real do projeto**: `robot-bringup` cobre
+    especificamente "ordered startup with health checks" e "debugging
+    boot-time race conditions" — exatamente a classe do problema dos 70%
+    de sucesso na ativação sequencial (`conhecimento/dds_tuning.md`).
+    Vale consultar essa skill da próxima vez que alguém mexer em
+    `activate_robot_nav.launch.py` ou no settle-time de 15s.
+- **[sessão]** Tentativa de gravar vídeo de demo com 2 robôs + 2 pilotos
+  de IA navegando **simultaneamente**: reproduziu ao vivo o bug já
+  documentado (`conhecimento/dds_tuning.md`, Seção 09 da dissertação) —
+  salto de relógio simulado, "jump back in time" repetido, Nav2 nunca
+  ficou pronto pra nenhum dos 2 robôs em 300s. Confirma, de novo, que
+  Nav2 simultâneo pra 2+ robôs não é confiável; a arquitetura real
+  (`activate_robot_nav` + troca sequencial) é o único caminho validado.
+  Demo cancelada antes de decidir entre simultâneo/sequencial — autor
+  ainda não escolheu.
+- **[sessão]** Confirmado que `turtlebot3_house.launch.py` é resquício do
+  commit inicial do repo (`b8834ba`, nunca mais tocado) — projeto nunca
+  migrou pra TurtleBot3, é TurtleBot4 Standard do início ao fim, inclusive
+  em toda a dissertação.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
