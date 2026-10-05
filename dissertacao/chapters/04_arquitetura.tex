@@ -355,7 +355,23 @@ A arquitetura do Fleet UI resulta de uma série de decisões motivadas por probl
 concretos encontrados durante o desenvolvimento: o executor multithreaded para evitar
 deadlocks de action client, os buffers TF por robô para suporte multi-robô, os perfis
 de QoS diferenciados para garantir integridade dos bags, e a separação entre
-orquestrador e coletor para permitir falhas independentes. Sobre essa base, a camada
+orquestrador e coletor para permitir falhas independentes.
+
+Vistos em conjunto, esses mecanismos resolvem uma instância concreta de um
+problema clássico de Engenharia de Software: integrar componentes
+desenvolvidos independentemente --- o xacro vendor do TurtleBot4, o plugin
+\texttt{DiffDrive} do Gazebo, o Nav2, o SLAM Toolbox --- sem que nenhum
+deles pressupusesse múltiplas instâncias coexistindo, um descompasso
+arquitetural conhecido na literatura como \textit{architectural mismatch}
+\cite{garlan1995architectural}. O caso dos perfis de QoS é uma
+manifestação ainda mais formal desse problema: no DDS, middleware
+subjacente ao ROS~2 \cite{pardocastellote2003dds}, publicador e assinante
+só se conectam se suas QoS satisfizerem regras explícitas de
+compatibilidade entre QoS oferecida e requisitada \cite{omgdds2015} ---
+não é um detalhe de configuração arbitrário, é um contrato de
+interoperabilidade que o framework precisa satisfazer explicitamente.
+
+Sobre essa base, a camada
 de agentes de IA descrita na Seção~\ref{sec:agentes} foi construída inteiramente por
 cima da API REST já existente, sem alterar o orquestrador ROS~2 ou o coletor de
 dados, uma confirmação prática de que a separação em camadas cumpriu seu papel de
