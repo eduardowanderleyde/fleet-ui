@@ -38,10 +38,17 @@ código) confirmando o efeito.
   teste: N réplicas (≥10) da ativação sequencial com e sem a variável,
   comparando quantos retries cada config precisou, antes de decidir se
   muda o número de 70% já citado na dissertação. Risco: baixo. Chance de
-  funcionar: não comprovada (nenhuma fonte prova que resolve o "jump
-  back in time" especificamente) — é um experimento de diagnóstico/
-  mitigação barato, não uma correção garantida. Ver `conhecimento/dds_tuning.md`
-  (achado 2026-10-03) pro detalhe completo e as fontes.
+  funcionar: reforçada em 2026-10-05 por corroboração independente real —
+  usuários no fórum oficial ROS/Gazebo relatam a mesma classe de sintoma
+  (tf falhando ~75% das vezes, timeout de serviço) sob Fast DDS numa
+  única máquina, resolvido trocando pra Cyclone DDS, em outro projeto.
+  **Atualização importante**: Cyclone DDS tem seu próprio bug conhecido
+  sob bringup concorrente (`ros2/rmw_cyclonedds#458`, "Failed to find a
+  free participant index") — incluir
+  `CYCLONEDDS_URI` com `MaxAutoParticipantIndex` elevado (ex. 100) junto
+  da troca de RMW desde a primeira tentativa, não só se aparecer erro
+  novo depois. Ver `conhecimento/dds_tuning.md` (achados 2026-10-03 e
+  2026-10-05) pro detalhe completo e as fontes.
 - [ ] **Avaliar adicionar o plugin `WheelSlip` ao modelo do Gazebo**
   (origem: `gazebo_tracking`, 2026-10-02; reavaliado em 2026-10-03). Hoje
   a dissertação registra "DiffDrive não modela slip" como limitação;

@@ -481,3 +481,38 @@ de mitigação que não foi medido.
   TurtleBot4. Não muda a recomendação de ontem (RMW primeiro, composição
   depois da defesa) — só deixa mais preciso o "porquê" técnico de ser
   mexer em launch file, não parâmetro simples.
+
+### 2026-10-05 — pesquisa mais a fundo: confirma RMW atual (Fast DDS), achado de corroboração forte, e um risco novo a conhecer antes de trocar
+
+- **[sessão, não agente]** Confirmado direto nesta máquina (`RMW_IMPLEMENTATION`
+  vazio, só `ros-jazzy-rmw-fastrtps-cpp` instalado via `dpkg -l`, nenhum
+  pacote `rmw-cyclonedds` presente): o bug reproduzido ao vivo hoje
+  (tentativa de demo com 2 robôs, "jump back in time" repetido, Nav2 nunca
+  ficou pronto em 300s) aconteceu sob **Fast DDS**, o default do Jazzy —
+  não Cyclone DDS.
+- **Corroboração forte e independente da recomendação de ontem** (trocar
+  pra Cyclone DDS): no fórum oficial ROS/Gazebo (ROS Discourse,
+  `discourse.openrobotics.org/t/fastdds-without-discovery-server/26117`),
+  múltiplos usuários independentes relatam exatamente essa classe de
+  sintoma — um especificamente diz que reiniciar launch files individuais
+  faz tópicos (particularmente `tf`) falharem ao conectar **~75% das
+  vezes** sob Fast DDS numa única máquina, `ros2 node list` não lista
+  todos os nós, chamadas de serviço dão timeout — e que "todos os
+  problemas desapareceram magicamente" ao trocar pra Cyclone DDS. Isso é
+  da mesma ordem de grandeza do nosso próprio achado (70% de sucesso =
+  ~30% de falha), em outro projeto, outro autor, mesma dupla de sintomas
+  (TF + serviço). Fortalece bastante a prioridade de testar RMW antes da
+  defesa.
+- **Risco novo a conhecer, não descoberto antes**: Cyclone DDS tem seu
+  próprio bug real e documentado sob bringup concorrente — issue oficial
+  `github.com/ros2/rmw_cyclonedds/issues/458`, erro "Failed to find a
+  free participant index for domain 0" quando vários processos sobem ao
+  mesmo tempo (exatamente o padrão do Nav2 bringup). Fix conhecido: variável
+  de ambiente antes do launch —
+  `CYCLONEDDS_URI='<CycloneDDS><Discovery><ParticipantIndex>auto</ParticipantIndex><MaxAutoParticipantIndex>100</MaxAutoParticipantIndex></Discovery></CycloneDDS>'`
+  (default do índice de participante é baixo o bastante — a faixa 32-99
+  aparece em fontes diferentes, não cravei o número exato — pra esgotar
+  sob bringup de frota). **Ação sugerida**: se/quando o teste de RMW
+  acontecer, aplicar essa env var junto da troca pra Cyclone DDS desde o
+  início, não só depois de ver falha nova — senão corre o risco de trocar
+  um bug conhecido por outro bug conhecido e achar que "não funcionou".
