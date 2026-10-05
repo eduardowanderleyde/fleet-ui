@@ -460,3 +460,24 @@ mais honesta é documentar os 70% como limitação conhecida (já é o caso)
 e citar `ComposableNodeContainer`/`ROS_DISCOVERY_SERVER`/troca de RMW
 como trabalho futuro no texto já existente — não inventar um resultado
 de mitigação que não foi medido.
+
+### 2026-10-05 — detalhe concreto sobre ComposableNodeContainer (achado via skill ros2 instalada, não pesquisa nova)
+
+- **[sessão, não agente]** Ao explorar a skill `ros2` recém-instalada
+  (`.claude/skills/ros2`), confirmei direto no arquivo real que este
+  projeto usa (`/opt/ros/jazzy/share/turtlebot4_navigation/launch/nav2.launch.py`,
+  linha 73): ele inclui `nav2_bringup/launch/navigation_launch.py` com
+  `('use_composition', 'False')` **hardcoded inline**, não exposto como
+  `DeclareLaunchArgument` próprio (só `use_sim_time`, `params_file`,
+  `namespace` são declarados). `navigation_launch.py` em si **já suporta
+  composição nativamente** (6 ocorrências reais de `use_composition`, não
+  comentário solto) — não seria preciso escrever componente C++ do zero,
+  só ativar o que já existe. Mas como `nav2.launch.py` do TurtleBot4 não
+  expõe essa opção pra quem chama de fora, a única forma de usar é (a)
+  fazer um fork pequeno desse arquivo específico (mesmo padrão já usado
+  pro xacro do DiffDrive) trocando a string `'False'` por
+  `LaunchConfiguration('use_composition')`, ou (b) escrever um launch
+  próprio que inclua `navigation_launch.py` direto, pulando o wrapper do
+  TurtleBot4. Não muda a recomendação de ontem (RMW primeiro, composição
+  depois da defesa) — só deixa mais preciso o "porquê" técnico de ser
+  mexer em launch file, não parâmetro simples.
