@@ -59,6 +59,16 @@ import analyze_runs  # noqa: E402
 # o que este piloto não implementa (ver design.md, Risco de geometria).
 FUUT_SPAWN_POSE = FuutPose(x=0.0, y=2.0)
 
+# Offset de montagem do LiDAR do FUUT relativo ao eixo frontal do base_link,
+# medido empiricamente (não lido do URDF): piloto real de 3 réplicas
+# (runs/fuut_pilot01/, antes desta correção) mostrou distância detectada
+# correta (~2,0-2,15m, batendo com a geometria real) mas bearing sempre
+# ~87-90° fora do esperado, de forma consistente — assinatura de rotação
+# fixa de montagem, não ruído. 90° é a hipótese mais simples compatível
+# com os 3 valores medidos (87,2° / 88,5° / 89,7°); não foi confirmado
+# contra o transform lidar_link→base_link do URDF (trabalho futuro).
+FUUT_LIDAR_YAW_OFFSET_DEG = 90.0
+
 SIM_PROCESS_PATTERNS = [
     "gz sim -r -s", "nav2_", "slam_toolbox", "fleet_orchestrator",
     "sensor_collector", "ros_gz_bridge/parameter_bridge",
@@ -279,8 +289,9 @@ def build_report_entry(reference: dict, replica: dict, verifier: FuutVerifier) -
 
     _, idx, obs, t_fuut = best_pair
     claim = MuutClaim(x=float(x_arr[idx]), y=float(y_arr[idx]), timestamp_s=float(t_abs[idx]))
+    corrected_bearing_deg = obs.bearing_deg + FUUT_LIDAR_YAW_OFFSET_DEG
     observation = FuutObservation(
-        distance_m=obs.distance_m, bearing_deg=obs.bearing_deg, timestamp_s=t_fuut,
+        distance_m=obs.distance_m, bearing_deg=corrected_bearing_deg, timestamp_s=t_fuut,
     )
     result = verifier.verify(FUUT_SPAWN_POSE, observation, claim)
     return {

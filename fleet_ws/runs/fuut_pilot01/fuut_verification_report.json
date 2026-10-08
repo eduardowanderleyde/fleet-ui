@@ -1,0 +1,59 @@
+[
+  {
+    "replicate_id": 1,
+    "status": "verificado",
+    "muut_claim": {
+      "x": 0.1281683671960887,
+      "y": -0.00032829374945615426,
+      "timestamp_s": 19.2
+    },
+    "fuut_observation": {
+      "distance_m": 1.975112795829773,
+      "bearing_deg": 273.91785028869515,
+      "timestamp_s": 19.2
+    },
+    "level": 2.95,
+    "label": "Correspondência forte — distância geométrica, direção e instante todos compatíveis com a pose reportada pelo MUUT, dentro de ruído esperado de sensor",
+    "confidence": 0.95,
+    "geometric_discrepancy_m": 0.030592785668002043,
+    "time_discrepancy_s": 0.0
+  },
+  {
+    "replicate_id": 2,
+    "status": "verificado",
+    "muut_claim": {
+      "x": 0.7240270025307827,
+      "y": 0.00381477476886886,
+      "timestamp_s": 39.201
+    },
+    "fuut_observation": {
+      "distance_m": 2.0769331455230713,
+      "bearing_deg": 288.95200698804354,
+      "timestamp_s": 39.201
+    },
+    "level": 2.87,
+    "label": "Correspondência forte — distância geométrica, direção e instante todos compatíveis com a pose reportada pelo MUUT, dentro de ruído esperado de sensor",
+    "confidence": 0.86,
+    "geometric_discrepancy_m": 0.05884705803737033,
+    "time_discrepancy_s": 0.0
+  },
+  {
+    "replicate_id": 3,
+    "status": "verificado",
+    "muut_claim": {
+      "x": 0.6874246728362781,
+      "y": 0.06527252342497963,
+      "timestamp_s": 109.8
+    },
+    "fuut_observation": {
+      "distance_m": 2.0107496976852417,
+      "bearing_deg": 288.95200698804354,
+      "timestamp_s": 109.8
+    },
+    "level": 2.95,
+    "label": "Correspondência forte — distância geométrica, direção e instante todos compatíveis com a pose reportada pelo MUUT, dentro de ruído esperado de sensor",
+    "confidence": 0.96,
+    "geometric_discrepancy_m": 0.047641008122890904,
+    "time_discrepancy_s": 0.0
+  }
+]

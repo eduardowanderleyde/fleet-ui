@@ -1,0 +1,24 @@
+
+=== Fase B: reproduzir percurso (coleta + play_route) ===
+robot='tb1' route=fleet_pilot_tb1_v3
+topics=['scan', 'odom', 'imu', 'pose'] skip_collection=False export='runs/fuut_pilot01/replay_r02.json'
+[TRACE] Chamando service enable_collection ...
+[OK] enable_collection — Collection enabled. Bag: collections/tb1/2026-10-08_22-22-25_441151_5137af25
+[TRACE] Warmup após enable_collection (sleep 5s) ...
+[TRACE] Chamando service play_route ...
+[OK] play_route — Navigation started
+[OK] navegação iniciou (navigating)
+[OK] navegação terminou (idle)
+[TRACE] Chamando service disable_collection ...
+[OK] disable_collection — Collection disabled for tb1. Bag: collections/tb1/2026-10-08_22-22-25_441151_5137af25
+
+Resumo: sem falhas
+
+[TRACE] Sensor summary (mcap):
+  /tb1/pose: 14 msgs  ~0.2 Hz
+  /tb1/imu: 13551 msgs  ~200.0 Hz
+  /tb1/odom: 1882 msgs  ~27.8 Hz
+  /tb1/scan: 678 msgs  ~10.0 Hz
+[TRACE] bag_metrics: odom=0 msgs  path=0.0000 m  scan=0  imu=0
+
+[OK] Resumo exportado: runs/fuut_pilot01/replay_r02.json

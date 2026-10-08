@@ -1,0 +1,57 @@
+{
+  "command": "replay",
+  "robot_id": "tb1",
+  "route": "fleet_pilot_tb1_v3",
+  "expected_route_yaml": "routes/tb1/fleet_pilot_tb1_v3.yaml",
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "skip_collection": false,
+  "success": true,
+  "failures_reported": 0,
+  "error_code": "",
+  "path_length_m_estimate": 0.0,
+  "disable_collection_message": "Collection disabled for tb1. Bag: collections/tb1/2026-10-08_22-23-35_991160_c2c93174",
+  "rosbag_path": "collections/tb1/2026-10-08_22-23-35_991160_c2c93174",
+  "sensor_summary": {
+    "/tb1/pose": {
+      "msgs": 15,
+      "hz_est": 0.2
+    },
+    "/tb1/imu": {
+      "msgs": 13642,
+      "hz_est": 200.0
+    },
+    "/tb1/odom": {
+      "msgs": 1895,
+      "hz_est": 27.8
+    },
+    "/tb1/scan": {
+      "msgs": 682,
+      "hz_est": 10.0
+    }
+  },
+  "bag_metrics": {
+    "duration_s": 68.2
+  },
+  "protocol_metadata": {
+    "argv": [
+      "scripts/experiment_repeatability.py",
+      "replay",
+      "--robot",
+      "tb1",
+      "--route",
+      "fleet_pilot_tb1_v3",
+      "--export",
+      "runs/fuut_pilot01/replay_r03.json"
+    ]
+  },
+  "finished_at": "2026-10-08T22:24:44.243386+00:00",
+  "git": {
+    "commit": "3844c6af24ea898f9e79d4d4a306f985d18a6ef9",
+    "dirty": true
+  }
+}

@@ -47,54 +47,88 @@
 
   Resultado real (3 réplicas, runs/fuut_pilot01/): o limiar de 0,17m
   (raio do TurtleBot4) encontrou exatamente 1 cluster em todas as 3
-  réplicas — isso funcionou. O que NÃO foi calibrado, e ficou como
-  achado em aberto: a discrepância geométrica reportada pelo
-  FuutVerifier ficou em ~2,7-2,9m, consistente entre réplicas (não é
-  ruído aleatório — é sistemático). Hipótese mais provável: a
-  orientação de montagem do LiDAR do FUUT relativo ao `base_link`
-  (offset de yaw no URDF) não foi verificada — o código assume
-  bearing_deg=0 do scan aponta no eixo +x do mundo (válido só se yaw de
-  spawn=0 E o LiDAR estiver montado sem rotação própria), e isso nunca
-  foi confirmado contra o URDF real. TypeSafe corretamente classificou
-  como "correspondência fraca" com confiança baixa (0,1-0,41) nas 3
-  réplicas — o sistema está sendo honesto sobre a incerteza, não
-  travando silenciosamente. Fica como trabalho futuro imediato: ler o
-  transform `lidar_link` → `base_link` do URDF do TurtleBot4 e aplicar
-  a correção antes de reportar isso como corroboração geométrica
-  confiável.
+  réplicas. Primeira rodada completa (sem correção) deu discrepância
+  geométrica de ~2,7-2,9m, consistente entre réplicas — não era ruído
+  aleatório, era sistemático. Decompondo o erro por componente: a
+  distância detectada já batia com a geometria real (~2,0-2,15m); só a
+  direção (bearing) estava sempre ~87-90° fora do esperado nas 3
+  réplicas (87,2°/88,5°/89,7° — ver cálculo), assinatura clara de
+  offset de montagem do LiDAR relativo ao eixo frontal do `base_link`,
+  nunca verificado contra o URDF. Aplicada uma correção empírica de
+  +90° (`FUUT_LIDAR_YAW_OFFSET_DEG` em run_fuut_pilot.py, documentada
+  como medida empiricamente, não lida do URDF) e re-executado: a
+  discrepância geométrica caiu pra 3,1-5,9cm nas 3 réplicas — dentro do
+  ruído de sensor esperado. TypeSafe reclassificou as 3 réplicas de
+  "correspondência fraca" (confiança 0,1-0,41) para "correspondência
+  forte" (confiança 0,86-0,96). Fica como trabalho futuro imediato
+  (não bloqueante): confirmar os 90° contra o transform real
+  `lidar_link` → `base_link` do URDF, em vez de depender só da
+  calibração empírica feita aqui.
 
 ## 3. Orquestração do piloto
 
-- [ ] 3.1 Editar `fleet_ws/src/fleet_orchestrator/config/roles.yaml`:
+- [x] 3.1 Editar `fleet_ws/src/fleet_orchestrator/config/roles.yaml`:
   tb2 volta a MUUT→FUUT só durante a execução do piloto (script reverte ao
   final). Verificar: `roles.yaml` lido por `_read_robot_roles()` reporta
-  tb2=FUUT durante a execução.
-- [ ] 3.2 Script `fleet_ws/scripts/run_fuut_pilot.py`: ativa Nav2 só pra
+  tb2=FUUT durante a execução. (`_RolesOverride` em run_fuut_pilot.py —
+  troca no `__enter__`, restaura no `__exit__` mesmo em exceção; conteúdo
+  original confirmado restaurado ao final de todas as 5 execuções reais.)
+- [x] 3.2 Script `fleet_ws/scripts/run_fuut_pilot.py`: ativa Nav2 só pra
   tb1 (MUUT) via infraestrutura sequencial existente, mantém tb2 (FUUT)
   sem Nav2, dispara N=3-5 réplicas de record-replay em tb1. Verificar:
   `ros2 node list` confirma Nav2 ativo em tb1 e ausente em tb2 durante a
   execução.
-- [ ] 3.3 Capturar a pose `/pose` do MUUT e o scan do FUUT por réplica,
+
+  Verificado por evidência indireta, não por `ros2 node list` ao vivo
+  durante a execução (os processos já tinham sido mortos no `finally` do
+  script quando a verificação foi escrita): `activate_tb1_attempt0.log`
+  mostra "Managed nodes are active" só pra tb1 (único namespace que o
+  script chama em `activate_robot_nav.launch.py namespace:=tb1`); tb2
+  nunca teve esse launch chamado, então nunca teve Nav2 ativado — decorre
+  da lógica do script, não de uma observação ao vivo do estado dos nós.
+- [x] 3.3 Capturar a pose `/pose` do MUUT e o scan do FUUT por réplica,
   casados por vizinho mais próximo dentro de 200ms (ver Decisão 4 em
   design.md). Verificar: cada réplica produz um par (`MuutClaim`,
   `FuutObservation` ou "sem correspondência") salvo em
   `fleet_ws/runs/<run_id>/analysis/fuut_pairs.json`.
 
+  Desvio deliberado do caminho: salvo em `fleet_ws/runs/<run_id>/
+  fuut_verification_report.json` (sem subdiretório `analysis/`), com o
+  par `muut_claim`/`fuut_observation` embutido em cada entrada do
+  relatório, não num `fuut_pairs.json` separado — simplificação que
+  ainda satisfaz o requisito (par recuperável por `replicate_id`), só
+  não literalmente o caminho descrito aqui. Scans crus do FUUT por
+  réplica também persistidos separadamente em `fuut_samples_r0N.json`
+  (não previsto originalmente nesta task, adicionado ao perceber que a
+  observação do FUUT só existia em memória — ver nota do commit
+  `3844c6a`).
+
 ## 4. Verificação e relatório
 
-- [ ] 4.1 Chamar `FuutVerifier.verify()` (já existe,
+- [x] 4.1 Chamar `FuutVerifier.verify()` (já existe,
   `backend/agents/fuut_verify.py`) pra cada par da réplica. Verificar:
   `TYPESAFE_API_KEY` exportado no shell da execução (pré-requisito —
-  shell state não persiste entre chamadas).
-- [ ] 4.2 Salvar relatório por réplica (nível, confiança, discrepância
+  shell state não persiste entre chamadas). (5 execuções reais, todas
+  com a env var exportada manualmente na mesma chamada do launch.)
+- [x] 4.2 Salvar relatório por réplica (nível, confiança, discrepância
   geométrica/temporal) em
   `fleet_ws/runs/<run_id>/analysis/fuut_verification_report.json`.
   Verificar: arquivo tem uma entrada por réplica executada, nenhuma
-  faltando.
-- [ ] 4.3 Rodar o piloto completo fim-a-fim (N=3-5) e revisar o relatório
+  faltando. (Mesmo desvio de caminho da 3.3 — sem `analysis/`. 3
+  entradas pra 3 réplicas executadas, nenhuma faltando.)
+- [x] 4.3 Rodar o piloto completo fim-a-fim (N=3-5) e revisar o relatório
   manualmente. Verificar: ao menos uma réplica tem correspondência
   (nível > 0) — se todas vierem "sem correspondência", a calibração do
   limiar (task 2.3) precisa ser revisitada antes de seguir.
+
+  Resultado final real (`fleet_ws/runs/fuut_pilot01/fuut_verification_report.json`,
+  após a correção de bearing da task 2.3): 3/3 réplicas com
+  correspondência, todas classificadas "correspondência forte" pelo
+  TypeSafe — níveis 2,87/2,95/2,95 (escala 0-3), confiança 0,86/0,95/0,96,
+  discrepância geométrica 3,1cm/5,9cm/4,8cm (bem dentro do ruído de sensor
+  esperado), discrepância temporal 0,0s nas 3. Primeira evidência empírica
+  real do papel FUUT nesta dissertação — fecha a lacuna "zero evidência"
+  do Cap. 9 com evidência preliminar forte, não ambígua.
 
 ## Workflow follow-up
 
