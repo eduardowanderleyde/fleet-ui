@@ -346,7 +346,12 @@ configuração reproduziu, durante o desenvolvimento, o sintoma do relógio
 simulado retrocedendo e invalidando o buffer de TF antes do prazo interno
 do Nav2 (ver Seção~\ref{sec:limitacoes} da Conclusão para o registro
 detalhado desse problema e da decisão de redesenho que resultou na
-ativação sequencial).
+ativação sequencial). Uma investigação posterior, registrada na mesma
+seção, encontrou e testou ao vivo uma correção para o próprio sintoma
+(troca do middleware DDS padrão), com resultado promissor o bastante
+para ser recomendada como prioridade de trabalho futuro — mas não
+adotada como arquitetura padrão nesta dissertação, que permanece
+avaliada sob ativação sequencial em todo o restante do texto.
 
 \section{Considerações Finais}
 \label{sec:arq_conclusao}

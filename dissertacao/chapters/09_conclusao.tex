@@ -224,6 +224,34 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     substitui uma avaliação quantitativa formal de repetibilidade sob
     operação multi-robô, que permanece em aberto.
 
+    Uma investigação posterior, já na fase final de escrita, identificou e
+    testou ao vivo uma causa raiz provável e uma correção específica para o
+    próprio sintoma do relógio retrocedendo, não apenas um contorno por
+    ativação sequencial. O middleware DDS padrão do ROS~2 Jazzy (Fast DDS)
+    foi substituído por Cyclone DDS via uma única variável de ambiente
+    (\texttt{RMW\_\allowbreak IMPLEMENTATION=\allowbreak rmw\_\allowbreak cyclonedds\_\allowbreak cpp}),
+    sem alteração de código. Sob essa troca, a ativação SIMULTÂNEA (não
+    sequencial) de Nav2 completo em tb1 e tb2 teve taxa de sucesso de
+    100\% em duas baterias de cinco tentativas (dez de dez), contra 20\%
+    (uma de cinco) sob o Fast DDS padrão na mesma configuração simultânea;
+    nenhuma ocorrência do sintoma de salto de relógio foi observada sob
+    Cyclone DDS. Uma verificação adicional, de menor escopo (uma réplica,
+    janela de 25\,s), observou os dois robôs navegando simultaneamente após
+    essa ativação sem o sintoma reaparecer. A leitura do código-fonte do
+    \texttt{tf2\_\allowbreak ros} (pacote \texttt{geometry2}, ramo
+    \textit{jazzy}) confirma que o limiar que dispara a invalidação do
+    buffer de TF é fixo em 1\,segundo, não exposto como parâmetro
+    configurável — o que explica por que nenhuma forma de ajustar
+    tolerância, só a troca de middleware, resolveu o sintoma. Este
+    resultado não foi integrado como arquitetura padrão do projeto nem
+    reavaliado quantitativamente (RMSE, consistência temporal) sob a
+    configuração simultânea: permanece registrado aqui como candidato
+    validado, não como substituição da ativação sequencial efetivamente
+    usada em todo o restante desta dissertação. A adoção da troca de RMW
+    como arquitetura padrão, e a avaliação quantitativa completa sob
+    ativação simultânea, permanecem como trabalho futuro imediato
+    (Seção~\ref{sec:futuros}).
+
     \item \textbf{Papel FUUT exercitado apenas em piloto pequeno.}
     Distinta da limitação de escala acima, há uma lacuna específica quanto
     ao papel de observação exógena: a dualidade MUUT/FUUT, motivada em
@@ -362,15 +390,23 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     um todo (Seção~\ref{sec:limitacoes}).
 
     \item Avaliar quantitativamente cenários multi-robô (MUUT+MUUT) com RMSE
-    pairwise por robô, usando a arquitetura de ativação sequencial de dois
-    robôs (Seção~\ref{sec:limitacoes}) como alvo inicial (já com taxa de
-    sucesso de 70\% medida qualitativamente, mas ainda sem avaliação
-    quantitativa de RMSE sob essa operação), respondendo diretamente à
-    limitação de escopo single-robot registrada na mesma seção — distinta
-    da lacuna específica do papel FUUT, exercitada apenas em piloto de
-    $N=3$ (Seção~\ref{sec:res_fuut_piloto}) e sem alvo de ativação
-    sequencial equivalente, já que uma unidade fixa não navega. A extensão
-    natural dessa lacuna é ampliar o piloto FUUT para mais réplicas e mais
+    pairwise por robô. Dois alvos concretos ficam disponíveis a partir da
+    Seção~\ref{sec:limitacoes}: a arquitetura de ativação sequencial já
+    em uso (taxa de sucesso de 70\% medida qualitativamente, ainda sem
+    RMSE) e, mais promissor, a ativação SIMULTÂNEA sob Cyclone DDS
+    (mesma seção), que mediu 100\% de sucesso de ativação em dez de dez
+    tentativas e eliminou o sintoma que motivou a ativação sequencial em
+    primeiro lugar — mas segue sem nenhuma avaliação quantitativa de RMSE
+    sob navegação simultânea prolongada, só um teste de fumaça de 25\,s.
+    Adotar a troca de RMW como arquitetura padrão do projeto e então medir
+    RMSE pairwise sob essa configuração é o caminho que este trabalho
+    recomenda como prioridade, por responder à mesma limitação de escopo
+    single-robot com uma arquitetura já validada quanto ao sintoma que
+    inviabilizava a tentativa anterior — distinta da lacuna específica do
+    papel FUUT, exercitada apenas em piloto de $N=3$
+    (Seção~\ref{sec:res_fuut_piloto}) e sem alvo de ativação sequencial
+    equivalente, já que uma unidade fixa não navega. A extensão natural
+    dessa lacuna é ampliar o piloto FUUT para mais réplicas e mais
     geometrias de observação, não um alvo de escala de ativação.
 
     \item \textbf{Estender o piloto de repetibilidade sob agente de IA
