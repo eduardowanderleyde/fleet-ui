@@ -1,0 +1,90 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-08-19-59-09-508697-eduardo-B550M-AORUS-ELITE-31133
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [xacro-1]: process started with pid [31188]
+[INFO] [xacro-1]: process has finished cleanly [pid 31188]
+[INFO] [gazebo-2]: process started with pid [31189]
+[INFO] [parameter_bridge-3]: process started with pid [31190]
+[INFO] [robot_state_publisher-4]: process started with pid [31231]
+[INFO] [parameter_bridge-5]: process started with pid [31232]
+[INFO] [create-6]: process started with pid [31233]
+[robot_state_publisher-4] [WARN] [1791500350.015837705] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-4] [INFO] [1791500350.015943175] [tb1.robot_state_publisher]: Robot initialized
+[create-6] [INFO] [1791500350.019333668] [ros_gz_sim]: Requesting list of world names.
+[create-6] [INFO] [1791500350.606690059] [ros_gz_sim]: Waiting messages on topic [/tb1/robot_description].
+[create-6] [INFO] [1791500350.617942846] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-6]: process has finished cleanly [pid 31233]
+[parameter_bridge-3] [INFO] [1791500350.871988519] [bridge_ros_gz_clock]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.036500816] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.037375533] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/joint_states (gz.msgs.Model) -> /tb1/joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.039690641] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/odom (gz.msgs.Odometry) -> /tb1/odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.041047786] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/tf (gz.msgs.Pose_V) -> /tb1/tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.042345213] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/imu (gz.msgs.IMU) -> /tb1/imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.042799455] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/scan (gz.msgs.LaserScan) -> /tb1/scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.043189810] [bridge_ros_gz_tb1]: Creating ROS->GZ Bridge: [/tb1/cmd_vel (geometry_msgs/msg/Twist) -> /tb1/cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500351.043785453] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /tb1/rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[INFO] [robot_state_publisher-7]: process started with pid [31659]
+[INFO] [parameter_bridge-8]: process started with pid [31660]
+[INFO] [create-9]: process started with pid [31661]
+[gazebo-2] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[create-9] [INFO] [1791500352.548970360] [ros_gz_sim]: Requesting list of world names.
+[robot_state_publisher-7] [WARN] [1791500352.555978558] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-7] [INFO] [1791500352.556123977] [tb2.robot_state_publisher]: Robot initialized
+[create-9] [INFO] [1791500352.753755720] [ros_gz_sim]: Waiting messages on topic [/tb2/robot_description].
+[create-9] [INFO] [1791500353.219367094] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-9]: process has finished cleanly [pid 31661]
+[parameter_bridge-8] [INFO] [1791500353.564115494] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500353.566842640] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/joint_states (gz.msgs.Model) -> /tb2/joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500353.570334875] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/odom (gz.msgs.Odometry) -> /tb2/odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500353.572670894] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/tf (gz.msgs.Pose_V) -> /tb2/tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500353.574800333] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/imu (gz.msgs.IMU) -> /tb2/imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500353.576197498] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/scan (gz.msgs.LaserScan) -> /tb2/scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500353.577499013] [bridge_ros_gz_tb2]: Creating ROS->GZ Bridge: [/tb2/cmd_vel (geometry_msgs/msg/Twist) -> /tb2/cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500353.578895205] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /tb2/rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[gazebo-2] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[robot_state_publisher-4] [WARN] [1791500361.063013356] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.081789435] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.136968351] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.141595590] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.164687150] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.165145070] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.189454058] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.200173426] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.207665716] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.218155749] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.227977586] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.234517363] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.234979812] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.241573076] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.248745531] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.261682554] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.274370723] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.274436183] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.284184773] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.295456820] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.305634893] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.310898006] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.322413385] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.327195493] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.335487220] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.343161892] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.350718920] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.358077504] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.372779854] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.375948326] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.381393230] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.394397597] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.408053928] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.412765375] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.417859161] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.424483828] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.425304748] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.433601456] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.437100906] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.442079533] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.448965659] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.454144113] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.455221884] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.461325075] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.462823370] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500361.473066203] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500361.477654565] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!

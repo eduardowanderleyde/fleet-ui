@@ -1,0 +1,65 @@
+{
+  "started_at": "2026-10-08T23:01:04.886757+00:00",
+  "rmw": "rmw_cyclonedds_cpp",
+  "cyclonedds_fix": true,
+  "repeat": 5,
+  "activate_timeout_s": 120.0,
+  "replicas": [
+    {
+      "replicate_id": 1,
+      "status_tb1": "ready",
+      "status_tb2": "ready",
+      "both_ready": true,
+      "elapsed_sec": 6.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 0,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 2,
+      "status_tb1": "ready",
+      "status_tb2": "ready",
+      "both_ready": true,
+      "elapsed_sec": 6.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 0,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 3,
+      "status_tb1": "ready",
+      "status_tb2": "ready",
+      "both_ready": true,
+      "elapsed_sec": 6.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 0,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 4,
+      "status_tb1": "ready",
+      "status_tb2": "ready",
+      "both_ready": true,
+      "elapsed_sec": 6.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 0,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 5,
+      "status_tb1": "ready",
+      "status_tb2": "ready",
+      "both_ready": true,
+      "elapsed_sec": 6.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 0,
+      "boot_ok": true
+    }
+  ],
+  "finished_at": "2026-10-08T23:02:48.876006+00:00",
+  "summary": {
+    "both_ready_count": 5,
+    "total": 5,
+    "success_rate": 1.0
+  }
+}

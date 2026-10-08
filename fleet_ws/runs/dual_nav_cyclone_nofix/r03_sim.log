@@ -1,0 +1,46 @@
+/opt/ros/jazzy/lib/python3.12/site-packages/launch/logging/__init__.py:149: UserWarning: Cannot create a symlink to latest log directory: [Errno 2] No such file or directory: '/home/eduardo/.ros/log/latest'
+
+  warnings.warn(
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-08-20-04-41-208789-eduardo-B550M-AORUS-ELITE-38426
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [xacro-1]: process started with pid [38479]
+[INFO] [xacro-1]: process has finished cleanly [pid 38479]
+[INFO] [gazebo-2]: process started with pid [38480]
+[INFO] [parameter_bridge-3]: process started with pid [38481]
+[INFO] [robot_state_publisher-4]: process started with pid [38518]
+[INFO] [parameter_bridge-5]: process started with pid [38519]
+[INFO] [create-6]: process started with pid [38520]
+[robot_state_publisher-4] [WARN] [1791500681.690242244] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-4] [INFO] [1791500681.690332583] [tb1.robot_state_publisher]: Robot initialized
+[create-6] [INFO] [1791500681.694299609] [ros_gz_sim]: Requesting list of world names.
+[create-6] [INFO] [1791500682.274133111] [ros_gz_sim]: Waiting messages on topic [/tb1/robot_description].
+[create-6] [INFO] [1791500682.276147035] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-6]: process has finished cleanly [pid 38520]
+[parameter_bridge-3] [INFO] [1791500682.558959113] [bridge_ros_gz_clock]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.707442606] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.708161906] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/joint_states (gz.msgs.Model) -> /tb1/joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.709964460] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/odom (gz.msgs.Odometry) -> /tb1/odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.710906212] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/tf (gz.msgs.Pose_V) -> /tb1/tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.711753306] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/imu (gz.msgs.IMU) -> /tb1/imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.712085095] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/scan (gz.msgs.LaserScan) -> /tb1/scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.712386154] [bridge_ros_gz_tb1]: Creating ROS->GZ Bridge: [/tb1/cmd_vel (geometry_msgs/msg/Twist) -> /tb1/cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500682.712862661] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /tb1/rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[gazebo-2] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[INFO] [robot_state_publisher-7]: process started with pid [38946]
+[INFO] [parameter_bridge-8]: process started with pid [38947]
+[INFO] [create-9]: process started with pid [38948]
+[robot_state_publisher-7] [WARN] [1791500683.803929427] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-7] [INFO] [1791500683.804078804] [tb2.robot_state_publisher]: Robot initialized
+[create-9] [INFO] [1791500683.808235377] [ros_gz_sim]: Requesting list of world names.
+[create-9] [INFO] [1791500684.010685973] [ros_gz_sim]: Waiting messages on topic [/tb2/robot_description].
+[create-9] [INFO] [1791500684.012904694] [ros_gz_sim]: Entity creation successful.
+[gazebo-2] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[INFO] [create-9]: process has finished cleanly [pid 38948]
+[parameter_bridge-8] [INFO] [1791500684.826124917] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500684.828175213] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/joint_states (gz.msgs.Model) -> /tb2/joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500684.830678830] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/odom (gz.msgs.Odometry) -> /tb2/odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500684.832273009] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/tf (gz.msgs.Pose_V) -> /tb2/tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500684.834010864] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/imu (gz.msgs.IMU) -> /tb2/imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500684.835177904] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/scan (gz.msgs.LaserScan) -> /tb2/scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500684.836238723] [bridge_ros_gz_tb2]: Creating ROS->GZ Bridge: [/tb2/cmd_vel (geometry_msgs/msg/Twist) -> /tb2/cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500684.837145796] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /tb2/rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)

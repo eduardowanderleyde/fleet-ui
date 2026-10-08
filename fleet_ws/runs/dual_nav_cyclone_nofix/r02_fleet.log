@@ -1,0 +1,9 @@
+/opt/ros/jazzy/lib/python3.12/site-packages/launch/logging/__init__.py:149: UserWarning: Cannot create a symlink to latest log directory: [Errno 2] No such file or directory: '/home/eduardo/.ros/log/latest'
+
+  warnings.warn(
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-08-20-04-20-429241-eduardo-B550M-AORUS-ELITE-37673
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [fleet_orchestrator-1]: process started with pid [37709]
+[INFO] [sensor_collector-2]: process started with pid [37710]
+[sensor_collector-2] [INFO] [1791500660.780570836] [sensor_collector]: sensor_collector ready robots=['tb1', 'tb2'] dir=collections
+[fleet_orchestrator-1] [INFO] [1791500660.965052823] [fleet_orchestrator]: fleet_orchestrator ready robots=['tb1', 'tb2'] shared_map=False

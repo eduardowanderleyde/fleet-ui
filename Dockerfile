@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-dev-tools \
     ros-${ROS_DISTRO}-desktop \
     ros-${ROS_DISTRO}-nav2-minimal-tb4-sim \
+    ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
     ros-${ROS_DISTRO}-rosbag2-storage-mcap \
     ros-${ROS_DISTRO}-tf2-py \
     ros-${ROS_DISTRO}-tf2-ros \

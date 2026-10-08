@@ -761,6 +761,21 @@ diante) ainda não funciona de ponta a ponta. Frontend (`useSimulation.js`)
 ainda não foi adaptado pra chamar activate/deactivate em sequência — não
 faz sentido fazer isso antes de resolver o bug do segundo robô.
 
+**Atualização (2026-10-08, agente de pesquisa `experiment-dds-tuning`):**
+a decisão "1 robô por vez" acima partiu da premissa de que 2 Nav2
+simultâneos batem num teto estrutural sem saída barata. Testado ao vivo
+nesta sessão (ver `conhecimento/dds_tuning.md`, entrada 2026-10-08): com
+`RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` (troca de 1 variável de ambiente,
+sem mudar launch file nenhum), a ativação **genuinamente simultânea** de
+tb1+tb2 (sem stagger, os dois disparados juntos) foi **10/10 (100%)** em
+10 réplicas reais contra o Gazebo desta mesma máquina — contra **1/5
+(20%)** sob Fast DDS (o default, nunca trocado até agora). Navegação
+concorrente de verdade pós-ativação também testada (25s, 0 jumps). Ou
+seja: o teto que motivou esta seção parece ser do RMW (Fast DDS), não do
+`/clock`/CPU em si — não confirmado pra 3+ robôs, só pra 2. Isso não foi
+aplicado como mudança de arquitetura aqui (decisão do autor, ver arquivo
+de conhecimento pros números completos e os limites do teste).
+
 ### Investigação continuada na máquina Windows/Docker (2026-09-29) — hipótese refutada, achado redirecionado
 
 Retomando o bug do 2º robô (seção acima), mas na máquina Windows via Docker
@@ -1120,8 +1135,12 @@ dissertação (isso é escopo dos agentes `chapter-*` na branch
 | `experiment-artifact-publishing` | Publicação de artefato de pesquisa (DOI, replicação) | `conhecimento/artifact_publishing.md` |
 | `experiment-mcp-orchestration` | MCP e orquestração multi-agente — mesmo tema do item "Servidor MCP" logo abaixo | `conhecimento/mcp_orchestration.md` |
 
-Nenhum rodou ainda (criados, não invocados) — os 7 arquivos de
-conhecimento estão vazios, só com o cabeçalho TL;DR/Achados.
+Atualização: `experiment-dds-tuning` já rodou várias vezes (2026-10-02,
+-03, -05, -08) e seu arquivo de conhecimento acumulou achados reais,
+incluindo um teste ao vivo contra o Gazebo (ver `conhecimento/dds_tuning.md`,
+entrada 2026-10-08). Os outros 6 continuam sem execução registrada até
+onde este documento sabe — essa frase só estava desatualizada pro
+`dds-tuning`, não corrigida antes.
 
 ## Próximos passos naturais
 

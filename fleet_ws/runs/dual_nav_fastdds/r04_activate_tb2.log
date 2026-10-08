@@ -1,0 +1,204 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-08-19-59-11-500040-eduardo-B550M-AORUS-ELITE-31307
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sync_slam_toolbox_node-1]: process started with pid [31372]
+[INFO] [controller_server-2]: process started with pid [31373]
+[INFO] [smoother_server-3]: process started with pid [31374]
+[INFO] [planner_server-4]: process started with pid [31375]
+[INFO] [behavior_server-5]: process started with pid [31376]
+[INFO] [bt_navigator-6]: process started with pid [31378]
+[INFO] [velocity_smoother-7]: process started with pid [31380]
+[INFO] [collision_monitor-8]: process started with pid [31382]
+[INFO] [waypoint_follower-9]: process started with pid [31384]
+[INFO] [lifecycle_manager-10]: process started with pid [31385]
+[planner_server-4] [INFO] [1791500351.873146421] [tb2.planner_server]: 
+[planner_server-4] 	planner_server lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1791500351.875089409] [tb2.planner_server]: Creating
+[sync_slam_toolbox_node-1] [INFO] [1791500351.878259294] [tb2.slam_toolbox]: Node using stack size 40000000
+[velocity_smoother-7] [INFO] [1791500351.887059271] [tb2.velocity_smoother]: 
+[velocity_smoother-7] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-7] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-7] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-3] [INFO] [1791500351.891355032] [tb2.smoother_server]: 
+[smoother_server-3] 	smoother_server lifecycle node launched. 
+[smoother_server-3] 	Waiting on external lifecycle transitions to activate
+[smoother_server-3] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-3] [INFO] [1791500351.892758078] [tb2.smoother_server]: Creating smoother server
+[planner_server-4] [INFO] [1791500351.894194591] [tb2.global_costmap.global_costmap]: 
+[planner_server-4] 	global_costmap lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1791500351.894530979] [tb2.global_costmap.global_costmap]: Creating Costmap
+[controller_server-2] [INFO] [1791500352.190635361] [tb2.controller_server]: 
+[controller_server-2] 	controller_server lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-2] [INFO] [1791500352.193375573] [tb2.controller_server]: Creating controller server
+[controller_server-2] [INFO] [1791500352.201011627] [tb2.local_costmap.local_costmap]: 
+[controller_server-2] 	local_costmap lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-2] [INFO] [1791500352.201379157] [tb2.local_costmap.local_costmap]: Creating Costmap
+[sync_slam_toolbox_node-1] [INFO] [1791500352.487218515] [tb2.slam_toolbox]: Configuring
+[sync_slam_toolbox_node-1] [INFO] [1791500352.493737391] [tb2.slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[sync_slam_toolbox_node-1] [INFO] [1791500352.498239161] [tb2.slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[bt_navigator-6] [INFO] [1791500352.513311514] [tb2.bt_navigator]: 
+[bt_navigator-6] 	bt_navigator lifecycle node launched. 
+[bt_navigator-6] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-6] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-6] [INFO] [1791500352.515128232] [tb2.bt_navigator]: Creating
+[lifecycle_manager-10] [INFO] [1791500352.531112876] [tb2.lifecycle_manager_navigation]: Creating
+[collision_monitor-8] [INFO] [1791500352.542672914] [tb2.collision_monitor]: 
+[collision_monitor-8] 	collision_monitor lifecycle node launched. 
+[collision_monitor-8] 	Waiting on external lifecycle transitions to activate
+[collision_monitor-8] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-10] [INFO] [1791500352.544896740] [tb2.lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[waypoint_follower-9] [INFO] [1791500352.550187597] [tb2.waypoint_follower]: 
+[waypoint_follower-9] 	waypoint_follower lifecycle node launched. 
+[waypoint_follower-9] 	Waiting on external lifecycle transitions to activate
+[waypoint_follower-9] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-9] [INFO] [1791500352.553666426] [tb2.waypoint_follower]: Creating
+[behavior_server-5] [INFO] [1791500352.555243719] [tb2.behavior_server]: 
+[behavior_server-5] 	behavior_server lifecycle node launched. 
+[behavior_server-5] 	Waiting on external lifecycle transitions to activate
+[behavior_server-5] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[INFO] [launch.user]: [LifecycleLaunch] Slamtoolbox node is activating.
+[sync_slam_toolbox_node-1] [INFO] [1791500352.564149175] [tb2.slam_toolbox]: Activating
+[lifecycle_manager-10] [INFO] [1791500353.637641111] [tb2.lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-10] [INFO] [1791500353.637683265] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[controller_server-2] [INFO] [1791500353.637951919] [tb2.controller_server]: Configuring controller interface
+[controller_server-2] [INFO] [1791500353.637973662] [tb2.controller_server]: getting progress checker plugins..
+[controller_server-2] [INFO] [1791500353.638296433] [tb2.controller_server]: getting goal checker plugins..
+[controller_server-2] [INFO] [1791500353.638920713] [tb2.controller_server]: Controller frequency set to 20.0000Hz
+[controller_server-2] [INFO] [1791500353.638965271] [tb2.local_costmap.local_costmap]: Configuring
+[controller_server-2] [INFO] [1791500353.649949305] [tb2.local_costmap.local_costmap]: Using plugin "static_layer"
+[controller_server-2] [INFO] [1791500353.653513142] [tb2.local_costmap.local_costmap]: Subscribing to the map topic (/tb2/map) with transient local durability
+[controller_server-2] [INFO] [1791500353.655032018] [tb2.local_costmap.local_costmap]: Initialized plugin "static_layer"
+[controller_server-2] [INFO] [1791500353.655049914] [tb2.local_costmap.local_costmap]: Using plugin "voxel_layer"
+[controller_server-2] [INFO] [1791500353.655751768] [tb2.local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-2] [INFO] [1791500353.666974626] [tb2.local_costmap.local_costmap]: Initialized plugin "voxel_layer"
+[controller_server-2] [INFO] [1791500353.667006579] [tb2.local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-2] [INFO] [1791500353.668151674] [tb2.local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-2] [INFO] [1791500353.686692013] [tb2.controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-2] [INFO] [1791500353.687047550] [tb2.controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-2] [INFO] [1791500353.687524427] [tb2.controller_server]: Created goal checker : general_goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-2] [INFO] [1791500353.688045702] [tb2.controller_server]: Controller Server has general_goal_checker  goal checkers available.
+[controller_server-2] [INFO] [1791500353.689327066] [tb2.controller_server]: Created controller : FollowPath of type nav2_mppi_controller::MPPIController
+[controller_server-2] [INFO] [1791500353.691927891] [tb2.controller_server]: Controller period is equal to model dt. Control sequence shifting is ON
+[controller_server-2] [INFO] [1791500353.693392310] [tb2.controller_server]: ConstraintCritic instantiated with 1 power and 4.000000 weight.
+[controller_server-2] [INFO] [1791500353.693420285] [tb2.controller_server]: Critic loaded : mppi::critics::ConstraintCritic
+[controller_server-2] [INFO] [1791500353.694497074] [tb2.controller_server]: InflationCostCritic instantiated with 1 power and 300.000000 / 0.015000 weights. Critic will collision check based on footprint cost.
+[controller_server-2] [INFO] [1791500353.694522364] [tb2.controller_server]: Critic loaded : mppi::critics::CostCritic
+[controller_server-2] [INFO] [1791500353.694907840] [tb2.controller_server]: GoalCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-2] [INFO] [1791500353.694921517] [tb2.controller_server]: Critic loaded : mppi::critics::GoalCritic
+[controller_server-2] [INFO] [1791500353.695413163] [tb2.controller_server]: GoalAngleCritic instantiated with 1 power, 3.000000 weight, 0.500000 angular threshold and symmetric_yaw_tolerance disabled
+[controller_server-2] [INFO] [1791500353.695429856] [tb2.controller_server]: Critic loaded : mppi::critics::GoalAngleCritic
+[controller_server-2] [INFO] [1791500353.696224705] [tb2.controller_server]: ReferenceTrajectoryCritic instantiated with 1 power and 14.000000 weight
+[controller_server-2] [INFO] [1791500353.696240767] [tb2.controller_server]: Critic loaded : mppi::critics::PathAlignCritic
+[controller_server-2] [INFO] [1791500353.696744797] [tb2.controller_server]: Critic loaded : mppi::critics::PathFollowCritic
+[controller_server-2] [INFO] [1791500353.697698702] [tb2.controller_server]: PathAngleCritic instantiated with 1 power and 2.000000 weight. Mode set to: Forward Preference
+[controller_server-2] [INFO] [1791500353.697743481] [tb2.controller_server]: Critic loaded : mppi::critics::PathAngleCritic
+[controller_server-2] [INFO] [1791500353.698212843] [tb2.controller_server]: PreferForwardCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-2] [INFO] [1791500353.698230899] [tb2.controller_server]: Critic loaded : mppi::critics::PreferForwardCritic
+[controller_server-2] [INFO] [1791500353.700708770] [tb2.controller_server]: Optimizer reset
+[controller_server-2] [INFO] [1791500353.704873621] [MPPIController]: Configured MPPI Controller: FollowPath
+[controller_server-2] [INFO] [1791500353.704893701] [tb2.controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-10] [INFO] [1791500353.714581410] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring smoother_server[0m[0m
+[smoother_server-3] [INFO] [1791500353.714793702] [tb2.smoother_server]: Configuring smoother server
+[smoother_server-3] [INFO] [1791500353.727115462] [tb2.smoother_server]: Created smoother : simple_smoother of type nav2_smoother::SimpleSmoother
+[smoother_server-3] [INFO] [1791500353.727630124] [tb2.smoother_server]: Smoother Server has simple_smoother  smoothers available.
+[lifecycle_manager-10] [INFO] [1791500353.735342310] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-4] [INFO] [1791500353.735609831] [tb2.planner_server]: Configuring
+[planner_server-4] [INFO] [1791500353.735639250] [tb2.global_costmap.global_costmap]: Configuring
+[planner_server-4] [INFO] [1791500353.745932752] [tb2.global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-4] [INFO] [1791500353.749718781] [tb2.global_costmap.global_costmap]: Subscribing to the map topic (/tb2/map) with transient local durability
+[planner_server-4] [INFO] [1791500353.751807699] [tb2.global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-4] [INFO] [1791500353.751828530] [tb2.global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-4] [INFO] [1791500353.753077330] [tb2.global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-4] [INFO] [1791500353.758143451] [tb2.global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-4] [INFO] [1791500353.758174253] [tb2.global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-4] [INFO] [1791500353.759730564] [tb2.global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-4] [INFO] [1791500353.786317133] [tb2.planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner
+[planner_server-4] [INFO] [1791500353.786350720] [tb2.planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[planner_server-4] [INFO] [1791500353.787134917] [tb2.planner_server]: Planner Server has GridBased  planners available.
+[lifecycle_manager-10] [INFO] [1791500353.800386444] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring behavior_server[0m[0m
+[behavior_server-5] [INFO] [1791500353.800703072] [tb2.behavior_server]: Configuring
+[behavior_server-5] [INFO] [1791500353.806138537] [tb2.behavior_server]: Creating behavior plugin spin of type nav2_behaviors::Spin
+[behavior_server-5] [INFO] [1791500353.807026580] [tb2.behavior_server]: Creating behavior plugin backup of type nav2_behaviors::BackUp
+[behavior_server-5] [INFO] [1791500353.807854404] [tb2.behavior_server]: Creating behavior plugin drive_on_heading of type nav2_behaviors::DriveOnHeading
+[behavior_server-5] [INFO] [1791500353.808576499] [tb2.behavior_server]: Creating behavior plugin assisted_teleop of type nav2_behaviors::AssistedTeleop
+[behavior_server-5] [INFO] [1791500353.809905087] [tb2.behavior_server]: Creating behavior plugin wait of type nav2_behaviors::Wait
+[behavior_server-5] [INFO] [1791500353.817737211] [tb2.behavior_server]: Configuring spin
+[behavior_server-5] [INFO] [1791500353.828739922] [tb2.behavior_server]: Configuring backup
+[behavior_server-5] [INFO] [1791500353.833960049] [tb2.behavior_server]: Configuring drive_on_heading
+[behavior_server-5] [INFO] [1791500353.839592134] [tb2.behavior_server]: Configuring assisted_teleop
+[behavior_server-5] [INFO] [1791500353.846828074] [tb2.behavior_server]: Configuring wait
+[lifecycle_manager-10] [INFO] [1791500353.853189948] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring velocity_smoother[0m[0m
+[velocity_smoother-7] [INFO] [1791500353.853497519] [tb2.velocity_smoother]: Configuring velocity smoother
+[lifecycle_manager-10] [INFO] [1791500353.859278329] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring collision_monitor[0m[0m
+[collision_monitor-8] [INFO] [1791500353.859537675] [tb2.collision_monitor]: Configuring
+[collision_monitor-8] [INFO] [1791500353.866679638] [collision_monitor]: [scan]: Creating Scan
+[collision_monitor-8] [INFO] [1791500353.869245934] [collision_monitor]: [FootprintApproach]: Creating Polygon
+[collision_monitor-8] [INFO] [1791500353.869448857] [collision_monitor]: [FootprintApproach]: Polygon points are not defined. Using dynamic subscription instead.
+[collision_monitor-8] [INFO] [1791500353.870637198] [collision_monitor]: [FootprintApproach]: Making footprint subscriber on local_costmap/published_footprint topic
+[lifecycle_manager-10] [INFO] [1791500353.881015909] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring bt_navigator[0m[0m
+[bt_navigator-6] [INFO] [1791500353.881222339] [tb2.bt_navigator]: Configuring
+[bt_navigator-6] [INFO] [1791500353.887095272] [tb2.bt_navigator]: Creating navigator id navigate_to_pose of type nav2_bt_navigator::NavigateToPoseNavigator
+[bt_navigator-6] [INFO] [1791500353.951060213] [tb2.bt_navigator]: Creating navigator id navigate_through_poses of type nav2_bt_navigator::NavigateThroughPosesNavigator
+[lifecycle_manager-10] [INFO] [1791500353.978668070] [tb2.lifecycle_manager_navigation]: [34m[1mConfiguring waypoint_follower[0m[0m
+[waypoint_follower-9] [INFO] [1791500353.978889390] [tb2.waypoint_follower]: Configuring
+[waypoint_follower-9] [INFO] [1791500353.997880726] [tb2.waypoint_follower]: Created waypoint_task_executor : wait_at_waypoint of type nav2_waypoint_follower::WaitAtWaypoint
+[lifecycle_manager-10] [INFO] [1791500353.998833658] [tb2.lifecycle_manager_navigation]: [34m[1mActivating controller_server[0m[0m
+[controller_server-2] [INFO] [1791500353.999025619] [tb2.controller_server]: Activating
+[controller_server-2] [INFO] [1791500353.999078184] [tb2.local_costmap.local_costmap]: Activating
+[controller_server-2] [INFO] [1791500353.999087212] [tb2.local_costmap.local_costmap]: Checking transform
+[controller_server-2] [INFO] [1791500353.999120558] [tb2.local_costmap.local_costmap]: Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
+[sync_slam_toolbox_node-1] Registering sensor: [Custom Described Lidar]
+[controller_server-2] [INFO] [1791500354.499297813] [tb2.local_costmap.local_costmap]: start
+[controller_server-2] [INFO] [1791500354.576859918] [tb2.local_costmap.local_costmap]: StaticLayer: Resizing static layer to 458 X 344 at 0.050000 m/pix
+[planner_server-4] [INFO] [1791500354.576860209] [tb2.global_costmap.global_costmap]: StaticLayer: Resizing costmap to 458 X 344 at 0.050000 m/pix
+[controller_server-2] [WARN] [1791500354.850638578] [tb2.controller_server]: Parameter controller_server.verbose not found
+[controller_server-2] [INFO] [1791500354.852558271] [tb2.controller_server]: Optimizer reset
+[controller_server-2] [INFO] [1791500354.852795281] [MPPIController]: Activated MPPI Controller: FollowPath
+[controller_server-2] [INFO] [1791500354.852816333] [tb2.controller_server]: Creating bond (controller_server) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500354.958324086] [tb2.lifecycle_manager_navigation]: Server controller_server connected with bond.
+[lifecycle_manager-10] [INFO] [1791500354.958357633] [tb2.lifecycle_manager_navigation]: [34m[1mActivating smoother_server[0m[0m
+[smoother_server-3] [INFO] [1791500354.958694953] [tb2.smoother_server]: Activating
+[smoother_server-3] [INFO] [1791500354.958722547] [tb2.smoother_server]: Creating bond (smoother_server) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500355.063613626] [tb2.lifecycle_manager_navigation]: Server smoother_server connected with bond.
+[lifecycle_manager-10] [INFO] [1791500355.063650329] [tb2.lifecycle_manager_navigation]: [34m[1mActivating planner_server[0m[0m
+[planner_server-4] [INFO] [1791500355.063984703] [tb2.planner_server]: Activating
+[planner_server-4] [INFO] [1791500355.064014382] [tb2.global_costmap.global_costmap]: Activating
+[planner_server-4] [INFO] [1791500355.064022658] [tb2.global_costmap.global_costmap]: Checking transform
+[planner_server-4] [INFO] [1791500355.064111304] [tb2.global_costmap.global_costmap]: start
+[planner_server-4] [INFO] [1791500356.115250852] [tb2.planner_server]: Activating plugin GridBased of type NavfnPlanner
+[planner_server-4] [INFO] [1791500356.117073913] [tb2.planner_server]: Creating bond (planner_server) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500356.221582613] [tb2.lifecycle_manager_navigation]: Server planner_server connected with bond.
+[lifecycle_manager-10] [INFO] [1791500356.221611371] [tb2.lifecycle_manager_navigation]: [34m[1mActivating behavior_server[0m[0m
+[behavior_server-5] [INFO] [1791500356.222016004] [tb2.behavior_server]: Activating
+[behavior_server-5] [INFO] [1791500356.222037397] [tb2.behavior_server]: Activating spin
+[behavior_server-5] [INFO] [1791500356.222046164] [tb2.behavior_server]: Activating backup
+[behavior_server-5] [INFO] [1791500356.222053438] [tb2.behavior_server]: Activating drive_on_heading
+[behavior_server-5] [INFO] [1791500356.222060162] [tb2.behavior_server]: Activating assisted_teleop
+[behavior_server-5] [INFO] [1791500356.222067276] [tb2.behavior_server]: Activating wait
+[behavior_server-5] [INFO] [1791500356.222077376] [tb2.behavior_server]: Creating bond (behavior_server) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500356.327680450] [tb2.lifecycle_manager_navigation]: Server behavior_server connected with bond.
+[lifecycle_manager-10] [INFO] [1791500356.327711522] [tb2.lifecycle_manager_navigation]: [34m[1mActivating velocity_smoother[0m[0m
+[velocity_smoother-7] [INFO] [1791500356.328069412] [tb2.velocity_smoother]: Activating
+[velocity_smoother-7] [INFO] [1791500356.328115614] [tb2.velocity_smoother]: Creating bond (velocity_smoother) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500356.433589201] [tb2.lifecycle_manager_navigation]: Server velocity_smoother connected with bond.
+[lifecycle_manager-10] [INFO] [1791500356.433630613] [tb2.lifecycle_manager_navigation]: [34m[1mActivating collision_monitor[0m[0m
+[collision_monitor-8] [INFO] [1791500356.434019596] [tb2.collision_monitor]: Activating
+[collision_monitor-8] [INFO] [1791500356.434051069] [tb2.collision_monitor]: Creating bond (collision_monitor) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500356.540292200] [tb2.lifecycle_manager_navigation]: Server collision_monitor connected with bond.
+[lifecycle_manager-10] [INFO] [1791500356.540323702] [tb2.lifecycle_manager_navigation]: [34m[1mActivating bt_navigator[0m[0m
+[bt_navigator-6] [INFO] [1791500356.540678908] [tb2.bt_navigator]: Activating
+[bt_navigator-6] [INFO] [1791500356.616700053] [tb2.bt_navigator]: Creating bond (bt_navigator) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500356.722064312] [tb2.lifecycle_manager_navigation]: Server bt_navigator connected with bond.
+[lifecycle_manager-10] [INFO] [1791500356.722097127] [tb2.lifecycle_manager_navigation]: [34m[1mActivating waypoint_follower[0m[0m
+[waypoint_follower-9] [INFO] [1791500356.722539787] [tb2.waypoint_follower]: Activating
+[waypoint_follower-9] [INFO] [1791500356.722569816] [tb2.waypoint_follower]: Creating bond (waypoint_follower) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500356.829375198] [tb2.lifecycle_manager_navigation]: Server waypoint_follower connected with bond.
+[lifecycle_manager-10] [INFO] [1791500356.829407222] [tb2.lifecycle_manager_navigation]: [34m[1mManaged nodes are active[0m[0m
+[lifecycle_manager-10] [INFO] [1791500356.829417502] [tb2.lifecycle_manager_navigation]: [34m[1mCreating bond timer...[0m[0m

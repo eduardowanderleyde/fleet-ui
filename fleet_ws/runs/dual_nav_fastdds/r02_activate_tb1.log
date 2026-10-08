@@ -1,0 +1,314 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-08-19-55-36-888913-eduardo-B550M-AORUS-ELITE-29302
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sync_slam_toolbox_node-1]: process started with pid [29375]
+[INFO] [controller_server-2]: process started with pid [29376]
+[INFO] [smoother_server-3]: process started with pid [29377]
+[INFO] [planner_server-4]: process started with pid [29378]
+[INFO] [behavior_server-5]: process started with pid [29380]
+[INFO] [bt_navigator-6]: process started with pid [29381]
+[INFO] [velocity_smoother-7]: process started with pid [29383]
+[INFO] [collision_monitor-8]: process started with pid [29385]
+[INFO] [waypoint_follower-9]: process started with pid [29389]
+[INFO] [lifecycle_manager-10]: process started with pid [29391]
+[smoother_server-3] [INFO] [1791500137.218887928] [tb1.smoother_server]: 
+[smoother_server-3] 	smoother_server lifecycle node launched. 
+[smoother_server-3] 	Waiting on external lifecycle transitions to activate
+[smoother_server-3] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-3] [INFO] [1791500137.220593150] [tb1.smoother_server]: Creating smoother server
+[velocity_smoother-7] [INFO] [1791500137.246734899] [tb1.velocity_smoother]: 
+[velocity_smoother-7] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-7] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-7] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[sync_slam_toolbox_node-1] [INFO] [1791500137.264781659] [tb1.slam_toolbox]: Node using stack size 40000000
+[waypoint_follower-9] [INFO] [1791500137.280986045] [tb1.waypoint_follower]: 
+[waypoint_follower-9] 	waypoint_follower lifecycle node launched. 
+[waypoint_follower-9] 	Waiting on external lifecycle transitions to activate
+[waypoint_follower-9] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-9] [INFO] [1791500137.281436668] [tb1.waypoint_follower]: Creating
+[controller_server-2] [INFO] [1791500137.303672389] [tb1.controller_server]: 
+[controller_server-2] 	controller_server lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1791500137.304080749] [tb1.planner_server]: 
+[planner_server-4] 	planner_server lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1791500137.305879577] [tb1.planner_server]: Creating
+[controller_server-2] [INFO] [1791500137.310736212] [tb1.controller_server]: Creating controller server
+[bt_navigator-6] [INFO] [1791500137.371901899] [tb1.bt_navigator]: 
+[bt_navigator-6] 	bt_navigator lifecycle node launched. 
+[bt_navigator-6] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-6] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-6] [INFO] [1791500137.373516121] [tb1.bt_navigator]: Creating
+[collision_monitor-8] [INFO] [1791500137.375820312] [tb1.collision_monitor]: 
+[collision_monitor-8] 	collision_monitor lifecycle node launched. 
+[collision_monitor-8] 	Waiting on external lifecycle transitions to activate
+[collision_monitor-8] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1791500137.377350217] [tb1.global_costmap.global_costmap]: 
+[planner_server-4] 	global_costmap lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1791500137.377780190] [tb1.global_costmap.global_costmap]: Creating Costmap
+[controller_server-2] [INFO] [1791500137.378774262] [tb1.local_costmap.local_costmap]: 
+[controller_server-2] 	local_costmap lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-2] [INFO] [1791500137.379243953] [tb1.local_costmap.local_costmap]: Creating Costmap
+[lifecycle_manager-10] [INFO] [1791500137.382371859] [tb1.lifecycle_manager_navigation]: Creating
+[behavior_server-5] [INFO] [1791500137.384355524] [tb1.behavior_server]: 
+[behavior_server-5] 	behavior_server lifecycle node launched. 
+[behavior_server-5] 	Waiting on external lifecycle transitions to activate
+[behavior_server-5] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-10] [INFO] [1791500137.387112593] [tb1.lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[sync_slam_toolbox_node-1] [INFO] [1791500137.432816388] [tb1.slam_toolbox]: Configuring
+[sync_slam_toolbox_node-1] [INFO] [1791500137.440276236] [tb1.slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[sync_slam_toolbox_node-1] [INFO] [1791500137.440876497] [tb1.slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[sync_slam_toolbox_node-1] [WARN] [1791500137.584012202] [tb1.slam_toolbox.rclcpp]: failed to send response to /tb1/slam_toolbox/change_state (timeout): client will not receive response, at ./src/rmw_response.cpp:153, at ./src/rcl/service.c:400
+[lifecycle_manager-10] [INFO] [1791500137.939633054] [tb1.lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-10] [INFO] [1791500137.939680528] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[controller_server-2] [INFO] [1791500137.939954882] [tb1.controller_server]: Configuring controller interface
+[controller_server-2] [INFO] [1791500137.939982147] [tb1.controller_server]: getting progress checker plugins..
+[controller_server-2] [INFO] [1791500137.940306590] [tb1.controller_server]: getting goal checker plugins..
+[controller_server-2] [INFO] [1791500137.940470475] [tb1.controller_server]: Controller frequency set to 20.0000Hz
+[controller_server-2] [INFO] [1791500137.940509954] [tb1.local_costmap.local_costmap]: Configuring
+[controller_server-2] [INFO] [1791500137.949351683] [tb1.local_costmap.local_costmap]: Using plugin "static_layer"
+[controller_server-2] [INFO] [1791500137.952162570] [tb1.local_costmap.local_costmap]: Subscribing to the map topic (/tb1/map) with transient local durability
+[controller_server-2] [INFO] [1791500137.954067979] [tb1.local_costmap.local_costmap]: Initialized plugin "static_layer"
+[controller_server-2] [INFO] [1791500137.954082758] [tb1.local_costmap.local_costmap]: Using plugin "voxel_layer"
+[controller_server-2] [INFO] [1791500137.954867956] [tb1.local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-2] [INFO] [1791500137.967624252] [tb1.local_costmap.local_costmap]: Initialized plugin "voxel_layer"
+[controller_server-2] [INFO] [1791500137.967652117] [tb1.local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-2] [INFO] [1791500137.969173495] [tb1.local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-2] [INFO] [1791500137.993987279] [tb1.controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-2] [INFO] [1791500137.994423795] [tb1.controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-2] [INFO] [1791500137.994820292] [tb1.controller_server]: Created goal checker : general_goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-2] [INFO] [1791500137.995297047] [tb1.controller_server]: Controller Server has general_goal_checker  goal checkers available.
+[controller_server-2] [INFO] [1791500137.996516346] [tb1.controller_server]: Created controller : FollowPath of type nav2_mppi_controller::MPPIController
+[controller_server-2] [INFO] [1791500137.999780511] [tb1.controller_server]: Controller period is equal to model dt. Control sequence shifting is ON
+[controller_server-2] [INFO] [1791500138.001265608] [tb1.controller_server]: ConstraintCritic instantiated with 1 power and 4.000000 weight.
+[controller_server-2] [INFO] [1791500138.001286499] [tb1.controller_server]: Critic loaded : mppi::critics::ConstraintCritic
+[controller_server-2] [INFO] [1791500138.002580536] [tb1.controller_server]: InflationCostCritic instantiated with 1 power and 300.000000 / 0.015000 weights. Critic will collision check based on footprint cost.
+[controller_server-2] [INFO] [1791500138.002602369] [tb1.controller_server]: Critic loaded : mppi::critics::CostCritic
+[controller_server-2] [INFO] [1791500138.003113824] [tb1.controller_server]: GoalCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-2] [INFO] [1791500138.003132210] [tb1.controller_server]: Critic loaded : mppi::critics::GoalCritic
+[controller_server-2] [INFO] [1791500138.003732872] [tb1.controller_server]: GoalAngleCritic instantiated with 1 power, 3.000000 weight, 0.500000 angular threshold and symmetric_yaw_tolerance disabled
+[controller_server-2] [INFO] [1791500138.003752611] [tb1.controller_server]: Critic loaded : mppi::critics::GoalAngleCritic
+[controller_server-2] [INFO] [1791500138.004806983] [tb1.controller_server]: ReferenceTrajectoryCritic instantiated with 1 power and 14.000000 weight
+[controller_server-2] [INFO] [1791500138.004827874] [tb1.controller_server]: Critic loaded : mppi::critics::PathAlignCritic
+[controller_server-2] [INFO] [1791500138.005480028] [tb1.controller_server]: Critic loaded : mppi::critics::PathFollowCritic
+[controller_server-2] [INFO] [1791500138.006463248] [tb1.controller_server]: PathAngleCritic instantiated with 1 power and 2.000000 weight. Mode set to: Forward Preference
+[controller_server-2] [INFO] [1791500138.006507747] [tb1.controller_server]: Critic loaded : mppi::critics::PathAngleCritic
+[controller_server-2] [INFO] [1791500138.006997699] [tb1.controller_server]: PreferForwardCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-2] [INFO] [1791500138.007012738] [tb1.controller_server]: Critic loaded : mppi::critics::PreferForwardCritic
+[controller_server-2] [INFO] [1791500138.009841169] [tb1.controller_server]: Optimizer reset
+[controller_server-2] [INFO] [1791500138.014459130] [MPPIController]: Configured MPPI Controller: FollowPath
+[controller_server-2] [INFO] [1791500138.014484551] [tb1.controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-10] [INFO] [1791500138.023308706] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring smoother_server[0m[0m
+[smoother_server-3] [INFO] [1791500138.023490136] [tb1.smoother_server]: Configuring smoother server
+[smoother_server-3] [INFO] [1791500138.034031297] [tb1.smoother_server]: Created smoother : simple_smoother of type nav2_smoother::SimpleSmoother
+[smoother_server-3] [INFO] [1791500138.034652279] [tb1.smoother_server]: Smoother Server has simple_smoother  smoothers available.
+[lifecycle_manager-10] [INFO] [1791500138.040207950] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-4] [INFO] [1791500138.040427535] [tb1.planner_server]: Configuring
+[planner_server-4] [INFO] [1791500138.040456874] [tb1.global_costmap.global_costmap]: Configuring
+[planner_server-4] [INFO] [1791500138.048383017] [tb1.global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-4] [INFO] [1791500138.051367337] [tb1.global_costmap.global_costmap]: Subscribing to the map topic (/tb1/map) with transient local durability
+[planner_server-4] [INFO] [1791500138.053111928] [tb1.global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-4] [INFO] [1791500138.053129954] [tb1.global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-4] [INFO] [1791500138.053985301] [tb1.global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-4] [INFO] [1791500138.057981428] [tb1.global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-4] [INFO] [1791500138.057997881] [tb1.global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-4] [INFO] [1791500138.058897415] [tb1.global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-4] [INFO] [1791500138.078900096] [tb1.planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner
+[planner_server-4] [INFO] [1791500138.078941929] [tb1.planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[planner_server-4] [INFO] [1791500138.079906282] [tb1.planner_server]: Planner Server has GridBased  planners available.
+[lifecycle_manager-10] [INFO] [1791500138.089524111] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring behavior_server[0m[0m
+[behavior_server-5] [INFO] [1791500138.089747154] [tb1.behavior_server]: Configuring
+[behavior_server-5] [INFO] [1791500138.095503022] [tb1.behavior_server]: Creating behavior plugin spin of type nav2_behaviors::Spin
+[behavior_server-5] [INFO] [1791500138.096278791] [tb1.behavior_server]: Creating behavior plugin backup of type nav2_behaviors::BackUp
+[behavior_server-5] [INFO] [1791500138.096944622] [tb1.behavior_server]: Creating behavior plugin drive_on_heading of type nav2_behaviors::DriveOnHeading
+[behavior_server-5] [INFO] [1791500138.097589441] [tb1.behavior_server]: Creating behavior plugin assisted_teleop of type nav2_behaviors::AssistedTeleop
+[behavior_server-5] [INFO] [1791500138.098891714] [tb1.behavior_server]: Creating behavior plugin wait of type nav2_behaviors::Wait
+[behavior_server-5] [INFO] [1791500138.105412921] [tb1.behavior_server]: Configuring spin
+[behavior_server-5] [INFO] [1791500138.111476950] [tb1.behavior_server]: Configuring backup
+[behavior_server-5] [INFO] [1791500138.116044111] [tb1.behavior_server]: Configuring drive_on_heading
+[behavior_server-5] [INFO] [1791500138.120255395] [tb1.behavior_server]: Configuring assisted_teleop
+[behavior_server-5] [INFO] [1791500138.126215438] [tb1.behavior_server]: Configuring wait
+[lifecycle_manager-10] [INFO] [1791500138.131133444] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring velocity_smoother[0m[0m
+[velocity_smoother-7] [INFO] [1791500138.131349372] [tb1.velocity_smoother]: Configuring velocity smoother
+[lifecycle_manager-10] [INFO] [1791500138.135789541] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring collision_monitor[0m[0m
+[collision_monitor-8] [INFO] [1791500138.136013505] [tb1.collision_monitor]: Configuring
+[collision_monitor-8] [INFO] [1791500138.141362847] [collision_monitor]: [scan]: Creating Scan
+[collision_monitor-8] [INFO] [1791500138.143343356] [collision_monitor]: [FootprintApproach]: Creating Polygon
+[collision_monitor-8] [INFO] [1791500138.143495137] [collision_monitor]: [FootprintApproach]: Polygon points are not defined. Using dynamic subscription instead.
+[collision_monitor-8] [INFO] [1791500138.144408248] [collision_monitor]: [FootprintApproach]: Making footprint subscriber on local_costmap/published_footprint topic
+[lifecycle_manager-10] [INFO] [1791500138.154087620] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring bt_navigator[0m[0m
+[bt_navigator-6] [INFO] [1791500138.154324660] [tb1.bt_navigator]: Configuring
+[bt_navigator-6] [INFO] [1791500138.161119149] [tb1.bt_navigator]: Creating navigator id navigate_to_pose of type nav2_bt_navigator::NavigateToPoseNavigator
+[bt_navigator-6] [INFO] [1791500138.220350549] [tb1.bt_navigator]: Creating navigator id navigate_through_poses of type nav2_bt_navigator::NavigateThroughPosesNavigator
+[lifecycle_manager-10] [INFO] [1791500138.243606744] [tb1.lifecycle_manager_navigation]: [34m[1mConfiguring waypoint_follower[0m[0m
+[waypoint_follower-9] [INFO] [1791500138.243819406] [tb1.waypoint_follower]: Configuring
+[waypoint_follower-9] [INFO] [1791500138.263010016] [tb1.waypoint_follower]: Created waypoint_task_executor : wait_at_waypoint of type nav2_waypoint_follower::WaitAtWaypoint
+[lifecycle_manager-10] [INFO] [1791500138.263833399] [tb1.lifecycle_manager_navigation]: [34m[1mActivating controller_server[0m[0m
+[controller_server-2] [INFO] [1791500138.263988356] [tb1.controller_server]: Activating
+[controller_server-2] [INFO] [1791500138.264015170] [tb1.local_costmap.local_costmap]: Activating
+[controller_server-2] [INFO] [1791500138.264022444] [tb1.local_costmap.local_costmap]: Checking transform
+[controller_server-2] [INFO] [1791500138.264055880] [tb1.local_costmap.local_costmap]: Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [INFO] [1791500138.764121821] [tb1.local_costmap.local_costmap]: Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [INFO] [1791500139.264112235] [tb1.local_costmap.local_costmap]: Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [INFO] [1791500139.764181158] [tb1.local_costmap.local_costmap]: start
+[controller_server-2] [WARN] [1791500140.116068765] [tb1.controller_server]: Parameter controller_server.verbose not found
+[controller_server-2] [INFO] [1791500140.118332435] [tb1.controller_server]: Optimizer reset
+[controller_server-2] [INFO] [1791500140.118562612] [MPPIController]: Activated MPPI Controller: FollowPath
+[controller_server-2] [INFO] [1791500140.118582351] [tb1.controller_server]: Creating bond (controller_server) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500140.225350506] [tb1.lifecycle_manager_navigation]: Server controller_server connected with bond.
+[lifecycle_manager-10] [INFO] [1791500140.225382540] [tb1.lifecycle_manager_navigation]: [34m[1mActivating smoother_server[0m[0m
+[smoother_server-3] [INFO] [1791500140.225723215] [tb1.smoother_server]: Activating
+[smoother_server-3] [INFO] [1791500140.225754187] [tb1.smoother_server]: Creating bond (smoother_server) to lifecycle manager.
+[lifecycle_manager-10] [INFO] [1791500140.331349104] [tb1.lifecycle_manager_navigation]: Server smoother_server connected with bond.
+[lifecycle_manager-10] [INFO] [1791500140.331385587] [tb1.lifecycle_manager_navigation]: [34m[1mActivating planner_server[0m[0m
+[planner_server-4] [INFO] [1791500140.331885829] [tb1.planner_server]: Activating
+[planner_server-4] [INFO] [1791500140.331918314] [tb1.global_costmap.global_costmap]: Activating
+[planner_server-4] [INFO] [1791500140.331926149] [tb1.global_costmap.global_costmap]: Checking transform
+[planner_server-4] [INFO] [1791500140.331955417] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500140.831967023] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500141.332004874] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500141.832013680] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500142.332028242] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500142.832004008] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500143.097916850] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500143.332005851] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500143.832008888] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500144.332005235] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500144.832004350] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500145.332042447] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500145.832005978] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500146.332005514] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500146.431214511] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500146.832015784] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500147.332004485] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500147.832004110] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500148.332015933] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500148.832008930] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500149.332004427] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500149.764560242] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500149.832016628] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500150.332005257] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500150.832004370] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500151.332300064] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500151.832008385] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500152.332005002] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500152.832021340] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500153.097899645] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500153.332005879] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500153.832004848] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500154.332049863] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500154.832003289] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500155.332004693] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500155.832010709] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500156.332003842] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500156.431239945] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500156.832007269] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500157.332089977] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500157.832003682] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500158.332003401] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500158.832009414] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500159.332004971] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500159.764568254] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500159.832005300] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500160.332010893] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500160.832003041] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500161.332003580] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500161.832017447] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500162.332004104] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500162.832007046] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500163.097950272] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500163.332062736] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500163.832003440] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500164.332005429] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500164.832006679] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500165.332004276] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500165.832006694] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500166.332011461] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500166.431326692] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500166.832007732] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500167.332004268] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500167.832011167] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500168.332007679] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500168.832005876] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500169.332135869] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500169.764586369] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500169.832006369] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500170.332004135] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500170.832008827] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500171.332004915] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500171.832003601] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500172.332012612] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500172.832004319] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500173.097901846] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500173.332004318] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500173.832008025] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500174.332003991] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500174.832008085] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500175.332098374] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500175.832005361] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500176.332006078] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500176.431254298] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500176.832009592] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500177.332007419] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500177.832004136] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500178.332006828] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500178.832004242] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500179.332004526] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500179.764660112] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500179.832243605] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500180.332005170] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500180.832004720] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500181.332009844] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500181.832007376] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500182.332006123] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500182.832050402] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500183.097892951] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500183.332004016] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500183.832007079] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500184.332047872] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500184.832006753] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500185.332004486] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500185.832013001] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500186.332004688] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500186.431227429] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500186.832005173] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500187.332074820] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500187.832004510] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500188.332004263] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500188.832018617] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500189.332013577] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500189.764583833] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500189.832006143] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500190.332008383] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500190.832006466] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500191.332005795] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500191.832007111] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500192.332004642] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500192.832009690] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500193.097901186] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500193.332006836] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500193.832005127] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500194.332007148] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500194.832003831] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500195.332003714] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500195.832009390] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500196.332009238] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500196.431298191] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500196.832002786] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500197.332005536] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500197.832003939] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500198.332004209] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500198.832004020] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500199.332003915] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[controller_server-2] [WARN] [1791500199.764702935] [tb1.local_costmap.local_costmap]: Can't update static costmap layer, no map received
+[planner_server-4] [INFO] [1791500199.832005225] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500200.332009414] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [INFO] [1791500200.832004406] [tb1.global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[planner_server-4] [ERROR] [1791500200.832045117] [tb1.global_costmap.global_costmap]: Failed to activate global_costmap because transform from base_link to map did not become available before timeout
+[lifecycle_manager-10] [ERROR] [1791500200.832558506] [tb1.lifecycle_manager_navigation]: Failed to change state for node: planner_server
+[lifecycle_manager-10] [ERROR] [1791500200.832596111] [tb1.lifecycle_manager_navigation]: Failed to bring up all requested nodes. Aborting bringup.

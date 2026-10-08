@@ -507,6 +507,55 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   não atualizado (fora do escopo do change de código; registrado em
   "Workflow follow-up" do `tasks.md` do change).
 
+### 2026-10-08 (continuação 4) — [agente de pesquisa, dds_tuning] RMW swap resolve ativação SIMULTÂNEA de 2 robôs de verdade, testado ao vivo: 1/5 (Fast DDS) → 10/10 (Cyclone DDS)
+
+- **[dds_tuning]** Pergunta nova (nunca testada antes): dá pra ligar Nav2
+  completo em tb1 E tb2 AO MESMO TEMPO (não a ativação sequencial já
+  medida em 70%/10 no Cap. 9)? Testei ao vivo contra o Gazebo real com
+  script novo (`fleet_ws/scripts/run_dual_nav_simultaneous.py`, dispara os
+  dois `activate_robot_nav.launch.py` back-to-back sem stagger, sem
+  retry). **Baseline Fast DDS: 1/5 (20%)** — pior que a sequencial, como
+  esperado (mais participantes DDS entrando na mesma janela). **Trocando
+  só `RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` (zero mudança de código):
+  10/10 (100%)** em duas baterias de 5 réplicas, 0 avisos de "jump back in
+  time" em todas, ativação em 6s (mesma velocidade da única réplica limpa
+  do baseline). O fix `CYCLONEDDS_URI` pro bug `rmw_cyclonedds#458` não foi
+  necessário pra 2 robôs (testado em paralelo, também 5/5 sem ele) —
+  continua recomendado como precaução pra quem escalar pra 3+.
+- Também testei navegação concorrente de verdade (não só ativação):
+  `go_to_point` real pros dois ao mesmo tempo depois da ativação, 25s de
+  drive sob Cyclone DDS — 0 jumps, os dois retornaram `Navigation
+  started`. Dados em `fleet_ws/runs/dual_nav_fastdds/`,
+  `dual_nav_cyclone/`, `dual_nav_cyclone_nofix/`, `dual_nav_drive_cyclone/`.
+- Achado de precisão técnica (não medição, leitura de código-fonte):
+  confirmei no `tf2_ros.Buffer` (branch jazzy do `ros2/geometry2`) que o
+  limiar de "jump back in time" é hardcoded em 1 segundo
+  (`JumpThreshold(min_backward=Duration(seconds=-1))`) e também dispara em
+  troca de tipo de clock (`on_clock_change=True`) — não é configurável por
+  parâmetro, então a rota de "ajustar transform_tolerance/tolerância do
+  buffer" não existe sem fork do `tf2_ros` instalado. Corrobora por que o
+  achado de 2026-10-02 ("não achei receita de tuning de tolerância") não
+  era falta de busca — a rota realmente não existe sem mudar o pacote
+  instalado.
+- Corroboração externa concreta achada nesta rodada: o projeto real
+  `arshadlab/turtlebot3_multi_robot` (Jazzy + Gazebo Harmonic) sobe Nav2
+  completo pra TODOS os robôs de uma vez com um único launch (exatamente a
+  pergunta desta rodada) e documenta Cyclone DDS + o mesmo fix de
+  `MaxAutoParticipantIndex=100` já citado aqui em 2026-10-05 como
+  pré-requisito — não é combinação exótica, é padrão usado por outro
+  projeto real com a mesma pilha.
+- **Limite honesto**: só testado com 2 robôs (tb1+tb2, igual ao suportado
+  hoje), só 1 réplica/25s de navegação concorrente (teste de fumaça, não
+  campanha), `ComposableNodeContainer`/`ROS_DISCOVERY_SERVER` não
+  testados (não foi necessário, RMW isolado já resolveu o caso testado).
+  **Mudança de arquitetura de ativação (sequencial → simultânea) como
+  default do projeto não foi aplicada — fica registrada com números reais
+  pra decisão do autor**, não aplicada em `activate_robot_nav.launch.py`
+  nem no texto da dissertação (fora de escopo desta sessão). `Dockerfile`
+  ganhou `ros-jazzy-rmw-cyclonedds-cpp` instalável (só disponibilidade, não
+  muda o default de RMW). Detalhe completo, tabela de números e scripts:
+  `conhecimento/dds_tuning.md` (entrada 2026-10-08).
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver

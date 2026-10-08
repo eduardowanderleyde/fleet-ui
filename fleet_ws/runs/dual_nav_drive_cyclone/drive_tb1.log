@@ -1,0 +1,5 @@
+requester: making request: fleet_msgs.srv.GoToPoint_Request(robot_id='tb1', x=1.5, y=0.0, yaw=0.0)
+
+response:
+fleet_msgs.srv.GoToPoint_Response(success=True, message='Navigation started', error_code='')
+

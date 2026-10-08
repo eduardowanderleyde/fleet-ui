@@ -1,0 +1,215 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/.ros/log/2026-10-08-19-56-54-664108-eduardo-B550M-AORUS-ELITE-30025
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [xacro-1]: process started with pid [30067]
+[INFO] [xacro-1]: process has finished cleanly [pid 30067]
+[INFO] [gazebo-2]: process started with pid [30068]
+[INFO] [parameter_bridge-3]: process started with pid [30069]
+[INFO] [robot_state_publisher-4]: process started with pid [30116]
+[INFO] [parameter_bridge-5]: process started with pid [30119]
+[INFO] [create-6]: process started with pid [30120]
+[robot_state_publisher-4] [WARN] [1791500215.159116214] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-4] [INFO] [1791500215.159234148] [tb1.robot_state_publisher]: Robot initialized
+[create-6] [INFO] [1791500215.165287683] [ros_gz_sim]: Requesting list of world names.
+[create-6] [INFO] [1791500215.732095436] [ros_gz_sim]: Waiting messages on topic [/tb1/robot_description].
+[create-6] [INFO] [1791500215.743394912] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-6]: process has finished cleanly [pid 30120]
+[parameter_bridge-3] [INFO] [1791500216.026053830] [bridge_ros_gz_clock]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.178280819] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.179049294] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/joint_states (gz.msgs.Model) -> /tb1/joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.181181375] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/odom (gz.msgs.Odometry) -> /tb1/odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.182614430] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/tf (gz.msgs.Pose_V) -> /tb1/tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.183887025] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/imu (gz.msgs.IMU) -> /tb1/imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.184341166] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/scan (gz.msgs.LaserScan) -> /tb1/scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.184776220] [bridge_ros_gz_tb1]: Creating ROS->GZ Bridge: [/tb1/cmd_vel (geometry_msgs/msg/Twist) -> /tb1/cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-5] [INFO] [1791500216.185422673] [bridge_ros_gz_tb1]: Creating GZ->ROS Bridge: [/tb1/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /tb1/rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[gazebo-2] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[INFO] [robot_state_publisher-7]: process started with pid [30558]
+[INFO] [parameter_bridge-8]: process started with pid [30559]
+[INFO] [create-9]: process started with pid [30560]
+[robot_state_publisher-7] [WARN] [1791500217.501931489] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-7] [INFO] [1791500217.502068060] [tb2.robot_state_publisher]: Robot initialized
+[create-9] [INFO] [1791500217.516501425] [ros_gz_sim]: Requesting list of world names.
+[create-9] [INFO] [1791500217.718732326] [ros_gz_sim]: Waiting messages on topic [/tb2/robot_description].
+[create-9] [INFO] [1791500218.397662763] [ros_gz_sim]: Entity creation successful.
+[parameter_bridge-8] [INFO] [1791500218.513110369] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[INFO] [create-9]: process has finished cleanly [pid 30560]
+[parameter_bridge-8] [INFO] [1791500218.516303356] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/joint_states (gz.msgs.Model) -> /tb2/joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500218.520417822] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/odom (gz.msgs.Odometry) -> /tb2/odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500218.522991781] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/tf (gz.msgs.Pose_V) -> /tb2/tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500218.525497724] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/imu (gz.msgs.IMU) -> /tb2/imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500218.527038162] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/scan (gz.msgs.LaserScan) -> /tb2/scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500218.528461276] [bridge_ros_gz_tb2]: Creating ROS->GZ Bridge: [/tb2/cmd_vel (geometry_msgs/msg/Twist) -> /tb2/cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-8] [INFO] [1791500218.529926213] [bridge_ros_gz_tb2]: Creating GZ->ROS Bridge: [/tb2/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /tb2/rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[gazebo-2] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[robot_state_publisher-7] [WARN] [1791500338.250977467] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.251890310] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.252768033] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.256288875] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.257254502] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.257838742] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.258860361] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.261245708] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.262498225] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.263216111] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.263758578] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.264450893] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.264985224] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.265661858] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.266707043] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.269974051] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.270918867] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.271922410] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.275300839] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.277519144] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.280964285] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.281605789] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.287129118] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.293694225] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.297639299] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.299473662] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.300254111] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.300753794] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.302462938] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.303032389] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.306622979] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.323943494] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.325543171] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.331628155] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.342791763] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.343360433] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.344751705] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.360918790] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.372945944] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.415511592] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.425457633] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.427004525] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.435789069] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.438732194] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.445834377] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.452934647] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.457489202] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.459462760] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500338.460601853] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.154394519] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500339.156998239] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.157241342] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.160417700] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.163406034] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.166120194] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-7] [WARN] [1791500339.166285011] [tb2.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.169844269] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.172466536] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.175800317] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.178214370] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.181136373] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.183895202] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.186867254] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.189951568] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.193049781] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.196141781] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.198865440] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.201766611] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.204877188] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.207869701] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.210857083] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.213827863] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.216921136] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.219874320] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.222838596] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.226028882] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.228990453] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.231877486] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.234976490] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.237996688] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.241142455] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.243890482] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.246803416] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.249968301] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.252830515] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.255842116] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.259083603] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.261891208] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.264964812] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.268055139] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.270962372] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.273760338] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.276867198] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.279858718] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.282812414] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.285955095] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.288883620] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.291827136] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.294888415] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.298120563] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.300983328] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.303866063] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.306881831] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.310034252] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.313065341] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.316042283] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.318879928] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.321951096] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.324810675] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.328037092] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.330953944] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.333669668] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.337076112] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.339919138] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.342942061] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.345989493] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.348937527] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.354790570] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.357847250] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.360834863] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.367007871] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.369810397] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.372765856] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.375811233] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.378919165] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.381990143] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.384912066] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.387911713] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.390875629] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.393753674] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.396916605] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.399930720] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.402965256] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.403691859] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.405862219] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.409985247] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.412023825] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.414883844] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.417812350] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.421068747] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.424008935] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.426922281] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.429814614] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.433018146] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.435897995] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.438949134] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.441836107] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.445069468] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.448055377] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.451112508] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.453916587] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.456766877] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.460034175] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.463069743] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.465941887] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.468877025] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.472036249] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.477965363] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.480859531] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.483853466] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.486893974] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.489829022] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.493108355] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.495757826] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.499070254] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.501919722] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.504907295] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.507913074] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.511034152] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.513870715] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.517045760] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-4] [WARN] [1791500339.520016069] [tb1.robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!

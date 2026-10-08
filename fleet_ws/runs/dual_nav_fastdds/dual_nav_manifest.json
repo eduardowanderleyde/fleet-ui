@@ -1,0 +1,65 @@
+{
+  "started_at": "2026-10-08T22:53:17.212868+00:00",
+  "rmw": "rmw_fastrtps_cpp",
+  "cyclonedds_fix": false,
+  "repeat": 5,
+  "activate_timeout_s": 120.0,
+  "replicas": [
+    {
+      "replicate_id": 1,
+      "status_tb1": "timeout",
+      "status_tb2": "timeout",
+      "both_ready": false,
+      "elapsed_sec": 120.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 1,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 2,
+      "status_tb1": "fail",
+      "status_tb2": "ready",
+      "both_ready": false,
+      "elapsed_sec": 65.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 5,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 3,
+      "status_tb1": "timeout",
+      "status_tb2": "ready",
+      "both_ready": false,
+      "elapsed_sec": 120.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 4,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 4,
+      "status_tb1": "ready",
+      "status_tb2": "ready",
+      "both_ready": true,
+      "elapsed_sec": 6.0,
+      "jumps_tb1": 0,
+      "jumps_tb2": 0,
+      "boot_ok": true
+    },
+    {
+      "replicate_id": 5,
+      "status_tb1": "fail",
+      "status_tb2": "fail",
+      "both_ready": false,
+      "elapsed_sec": 65.0,
+      "jumps_tb1": 2,
+      "jumps_tb2": 7,
+      "boot_ok": true
+    }
+  ],
+  "finished_at": "2026-10-08T23:00:47.288745+00:00",
+  "summary": {
+    "both_ready_count": 1,
+    "total": 5,
+    "success_rate": 0.2
+  }
+}

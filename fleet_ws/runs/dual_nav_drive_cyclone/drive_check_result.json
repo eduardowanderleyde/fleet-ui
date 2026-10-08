@@ -1,0 +1,21 @@
+{
+  "rmw": "rmw_cyclonedds_cpp",
+  "cyclonedds_fix": false,
+  "activation": {
+    "status_tb1": "ready",
+    "status_tb2": "ready",
+    "both_ready": true,
+    "elapsed_sec": 6.0,
+    "jumps_tb1": 0,
+    "jumps_tb2": 0
+  },
+  "drive_check": {
+    "watch_sec": 25.0,
+    "jumps_during_drive_tb1": 0,
+    "jumps_during_drive_tb2": 0,
+    "go_to_point_tb1_log": "/home/eduardo/fleet-ui/.claude/worktrees/agent-a8b5eeda8040a7cd8/fleet_ws/runs/dual_nav_drive_cyclone/drive_tb1.log",
+    "go_to_point_tb2_log": "/home/eduardo/fleet-ui/.claude/worktrees/agent-a8b5eeda8040a7cd8/fleet_ws/runs/dual_nav_drive_cyclone/drive_tb2.log"
+  },
+  "go_to_point_tb1_response": "requester: making request: fleet_msgs.srv.GoToPoint_Request(robot_id='tb1', x=1.5, y=0.0, yaw=0.0)\n\nresponse:\nfleet_msgs.srv.GoToPoint_Response(success=True, message='Navigation started', error_code='')\n\n",
+  "go_to_point_tb2_response": "requester: making request: fleet_msgs.srv.GoToPoint_Request(robot_id='tb2', x=1.5, y=2.0, yaw=0.0)\n\nresponse:\nfleet_msgs.srv.GoToPoint_Response(success=True, message='Navigation started', error_code='')\n\n"
+}

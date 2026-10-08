@@ -2,6 +2,33 @@
 
 ## TL;DR
 
+(atualizado 2026-10-08) **[agente de pesquisa] Pergunta NOVA respondida ao
+vivo, diferente da de 2026-10-03: dá pra ligar Nav2 completo em 2 robôs
+SIMULTANEAMENTE (não sequencial) de verdade?** Sim, com alta confiança —
+testado ao vivo contra o Gazebo real deste projeto, não só hipótese.
+Baseline (Fast DDS, ativação genuinamente simultânea de tb1+tb2, sem
+stagger nenhum): **1/5 (20%) de sucesso** — pior que os 70% já citados na
+dissertação, porque aquele número é da ativação SEQUENCIAL (1 por vez),
+um problema mais fácil. Trocando só `RMW_IMPLEMENTATION=rmw_cyclonedds_cpp`
+(zero mudança de código, mesma variável já recomendada em 2026-10-03):
+**10/10 (100%) em duas baterias de 5 réplicas**, todas com 0 avisos de
+"jump back in time" e ativação em 6s (mesma velocidade da única réplica
+limpa do baseline). O fix de `CYCLONEDDS_URI` pro bug conhecido
+`ros2/rmw_cyclonedds#458` (participant index) foi testado em paralelo e
+**não foi necessário pra 2 robôs** (5/5 sem ele também) — continua
+recomendado como precaução pra quem for tentar 3+ robôs (ver achado de
+2026-10-08 abaixo, inclusive referência externa que precisou dele com 4
+robôs). Também testado (não só ativação): mandar `go_to_point` real pros
+dois robôs AO MESMO TEMPO depois da ativação, 25s de navegação concorrente
+de verdade sob Cyclone DDS — **0 jumps, os dois chegaram a "Navigation
+started"**. Isso muda a recomendação: a troca de RMW não é mais "trabalho
+futuro não testado", é um candidato testado e pronto pra adotar — mas a
+decisão de trocar a ARQUITETURA de ativação (sequencial → simultânea) como
+default do projeto é do autor, não foi aplicada nos launch files de
+produção nesta sessão (ver achado completo abaixo pros limites do que foi
+testado: só 2 robôs, só uma janela de 25s de drive, não uma campanha
+longa).
+
 (atualizado 2026-10-03) **Pergunta direta respondida nesta rodada:** dado
 o prazo curto até a defesa, das 3 hipóteses levantadas, a de melhor
 relação esforço/risco/chance é **trocar `RMW_IMPLEMENTATION` pra
@@ -516,3 +543,125 @@ de mitigação que não foi medido.
   acontecer, aplicar essa env var junto da troca pra Cyclone DDS desde o
   início, não só depois de ver falha nova — senão corre o risco de trocar
   um bug conhecido por outro bug conhecido e achar que "não funcionou".
+
+### 2026-10-08 — [AGENTE DE PESQUISA] Teste ao vivo: RMW swap resolve ativação SIMULTÂNEA de verdade (pergunta nova, nunca testada), não só a sequencial já medida em 2026-10-03
+
+**Por que esta rodada é diferente da de 2026-10-03:** aquele teste A/B
+proposto (nunca executado até agora) era sobre a ativação SEQUENCIAL — o
+workaround atual, 1 robô por vez. A pergunta desta sessão é outra: dá pra
+ligar Nav2 completo em tb1 E tb2 AO MESMO TEMPO, sem stagger nenhum, de
+verdade? Isso é um alvo mais difícil (mais participantes DDS entrando na
+mesma janela de tempo), nunca medido antes neste projeto.
+
+**Metodologia:** script novo, `fleet_ws/scripts/run_dual_nav_simultaneous.py`,
+reaproveitando o padrão de boot+cleanup de `run_fuut_pilot.py`/
+`run_ground_truth_campaign.py` (`turtlebot4_multi_sim.launch.py
+bringup_nav:=false` pra Gazebo+spawn, depois `activate_robot_nav.launch.py`
+por robô) — mas **sem retry dentro da réplica** (o objetivo aqui é medir a
+taxa de sucesso bruta de "dois de uma vez", não mascarar com retry) e
+disparando os dois `ros2 launch activate_robot_nav.launch.py` (namespace
+tb1, namespace tb2) **back-to-back via `subprocess.Popen`, sem esperar
+sinal nenhum do primeiro antes do segundo** — essa é a definição operacional
+de "simultâneo" usada. `RMW_IMPLEMENTATION`/`CYCLONEDDS_URI` propagados a
+TODOS os processos (Gazebo, bridges, SLAM, Nav2) via o mesmo `extra_env`,
+não só no Nav2 — confirmado necessário porque nós de RMW diferentes não se
+descobrem.
+
+**Resultados (réplicas reais contra Gazebo, máquina com 16 cores/46GB RAM,
+load ~0 antes de cada bateria):**
+
+| Configuração | Réplicas | tb1+tb2 ativos juntos | "jump back in time" |
+|---|---|---|---|
+| Fast DDS (default do projeto, sem mudança nenhuma) | 5 | **1/5 (20%)** | tb1: 0,0,0,0,2 / tb2: 1,5,4,0,7 por réplica (a única réplica OK, a 4ª, teve 0 nos dois; réplica 1 chegou a dar timeout nos dois lados com só 1 jump em tb2 — falha não é só "muitos jumps", um timeout de `change_state` sozinho já basta) |
+| Cyclone DDS, sem fix de participant index | 5 | **5/5 (100%)** | 0 em todas |
+| Cyclone DDS + `CYCLONEDDS_URI` (fix do `ros2/rmw_cyclonedds#458`) | 5 | **5/5 (100%)** | 0 em todas |
+
+Dados crus: `fleet_ws/runs/dual_nav_fastdds/`, `dual_nav_cyclone/`,
+`dual_nav_cyclone_nofix/` (manifesto `dual_nav_manifest.json` +
+`r0N_activate_tb{1,2}.log` por réplica).
+
+**Achado adicional, não só ativação — navegação concorrente de verdade:**
+depois de uma ativação simultânea sob Cyclone DDS (sem o fix), disparei
+`ros2 service call /go_to_point` pra tb1 E tb2 ao mesmo tempo (via
+`fleet_ws/scripts/check_dual_nav_drive.py`, script novo) e observei os
+logs por 25s de navegação real. Os dois serviços retornaram
+`success=True, message='Navigation started'`, **0 avisos de "jump back in
+time" durante a janela de drive** — ver
+`fleet_ws/runs/dual_nav_drive_cyclone/drive_check_result.json`. Isso
+importa porque a causa raiz podia, em princípio, só atrasar o problema pra
+depois do bringup (robôs ativam OK mas colidem/perdem TF ao se mover
+juntos) — não foi o que aconteceu nesta checagem, embora seja só uma
+janela curta, não uma campanha longa (ver limites abaixo).
+
+**Achado de precisão técnica, via leitura direta do código-fonte do tf2_ros
+(não extrapolação):** o "jump back in time" vem de um callback hardcoded
+em `tf2_ros.Buffer.__init__` (`buffer.py`, branch jazzy do
+`ros2/geometry2`):
+
+```python
+threshold = JumpThreshold(min_forward=None,
+                          min_backward=Duration(seconds=-1),
+                          on_clock_change=True)
+```
+
+Ou seja: (a) o limiar pra considerar um salto "pra trás" relevante é
+**fixo em 1 segundo**, não configurável por parâmetro nem argumento de
+construtor — não existe um "transform_tolerance" ou equivalente que
+destrave isso sem fazer fork do `tf2_ros` instalado (fora de escopo,
+mudaria comportamento de todo nó do projeto, não só da ativação
+simultânea); e (b) `on_clock_change=True` significa que o callback TAMBÉM
+dispara quando o tipo de clock muda (ex.: transição de "sem clock ainda"
+pra "clock de simulação recebido"), o que é plausível como gatilho real
+durante uma rajada de bringup com várias subscrições de `/clock` se
+inicializando ao mesmo tempo sob congestionamento — **isso é hipótese
+mecanística, não confirmada por captura de tráfego nesta sessão**,
+registrado como tal. Corrige o achado de 2026-10-02 que já dizia "não é
+configurável" sem ter a fonte exata — agora está confirmado e com o valor
+numérico.
+
+**Corroboração externa concreta, achada nesta rodada (reforça a decisão,
+não é o único motivo):** o projeto `arshadlab/turtlebot3_multi_robot`
+(GitHub, ROS 2 Jazzy + Gazebo Harmonic — mesma geração deste projeto, só
+TurtleBot3 em vez de 4) faz exatamente o que esta pergunta pede: um único
+`ros2 launch tb3_nav2.launch.py` sobe Nav2 completo pra TODOS os robôs
+habilitados de uma vez (simultâneo, não sequencial). O README deles
+**recomenda Cyclone DDS por padrão** e documenta o MESMO fix de
+`MaxAutoParticipantIndex` (valor **100**, idêntico ao já registrado em
+2026-10-05 aqui) como pré-requisito pra "launching multiple robots with
+Nav2" — citação: "the number of DDS participants can quickly exceed the
+default limit set by CycloneDDS. To avoid participant ID exhaustion,
+create a configuration file to increase the allowable range." Esse projeto
+testa com 4 robôs habilitáveis (não confirmei quantos simultâneos de fato,
+o README não cravou um número de teste), o que é consistente com meu
+achado de que o fix não foi necessário pra 2 robôs aqui mas pode ser
+necessário ao escalar.
+
+**Limites honestos do que foi testado (não inflar o resultado):**
+- Só 2 robôs (tb1+tb2) — o projeto já tinha decidido não perseguir 3
+  simultâneos nesta máquina (`orquestracion.md`, 2026-09-22); este teste
+  NÃO cobre se Cyclone DDS resolveria 3 robôs também, só reforça (via a
+  referência externa acima) que o fix de participant index ficaria mais
+  relevante nesse caso.
+- A checagem de navegação concorrente foi 1 réplica, 25s de janela, 1
+  trajeto simples (linha reta ~1,5m) — não é uma campanha com poder
+  amostral, é um teste de fumaça que não achou o problema, não uma prova
+  de que ele nunca mais aparece sob uso prolongado/trajetos complexos.
+- Não testei `ComposableNodeContainer` nem `ROS_DISCOVERY_SERVER` nesta
+  rodada — não foi necessário porque a troca de RMW isolada já resolveu o
+  caso testado; eles continuam como trabalho futuro se o RMW swap não
+  bastar ao escalar pra mais robôs.
+
+**Ação sugerida (mudança de recomendação):** a troca de RMW deixa de ser
+"trabalho futuro não testado" (status de 2026-10-03) e passa a ser
+**candidato testado e pronto pra adotar** como substituto real da
+ativação sequencial — não só mitigação. Decisão de aplicar como
+arquitetura padrão do projeto (trocar `activate_robot_nav.launch.py`/o
+fluxo de ativação pra simultâneo + exportar
+`RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` por padrão) é do autor, não
+aplicada nos launch files de produção nesta sessão — fica registrada aqui
+com os números pra ele decidir com dados reais, não só promessa. Scripts
+de teste (`run_dual_nav_simultaneous.py`, `check_dual_nav_drive.py`) e
+dados crus ficam no repo, reproduzíveis. `Dockerfile` ganhou
+`ros-jazzy-rmw-cyclonedds-cpp` na lista de pacotes (só instalação, não
+muda o default — ninguém precisa dele a menos que exporte
+`RMW_IMPLEMENTATION`).
