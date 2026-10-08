@@ -2,30 +2,44 @@
 
 ## 1. Role enforcement
 
-- [ ] 1.1 Criar `_require_muut(robot_id)` em `backend/main.py` — lê
+- [x] 1.1 Criar `_require_muut(robot_id)` em `backend/main.py` — lê
   `_read_robot_roles()`, levanta HTTP 403 se papel != MUUT ou ausente.
   Verificar: teste unitário cobre FUUT, SU e robot_id ausente de
   `roles.yaml`, todos rejeitados.
-- [ ] 1.2 Chamar `_require_muut` no topo de `/api/agent/run`,
+- [x] 1.2 Chamar `_require_muut` no topo de `/api/agent/run`,
   `/api/agent/run_fleet` e nos serviços de record/replay que despacham
   movimento. Verificar: requisição pra um robot_id MUUT continua
   funcionando sem mudança de comportamento (teste de regressão existente
   passa).
-- [ ] 1.3 Escrever `tests/test_fuut_role_enforcement.py`: 403 pra
+
+  Nota de implementação: o check foi colocado nos 4 endpoints de baixo
+  nível (`start_record`, `stop_record`, `play_route`, `go_to_point`), não
+  dentro de `/api/agent/run`/`run_fleet` diretamente — confirmado em
+  `backend/agents/executor.py` que o agente despacha movimento via HTTP
+  pra esses mesmos 4 endpoints, então o enforcement cobre os dois
+  caminhos (UI direta e camada de agente) num único ponto, como o
+  design.md já pretendia ("chamado no topo de cada endpoint que
+  despacha movimento").
+- [x] 1.3 Escrever `tests/test_fuut_role_enforcement.py`: 403 pra
   FUUT/SU/ausente, 200 pra MUUT. Verificar: `python3 -m unittest
-  tests.test_fuut_role_enforcement` passa.
+  tests.test_fuut_role_enforcement` passa. (8/8 passou, suíte completa
+  92 testes sem regressão.)
 
 ## 2. Detecção do FUUT (subtração de referência)
 
-- [ ] 2.1 Script `fleet_ws/scripts/fuut_reference_scan.py`: grava um scan
+- [x] 2.1 Script `fleet_ws/scripts/fuut_reference_scan.py`: grava um scan
   de referência do `/scan` do FUUT parado, salva em
   `fleet_ws/runs/<run_id>/fuut_reference.json`. Verificar: arquivo gerado
-  contém um array de ranges do tamanho esperado do LiDAR.
-- [ ] 2.2 Função de detecção: compara scan vivo contra referência, agrupa
+  contém um array de ranges do tamanho esperado do LiDAR. (Verificado com
+  rclpy real — `tests/test_fuut_reference_scan.py` publica um `/scan`
+  fake num nó separado e confirma a captura; não precisa de Gazebo pra
+  isso, só de um tópico `/scan` publicando.)
+- [x] 2.2 Função de detecção: compara scan vivo contra referência, agrupa
   pontos com diferença > 0,17m (raio do TurtleBot4), retorna centróide
   (`distance_m`, `bearing_deg`) do maior cluster. Verificar: teste unitário
   com scan sintético (obstáculo simulado numa posição conhecida) retorna
-  distância/direção dentro de 5% do valor esperado.
+  distância/direção dentro de 5% do valor esperado. (5/5 testes,
+  `fleet_ws/scripts/fuut_detection.py` + `tests/test_fuut_detection.py`.)
 - [ ] 2.3 Calibrar limiar manualmente na primeira réplica real (ver Riscos
   em design.md) e documentar o valor escolhido no próprio script.
   Verificar: detecção na réplica de calibração encontra exatamente um

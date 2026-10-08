@@ -648,6 +648,17 @@ def _read_robot_roles() -> dict[str, str]:
         return {}
 
 
+def _require_muut(robot_id: str) -> JSONResponse | None:
+    """Bloqueia comando de movimento se o papel declarado em roles.yaml não
+    for MUUT (inclui papel ausente ou desconhecido). Devolve None se o robô
+    pode se mover, ou a JSONResponse 403 já pronta pra retornar."""
+    role = _read_robot_roles().get(robot_id)
+    if role == "MUUT":
+        return None
+    reason = f"papel '{role}' não permite movimento" if role else "robot_id não declarado em roles.yaml"
+    return JSONResponse({"success": False, "message": f"{robot_id}: {reason}"}, status_code=403)
+
+
 def _read_configured_robots() -> list[str]:
     return list(_read_robot_roles().keys())
 
@@ -989,6 +1000,8 @@ async def get_slam_map_meta():
 @app.post("/api/start_record")
 async def start_record(robot_id: str = "", route_name: str = "r1"):
     robot_id = robot_id or ""
+    if (err := _require_muut(robot_id)) is not None:
+        return err
     ok, out = _run_ros2_service(
         "start_record", "fleet_msgs/srv/StartRecord",
         json.dumps({"robot_id": robot_id, "route_name": route_name}),
@@ -999,6 +1012,8 @@ async def start_record(robot_id: str = "", route_name: str = "r1"):
 @app.post("/api/stop_record")
 async def stop_record(robot_id: str = ""):
     robot_id = robot_id or ""
+    if (err := _require_muut(robot_id)) is not None:
+        return err
     ok, out = _run_ros2_service(
         "stop_record", "fleet_msgs/srv/StopRecord",
         json.dumps({"robot_id": robot_id}),
@@ -1009,6 +1024,8 @@ async def stop_record(robot_id: str = ""):
 @app.post("/api/play_route")
 async def play_route(robot_id: str = "", route_name: str = "r1"):
     robot_id = robot_id or ""
+    if (err := _require_muut(robot_id)) is not None:
+        return err
     ok, out = _run_ros2_service(
         "play_route", "fleet_msgs/srv/PlayRoute",
         json.dumps({"robot_id": robot_id, "route_name": route_name}),
@@ -1019,6 +1036,8 @@ async def play_route(robot_id: str = "", route_name: str = "r1"):
 @app.post("/api/go_to_point")
 async def go_to_point(robot_id: str = "", x: float = 0.0, y: float = 0.0, yaw: float = 0.0):
     robot_id = robot_id or ""
+    if (err := _require_muut(robot_id)) is not None:
+        return err
     ok, out = _run_ros2_service(
         "go_to_point", "fleet_msgs/srv/GoToPoint",
         json.dumps({"robot_id": robot_id, "x": x, "y": y, "yaw": yaw}),
