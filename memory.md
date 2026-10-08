@@ -459,16 +459,29 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 - **[sessão]** Planejado com OpenSpec (`openspec/changes/fuut-pilot-experiment/`:
   proposal, 2 specs, design, 12 tasks) e executado de ponta a ponta contra
-  Gazebo real (não simulado/fake): `_require_muut()` em `backend/main.py`
-  passou a rejeitar (403) comando de movimento pra robô não-MUUT nos 4
-  endpoints de despacho real (`start_record`/`stop_record`/`play_route`/
-  `go_to_point`) — cobre também a camada de agente de IA, confirmado em
-  `executor.py` que ela chama os mesmos endpoints. `fleet_ws/scripts/
-  run_fuut_pilot.py`: sobe multi-robô com `bringup_nav:=false`, ativa Nav2
-  só em tb1 (MUUT), mantém tb2 (FUUT) parado só com sensores, detecta tb1
-  via subtração de scan de referência do LiDAR de tb2, cruza contra
-  `/tb1/pose` e chama o `FuutVerifier` (piloto de sessão anterior) pra
-  cada réplica.
+  Gazebo real (não simulado/fake). **Correção importante sobre o próprio
+  trabalho desta sessão**: o proposal.md deste change afirmou que "nenhum
+  endpoint ou serviço realmente rejeita um robô FUUT/SU" — isso estava
+  ERRADO, descoberto só depois, ao chegar na dissertação (Cap. 6,
+  06_implementacao.tex, já documentava um `ROLE_NOT_ALLOWED`). O
+  enforcement real e pré-existente vive em
+  `fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py::_motion_allowed`
+  (nó ROS2, não o `backend/main.py` que foi o único lugar checado antes de
+  escrever o proposal), já testado em `test_fleet_orchestrator_logic.py`
+  (`tb2`/`tb3` já rejeitados). O que `_require_muut()` em `backend/main.py`
+  realmente agrega, não duplicado: (a) HTTP 403 explícito antes do
+  round-trip ROS2, em vez de um 200 OK com `success:false` escondido no
+  corpo; (b) fail-closed de verdade pra `robot_id` desconhecido — o
+  `_motion_allowed` pré-existente tem `self._roles.get(robot_id, "MUUT")`,
+  ou seja, **qualquer robot_id não declarado em roles.yaml é tratado como
+  MUUT por padrão** (fail-open), um gap real e distinto do que o proposal
+  original descreveu. Lição: checar a implementação ROS2 real (não só o
+  backend HTTP) antes de escrever "nada faz X" num proposal.
+  `fleet_ws/scripts/run_fuut_pilot.py`: sobe multi-robô com
+  `bringup_nav:=false`, ativa Nav2 só em tb1 (MUUT), mantém tb2 (FUUT)
+  parado só com sensores, detecta tb1 via subtração de scan de referência
+  do LiDAR de tb2, cruza contra `/tb1/pose` e chama o `FuutVerifier`
+  (piloto de sessão anterior) pra cada réplica.
 - **Achado real #1** (confirma Cap. 9): a ativação sequencial de Nav2
   falhou espontaneamente numa das 5 execuções reais desta sessão (mesmo
   sintoma de "jump back in time" já documentado) — precisou de retry

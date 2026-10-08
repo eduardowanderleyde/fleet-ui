@@ -5,14 +5,22 @@
 A dissertação (`dissertacao/chapters/09_conclusao.tex`, Seção Limitações)
 admite que o papel FUUT (unidade fixa sob teste) nunca foi exercitado:
 existe só como arquitetura verificada em software, sem nenhuma evidência
-empírica. Investigação de código confirma que essa afirmação é ainda mais
-literal do que o texto sugere: `backend/main.py` (`_read_robot_roles`,
-linha 638) lê o papel de `roles.yaml` e documenta em comentário que "só
-MUUT aceita comandos de movimento", mas nenhum endpoint ou serviço
-realmente rejeita um robô FUUT/SU que receba um comando de navegação —
-é uma intenção documentada, não uma regra aplicada. `roles.yaml` hoje tem
-os três robôs como MUUT, com o papel original (FUUT pra tb2, SU pra tb3)
-preservado só em comentário.
+empírica. `roles.yaml` hoje tem os três robôs como MUUT, com o papel
+original (FUUT pra tb2, SU pra tb3) preservado só em comentário.
+
+**Correção pós-escrita deste proposal**: a frase original aqui dizia que
+"nenhum endpoint ou serviço realmente rejeita um robô FUUT/SU" — isso
+estava errado. Só foi checado `backend/main.py` (camada HTTP); o
+enforcement real já existe em
+`fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py::_motion_allowed`
+(nó ROS2), com teste (`test_fleet_orchestrator_logic.py`) confirmando
+`tb2`/`tb3` já rejeitados — e a própria dissertação (Cap. 6,
+06_implementacao.tex) já documenta isso (`ROLE_NOT_ALLOWED`). O gap real
+e específico é outro: `_motion_allowed` usa
+`self._roles.get(robot_id, "MUUT")` — um `robot_id` não declarado em
+`roles.yaml` é tratado como MUUT por padrão (fail-open), não rejeitado.
+É esse fail-open que motiva a capability `fuut-role-enforcement` abaixo,
+não a ausência total de enforcement.
 
 Fechar essa lacuna antes da defesa, mesmo com N pequeno, muda a frase de
 "zero evidência empírica" pra "evidência preliminar" — mudança que pesa
