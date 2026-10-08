@@ -29,7 +29,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from ros_bridge import RosBridge
-from agents import Analyst, Executor, Planner, MissionRouter, RobotCandidate
+from agents import Analyst, Executor, Planner, MissionRouter, RobotCandidate, decompose_and_route
 
 # Robôs simulados (mesma variável usada pelos launch files ROS 2 — precisa
 # bater com quem realmente existe no Gazebo). SLAM/Nav2 publicam map,
@@ -1286,6 +1286,70 @@ async def agent_run_mission(body: AgentMissionRequest):
 
     asyncio.create_task(_run_and_persist())
     return {"job_id": job_id, "routed_to": decision.robot_id, "confidence": decision.confidence}
+
+
+@app.post("/api/agent/run_mission_fleet")
+async def agent_run_mission_fleet(body: AgentMissionRequest):
+    """Item 'mais ambicioso' do trabalho futuro (Cap. 9): recebe UMA missão,
+    quebra em até N sub-tarefas (Claude) e roteia cada uma pro robô
+    disponível mais adequado (TypeSafe/MissionRouter, um por sub-tarefa,
+    sem repetir robô) — depois dispara um Planner independente por robô
+    alocado, em paralelo, mesmo padrão de /api/agent/run_fleet. Ainda é
+    decomposição + roteamento, não a negociação real entre agentes que o
+    CLiMRS propõe (Cap. 9 já registra essa distinção)."""
+    mission = (body.mission or "").strip()
+    if not mission:
+        return JSONResponse({"success": False, "message": "mission vazia"}, status_code=400)
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return JSONResponse({"success": False, "message": "ANTHROPIC_API_KEY não configurada"}, status_code=400)
+    if not os.environ.get("TYPESAFE_API_KEY"):
+        return JSONResponse({"success": False, "message": "TYPESAFE_API_KEY não configurada"}, status_code=400)
+
+    with _status_lock:
+        known_robots = {r["robot_id"]: r for r in (_fleet_status.get("robots") or [])}
+        poses = dict(_robot_poses)
+    candidate_ids = body.candidates or list(known_robots.keys())
+    candidates = [
+        RobotCandidate(
+            robot_id=rid,
+            role=known_robots.get(rid, {}).get("role", "?"),
+            nav_state=known_robots.get(rid, {}).get("nav_state", "?"),
+            pose=poses.get(rid),
+        )
+        for rid in candidate_ids if rid in known_robots
+    ]
+    if not candidates:
+        return JSONResponse(
+            {"success": False, "message": "Nenhum robô candidato conhecido em _fleet_status."},
+            status_code=409,
+        )
+
+    try:
+        allocation = await asyncio.to_thread(decompose_and_route, mission, candidates)
+    except Exception as e:
+        return JSONResponse({"success": False, "message": f"Falha na decomposição/roteamento: {e}"}, status_code=502)
+
+    job_id = str(uuid.uuid4())[:8]
+    robots_state = {
+        rid: {"running": True, "steps": [], "final_text": None, "error": None, "instruction": instr}
+        for rid, instr in allocation.items()
+    }
+    _fleet_jobs[job_id] = {
+        "running": True, "robots": robots_state, "model": body.model,
+        "started_at": _now_iso(), "finished_at": None, "mission": mission,
+    }
+
+    async def _run_all():
+        await asyncio.gather(*(
+            _execute_planner(robots_state[rid], instr, body.model, robot_id=rid)
+            for rid, instr in allocation.items()
+        ))
+        _fleet_jobs[job_id]["running"] = False
+        _fleet_jobs[job_id]["finished_at"] = _now_iso()
+        _save_agent_run(f"mission_fleet_{job_id}", {"kind": "mission_fleet", "job_id": job_id, **_fleet_jobs[job_id]})
+
+    asyncio.create_task(_run_all())
+    return {"job_id": job_id, "allocation": allocation}
 
 
 def _summarize_agent_run(data: dict) -> dict:
