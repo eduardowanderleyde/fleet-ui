@@ -403,6 +403,25 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   migrou pra TurtleBot3, é TurtleBot4 Standard do início ao fim, inclusive
   em toda a dissertação.
 
+### 2026-10-08 — pilotos reais de 2 gaps de trabalho futuro do Cap. 9, usando TypeSafe (skill instalada em 2026-10-05)
+
+- **[sessão]** `backend/agents/router.py` (`MissionRouter`) e
+  `backend/agents/fuut_verify.py` (`FuutVerifier`): dois pilotos testados
+  de verdade (não só desenhados), usando a API da TypeSafe
+  (`typesafe-sdk`, modelo `jev-1.13.0`) pros primitivos `Choice`/`Score`.
+  (1) Roteamento de missão: dado o estado ao vivo da frota, escolhe qual
+  robô executa uma instrução — testado com 2 robôs, escolheu certo o
+  livre mais próximo (98% confiança), não só o mais próximo em linha
+  reta. Novo endpoint `POST /api/agent/run_mission`. (2) Verificação
+  cruzada via FUUT: julga se uma observação independente da unidade fixa
+  corrobora a pose que o MUUT reportou — testado com 3 cenários
+  sintéticos, discriminou bem. Escopo deliberadamente limitado: não faz
+  detecção de robô em LiDAR bruto (problema de percepção separado, maior,
+  registrado como próximo passo). `decompose_and_route()` (quebrar 1
+  missão em N sub-tarefas) está escrito e compila, mas o endpoint ainda
+  não foi plugado nem testado. Detalhe completo no commit (mensagem
+  extensa) na branch `mission-coordinate-large-scale`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
