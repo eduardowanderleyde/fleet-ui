@@ -29,7 +29,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from ros_bridge import RosBridge
-from agents import Analyst, Executor, Planner
+from agents import Analyst, Executor, Planner, MissionRouter, RobotCandidate
 
 # Robôs simulados (mesma variável usada pelos launch files ROS 2 — precisa
 # bater com quem realmente existe no Gazebo). SLAM/Nav2 publicam map,
@@ -155,6 +155,12 @@ class AgentRunRequest(BaseModel):
 
 class AgentFleetRunRequest(BaseModel):
     instructions: dict[str, str]  # robot_id → instrução
+    model: str = "claude-sonnet-5"
+
+
+class AgentMissionRequest(BaseModel):
+    mission: str
+    candidates: list[str] | None = None  # None = usa todos os robôs conhecidos em _fleet_status
     model: str = "claude-sonnet-5"
 
 
@@ -1222,6 +1228,64 @@ async def agent_fleet_job(job_id: str):
     if not job:
         return JSONResponse({"error": "job not found"}, status_code=404)
     return job
+
+
+@app.post("/api/agent/run_mission")
+async def agent_run_mission(body: AgentMissionRequest):
+    """Piloto do 'Planner supervisor' do trabalho futuro (Cap. 9): recebe UMA
+    instrução de missão, sem robot_id, decide via MissionRouter (TypeSafe)
+    qual robô deve executá-la a partir do estado ao vivo da frota, e só
+    então dispara o Planner de /api/agent/run pra esse robô. Escopo piloto:
+    aloca 1 robô por missão, não divide em sub-tarefas multi-robô."""
+    mission = (body.mission or "").strip()
+    if not mission:
+        return JSONResponse({"success": False, "message": "mission vazia"}, status_code=400)
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return JSONResponse({"success": False, "message": "ANTHROPIC_API_KEY não configurada"}, status_code=400)
+    if not os.environ.get("TYPESAFE_API_KEY"):
+        return JSONResponse({"success": False, "message": "TYPESAFE_API_KEY não configurada"}, status_code=400)
+
+    with _status_lock:
+        known_robots = {r["robot_id"]: r for r in (_fleet_status.get("robots") or [])}
+        poses = dict(_robot_poses)
+    candidate_ids = body.candidates or list(known_robots.keys())
+    candidates = [
+        RobotCandidate(
+            robot_id=rid,
+            role=known_robots.get(rid, {}).get("role", "?"),
+            nav_state=known_robots.get(rid, {}).get("nav_state", "?"),
+            pose=poses.get(rid),
+        )
+        for rid in candidate_ids if rid in known_robots
+    ]
+    if not candidates:
+        return JSONResponse(
+            {"success": False, "message": "Nenhum robô candidato conhecido em _fleet_status."},
+            status_code=409,
+        )
+
+    try:
+        decision = await asyncio.to_thread(MissionRouter().route, mission, candidates)
+    except Exception as e:
+        return JSONResponse({"success": False, "message": f"Falha no roteamento: {e}"}, status_code=502)
+
+    job_id = str(uuid.uuid4())[:8]
+    _agent_jobs[job_id] = {
+        "running": True, "steps": [], "final_text": None, "error": None,
+        "instruction": mission, "model": body.model, "started_at": _now_iso(), "finished_at": None,
+        "routing": {
+            "robot_id": decision.robot_id, "confidence": decision.confidence,
+            "probabilities": decision.probabilities, "model": decision.model,
+        },
+    }
+
+    async def _run_and_persist():
+        await _execute_planner(_agent_jobs[job_id], mission, body.model, robot_id=decision.robot_id)
+        _agent_jobs[job_id]["finished_at"] = _now_iso()
+        _save_agent_run(f"mission_{job_id}", {"kind": "mission", "job_id": job_id, **_agent_jobs[job_id]})
+
+    asyncio.create_task(_run_and_persist())
+    return {"job_id": job_id, "routed_to": decision.robot_id, "confidence": decision.confidence}
 
 
 def _summarize_agent_run(data: dict) -> dict:
