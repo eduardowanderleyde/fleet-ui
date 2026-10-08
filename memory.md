@@ -438,6 +438,23 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   sintéticos (8cm, 18cm), que escalaram certo pra "suspeito"/"forte
   indício". Commits detalhados na branch `mission-coordinate-large-scale`.
 
+### 2026-10-08 (continuação 2) — avaliação formal do NoiseClassifier: baseline estatístico vs. TypeSafe, achado real de limitação
+
+- **[sessão]** `fleet_ws/scripts/evaluate_noise_classifier.py`: primeira
+  avaliação séria (não só "funcionou") de um dos 3 pilotos TypeSafe —
+  comparou `NoiseClassifier` contra uma baseline clássica de regra de
+  3-sigma, 20 cenários (10 reais da campanha + 10 sintéticos). 75% de
+  concordância exata, diferença média 0,38 níveis. Dois achados reais:
+  (a) a favor do TypeSafe — trata RMSE abaixo da média como bem menos
+  preocupante que acima da média no mesmo \|z\|, assimetria que a regra
+  ingênua não captura; (b) **limitação real** — satura em ~2,5-2,8/3,0
+  pra outliers extremos, mesmo quando o RMSE já ultrapassa a própria
+  tolerância de 25cm (ex.: RMSE=30cm ainda não bate nível máximo). A
+  baseline simples acerta esse caso extremo, o TypeSafe não. Esse é o
+  tipo de achado que sustenta "quando usar e quando não" — mais forte
+  que só demonstrar que funciona. Resultado salvo em
+  `fleet_ws/runs/eval_noise_classifier/results_20261008.txt`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
