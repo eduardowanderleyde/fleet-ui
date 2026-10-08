@@ -156,15 +156,23 @@ def boot_multi_sim(world: str, run_dir: Path) -> tuple[subprocess.Popen, subproc
     return sim_proc, fleet_proc
 
 
-def activate_tb1_nav(run_dir: Path) -> subprocess.Popen:
-    log = run_dir / "activate_tb1.log"
+def activate_tb1_nav(run_dir: Path, max_retries: int = 3) -> subprocess.Popen:
+    """Ativação sequencial falha espontaneamente em parte das tentativas —
+    já documentado na dissertação (Cap. 9, Limitações: 70% de sucesso em
+    10 tentativas, sem padrão ligado à ordem). Retry mata e tenta de novo,
+    mesmo padrão de run_ground_truth_campaign.py::boot_stack."""
     cmd = "ros2 launch fleet_orchestrator activate_robot_nav.launch.py namespace:=tb1"
-    proc = launch_bash(cmd, log)
-    status = wait_for_log(log, (ACTIVATE_READY,), FAIL_MARKERS, 45.0)
-    if status != "ready":
+    for attempt in range(max_retries + 1):
+        log = run_dir / f"activate_tb1_attempt{attempt}.log"
+        proc = launch_bash(cmd, log)
+        status = wait_for_log(log, (ACTIVATE_READY,), FAIL_MARKERS, 45.0)
+        if status == "ready":
+            return proc
+        print(f"  [tentativa {attempt}] ativação de tb1 = {status}, matando e tentando de novo")
         kill_proc_group(proc)
-        raise RuntimeError(f"Nav2 de tb1 não ativou (status={status}) — ver {log}")
-    return proc
+        subprocess.run(["pkill", "-9", "-f", "activate_robot_nav"], capture_output=True)
+        time.sleep(3)
+    raise RuntimeError(f"Nav2 de tb1 não ativou após {max_retries + 1} tentativas — ver {run_dir}/activate_tb1_attempt*.log")
 
 
 class _FuutScanSampler(Node):
@@ -216,10 +224,19 @@ def run_replica(route: str, replicate_id: int, run_dir: Path) -> dict:
     if export_path.exists():
         rosbag_path = json.loads(export_path.read_text()).get("rosbag_path")
 
+    # Persiste as amostras cruas do FUUT em disco — sem isso, o único
+    # registro do que o FUUT observou vivia na memória do processo,
+    # perdido ao final da réplica (achado ao escrever este script: a spec
+    # fuut-pilot-campaign exige que a observação fique recuperável por
+    # réplica, não só o resultado já derivado).
+    samples_path = run_dir / f"fuut_samples_r{replicate_id:02d}.json"
+    samples_path.write_text(json.dumps(sampler.samples))
+
     return {
         "replicate_id": replicate_id,
         "replay_ok": result.returncode == 0,
         "rosbag_path": rosbag_path,
+        "fuut_samples_path": str(samples_path),
         "fuut_samples": sampler.samples,
     }
 
@@ -243,7 +260,7 @@ def build_report_entry(reference: dict, replica: dict, verifier: FuutVerifier) -
 
     bag_dir = Path(replica["rosbag_path"])
     _, t_abs, x_arr, y_arr, _ = analyze_runs._read_traj_xy(
-        bag_dir, "/pose", use_header_stamp=True, rebase=False,
+        bag_dir, "/tb1/pose", use_header_stamp=True, rebase=False,
     )
 
     best_pair = None
@@ -269,6 +286,12 @@ def build_report_entry(reference: dict, replica: dict, verifier: FuutVerifier) -
     return {
         "replicate_id": replica["replicate_id"],
         "status": "verificado",
+        "muut_claim": {"x": claim.x, "y": claim.y, "timestamp_s": claim.timestamp_s},
+        "fuut_observation": {
+            "distance_m": observation.distance_m,
+            "bearing_deg": observation.bearing_deg,
+            "timestamp_s": observation.timestamp_s,
+        },
         "level": result.level,
         "label": result.label,
         "confidence": result.confidence,

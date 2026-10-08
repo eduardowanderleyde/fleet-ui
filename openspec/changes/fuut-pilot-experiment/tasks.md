@@ -40,10 +40,28 @@
   com scan sintético (obstáculo simulado numa posição conhecida) retorna
   distância/direção dentro de 5% do valor esperado. (5/5 testes,
   `fleet_ws/scripts/fuut_detection.py` + `tests/test_fuut_detection.py`.)
-- [ ] 2.3 Calibrar limiar manualmente na primeira réplica real (ver Riscos
+- [x] 2.3 Calibrar limiar manualmente na primeira réplica real (ver Riscos
   em design.md) e documentar o valor escolhido no próprio script.
   Verificar: detecção na réplica de calibração encontra exatamente um
   cluster, não zero nem múltiplos.
+
+  Resultado real (3 réplicas, runs/fuut_pilot01/): o limiar de 0,17m
+  (raio do TurtleBot4) encontrou exatamente 1 cluster em todas as 3
+  réplicas — isso funcionou. O que NÃO foi calibrado, e ficou como
+  achado em aberto: a discrepância geométrica reportada pelo
+  FuutVerifier ficou em ~2,7-2,9m, consistente entre réplicas (não é
+  ruído aleatório — é sistemático). Hipótese mais provável: a
+  orientação de montagem do LiDAR do FUUT relativo ao `base_link`
+  (offset de yaw no URDF) não foi verificada — o código assume
+  bearing_deg=0 do scan aponta no eixo +x do mundo (válido só se yaw de
+  spawn=0 E o LiDAR estiver montado sem rotação própria), e isso nunca
+  foi confirmado contra o URDF real. TypeSafe corretamente classificou
+  como "correspondência fraca" com confiança baixa (0,1-0,41) nas 3
+  réplicas — o sistema está sendo honesto sobre a incerteza, não
+  travando silenciosamente. Fica como trabalho futuro imediato: ler o
+  transform `lidar_link` → `base_link` do URDF do TurtleBot4 e aplicar
+  a correção antes de reportar isso como corroboração geométrica
+  confiável.
 
 ## 3. Orquestração do piloto
 
