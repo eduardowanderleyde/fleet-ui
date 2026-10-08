@@ -422,6 +422,22 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   não foi plugado nem testado. Detalhe completo no commit (mensagem
   extensa) na branch `mission-coordinate-large-scale`.
 
+### 2026-10-08 (continuação) — decompose_and_route plugado e testado + 3º piloto TypeSafe (classificador de ruído MPPI)
+
+- **[sessão]** `POST /api/agent/run_mission_fleet` plugado: decompõe 1
+  missão em até N sub-tarefas (Claude) e roteia cada uma via
+  `MissionRouter` sem repetir robô. Testado de ponta a ponta — "um robô
+  cobre o setor norte, outro o sul" com tb1 em (0,-3) e tb2 em (0,3):
+  decompôs certo e roteou geograficamente certo (tb2→norte, tb1→sul).
+- **[sessão]** `backend/agents/noise_classifier.py` (`NoiseClassifier`) —
+  3º piloto TypeSafe: julga via `Score` se o RMSE de uma réplica é ruído
+  esperado do MPPI ou indício real de problema, considerando z-score E
+  magnitude absoluta vs. tolerância (não escala só com z-score). Testado
+  com os valores REAIS da campanha (min 1,65cm, max 4,76cm) — corretamente
+  não achou problema nenhum (a campanha é limpa) — e com 2 outliers
+  sintéticos (8cm, 18cm), que escalaram certo pra "suspeito"/"forte
+  indício". Commits detalhados na branch `mission-coordinate-large-scale`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
