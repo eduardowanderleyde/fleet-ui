@@ -465,6 +465,142 @@ janela de busca limitada do \textit{scan matching} \cite{macenski2021slam}
 e a sensibilidade a ambientes com estrutura repetida, risco genérico de
 SLAM, podem não generalizar para mapas/rotas substancialmente maiores.
 
+\section{Piloto FUUT: Primeira Verificação Cruzada via Observação Exógena}
+\label{sec:res_fuut_piloto}
+
+A Seção~\ref{sec:frota} motivou a arquitetura de papéis MUUT/FUUT como
+enriquecimento metodológico: uma unidade fixa sob teste (FUUT) observando
+a cena de um ângulo externo oferece uma fonte de verdade independente da
+odometria/SLAM que o próprio robô móvel (MUUT) usa para reportar sua
+pose. Até a versão anterior deste texto, essa dualidade permanecia
+inteiramente não exercitada — contribuição de projeto verificada em
+software, sem nenhuma evidência empírica de funcionamento. Esta seção
+reporta um piloto pequeno ($N=3$ réplicas), fora do desenho formal
+QA1--QA4 (Seção~\ref{sec:questoes}) e sem pretensão de poder amostral,
+que exercita essa dualidade pela primeira vez.
+
+\subsection{Protocolo}
+
+O piloto usa a mesma infraestrutura de ativação sequencial já validada
+funcionalmente na Seção~\ref{sec:limitacoes}: tb1 (MUUT) executa replay
+normal de uma rota curta já gravada, com Nav2 ativado só nele; tb2 (FUUT)
+permanece parado, sem Nav2 ativado, apenas publicando seu LiDAR. A
+observação do FUUT é obtida por subtração contra um scan de referência do
+ambiente vazio, gravado antes do início de cada réplica: pontos do scan
+vivo que ficam mais próximos que o raio do TurtleBot4 (0,17\,m) em
+relação à referência são agrupados, e o centróide do maior cluster é
+tratado como a detecção do MUUT, convertida em distância e direção
+relativas à posição fixa do FUUT.
+
+A pose que o MUUT reivindica é lida de \texttt{/\allowbreak pose} (a
+mesma fonte corrigida por SLAM discutida na Seção~\ref{sec:res_fonte_trajetoria}),
+casada com o instante da detecção do FUUT por vizinho mais próximo dentro
+de uma janela de 200\,ms. As duas observações --- a pose reivindicada
+pelo MUUT e a detecção geométrica do FUUT --- alimentam um classificador
+baseado em LLM com saída estruturada (plataforma TypeSafe), que julga o
+grau de corroboração entre as duas fontes numa escala de quatro níveis.
+A escolha de um classificador qualitativo em vez de um limiar fixo de
+distância segue o mesmo raciocínio já aplicado a outras decisões de
+classificação nesta dissertação: a pergunta relevante não é só "a
+distância geométrica está abaixo de um corte arbitrário", mas se a
+distância E o alinhamento temporal, considerados juntos, são compatíveis
+com o ruído de sensor esperado --- um julgamento que combina duas
+variáveis continuamente, não um teste de limiar único.
+
+Uma calibração geométrica foi necessária antes do resultado final: a
+primeira execução completa produziu discrepância geométrica de
+$\approx$2,8\,m entre a pose do MUUT e a detecção do FUUT, consistente
+nas três réplicas. Decompondo o erro por componente, a distância
+detectada já era compatível com a geometria real ($\approx$2,0--2,15\,m);
+só a direção (\textit{bearing}) estava sistematicamente $\approx$87--90°
+fora do esperado nas três réplicas --- assinatura de um offset de
+montagem do LiDAR do FUUT relativo ao seu \texttt{base\_\allowbreak link},
+nunca verificado contra o URDF do TurtleBot4. Uma correção empírica de
++90° foi aplicada e o piloto foi re-executado; a Seção~\ref{sec:res_fuut_limitacoes}
+retoma essa correção como uma limitação explícita do resultado.
+
+\subsection{Resultado}
+
+A Tabela~\ref{tab:fuut_piloto} resume o resultado das três réplicas, após
+a correção geométrica.
+
+\begin{table}[H]
+\centering
+\caption{Resultado do piloto FUUT: discrepância geométrica/temporal entre pose reivindicada pelo MUUT e detecção do FUUT, e classificação de corroboração ($N=3$).}
+\label{tab:fuut_piloto}
+\begin{tabular}{lrrl}
+\toprule
+\textbf{Réplica} & \textbf{Discrep. geom. (cm)} & \textbf{Discrep. temporal (s)} & \textbf{Corroboração} \\
+\midrule
+1 & 3,06 & 0,00 & Forte (confiança 0,86) \\
+2 & 5,88 & 0,00 & Forte (confiança 0,95) \\
+3 & 4,76 & 0,00 & Forte (confiança 0,96) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Nas três réplicas, a discrepância geométrica entre a pose reivindicada
+pelo MUUT e a posição detectada pelo FUUT ficou entre 3,06\,cm e 5,88\,cm
+--- dentro da faixa de ruído de sensor já esperada em outras medições
+desta dissertação (ex.: erro de \texttt{/\allowbreak pose} contra o
+\textit{ground truth} de $\approx$2--3\,cm, Seção~\ref{sec:res_fonte_trajetoria}).
+A discrepância temporal foi nula nas três réplicas, dentro da janela de
+casamento de 200\,ms. O classificador julgou as três réplicas como
+"correspondência forte", com confiança entre 0,86 e 0,96.
+
+Esse resultado é a primeira evidência empírica, ainda que preliminar, de
+que a observação exógena do FUUT é capaz de corroborar de forma
+independente a pose que o MUUT reporta via sua própria odometria/SLAM ---
+exatamente o enriquecimento metodológico que motivou a arquitetura de
+papéis na Introdução. A Seção~\ref{sec:res_fuut_limitacoes} que fecha este
+capítulo, e a Seção de Limitações do Capítulo~\ref{chap:conclusao},
+detalham por que esse resultado deve ser lido como preliminar, não como
+validação definitiva do papel FUUT.
+
+\subsection{Limitações Específicas Deste Piloto}
+\label{sec:res_fuut_limitacoes}
+
+Quatro limitações, além das já discutidas para a avaliação multi-robô em
+geral (Capítulo~\ref{chap:conclusao}, Seção de Limitações), são
+específicas deste piloto e restringem a generalização do resultado
+acima:
+
+\begin{itemize}
+    \item \textbf{Calibração geométrica empírica, não verificada contra o
+    URDF.} A correção de +90° aplicada ao \textit{bearing} do FUUT
+    (Protocolo, acima) foi obtida ajustando o valor que colapsava a
+    discrepância observada, não lendo o transform real
+    \texttt{lidar\_\allowbreak link} $\rightarrow$ \texttt{base\_\allowbreak link}
+    do URDF do TurtleBot4. O resultado é consistente com essa correção,
+    mas o valor de 90° em si permanece uma hipótese empírica, não uma
+    grandeza confirmada na fonte.
+
+    \item \textbf{$N=3$, uma única rota curta, uma única posição do
+    FUUT.} Mesma natureza da restrição de escopo já discutida para QA1--QA3
+    (Capítulo~\ref{chap:conclusao}): este piloto não varia geometria de
+    rota, distância FUUT--MUUT ou ângulo de observação, de modo que não é
+    possível, a partir destes três pontos, caracterizar como a qualidade
+    da corroboração se comporta em distâncias maiores ou ângulos de
+    observação mais obliquos.
+
+    \item \textbf{Detecção por subtração de referência, não por
+    reconhecimento de robô.} O FUUT não distingue um TurtleBot4 de
+    qualquer outro objeto do tamanho certo que cruze seu campo de visão;
+    o protocolo depende do ambiente permanecer estático entre o scan de
+    referência e cada réplica, a mesma suposição já assumida pelo
+    protocolo record--replay em toda esta dissertação.
+
+    \item \textbf{Classificação qualitativa por LLM, não uma métrica
+    determinística de aceite.} A saída "correspondência forte" reflete o
+    julgamento do classificador treinado sobre o texto descritivo do
+    cenário, não um teste estatístico com nível de significância
+    pré-registrado. A discrepância geométrica e temporal (Tabela~\ref{tab:fuut_piloto}),
+    calculadas deterministicamente, são a evidência quantitativa
+    primária; a classificação qualitativa é um resumo interpretativo
+    sobre essa evidência, não uma fonte de evidência adicional
+    independente dela.
+\end{itemize}
+
 \section{Considerações Finais}
 \label{sec:res_conclusao}
 

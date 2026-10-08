@@ -224,19 +224,29 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     substitui uma avaliação quantitativa formal de repetibilidade sob
     operação multi-robô, que permanece em aberto.
 
-    \item \textbf{Papel FUUT nunca exercitado.} Distinta da limitação de
-    escala acima, há uma lacuna específica quanto ao papel de observação
-    exógena: a dualidade MUUT/FUUT, motivada em seção inteira da Introdução
-    (Seção~\ref{sec:frota}) como enriquecimento metodológico da análise de
-    repetibilidade, permanece inteiramente não testada nesta dissertação.
-    Nem a campanha quantitativa principal nem os testes exploratórios de
-    multi-robô citados acima ativaram uma unidade fixa sob teste: estes
-    últimos testaram exclusivamente duas ou três unidades móveis
-    (MUUT+MUUT) simultâneas, não a combinação MUUT+FUUT que motivou a
-    arquitetura de papéis. O valor da observação exógena como fonte de
-    verdade alternativa, central ao argumento da Introdução, permanece
-    portanto uma contribuição de projeto verificada em software, sem
-    qualquer evidência empírica de seu funcionamento.
+    \item \textbf{Papel FUUT exercitado apenas em piloto pequeno.}
+    Distinta da limitação de escala acima, há uma lacuna específica quanto
+    ao papel de observação exógena: a dualidade MUUT/FUUT, motivada em
+    seção inteira da Introdução (Seção~\ref{sec:frota}) como enriquecimento
+    metodológico da análise de repetibilidade, permaneceu inteiramente não
+    testada até um piloto de três réplicas reportado na
+    Seção~\ref{sec:res_fuut_piloto}, que exercitou pela primeira vez a
+    combinação MUUT+FUUT (distinta das três ou duas unidades móveis
+    simultâneas, MUUT+MUUT, testadas nos experimentos exploratórios de
+    escala citados acima) e obteve corroboração geométrica forte entre a
+    pose reivindicada pelo MUUT e a detecção do FUUT (discrepância de
+    3,06--5,88\,cm, Tabela~\ref{tab:fuut_piloto}). O valor da observação
+    exógena como fonte de verdade alternativa, central ao argumento da
+    Introdução, deixa portanto de ser só uma contribuição de projeto
+    verificada em software e passa a ter evidência empírica preliminar a
+    favor de seu funcionamento --- mas permanece preliminar: $N=3$, uma
+    única rota curta, uma única posição do FUUT, e uma calibração
+    geométrica obtida empiricamente (ajuste de +90° no \textit{bearing}
+    do LiDAR do FUUT) sem confirmação contra o transform real do URDF do
+    TurtleBot4 (detalhes em Seção~\ref{sec:res_fuut_limitacoes}). A
+    extensão para mais réplicas, mais geometrias de observação e a
+    confirmação da calibração contra o URDF permanecem como lacunas
+    abertas.
 
     \item \textbf{Estocasticidade do controlador local não isolada como fator
     de variância.} O controlador \texttt{nav2\_\allowbreak mppi\_\allowbreak controller}
@@ -357,8 +367,11 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     sucesso de 70\% medida qualitativamente, mas ainda sem avaliação
     quantitativa de RMSE sob essa operação), respondendo diretamente à
     limitação de escopo single-robot registrada na mesma seção — distinta
-    da lacuna específica do papel FUUT, nunca exercitado e sem alvo de
-    ativação sequencial equivalente, já que uma unidade fixa não navega.
+    da lacuna específica do papel FUUT, exercitada apenas em piloto de
+    $N=3$ (Seção~\ref{sec:res_fuut_piloto}) e sem alvo de ativação
+    sequencial equivalente, já que uma unidade fixa não navega. A extensão
+    natural dessa lacuna é ampliar o piloto FUUT para mais réplicas e mais
+    geometrias de observação, não um alvo de escala de ativação.
 
     \item \textbf{Estender o piloto de repetibilidade sob agente de IA
     (item anterior sobre LLM) para o cenário multi-robô acima.} O
