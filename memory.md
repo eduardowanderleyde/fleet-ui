@@ -455,6 +455,45 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   que só demonstrar que funciona. Resultado salvo em
   `fleet_ws/runs/eval_noise_classifier/results_20261008.txt`.
 
+### 2026-10-08 (continuação 3) — piloto FUUT real via OpenSpec: primeira evidência empírica do papel FUUT
+
+- **[sessão]** Planejado com OpenSpec (`openspec/changes/fuut-pilot-experiment/`:
+  proposal, 2 specs, design, 12 tasks) e executado de ponta a ponta contra
+  Gazebo real (não simulado/fake): `_require_muut()` em `backend/main.py`
+  passou a rejeitar (403) comando de movimento pra robô não-MUUT nos 4
+  endpoints de despacho real (`start_record`/`stop_record`/`play_route`/
+  `go_to_point`) — cobre também a camada de agente de IA, confirmado em
+  `executor.py` que ela chama os mesmos endpoints. `fleet_ws/scripts/
+  run_fuut_pilot.py`: sobe multi-robô com `bringup_nav:=false`, ativa Nav2
+  só em tb1 (MUUT), mantém tb2 (FUUT) parado só com sensores, detecta tb1
+  via subtração de scan de referência do LiDAR de tb2, cruza contra
+  `/tb1/pose` e chama o `FuutVerifier` (piloto de sessão anterior) pra
+  cada réplica.
+- **Achado real #1** (confirma Cap. 9): a ativação sequencial de Nav2
+  falhou espontaneamente numa das 5 execuções reais desta sessão (mesmo
+  sintoma de "jump back in time" já documentado) — precisou de retry
+  (mesmo padrão de `run_ground_truth_campaign.py`). Mais uma confirmação
+  direta do ~70% de taxa de sucesso já reportado, não um bug novo.
+- **Achado real #2** (bug de calibração, encontrado e corrigido ao vivo):
+  primeira rodada completa deu discrepância geométrica de ~2,8m entre a
+  pose reivindicada pelo MUUT e a observação do FUUT — decompondo por
+  componente, a distância já batia (~2,0-2,15m), só a direção estava
+  sempre ~87-90° fora do esperado nas 3 réplicas. Assinatura de offset de
+  montagem do LiDAR relativo ao `base_link`, nunca verificado contra o
+  URDF. Corrigido empiricamente (+90°, documentado no código como medida,
+  não como valor do URDF) — discrepância caiu pra 3,1-5,9cm (ruído de
+  sensor normal), TypeSafe reclassificou as 3 réplicas de "correspondência
+  fraca" (confiança 0,1-0,41) pra "correspondência forte" (confiança
+  0,86-0,96). **Ação sugerida**: confirmar os 90° contra o transform real
+  `lidar_link` → `base_link` do URDF do TurtleBot4 antes de citar esse
+  valor como definitivo em qualquer texto.
+- Resultado final: `fleet_ws/runs/fuut_pilot01/fuut_verification_report.json`
+  — 3/3 réplicas verificadas, todas "correspondência forte". Fecha a
+  lacuna "papel FUUT nunca exercitado, zero evidência empírica" (Cap. 9,
+  Limitações) com evidência preliminar forte — texto da dissertação ainda
+  não atualizado (fora do escopo do change de código; registrado em
+  "Workflow follow-up" do `tasks.md` do change).
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
