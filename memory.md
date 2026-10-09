@@ -556,6 +556,37 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   muda o default de RMW). Detalhe completo, tabela de números e scripts:
   `conhecimento/dds_tuning.md` (entrada 2026-10-08).
 
+### 2026-10-08 (continuação 4) — apresentação de defesa criada, branch `apresentacao-dissertacao`
+
+- **[sessão]** Nova branch `apresentacao-dissertacao` (a partir de
+  `dissertacao`, depois rebasada pra pegar o achado do Cyclone DDS
+  também). Dois arquivos novos em `disserta-apresenta/`:
+  - `apresentacao_defesa.pptx` — baseado em `apresentacao_seminario.pptx`
+    (14→17 slides). 3 slides novos: "Perguntas de Pesquisa e Hipóteses —
+    Retomada" (espelha a tabela PP/H/QA/Resultado do Cap. 9),
+    "Piloto FUUT — Primeira Evidência Empírica" e "Nav2 Simultâneo —
+    Achado Cyclone DDS". Os 2 últimos levam selo visual laranja "ACHADO
+    NOVO" no canto superior direito, pedido explícito do autor pra ficar
+    claro que são resultado desta semana, não planejados desde o início.
+    Rodapé "Seminário de Andamento" trocado por "Defesa de Dissertação"
+    nos 17 slides; Agenda e Conclusão atualizadas. Construído editando
+    XML bruto do pptx (duplicando `slide9.xml` como template de stat-card
+    3x via `add_slide.py` da skill `pptx`, substituição posicional de
+    texto, não por valor — evita ambiguidade de string repetida),
+    validado (`validate.py`, zero erros) e revisado visualmente
+    (thumbnail + render individual) — achei e corrigi 2 estouros de texto
+    (valor de card longo demais colidindo com a legenda) antes de fechar.
+  - `fala_apresentacao_defesa.txt` — roteiro de fala completo (310
+    linhas), baseado em `fala_apresentacao.txt` do seminário, com as 3
+    seções novas escritas e a Conclusão reescrita pra citar os achados.
+- **Nota de processo, não achado técnico**: ao tentar voltar pra
+  `mission-coordinate-large-scale` pra escrever esta entrada, a branch
+  estava presa por um worktree de agente (`experiment-dds-tuning`, já
+  tinha terminado e commitado) — removido com `git worktree remove`
+  depois de confirmar `git status` limpo dentro dele. Se isso acontecer
+  de novo: o worktree de um agente concluído não se autoremove, precisa
+  limpeza manual antes de reusar a branch no checkout principal.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
