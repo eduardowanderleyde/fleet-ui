@@ -429,22 +429,37 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     na presença da contenção de CPU/DDS da ativação sequencial
     (Seção~\ref{sec:limitacoes}) — testando se as duas fontes de variância
     (agente de IA, ativação sequencial) se somam ou interagem; (b) o mais
-    ambicioso — e fora do que a arquitetura atual suporta sem mudança de
-    design — introduzir coordenação real entre os agentes (ex.: um
-    \texttt{Planner} supervisor que aloca rotas entre os robôs disponíveis a
-    partir de uma única instrução de missão, não um mapa
-    robô~\textrightarrow{}~instrução já decidido por um humano), o que
-    posicionaria o framework no nível que a literatura atual trata como
-    gap aberto, não resolvido. Trabalho bem recente ataca exatamente esse
+    ambicioso — introduzir coordenação real entre os agentes, em vez de um
+    mapa robô~\textrightarrow{}~instrução já decidido por um humano — já
+    tem um primeiro protótipo, não mais só uma ideia fora do que a
+    arquitetura suporta: \texttt{MissionRouter} e
+    \texttt{decompose\_\allowbreak and\_\allowbreak route}
+    (\texttt{backend/\allowbreak agents/\allowbreak router.py}) decompõem
+    uma instrução de missão única em sub-tarefas e alocam cada uma ao
+    robô mais adequado dentre os disponíveis, sem repetir robô —
+    formulação que a literatura de alocação de tarefas multi-robô chama
+    de MRTA (\textit{Multi-Robot Task Allocation}), cuja taxonomia
+    original \citeonline{gerkey2004} também já fundamenta a arquitetura
+    de papéis desta dissertação (Seção~\ref{sec:coordenacao_multirrobo}). O protótipo
+    foi testado manualmente em dois cenários sintéticos, não uma campanha
+    sistemática: roteamento de uma instrução única entre dois robôs
+    (escolheu corretamente o robô livre mais próximo, confiança de 98\%)
+    e decomposição de uma missão em duas sub-tarefas geograficamente
+    distintas ("um robô cobre o setor norte, outro o sul"), roteadas cada
+    uma ao robô mais próximo do respectivo setor. Isso posiciona o
+    framework, ainda que em estágio de protótipo não avaliado
+    sistematicamente, no nível que a literatura atual trata como gap
+    aberto, não resolvido. Trabalho bem recente ataca exatamente esse
     cenário — \citeonline{song2025climrs} partem da mesma arquitetura de
     base (um agente de IA por robô) e propõem negociação dinâmica em
     subgrupos entre os agentes antes da execução, com replanejamento por
-    feedback — uma referência concreta de para onde essa extensão (b)
-    poderia caminhar, mais específica que o panorama geral de
-    \citeonline{li2025llmmultirobot}.
-
-    \item Integrar câmera OAK-D para coleta de dados visuais sincronizados
-    com trajetória.
+    feedback — uma referência concreta de para onde esse protótipo
+    poderia evoluir, mais específica que o panorama geral de
+    \citeonline{li2025llmmultirobot}. A extensão natural é substituir os
+    dois cenários sintéticos por uma avaliação sistemática (mais missões,
+    mais robôs candidatos, casos de ambiguidade deliberada) e medir se a
+    alocação decidida pelo roteador se sustenta sob RMSE pairwise, não só
+    "pareceu certa" num teste manual.
 \end{itemize}
 
 \textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações
