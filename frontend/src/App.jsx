@@ -228,7 +228,7 @@ export default function App() {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: `1px solid ${color.border}`, flexShrink: 0 }}>
         <h1 style={{ margin: 0, fontSize: '1.1rem', color: color.success, fontWeight: 700 }}>Fleet UI</h1>
-        <div style={{ display: 'flex', fontSize: '0.78rem', fontFamily: 'monospace', alignItems: 'stretch', background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', fontSize: '0.78rem', fontFamily: 'monospace', alignItems: 'stretch', background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', overflow: 'hidden' }}>
           {[
             { label: 'Nav2',   value: nav2Ok ? 'ON' : 'OFF',           color: nav2Ok ? color.success : color.danger },
             { label: 'Nav',    value: robot.nav_state || '—',           color: robot.nav_state === 'navigating' ? color.success : robot.nav_state === 'failed' ? color.danger : color.text },
@@ -250,7 +250,7 @@ export default function App() {
       </div>
 
       {/* ── Barra de conexão ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: `1px solid ${color.border}`, flexShrink: 0, position: 'relative' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 0.75rem', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: `1px solid ${color.border}`, flexShrink: 0, position: 'relative' }}>
 
         <ConnectionPanel
           containerRef={panelRef}
@@ -295,7 +295,7 @@ export default function App() {
       </div>
 
       {/* ── Layout 3 colunas ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr 300px', gap: '0.6rem', flex: 1, minHeight: 0, padding: '0.5rem 0.75rem 0.5rem', overflow: 'hidden' }}>
+      <div className="fleet-main-grid" style={{ display: 'grid', gap: '0.6rem', flex: 1, minHeight: 0, padding: '0.5rem 0.75rem 0.5rem' }}>
 
         {/* Coluna esquerda: formulário */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', overflowY: 'auto', paddingRight: '0.2rem', minHeight: 0 }}>

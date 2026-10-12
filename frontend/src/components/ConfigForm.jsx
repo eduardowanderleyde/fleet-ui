@@ -8,7 +8,7 @@ const S = {
   numInput: { background: '#0d0f14', border: '1px solid #2a3142', borderRadius: '6px', color: '#e6e9ef', padding: '0.4rem 0.5rem', fontSize: '0.82rem', outline: 'none', fontFamily: 'monospace', width: '70px', textAlign: 'center' },
   select:   { background: '#0d0f14', border: '1px solid #2a3142', borderRadius: '6px', color: '#e6e9ef', padding: '0.4rem 0.6rem', fontSize: '0.85rem', outline: 'none', width: '100%', boxSizing: 'border-box' },
   section:  { background: '#161a22', border: '1px solid #2a3142', borderRadius: '8px', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' },
-  row:      { display: 'flex', gap: '0.75rem', alignItems: 'flex-start' },
+  row:      { display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'flex-start' },
   field:    { display: 'flex', flexDirection: 'column', flex: 1 },
 }
 
@@ -20,7 +20,7 @@ function CmdToggle({ value, onChange }) {
   const base = { padding: '0.4rem 1.2rem', fontSize: '0.85rem', fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }
   const labels = { record: 'Gravar', replay: 'Reproduzir' }
   return (
-    <div style={{ display: 'flex', borderRadius: '8px', overflow: 'hidden', border: '1px solid #2a3142', alignSelf: 'flex-start' }}>
+    <div style={{ display: 'flex', flexShrink: 0, borderRadius: '8px', overflow: 'hidden', border: '1px solid #2a3142', alignSelf: 'flex-start' }}>
       {['record', 'replay'].map(cmd => (
         <button key={cmd} onClick={() => onChange(cmd)}
           style={{ ...base, background: value === cmd ? '#065f46' : '#161a22', color: value === cmd ? '#6ee7b7' : '#8b92a8' }}>
@@ -119,7 +119,7 @@ export default function ConfigForm({
             <span style={S.label}>Comando</span>
             <CmdToggle value={cfg.command} onChange={v => set('command', v)} />
           </div>
-          <div style={{ ...S.field, maxWidth: '110px' }}>
+          <div style={{ ...S.field, flex: '0 0 110px' }}>
             <span style={S.label}>Robô</span>
             <select value={cfg.robot} onChange={e => set('robot', e.target.value)} style={S.select}>
               <option value="default">único</option>

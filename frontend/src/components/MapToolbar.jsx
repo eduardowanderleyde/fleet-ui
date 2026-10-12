@@ -7,7 +7,7 @@ export default function MapToolbar({
   onCenter, hoverCoord,
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0,
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', flexShrink: 0,
                   background: color.bgPanel, borderRadius: '8px', padding: '0.4rem 0.7rem',
                   border: `1px solid ${color.border}` }}>
 

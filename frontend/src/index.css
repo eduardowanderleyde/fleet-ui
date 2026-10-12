@@ -312,3 +312,29 @@ input:focus, select:focus {
 
 .toast.success { background: var(--accent); color: var(--bg); }
 .toast.error { background: var(--danger); color: #fff; }
+
+/* Layout principal (App.jsx): config | mapa | output. Larguras fixas das
+   colunas laterais (260px + 300px) não cabem abaixo de ~900px — empilha em
+   coluna única e deixa o próprio grid rolar, já que o container pai é
+   height:100vh + overflow:hidden. */
+.fleet-main-grid {
+  grid-template-columns: 260px 1fr 300px;
+  overflow: hidden;
+}
+
+@media (max-width: 1023px) {
+  .fleet-main-grid {
+    grid-template-columns: 210px 1fr 230px;
+  }
+}
+
+@media (max-width: 767px) {
+  .fleet-main-grid {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .fleet-main-grid > div {
+    min-height: 360px;
+  }
+}
