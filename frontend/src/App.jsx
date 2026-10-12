@@ -629,8 +629,10 @@ export default function App() {
     } finally { setNavigating(false) }
   }, [cfg.points, cfg.robot])
 
-  // Prop obrigatória do MapView — mantida como no-op (clique já adiciona waypoint)
-  const handleMapNavigateTo = useCallback(() => {}, [])
+  // Clique no mapa → acrescenta um waypoint [x, y, yaw=0] ao fim da rota.
+  const addWaypoint = useCallback((x, y) => {
+    setCfg(c => ({ ...c, points: [...c.points, [x, y, 0]] }))
+  }, [])
 
   const connectRobot = async () => {
     const profile = [...ROBOT_PROFILES, ...extraProfiles].find(p => p.id === selectedProfile)
@@ -918,7 +920,7 @@ export default function App() {
             robotId={effectiveRobotId}
             poses={allPoses}
             waypoints={cfg.command === 'record' ? cfg.points : []}
-            onNavigateTo={handleMapNavigateTo}
+            onAddWaypoint={cfg.command === 'record' ? addWaypoint : undefined}
           />
         </div>
 
