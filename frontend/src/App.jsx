@@ -5,6 +5,7 @@ import SimulationPanel from './components/SimulationPanel'
 import MapView from './components/MapView'
 import ConnectionPanel, { ROBOT_PROFILES } from './components/ConnectionPanel'
 import DiscoveryPanel from './components/DiscoveryPanel'
+import { color, btn } from './styles/tokens'
 import {
   discoverRobots as fetchDiscoveredRobots,
   getStatus,
@@ -26,10 +27,6 @@ const DEFAULT_CFG = {
   initial_pose:    [0, 0, 0],
   points:          [[0.5, 0.0, 0.0], [1.0, 0.0, 0.0]],
   return_to_start: [0, 0, 0],
-}
-
-function btn(bg, color, disabled = false) {
-  return { background: bg, color, border: `1px solid ${color}`, borderRadius: '8px', padding: '0.45rem 0.9rem', fontSize: '0.85rem', fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.55 : 1, fontFamily: 'inherit' }
 }
 
 // Pose de spawn de cada robô no mundo Gazebo compartilhado — tem que bater
@@ -211,12 +208,12 @@ export default function App() {
   const isConnected = connStatus === 'connected'
 
   const lineColor = line => {
-    if (line.includes('[OK]'))     return '#6ee7b7'
-    if (line.includes('[FALHOU]')) return '#f87171'
-    if (line.includes('[TRACE]'))  return '#8b92a8'
-    if (line.includes('Resumo'))   return '#fbbf24'
-    if (line.includes('==='))      return '#93c5fd'
-    return '#e6e9ef'
+    if (line.includes('[OK]'))     return color.success
+    if (line.includes('[FALHOU]')) return color.danger
+    if (line.includes('[TRACE]'))  return color.textMuted
+    if (line.includes('Resumo'))   return color.warning
+    if (line.includes('==='))      return color.blue
+    return color.text
   }
 
   const deg = r => (r * 180 / Math.PI).toFixed(1)
@@ -226,34 +223,34 @@ export default function App() {
   const openAgentPanel    = () => { setAgentPanel(v => !v); setConnPanel(false); setDiscoverPanel(false) }
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', background: '#0d0f14', color: '#e6e9ef', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ fontFamily: 'system-ui, sans-serif', background: color.bgApp, color: color.text, height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: '1px solid #2a3142', flexShrink: 0 }}>
-        <h1 style={{ margin: 0, fontSize: '1.1rem', color: '#6ee7b7', fontWeight: 700 }}>Fleet UI</h1>
-        <div style={{ display: 'flex', fontSize: '0.78rem', fontFamily: 'monospace', alignItems: 'stretch', background: '#161a22', border: '1px solid #2a3142', borderRadius: '8px', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: `1px solid ${color.border}`, flexShrink: 0 }}>
+        <h1 style={{ margin: 0, fontSize: '1.1rem', color: color.success, fontWeight: 700 }}>Fleet UI</h1>
+        <div style={{ display: 'flex', fontSize: '0.78rem', fontFamily: 'monospace', alignItems: 'stretch', background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', overflow: 'hidden' }}>
           {[
-            { label: 'Nav2',   value: nav2Ok ? 'ON' : 'OFF',           color: nav2Ok ? '#6ee7b7' : '#f87171' },
-            { label: 'Nav',    value: robot.nav_state || '—',           color: robot.nav_state === 'navigating' ? '#6ee7b7' : robot.nav_state === 'failed' ? '#f87171' : '#e6e9ef' },
-            { label: 'Coleta', value: robot.collection_on ? 'ON':'OFF', color: robot.collection_on ? '#6ee7b7' : '#8b92a8' },
-            { label: 'x',      value: pose.valid ? pose.x.toFixed(3) : '—', color: pose.valid ? '#93c5fd' : '#8b92a8' },
-            { label: 'y',      value: pose.valid ? pose.y.toFixed(3) : '—', color: pose.valid ? '#93c5fd' : '#8b92a8' },
-            { label: 'yaw',    value: pose.valid ? `${deg(pose.yaw)}°` : '—', color: pose.valid ? '#93c5fd' : '#8b92a8' },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.3rem 0.7rem', borderRight: '1px solid #2a3142' }}>
-              <span style={{ fontSize: '0.62rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
-              <span style={{ color, fontWeight: 600, marginTop: '0.05rem' }}>{value}</span>
+            { label: 'Nav2',   value: nav2Ok ? 'ON' : 'OFF',           color: nav2Ok ? color.success : color.danger },
+            { label: 'Nav',    value: robot.nav_state || '—',           color: robot.nav_state === 'navigating' ? color.success : robot.nav_state === 'failed' ? color.danger : color.text },
+            { label: 'Coleta', value: robot.collection_on ? 'ON':'OFF', color: robot.collection_on ? color.success : color.textMuted },
+            { label: 'x',      value: pose.valid ? pose.x.toFixed(3) : '—', color: pose.valid ? color.blue : color.textMuted },
+            { label: 'y',      value: pose.valid ? pose.y.toFixed(3) : '—', color: pose.valid ? color.blue : color.textMuted },
+            { label: 'yaw',    value: pose.valid ? `${deg(pose.yaw)}°` : '—', color: pose.valid ? color.blue : color.textMuted },
+          ].map(({ label, value, color: statColor }) => (
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.3rem 0.7rem', borderRight: `1px solid ${color.border}` }}>
+              <span style={{ fontSize: '0.62rem', color: color.textFaint, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
+              <span style={{ color: statColor, fontWeight: 600, marginTop: '0.05rem' }}>{value}</span>
             </div>
           ))}
           <button onClick={resetToOrigin} disabled={resetting} aria-label="Enviar robô para a origem (0,0,0)" title="Envia robô para (0,0,0)"
-            style={{ background: 'none', border: 'none', cursor: resetting ? 'not-allowed' : 'pointer', padding: '0.3rem 0.75rem', color: resetMsg === 'ok' ? '#6ee7b7' : resetMsg ? '#f87171' : '#6366f1', fontWeight: 700, fontSize: '0.8rem', opacity: resetting ? 0.6 : 1 }}>
+            style={{ background: 'none', border: 'none', cursor: resetting ? 'not-allowed' : 'pointer', padding: '0.3rem 0.75rem', color: resetMsg === 'ok' ? color.success : resetMsg ? color.danger : color.indigo, fontWeight: 700, fontSize: '0.8rem', opacity: resetting ? 0.6 : 1 }}>
             {resetting ? '⏳' : resetMsg === 'ok' ? '✓' : resetMsg ? '✗' : '⟳ Origem'}
           </button>
         </div>
       </div>
 
       {/* ── Barra de conexão ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: '1px solid #2a3142', flexShrink: 0, position: 'relative' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: `1px solid ${color.border}`, flexShrink: 0, position: 'relative' }}>
 
         <ConnectionPanel
           containerRef={panelRef}
@@ -287,14 +284,14 @@ export default function App() {
 
         <div ref={agentRef} style={{ position: 'relative' }}>
           <button onClick={openAgentPanel} aria-expanded={agentPanel} aria-haspopup="true"
-            style={{ ...btn('#161a22', '#a78bfa'), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            style={{ ...btn(color.bgPanel, color.purple), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             🤖 Agentes IA <span aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.7 }}>{agentPanel ? '▲' : '▼'}</span>
           </button>
           {agentPanel && <AgentFleetPanel robotIds={['tb1', 'tb2', 'tb3']} />}
         </div>
 
-        {isConnected && <span style={{ fontSize: '0.8rem', color: '#6ee7b7', fontFamily: 'monospace' }}>● Conectado — {[...ROBOT_PROFILES, ...extraProfiles].find(p => p.id === selectedProfile)?.label}</span>}
-        {connStatus === 'error' && <span style={{ fontSize: '0.8rem', color: '#f87171', fontFamily: 'monospace' }}>✗ {connMsg}</span>}
+        {isConnected && <span style={{ fontSize: '0.8rem', color: color.success, fontFamily: 'monospace' }}>● Conectado — {[...ROBOT_PROFILES, ...extraProfiles].find(p => p.id === selectedProfile)?.label}</span>}
+        {connStatus === 'error' && <span style={{ fontSize: '0.8rem', color: color.danger, fontFamily: 'monospace' }}>✗ {connMsg}</span>}
       </div>
 
       {/* ── Layout 3 colunas ─────────────────────────────────────────────────── */}
@@ -304,7 +301,7 @@ export default function App() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', overflowY: 'auto', paddingRight: '0.2rem', minHeight: 0 }}>
           <SimulationPanel sim={sim} />
 
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6ee7b7', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>Configuração</span>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: color.success, textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>Configuração</span>
           <ConfigForm
             cfg={cfg}
             onChange={setCfg}
@@ -316,16 +313,16 @@ export default function App() {
           />
 
           {!isConnected && (
-            <div role="status" style={{ color: '#fbbf24', fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(251,191,36,0.08)', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.2)' }}>
+            <div role="status" style={{ color: color.warning, fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(251,191,36,0.08)', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.2)' }}>
               ⚠ Conecte um robô antes de executar.
             </div>
           )}
           {isConnected && !nav2Ok && (
-            <div role="status" style={{ color: '#fbbf24', fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(251,191,36,0.08)', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.2)' }}>
+            <div role="status" style={{ color: color.warning, fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(251,191,36,0.08)', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.2)' }}>
               ⚠ Nav2 offline — aguarda ~60s após o Terminal 2.
             </div>
           )}
-          {error && <div role="alert" style={{ color: '#f87171', fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(248,113,113,0.1)', borderRadius: '6px' }}>{error}</div>}
+          {error && <div role="alert" style={{ color: color.danger, fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(248,113,113,0.1)', borderRadius: '6px' }}>{error}</div>}
 
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
             {/* Navegar rota — percorre waypoints sem gravar */}
@@ -334,8 +331,8 @@ export default function App() {
                 disabled={navigating || running || !isConnected || !cfg.points.length}
                 title="Percorre os waypoints sem gravar bag — teste rápido"
                 style={btn(
-                  navigating || running || !isConnected || !cfg.points.length ? '#1a1f2e' : '#1e1b4b',
-                  '#a5b4fc',
+                  navigating || running || !isConnected || !cfg.points.length ? color.bgDisabled : color.indigoDark,
+                  color.indigoLight,
                   navigating || running || !isConnected || !cfg.points.length
                 )}>
                 {navigating ? '⏳ Navegando…' : '→ Navegar rota'}
@@ -344,12 +341,12 @@ export default function App() {
 
             {/* Executar record/replay com coleta */}
             <button onClick={run} disabled={running || navigating || !isConnected}
-              style={btn(running || navigating || !isConnected ? '#1a3a2a' : '#065f46', '#6ee7b7', running || navigating || !isConnected)}>
+              style={btn(running || navigating || !isConnected ? color.successBg : color.successDark, color.success, running || navigating || !isConnected)}>
               {running ? '⏳ A executar…' : `▶ Executar ${cfg.command}`}
             </button>
             {running && (
               <button onClick={stopPolling}
-                style={btn('#3a1a1a', '#f87171')}>■ Parar</button>
+                style={btn(color.dangerBg, color.danger)}>■ Parar</button>
             )}
           </div>
         </div>
@@ -367,42 +364,42 @@ export default function App() {
         {/* Coluna direita: output */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#8b92a8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Output {jobId && <span style={{ color: '#3b82f6', fontWeight: 400 }}>#{jobId}</span>}
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: color.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Output {jobId && <span style={{ color: color.blue2, fontWeight: 400 }}>#{jobId}</span>}
             </span>
             {job && !job.running && (
-              <span style={{ fontSize: '0.82rem', color: job.exit_code === 0 ? '#6ee7b7' : '#f87171', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.82rem', color: job.exit_code === 0 ? color.success : color.danger, fontWeight: 600 }}>
                 {job.exit_code === 0 ? '✓ Sucesso' : `✗ exit ${job.exit_code}`}
               </span>
             )}
           </div>
 
-          <div ref={outputRef} role="log" aria-label="Saída da execução" aria-live="polite" style={{ flex: 1, background: '#161a22', border: '1px solid #2a3142', borderRadius: '8px', padding: '0.6rem 0.85rem', overflowY: 'auto', fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: '0.75rem', lineHeight: 1.6 }}>
-            {!job && !running && <span style={{ color: '#8b92a8' }}>Aguardando execução…</span>}
+          <div ref={outputRef} role="log" aria-label="Saída da execução" aria-live="polite" style={{ flex: 1, background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', padding: '0.6rem 0.85rem', overflowY: 'auto', fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: '0.75rem', lineHeight: 1.6 }}>
+            {!job && !running && <span style={{ color: color.textMuted }}>Aguardando execução…</span>}
             {job?.lines?.map((line, i) => (
               <div key={i} style={{ color: lineColor(line), whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{line}</div>
             ))}
-            {running && <div aria-hidden="true" style={{ color: '#8b92a8', animation: 'blink 1s step-end infinite' }}>▌</div>}
+            {running && <div aria-hidden="true" style={{ color: color.textMuted, animation: 'blink 1s step-end infinite' }}>▌</div>}
           </div>
 
           {/* Métricas */}
           {job?.result?.bag_metrics && (() => {
             const m = job.result.bag_metrics
             const cards = [
-              m.wall_duration_s      != null && { label: 'Duração',      value: `${m.wall_duration_s} s`,      color: '#93c5fd' },
-              m.odom_path_length_m   != null && { label: 'Percurso',     value: `${m.odom_path_length_m} m`,   color: '#6ee7b7' },
-              m.odom_avg_speed_ms    != null && { label: 'Vel. média',   value: `${m.odom_avg_speed_ms} m/s`,  color: '#6ee7b7' },
-              m.scan_avg_valid_points!= null && { label: 'Scan pts',     value: `${m.scan_avg_valid_points}`,  color: '#fbbf24' },
-              m.imu_accel_mean_ms2   != null && { label: 'IMU accel',    value: `${m.imu_accel_mean_ms2} m/s²`,color: '#c4b5fd' },
+              m.wall_duration_s      != null && { label: 'Duração',      value: `${m.wall_duration_s} s`,      color: color.blue },
+              m.odom_path_length_m   != null && { label: 'Percurso',     value: `${m.odom_path_length_m} m`,   color: color.success },
+              m.odom_avg_speed_ms    != null && { label: 'Vel. média',   value: `${m.odom_avg_speed_ms} m/s`,  color: color.success },
+              m.scan_avg_valid_points!= null && { label: 'Scan pts',     value: `${m.scan_avg_valid_points}`,  color: color.warning },
+              m.imu_accel_mean_ms2   != null && { label: 'IMU accel',    value: `${m.imu_accel_mean_ms2} m/s²`,color: color.purpleLight },
             ].filter(Boolean)
             return cards.length > 0 && (
-              <div style={{ background: '#161a22', border: '1px solid #2a3142', borderRadius: '8px', padding: '0.6rem 0.85rem', flexShrink: 0 }}>
-                <div style={{ fontSize: '0.68rem', color: '#8b92a8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>Métricas</div>
+              <div style={{ background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', padding: '0.6rem 0.85rem', flexShrink: 0 }}>
+                <div style={{ fontSize: '0.68rem', color: color.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>Métricas</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
-                  {cards.map(({ label, value, color }) => (
-                    <div key={label} style={{ background: '#0d0f14', borderRadius: '5px', padding: '0.3rem 0.5rem' }}>
-                      <div style={{ fontSize: '0.62rem', color: '#8b92a8' }}>{label}</div>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color, fontFamily: 'monospace' }}>{value}</div>
+                  {cards.map(({ label, value, color: cardColor }) => (
+                    <div key={label} style={{ background: color.bgApp, borderRadius: '5px', padding: '0.3rem 0.5rem' }}>
+                      <div style={{ fontSize: '0.62rem', color: color.textMuted }}>{label}</div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: cardColor, fontFamily: 'monospace' }}>{value}</div>
                     </div>
                   ))}
                 </div>
@@ -411,7 +408,7 @@ export default function App() {
           })()}
 
           {job?.result && (
-            <button onClick={() => setShowResult(true)} style={{ ...btn('#161a22', '#2a3142'), fontSize: '0.75rem', flexShrink: 0 }}>
+            <button onClick={() => setShowResult(true)} style={{ ...btn(color.bgPanel, color.border), fontSize: '0.75rem', flexShrink: 0 }}>
               ▸ Ver resultado JSON
             </button>
           )}
@@ -423,12 +420,12 @@ export default function App() {
         <div onClick={() => setShowResult(false)} role="presentation"
           style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
           <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Resultado JSON da execução"
-            style={{ background: '#161a22', border: '1px solid #2a3142', borderRadius: '12px', width: '100%', maxWidth: '800px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: '1px solid #2a3142' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#8b92a8', textTransform: 'uppercase' }}>Resultado JSON</span>
-              <button onClick={() => setShowResult(false)} aria-label="Fechar" style={{ background: 'none', border: 'none', color: '#8b92a8', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
+            style={{ background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '12px', width: '100%', maxWidth: '800px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: `1px solid ${color.border}` }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: color.textMuted, textTransform: 'uppercase' }}>Resultado JSON</span>
+              <button onClick={() => setShowResult(false)} aria-label="Fechar" style={{ background: 'none', border: 'none', color: color.textMuted, cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
             </div>
-            <pre style={{ flex: 1, overflowY: 'auto', margin: 0, padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem', lineHeight: 1.6, color: '#e6e9ef' }}>
+            <pre style={{ flex: 1, overflowY: 'auto', margin: 0, padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem', lineHeight: 1.6, color: color.text }}>
               {JSON.stringify(job.result, null, 2)}
             </pre>
           </div>

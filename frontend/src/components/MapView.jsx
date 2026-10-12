@@ -1,5 +1,6 @@
 import { useMapCanvas } from '../hooks/useMapCanvas'
 import MapToolbar from './MapToolbar'
+import { color } from '../styles/tokens'
 
 export default function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
   const map = useMapCanvas({ robotId, poses, waypoints })
@@ -42,7 +43,7 @@ export default function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
           flex: 1,
           width: '100%',
           borderRadius: '10px',
-          border: '1px solid #1e2535',
+          border: `1px solid ${color.borderDark}`,
           boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
           cursor: 'cell',
           display: 'block',
