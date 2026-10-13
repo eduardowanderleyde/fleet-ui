@@ -1,0 +1,752 @@
+{
+  "created_at": "20261013T130646Z",
+  "scenario": "backend\\mission\\scenarios\\warehouse.yaml",
+  "args": {
+    "scenario": "\\\\192.168.8.12\\comum\\INFORMATICA\\eduardo\\fleet-ui\\backend\\mission\\scenarios\\warehouse.yaml",
+    "missions": "",
+    "allocators": "fixed,greedy,optimal,llm,llm_dist",
+    "repeat": 10,
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "no_fallback": false,
+    "output_dir": "",
+    "dry_run": false
+  },
+  "command_line": [
+    "fleet_ws/scripts/mission_allocation_study.py",
+    "--repeat",
+    "10"
+  ],
+  "git": {
+    "commit": "1907edf89ea814046d0254e54c172b33ec35494f",
+    "branch": "windows-version",
+    "dirty": false
+  },
+  "missions": {
+    "m1_dois_corredores": {
+      "text": "Inspecione os corredores oeste e leste e depois volte para a base.",
+      "expected_zones": [
+        "corredor_A",
+        "corredor_C"
+      ],
+      "optimal_makespan": 15.551105149300577,
+      "allocators": {
+        "fixed": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_A"
+            ],
+            "tb2": [
+              "corredor_C"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 15.551105149300577,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0
+        },
+        "greedy": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 16.59600562242592,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 6.719139656594366,
+          "gap_pct_max": 6.719139656594366,
+          "optimal_hit_rate": 0.0
+        },
+        "optimal": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_A"
+            ],
+            "tb2": [
+              "corredor_C"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 15.551105149300577,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0
+        },
+        "llm": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_A"
+            ],
+            "tb2": [
+              "corredor_C"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 15.551105149300577,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 7.1507000000000005,
+          "input_tokens": 12110,
+          "output_tokens": 7192,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        },
+        "llm_dist": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_A"
+            ],
+            "tb2": [
+              "corredor_C"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 15.551105149300577,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 7.1883,
+          "input_tokens": 13510,
+          "output_tokens": 6505,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        }
+      }
+    },
+    "m2_tres_corredores": {
+      "text": "Faça a ronda dos três corredores.",
+      "expected_zones": [
+        "corredor_A",
+        "corredor_B",
+        "corredor_C"
+      ],
+      "optimal_makespan": 19.03368876780841,
+      "allocators": {
+        "fixed": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_A",
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 26.673393078908102,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 40.13780200094838,
+          "gap_pct_max": 40.13780200094838,
+          "optimal_hit_rate": 0.0
+        },
+        "greedy": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_B",
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 24.537611973652734,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 28.916744793857738,
+          "gap_pct_max": 28.916744793857738,
+          "optimal_hit_rate": 0.0
+        },
+        "optimal": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A",
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 19.03368876780841,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0
+        },
+        "llm": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A",
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 19.03368876780841,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 12.991200000000001,
+          "input_tokens": 12010,
+          "output_tokens": 13060,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        },
+        "llm_dist": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A",
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 19.03368876780841,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 12.0778,
+          "input_tokens": 13410,
+          "output_tokens": 12754,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        }
+      }
+    },
+    "m3_doca_e_prateleira": {
+      "text": "Verifique a doca norte e a prateleira sul.",
+      "expected_zones": [
+        "doca",
+        "prateleira_sul"
+      ],
+      "optimal_makespan": 16.502143751025635,
+      "allocators": {
+        "fixed": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "doca"
+            ],
+            "tb2": [
+              "prateleira_sul"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 20.133325560164025,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 22.004303585785365,
+          "gap_pct_max": 22.004303585785365,
+          "optimal_hit_rate": 0.0
+        },
+        "greedy": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul"
+            ],
+            "tb2": [
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 16.502143751025635,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0
+        },
+        "optimal": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul"
+            ],
+            "tb2": [
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 16.502143751025635,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0
+        },
+        "llm": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul"
+            ],
+            "tb2": [
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 16.502143751025635,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 7.1658,
+          "input_tokens": 12050,
+          "output_tokens": 6691,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        },
+        "llm_dist": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul"
+            ],
+            "tb2": [
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 16.502143751025635,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 6.6681,
+          "input_tokens": 13450,
+          "output_tokens": 6025,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        }
+      }
+    },
+    "m4_tres_zonas_mistas": {
+      "text": "Inspecione a prateleira sul, o corredor central e a doca.",
+      "expected_zones": [
+        "prateleira_sul",
+        "corredor_B",
+        "doca"
+      ],
+      "optimal_makespan": 19.096157203769287,
+      "allocators": {
+        "fixed": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul",
+              "doca"
+            ],
+            "tb2": [
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 27.179853032918444,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 42.331531642154474,
+          "gap_pct_max": 42.331531642154474,
+          "optimal_hit_rate": 0.0
+        },
+        "greedy": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul"
+            ],
+            "tb2": [
+              "corredor_B",
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 20.12695471041006,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 5.397931613368317,
+          "gap_pct_max": 5.397931613368317,
+          "optimal_hit_rate": 0.0
+        },
+        "optimal": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul",
+              "corredor_B"
+            ],
+            "tb2": [
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 19.096157203769287,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0
+        },
+        "llm": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul",
+              "corredor_B"
+            ],
+            "tb2": [
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 19.096157203769287,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 12.738299999999999,
+          "input_tokens": 12100,
+          "output_tokens": 13360,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        },
+        "llm_dist": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul",
+              "corredor_B"
+            ],
+            "tb2": [
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 19.096157203769287,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 11.8403,
+          "input_tokens": 13500,
+          "output_tokens": 12576,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        }
+      }
+    },
+    "m5_armazem_completo": {
+      "text": "Faça a ronda completa do armazém, passando por todas as zonas.",
+      "expected_zones": [
+        "corredor_A",
+        "corredor_B",
+        "corredor_C",
+        "doca",
+        "prateleira_sul"
+      ],
+      "optimal_makespan": 25.760893306438454,
+      "allocators": {
+        "fixed": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_A",
+              "corredor_C",
+              "prateleira_sul"
+            ],
+            "tb2": [
+              "corredor_B",
+              "doca"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 34.12464536206751,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 32.46685569532906,
+          "gap_pct_max": 32.46685569532906,
+          "optimal_hit_rate": 0.0
+        },
+        "greedy": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "corredor_B",
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A",
+              "doca",
+              "prateleira_sul"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 29.71843041679051,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 15.362577156293506,
+          "gap_pct_max": 15.362577156293506,
+          "optimal_hit_rate": 0.0
+        },
+        "optimal": {
+          "deterministic": true,
+          "n": 1,
+          "n_valid": 1,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul",
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A",
+              "doca",
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 25.760893306438454,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0
+        },
+        "llm": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul",
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A",
+              "doca",
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 25.760893306438454,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 26.360000000000003,
+          "input_tokens": 12110,
+          "output_tokens": 27584,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        },
+        "llm_dist": {
+          "deterministic": false,
+          "n": 10,
+          "n_valid": 10,
+          "valid_rate": 1.0,
+          "distinct_allocations": 1,
+          "modal_share": 1.0,
+          "distinct_partitions": 1,
+          "modal_allocation": {
+            "tb1": [
+              "prateleira_sul",
+              "corredor_C"
+            ],
+            "tb2": [
+              "corredor_A",
+              "doca",
+              "corredor_B"
+            ]
+          },
+          "issues": {},
+          "makespan_mean": 25.760893306438454,
+          "makespan_std": 0.0,
+          "gap_pct_mean": 0.0,
+          "gap_pct_max": 0.0,
+          "optimal_hit_rate": 1.0,
+          "latency_s_mean": 25.3335,
+          "input_tokens": 13510,
+          "output_tokens": 27094,
+          "models_served": {
+            "claude-opus-5-5": 10
+          },
+          "fallback_runs": 0
+        }
+      }
+    }
+  }
+}
