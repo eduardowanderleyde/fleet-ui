@@ -3,13 +3,22 @@ Framework para Experimentos de Repetibilidade em Robótica Móvel com ROS 2 (Fle
 Eduardo Wanderley — Mestrado em Robótica, 2026
 
 Criado em 2026-10-08 a partir de fala_apresentacao.txt (versão do seminário),
-pra acompanhar apresentacao_defesa.pptx (17 slides, 3 novos). Mudanças:
-header/rodapé "Seminário de Andamento" -> "Defesa de Dissertação"; Slide 2
-(Agenda) menciona os 2 achados novos; Slide 5 (Arquitetura) ganha uma frase
-de gancho pro achado do Slide 17; 3 seções de fala novas (Slides 15, 16, 17);
-Slide 13 (Conclusão) reescrito pra citar os 2 achados em vez de 2 dos itens
-de trabalho futuro que eles substituem. Todo o resto é idêntico à versão do
-seminário — mesmos números, mesma fala, nada revisado além do listado aqui.
+pra acompanhar apresentacao_defesa.pptx (17 slides, 3 novos).
+
+Revisado em 2026-10-13:
+- Numeração dos slides passa a seguir a ORDEM DE EXIBIÇÃO do pptx (antes
+  seguia o nome interno do arquivo, slideNN.xml, e por isso pulava de 8 pra
+  15, depois 9, 10, 14, 16...). O número antigo fica entre colchetes.
+- Slide 5: o painel Missão Coordenada descrito como ele é de fato (formação,
+  despacho sequencial, só robôs MUUT se movem); quem faz a ativação
+  sequencial é o backend + painel, não o fleet_orchestrator.
+- Slide 15: "valido mais adiante" virou "mostrei há pouco" — o slide de
+  Fonte de Trajetória (12) vem ANTES deste na ordem de exibição.
+- "Esta semana" / "até a semana passada" trocados por formulações sem data,
+  pra fala não envelhecer até o dia da defesa.
+- Conclusão: "muito abaixo da tolerância do Nav2" suavizado, pra não
+  contradizer a ressalva do Slide 11 (são métricas diferentes).
+- Piloto FUUT: "odometria corrigida por SLAM" -> "pose estimada pelo SLAM".
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 1 — Título
@@ -64,24 +73,27 @@ SLIDE 5 — Arquitetura do Sistema
 ────────────────────────────────────────────────────────────────────────────
 O framework é organizado em camadas. No topo, a interface web — o Fleet UI —
 em React e Vite, com backend em FastAPI, um editor de configuração em JSON,
-painel multi-robô, o painel Missão Coordenada — que lança ou encerra a
-simulação inteira com um botão só, sem precisar abrir terminal — e o
-painel de agentes de IA que vou detalhar no próximo slide. Abaixo, o
-orquestrador — fleet_orchestrator — expõe 7 serviços ROS 2 pra record,
-replay, e chama as actions do Nav2, com suporte a múltiplos robôs por
+o painel Missão Coordenada e o painel de agentes de IA que vou detalhar no
+próximo slide. A Missão Coordenada é a forma mais direta de usar vários
+robôs: o pesquisador escolhe uma formação — L, I, V ou diagonal, um ponto
+por robô — e com um botão só lança a simulação inteira, sem abrir
+terminal. Quando ela fica pronta, o painel manda cada robô pro seu ponto,
+respeitando os papéis: só robô MUUT se move. Abaixo, o orquestrador —
+fleet_orchestrator — expõe 7 serviços ROS 2 pra record, replay e
+go_to_point, e chama as actions do Nav2, com suporte a múltiplos robôs por
 design. Ativar a pilha completa de Nav2 de dois robôs ao mesmo tempo nessa
 máquina se mostrou instável — um bug de salto no relógio simulado
-invalidava o buffer de TF — então tanto o orquestrador quanto o painel
-Missão Coordenada ativam um robô de cada vez, sequencialmente, com taxa de
-sucesso de 70% por ativação. Mais perto do fim da apresentação eu mostro um
-achado recente, de uma investigação mais a fundo desse mesmo bug, que aponta
-um caminho real pra superar essa limitação. Em seguida, a coleta de dados
-grava bags MCAP por robô, com QoS
-adaptado pros tópicos scan, odom, imu e pose. A navegação usa Nav2 com SLAM
-Toolbox, com TF namespaceado por robô. E na base, a simulação roda no Gazebo
-Harmonic, com TurtleBots4, usando um xacro namespaceado e tópicos
-gz-transport prefixados por robô — vou explicar por que isso foi necessário
-mais adiante.
+invalidava o buffer de TF — então o backend e o painel Missão Coordenada
+ativam a navegação de um robô de cada vez: liga, manda pro ponto, desliga,
+passa pro próximo. Essa ativação sequencial tem taxa de sucesso de 70% por
+ativação. Mais perto do fim da apresentação eu mostro um achado recente,
+de uma investigação mais a fundo desse mesmo bug, que aponta um caminho
+real pra superar essa limitação. Em seguida, a coleta de dados grava bags
+MCAP por robô, com QoS adaptado pros tópicos scan, odom, imu e pose. A
+navegação usa Nav2 com SLAM Toolbox, com TF namespaceado por robô. E na
+base, a simulação roda no Gazebo Harmonic, com TurtleBots4, usando um
+xacro namespaceado e tópicos gz-transport prefixados por robô — vou
+explicar por que isso foi necessário mais adiante.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 6 — Camada de Agentes de IA
@@ -111,9 +123,10 @@ monitoramento do sistema, como relay ou gateway ROS 2, sem participação
 direta na navegação ou na coleta de dados. E isso não é só
 documentação: pedidos de navegação vindos de um FUUT ou de um SU são
 bloqueados no nível do orquestrador — a restrição é estrutural, não uma
-convenção que dá pra ignorar. Daqui a pouco, nos resultados, mostro que esse
-papel do FUUT deixou de ser só arquitetura — rodei um primeiro piloto real
-dele esta semana.
+convenção que dá pra ignorar. A mesma regra vale no painel Missão
+Coordenada que mostrei há pouco: robô que não é MUUT fica parado. Daqui a
+pouco, nos resultados, mostro que esse papel do FUUT deixou de ser só
+arquitetura — rodei um primeiro piloto real dele.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 8 — Metodologia
@@ -129,7 +142,7 @@ ponto de partida via go_to_point — isso é condição necessária pra poder
 comparar as trajetórias de forma justa.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 15 — Perguntas de Pesquisa e Hipóteses — Retomada
+SLIDE 9 [antigo 15] — Perguntas de Pesquisa e Hipóteses — Retomada
 ────────────────────────────────────────────────────────────────────────────
 Antes de entrar nos números, vale retomar formalmente o que eu me propus a
 responder. Defini quatro perguntas de pesquisa, cada uma com uma hipótese de
@@ -148,7 +161,7 @@ perguntas endereçadas, duas corroboradas com número, duas com evidência
 parcial e honesta sobre os próprios limites — nenhuma foi refutada.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 9 — Resultados: Validação em Simulação
+SLIDE 10 [antigo 9] — Resultados: Validação em Simulação
 ────────────────────────────────────────────────────────────────────────────
 Esses são os resultados da campanha final, controlada: dez réplicas
 independentes de uma única rota — dissertation_clean01 — com a simulação, o
@@ -164,11 +177,12 @@ contra uma baseline gravada com um mecanismo diferente — go_to_point em vez
 de play_route — o RMSE sobe pra quase 14 centímetros, quase sete vezes mais.
 Isso não é falha de repetibilidade do robô — é a prova de que a métrica
 certa precisa comparar execuções que usam o mesmo mecanismo de navegação.
-Mais adiante eu mostro um resultado mais completo sobre essa mesma questão,
-comparando as fontes de trajetória contra a pose verdadeira do simulador.
+Daqui a dois slides eu mostro um resultado mais completo sobre essa mesma
+questão, comparando as fontes de trajetória contra a pose verdadeira do
+simulador.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 10 — Distribuição do RMSE (10 Réplicas)
+SLIDE 11 [antigo 10] — Distribuição do RMSE (10 Réplicas)
 ────────────────────────────────────────────────────────────────────────────
 Aqui está o detalhe réplica por réplica da campanha final, todas comparadas
 contra o replay 01 como referência: os valores vão de 1,65 até 4,76
@@ -177,12 +191,11 @@ espacial entre as execuções. Como referência operacional, esses valores
 também ficam bem abaixo da tolerância padrão de chegada do Nav2, que é de
 25 centímetros, embora sejam métricas conceitualmente diferentes — uma mede
 erro ao longo da trajetória, a outra mede precisão de chegada no destino.
-O gráfico de overlay completo dessa
-campanha está disponível no repositório, na pasta de runs do
-dissertation_clean01.
+O gráfico de overlay completo dessa campanha está disponível no
+repositório, na pasta de runs do dissertation_clean01.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 14 — Fonte de Trajetória: Odometria, SLAM e Ground Truth
+SLIDE 12 [antigo 14] — Fonte de Trajetória: Odometria, SLAM e Ground Truth
 ────────────────────────────────────────────────────────────────────────────
 Fiz um experimento adicional pra responder uma pergunta que ficou em aberto
 nos resultados anteriores: será que a fonte usada pra representar a
@@ -202,31 +215,30 @@ curvas, a diferença passa a ser substancial, a ponto de poder mudar a
 conclusão sobre repetibilidade dependendo de qual fonte for usada.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 16 — Piloto FUUT: Primeira Evidência Empírica
+SLIDE 13 [antigo 16] — Piloto FUUT: Primeira Evidência Empírica
 ────────────────────────────────────────────────────────────────────────────
-Lembram do papel FUUT que apresentei lá atrás? Até a semana passada, isso
-era só arquitetura — formalizado em software, nunca testado de verdade. Essa
-semana rodei o primeiro piloto real: tb1 navega normalmente como MUUT,
-enquanto tb2 fica parado como FUUT, só observando com o LiDAR dele. A ideia
-é simples: o tb1 diz onde ele está, pela própria odometria corrigida por
-SLAM; o tb2, de fora, de uma posição fixa conhecida, detecta onde o tb1
-realmente passou, por subtração contra um scan de referência do ambiente
-vazio. Se as duas fontes baterem, isso é uma confirmação independente de
-que o robô está mesmo onde diz que está. Rodei três réplicas. Na primeira
-tentativa, a discrepância deu quase três metros — muito ruim. Investigando,
-descobri que a distância detectada já estava certa, só a direção estava
-sistematicamente errada, por cerca de noventa graus — um offset de montagem
-do LiDAR que eu nunca tinha verificado contra o desenho do robô. Apliquei
-uma correção empírica de noventa graus e rodei de novo: a discrepância caiu
-pra entre três e seis centímetros, dentro do ruído de sensor esperado — e
-as três réplicas foram classificadas como correspondência forte, com
-confiança entre 0,86 e 0,96. É um resultado preliminar — N pequeno, uma
-rota só, uma calibração que ainda preciso confirmar contra o desenho real
-do robô — mas é a primeira vez que esse papel do FUUT sai do papel e vira
-dado.
+Lembram do papel FUUT que apresentei lá atrás? Até pouco tempo, isso era
+só arquitetura — formalizado em software, nunca testado de verdade. Agora
+rodei o primeiro piloto real: tb1 navega normalmente como MUUT, enquanto
+tb2 fica parado como FUUT, só observando com o LiDAR dele. A ideia é
+simples: o tb1 diz onde ele está, pela pose estimada pelo próprio SLAM; o
+tb2, de fora, de uma posição fixa conhecida, detecta onde o tb1 realmente
+passou, por subtração contra um scan de referência do ambiente vazio. Se as
+duas fontes baterem, isso é uma confirmação independente de que o robô está
+mesmo onde diz que está. Rodei três réplicas. Na primeira tentativa, a
+discrepância deu quase três metros — muito ruim. Investigando, descobri que
+a distância detectada já estava certa, só a direção estava sistematicamente
+errada, por cerca de noventa graus — um offset de montagem do LiDAR que eu
+nunca tinha verificado contra o desenho do robô. Apliquei uma correção
+empírica de noventa graus e rodei de novo: a discrepância caiu pra entre
+três e seis centímetros, dentro do ruído de sensor esperado — e as três
+réplicas foram classificadas como correspondência forte, com confiança
+entre 0,86 e 0,96. É um resultado preliminar — N pequeno, uma rota só, uma
+calibração que ainda preciso confirmar contra o desenho real do robô — mas
+é a primeira vez que esse papel do FUUT sai do papel e vira dado.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 11 — Desafios Técnicos Superados
+SLIDE 14 [antigo 11] — Desafios Técnicos Superados
 ────────────────────────────────────────────────────────────────────────────
 Quatro problemas técnicos reais que precisei resolver. Primeiro, TF
 namespaceado: o SLAM publicava em /tb1/tf, mas o buffer TF global só
@@ -242,7 +254,7 @@ flag e derrubava o programa — resolvi exigindo a sintaxe --points=VALOR, sem
 ambiguidade.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 12 — Desafios Recentes: Multi-Robô, CI e Confiabilidade
+SLIDE 15 [antigo 12] — Desafios Recentes: Multi-Robô, CI e Confiabilidade
 ────────────────────────────────────────────────────────────────────────────
 Mais quatro desafios, esses mais recentes. O xacro multi-robô: o DiffDrive
 original do TurtleBot4 publicava /cmd_vel de forma global — um comando movia
@@ -258,26 +270,26 @@ de repetibilidade real. Corrigi a prioridade de detecção automática
 (amcl_pose, depois pose do SLAM, só por último odom) e documentei o MPPI
 como fonte de variância conhecida e esperada do próprio algoritmo de
 controle; a campanha principal continua usando odom deliberadamente, uma
-escolha que valido mais adiante comparando contra o ground truth. E
-processos órfãos: a
-simulação antiga às vezes continuava rodando junto com uma nova, causando
-falhas imprevisíveis — resolvido com os.setsid mais os.killpg no painel de
+escolha que, como mostrei há pouco na comparação com o ground truth, não
+muda o resultado numa rota curta. E processos órfãos: a simulação antiga
+às vezes continuava rodando junto com uma nova, causando falhas
+imprevisíveis — resolvido com os.setsid mais os.killpg no painel de
 simulação, que mata a árvore de processos inteira, sem deixar nada pra trás.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 17 — Nav2 Simultâneo: Achado Cyclone DDS
+SLIDE 16 [antigo 17] — Nav2 Simultâneo: Achado Cyclone DDS
 ────────────────────────────────────────────────────────────────────────────
 Voltando ao bug que mencionei lá na arquitetura — o salto no relógio
-simulado que me obrigou a ativar os robôs um de cada vez. Essa semana fui
-mais fundo nele. A pergunta era: dá pra ligar os dois robôs ao mesmo tempo
-de verdade, não só contornar com ativação sequencial? Testei ao vivo contra
-o Gazebo real desta máquina. Do jeito que o ROS 2 vem configurado por
-padrão — com o middleware Fast DDS — ativar os dois simultaneamente só
-funcionou em uma de cinco tentativas, 20%, pior até que a ativação
-sequencial. Troquei o middleware pra Cyclone DDS — uma única variável de
-ambiente, nenhuma mudança de código — e rodei de novo: dez de dez, em duas
-baterias de cinco, nenhuma ocorrência do bug. Fui atrás do motivo:
-o limiar que detecta esse salto de relógio está escrito direto no
+simulado que me obrigou a ativar os robôs um de cada vez. Mais
+recentemente eu fui mais fundo nele. A pergunta era: dá pra ligar os dois
+robôs ao mesmo tempo de verdade, não só contornar com ativação sequencial?
+Testei ao vivo contra o Gazebo real desta máquina. Do jeito que o ROS 2 vem
+configurado por padrão — com o middleware Fast DDS — ativar os dois
+simultaneamente só funcionou em uma de cinco tentativas, 20%, pior até que
+a ativação sequencial. Troquei o middleware pra Cyclone DDS — uma única
+variável de ambiente, nenhuma mudança de código — e rodei de novo: dez de
+dez, em duas baterias de cinco, nenhuma ocorrência do bug. Fui atrás do
+motivo: o limiar que detecta esse salto de relógio está escrito direto no
 código-fonte do tf2, fixo em um segundo, não é configurável por parâmetro —
 por isso nenhum ajuste de tolerância ia resolver, só a troca de middleware
 mesmo. E achei um projeto real no GitHub, com a mesma versão do ROS 2 e do
@@ -288,14 +300,14 @@ mostrei até agora continua toda sob ativação sequencial — mas é um candida
 testado e validado, não mais uma ideia nunca tentada.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 13 — Trabalho Futuro e Conclusão
+SLIDE 17 [antigo 13] — Trabalho Futuro e Conclusão
 ────────────────────────────────────────────────────────────────────────────
 Pra fechar: o framework está funcional em simulação, com RMSE médio de 3,35
-centímetros — máximo de 4,76 — entre réplicas, muito abaixo da tolerância do
-Nav2. O modo multi-robô tem dois resultados agora: a ativação sequencial que
-venho usando, com 70% de sucesso, e o achado desta semana com Cyclone DDS,
-cem por cento de sucesso em ativação simultânea — ainda sem avaliação de
-RMSE sob essa configuração nova, mas já validado quanto ao sintoma que
+centímetros — máximo de 4,76 — entre réplicas, baixa dispersão entre
+execuções. O modo multi-robô tem dois resultados agora: a ativação
+sequencial que venho usando, com 70% de sucesso, e o achado com Cyclone
+DDS, cem por cento de sucesso em ativação simultânea — ainda sem avaliação
+de RMSE sob essa configuração nova, mas já validado quanto ao sintoma que
 motivou a arquitetura sequencial em primeiro lugar. E o piloto FUUT que
 mostrei: primeira evidência empírica real desse papel, correspondência forte
 nas três réplicas. Como próximos passos, priorizo dois: adotar a troca de
