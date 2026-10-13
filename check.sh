@@ -7,7 +7,10 @@ echo "[check] Python syntax"
 python3 -m py_compile \
   "$ROOT/backend/main.py" \
   "$ROOT/backend/ros_bridge.py" \
+  "$ROOT/backend/mission/model.py" \
+  "$ROOT/backend/mission/allocators.py" \
   "$ROOT/fleet_ws/scripts/health_check.py" \
+  "$ROOT/fleet_ws/scripts/mission_allocation_study.py" \
   "$ROOT/fleet_ws/scripts/experiment_repeatability.py" \
   "$ROOT/fleet_ws/scripts/analyze_runs.py" \
   "$ROOT/fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py" \

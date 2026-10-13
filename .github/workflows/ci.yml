@@ -24,14 +24,17 @@ jobs:
           python3 -m py_compile \
             backend/main.py \
             backend/ros_bridge.py \
+            backend/mission/model.py \
+            backend/mission/allocators.py \
             fleet_ws/scripts/health_check.py \
+            fleet_ws/scripts/mission_allocation_study.py \
             fleet_ws/scripts/experiment_repeatability.py \
             fleet_ws/scripts/analyze_runs.py \
             fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py \
             fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py
 
       - name: Install Python analysis dependencies
-        run: python3 -m pip install numpy
+        run: python3 -m pip install numpy pyyaml
 
       - name: Unit tests
         run: python3 -m unittest discover -s tests

@@ -387,6 +387,42 @@ With `--repeat N`, each replay writes a separate export file such as
 
 ---
 
+## Mission allocation study (phase 1, no simulator)
+
+A multi-robot inspection mission ("inspect the west and east aisles") is
+split into named zones and allocated to the MUUT robots. The study compares
+four allocators under the same cost (makespan, then total distance):
+
+| Allocator | How it decides |
+|---|---|
+| `fixed` | zone *i* → robot *i mod N* (what the Missão Coordenada panel does today) |
+| `greedy` | each zone to the robot that least increases the makespan |
+| `optimal` | exhaustive search (assignment + order), up to 8 zones |
+| `llm` / `llm_dist` | Claude reads the mission text and returns the allocation; `llm_dist` also receives robot→zone distances |
+
+Zones, robots (with roles) and missions live in
+`backend/mission/scenarios/warehouse.yaml`. No ROS or Gazebo is needed, so it
+also runs on Windows.
+
+```bash
+pip install -r backend/requirements.txt
+# deterministic allocators only (free)
+python3 fleet_ws/scripts/mission_allocation_study.py --allocators fixed,greedy,optimal
+# show the plan and the prompt without calling the API
+python3 fleet_ws/scripts/mission_allocation_study.py --dry-run
+# full study: 10 LLM repetitions per mission (needs ANTHROPIC_API_KEY)
+python3 fleet_ws/scripts/mission_allocation_study.py --repeat 10
+```
+
+Per mission and allocator, `summary.json` reports validity (all requested
+zones covered, no FUUT/SU robot moved), stability (distinct allocations across
+repetitions, share of the most frequent one) and the makespan gap to the
+optimum. `runs.jsonl` keeps every allocation with the model that actually
+served it, token usage and latency. Claude Opus 5.5 does not accept
+`temperature`, so run-to-run variation can only be measured, not fixed.
+
+---
+
 ## Development checks
 
 Before opening a pull request or after changing frontend/backend scripts:

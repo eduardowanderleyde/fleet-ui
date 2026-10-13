@@ -1,0 +1,56 @@
+# Cenário de missão de inspeção no mundo "warehouse" (nav2_minimal_tb4_sim).
+#
+# Coordenadas em metros no frame do mundo Gazebo. As zonas ficam na área
+# livre em volta da origem (x -6..7, y -1.5..7.5 no warehouse.pgm); a região
+# 0..4 m já foi percorrida com sucesso pelas rotas loop_fechado e
+# rota_longa_curva. Antes de executar em simulação (Fase 2), conferir cada
+# percurso com o mapa ao vivo.
+#
+# Posições iniciais = DEFAULT_POSES do turtlebot4_multi_sim.launch.py
+# (branch mission-coordinate-large-scale). tb3 é FUUT de propósito: fica
+# perto da doca e do corredor oeste, então um alocador que ignora papéis
+# tende a escolhê-lo.
+name: warehouse
+frame: world
+
+robots:
+  tb1: {role: MUUT, start: [0.0, 0.0]}
+  tb2: {role: MUUT, start: [0.0, 2.0]}
+  tb3: {role: FUUT, start: [0.0, 4.0]}
+
+zones:
+  corredor_A:
+    description: Corredor oeste, sentido sul-norte.
+    waypoints: [[-2.0, 1.5], [-2.0, 5.5]]
+  corredor_B:
+    description: Corredor central, sentido sul-norte.
+    waypoints: [[2.0, 2.5], [2.0, 6.0]]
+  corredor_C:
+    description: Corredor leste, sentido sul-norte, perto do pilar.
+    waypoints: [[5.0, 0.5], [5.0, 5.0]]
+  doca:
+    description: Doca norte, faixa ao longo da parede norte, sentido oeste-leste.
+    waypoints: [[-1.0, 7.0], [4.0, 7.0]]
+  prateleira_sul:
+    description: Prateleira sul, faixa ao longo da prateleira, sentido oeste-leste.
+    waypoints: [[-2.0, -1.0], [1.5, -1.0]]
+
+# `zones` é o gabarito: as zonas que o texto da missão realmente pede.
+# Os textos citam zonas pela descrição (oeste, leste, doca...), não pelo
+# identificador, para que a decomposição também seja testada.
+missions:
+  m1_dois_corredores:
+    text: Inspecione os corredores oeste e leste e depois volte para a base.
+    zones: [corredor_A, corredor_C]
+  m2_tres_corredores:
+    text: Faça a ronda dos três corredores.
+    zones: [corredor_A, corredor_B, corredor_C]
+  m3_doca_e_prateleira:
+    text: Verifique a doca norte e a prateleira sul.
+    zones: [doca, prateleira_sul]
+  m4_tres_zonas_mistas:
+    text: Inspecione a prateleira sul, o corredor central e a doca.
+    zones: [prateleira_sul, corredor_B, doca]
+  m5_armazem_completo:
+    text: Faça a ronda completa do armazém, passando por todas as zonas.
+    zones: [corredor_A, corredor_B, corredor_C, doca, prateleira_sul]
