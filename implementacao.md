@@ -104,6 +104,24 @@ código) confirmando o efeito.
   `conhecimento/artifact_publishing.md`). A dissertação hoje não afirma
   que os dados estão disponíveis, então não há afirmação falsa a corrigir
   — é só uma omissão a considerar.
+- [ ] **Trocar o despacho fixo do painel Missão Coordenada pelo
+  alocador ótimo** (origem: estudo de alocação, 2026-10-13). O fixo ficou
+  até +106% acima do ótimo; o ótimo é exato, determinístico e sem custo de
+  API (até 10 zonas). Precisa trazer `backend/mission/` da
+  `windows-version` para esta branch. Risco: baixo.
+- [ ] **Fase 2 da alocação de missão: executar as missões no Gazebo**
+  (origem: estudo de alocação, 2026-10-13). Hoje só a decisão foi
+  avaliada. Executar com alocação híbrida (LLM interpreta + ótimo decide),
+  medir tempo real e RMSE entre repetições da missão. Atenção: com
+  ativação sequencial o tempo real é a soma, não o makespan; com Cyclone
+  DDS volta a ser paralelo. Exige Docker em disco local (não na pasta de
+  rede `Y:`).
+- [ ] **Atualizar o item de trabalho futuro do Cap. 9 sobre "Planner
+  supervisor que aloca a partir de uma única instrução de missão"**
+  (origem: 2026-10-13). Hoje ele aparece como lacuna totalmente aberta;
+  a Seção 8.9 já responde a parte de decisão. Só texto, branch
+  `apresentacao-dissertacao`.
+
 ## Em andamento
 
 - [~] **Testar `regenerate_noises: false` no MPPI do Nav2** (origem:
@@ -151,6 +169,10 @@ código) confirmando o efeito.
   investigar a réplica 1, e repetir com N maior antes de reconsiderar.
 ## Feito
 
+- [x] **Estudo de alocação de missão (decisão, sem simulador)** (2026-10-13).
+  Ver `memory.md`, entrada de 2026-10-13. Código e dados na
+  `windows-version`; Seção 8.9, slide 13 e fala na
+  `apresentacao-dissertacao`.
 - [x] **Suavizar "estatisticamente equivalente" na Seção 8.6** (origem:
   `stats_methodology`; feito 2026-10-03, commit `c3ede78`). Trocado por
   "sem diferença perceptível" nos dois lugares (Cap. 08 e Cap. 09) —
