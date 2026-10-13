@@ -2,316 +2,351 @@ FALA DA APRESENTAÇÃO — Defesa de Dissertação
 Framework para Experimentos de Repetibilidade em Robótica Móvel com ROS 2 (Fleet UI)
 Eduardo Wanderley — Mestrado em Robótica, 2026
 
-Criado em 2026-10-08 a partir de fala_apresentacao.txt (versão do seminário),
-pra acompanhar apresentacao_defesa.pptx.
+Acompanha apresentacao_defesa.pptx (tema CIn/UFPE, 18 slides).
 
-Revisão de 2026-10-13 (1): numeração na ordem de exibição; Missão
-Coordenada descrita como implementada; sem "esta semana"; conclusão sem
-"muito abaixo da tolerância do Nav2".
+Revisado em 2026-10-12 (2): reescrita em linguagem simples — todo termo
+técnico vem acompanhado de uma explicação curta na primeira vez que
+aparece (analogia simples primeiro, nome técnico depois).
 
-Revisão de 2026-10-13 (2):
-- Slide 14 NOVO: piloto de alocação de missão (LLM vs. ótimo). Dados em
-  fleet_ws/runs/mission_allocation/ (branch windows-version, commits
-  1907edf, 344f366, 318eb37, 9ca98bf). Agenda (slide 2) e conclusão
-  (slide 18) do pptx ganharam a menção; os demais slides não mudaram.
-- Cada slide agora tem [importância · tempo-alvo]. Essencial = sustenta
-  objetivo, pergunta de pesquisa ou resultado principal; Importante = a
-  banca sente falta se sair; Complementar = reforça, pode encurtar se o
-  tempo apertar.
-- Enxugados os slides que estavam longos sem ser centrais: Arquitetura
-  (5), Piloto FUUT (13), Desafios Recentes (16) e Cyclone DDS (17).
-  Nenhum número foi alterado.
-- Total: ~2.580 palavras, ~18,5 min a 140 palavras/min (antes ~20 min com
-  um slide a menos).
-
-Se o tempo apertar, nesta ordem: falar só o resumo dos slides 15 e 16
-(desafios), juntar 10 e 11 numa fala só, e encurtar o 17.
-
-────────────────────────────────────────────────────────────────────────────
-SLIDE 1 — Título                                    [Essencial · 0,5 min]
-────────────────────────────────────────────────────────────────────────────
-Boa tarde. Meu trabalho é sobre um framework para experimentos de
-repetibilidade em robótica móvel usando ROS 2 — o Fleet UI. O objetivo é
-permitir que qualquer pesquisador grave um percurso com um robô, reproduza
-esse percurso quantas vezes for preciso, e meça o quão repetível o sistema é,
-sem precisar dominar a complexidade do ROS 2 por baixo.
+Revisado em 2026-10-13:
+- Slide 13 NOVO: piloto de alocação de missão (LLM vs. ótimo). Slides
+  seguintes renumerados (13→14 ... 17→18).
+- Slide 9 (PP3): corrigido o sentido — a dissertação diz que os dados são
+  COMPATÍVEIS com a repetibilidade fora do protocolo (sinais de que se
+  mantém), não o contrário.
+- Slides 10 e 17: a comparação com os 25 cm do Nav2 agora vem com a
+  ressalva de que são medidas diferentes (erro ao longo do caminho x
+  precisão de chegada).
+- Slide 15: dito que a campanha principal usa odometria de propósito (e o
+  slide 11 mostra que isso não muda o resultado numa rota curta); trocado
+  "não só no robô real" (não há robô real no trabalho).
+- Slide 4: "câmera a laser" → "sensor a laser (LiDAR)".
+- Slide 17: o protótipo antigo de divisão de missão foi trocado pelo
+  resultado do piloto do slide 13.
+- Sem "essa semana" / "até a semana passada" (a fala não envelhece até a
+  defesa). No pptx, o mesmo foi corrigido nos slides 12 e 17.
+- Tamanho: ~3.250 palavras (~23 min em ritmo explicativo). Se o tempo
+  apertar, encurtar primeiro 14, 15 e 16 (desafios e Cyclone).
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 2 — Agenda                                    [Importante · 0,5 min]
+SLIDE 1 — Título
 ────────────────────────────────────────────────────────────────────────────
-Vou seguir essa ordem: começo pela motivação e pelos objetivos; depois mostro
-a arquitetura do sistema, incluindo a camada de agentes de IA que construí
-por cima; explico os papéis experimentais que defini para os robôs; apresento
-a metodologia de record/replay/análise; retomo as perguntas de pesquisa antes
-dos resultados de repetibilidade; mostro dois pilotos — o do papel FUUT e um
-de alocação de missão por linguagem natural; falo dos desafios técnicos,
-incluindo um achado sobre ativação multi-robô; e fecho com trabalho futuro e
-conclusão.
+Boa tarde. Meu trabalho é sobre repetibilidade em robôs móveis: será que,
+se eu mandar um robô repetir o mesmo caminho várias vezes, ele realmente
+passa pelo mesmo lugar toda vez? Construí uma ferramenta — o Fleet UI —
+que grava um percurso uma vez, repete esse percurso quantas vezes eu
+quiser, e mede automaticamente o quão parecidas as repetições são entre
+si. O objetivo é que qualquer pesquisador consiga fazer isso sem precisar
+entender os detalhes internos do ROS 2, a plataforma de software muito
+usada hoje em pesquisa e na indústria para programar robôs.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 3 — Motivação                                 [Essencial · 0,7 min]
+SLIDE 2 — Agenda
 ────────────────────────────────────────────────────────────────────────────
-Reprodutibilidade é um pilar da ciência experimental em robótica — um
-resultado só tem validade científica se puder ser replicado. E sistemas
-multi-robô adicionam complexidade real: sincronização, sensores
-heterogêneos, coordenação. Ao olhar o que existia, identifiquei uma lacuna:
-faltam frameworks open-source que integrem controle de frota, coleta síncrona
-de dados e análise de repetibilidade num pacote só — e as interfaces nativas
-do ROS 2 são complexas demais pro dia a dia de um pesquisador. A proposta é
-um framework completo — orquestração, coleta, análise — com uma interface
-web que abstrai essa complexidade, e uma arquitetura de papéis pensada pra
-testbeds distribuídos.
+Vou seguir essa ordem: primeiro explico por que esse problema importa e
+quais eram meus objetivos; depois mostro como o sistema foi construído,
+incluindo uma camada de inteligência artificial que adicionei por cima;
+explico os diferentes papéis que dei pros robôs no experimento; apresento
+o passo a passo do método que uso pra gravar e comparar percursos; retomo
+formalmente as perguntas que eu queria responder antes de mostrar os
+números; mostro os resultados e dois testes-piloto — um sobre o robô que
+só observa, outro sobre dividir uma missão entre robôs usando IA; falo dos
+problemas técnicos reais que precisei resolver, incluindo uma descoberta
+recente; e fecho com o que falta fazer e minha conclusão.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 4 — Objetivos                                 [Essencial · 0,7 min]
+SLIDE 3 — Motivação
 ────────────────────────────────────────────────────────────────────────────
-O objetivo geral é desenvolver e validar um framework de orquestração
-multi-robô voltado a experimentos reprodutíveis de navegação autônoma com
-ROS 2. Isso se desdobra em cinco objetivos específicos: um orquestrador ROS 2
-com serviços de record, replay e go_to_point, mais controle de papéis; coleta
-síncrona de dados sensoriais em MCAP — scan, odometria, IMU, pose; um
-pipeline de análise que calcula RMSE par a par, comprimento de percurso e
-gera overlay visual; uma interface web que controla o experimento sem expor
-o pesquisador ao ROS 2; e validação em simulação Gazebo, já preparando o
-caminho para hardware real.
+Reprodutibilidade é a ideia de que, se eu fizer um experimento e publicar
+o resultado, outra pessoa em outro lugar deveria conseguir repetir esse
+experimento e chegar num resultado parecido — sem isso, o resultado não
+tem muito valor científico. Em robótica com vários robôs ao mesmo tempo,
+isso fica mais difícil: os robôs precisam ficar sincronizados, os sensores
+são de tipos diferentes, e coordenar tudo isso é complicado. Quando fui
+procurar, não achei uma ferramenta pronta, de código aberto, que juntasse
+controlar vários robôs, coletar os dados de forma sincronizada e analisar
+a repetibilidade — tudo num pacote só. E as ferramentas que já existem pra
+controlar robôs em ROS 2 são complicadas demais pro uso do dia a dia de um
+pesquisador. Por isso propus um sistema completo — que organiza o
+experimento, coleta os dados e analisa os resultados — com uma tela
+simples que esconde essa complexidade toda.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 5 — Arquitetura do Sistema                    [Essencial · 1,4 min]
+SLIDE 4 — Objetivos
 ────────────────────────────────────────────────────────────────────────────
-O framework é organizado em camadas. No topo, a interface web — o Fleet UI —
-em React com backend em FastAPI, com o painel Missão Coordenada e o painel
-de agentes de IA. A Missão Coordenada é a forma mais direta de usar vários
-robôs: o pesquisador escolhe uma formação e, com um botão, lança a simulação
-e manda cada robô pro seu ponto — sem abrir terminal, e só robô MUUT se
-move. Abaixo, o orquestrador — fleet_orchestrator — expõe 7 serviços ROS 2
-pra record, replay e go_to_point e chama as actions do Nav2. Uma decisão de
-arquitetura importante: ligar o Nav2 completo de dois robôs ao mesmo tempo
-nesta máquina era instável, por um salto no relógio simulado, então a
-navegação é ativada um robô de cada vez, com 70% de sucesso por ativação —
-no fim mostro um achado que aponta como superar isso. Em seguida, a coleta
-grava bags MCAP por robô, com QoS adaptado pra scan, odom, imu e pose. A
-navegação usa Nav2 com SLAM Toolbox e TF por robô. E na base, o Gazebo
-Harmonic com TurtleBots4, com tópicos prefixados por robô — explico mais
-adiante por que isso foi necessário.
+O objetivo geral foi construir e testar um sistema que coordena vários
+robôs fazendo experimentos repetíveis de navegação. Isso virou cinco
+objetivos específicos: criar comandos simples (gravar rota, repetir rota,
+ir até um ponto) que escondem a complexidade do ROS 2; gravar os dados dos
+sensores (sensor a laser, o LiDAR, que mede distâncias em volta do robô;
+odômetro; sensor de inércia; posição) de forma sincronizada, num formato
+de arquivo chamado MCAP, que é só um jeito padrão de guardar dados de
+sensores com a marca de tempo certa; calcular automaticamente o quanto as
+repetições diferem entre si (a métrica que uso pra isso se chama RMSE — é
+basicamente "o erro médio entre dois caminhos"), junto com o comprimento
+do percurso e uma imagem comparando as rotas; criar uma tela web que
+controla tudo isso sem precisar digitar comando nenhum; e validar esse
+sistema inteiro dentro de um simulador (Gazebo), como primeiro passo antes
+de testar num robô físico de verdade.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 6 — Camada de Agentes de IA                   [Importante · 1,0 min]
+SLIDE 5 — Arquitetura do Sistema
 ────────────────────────────────────────────────────────────────────────────
-Em cima dessa base eu construí uma camada de agentes de IA, usando a API da
-Anthropic/Claude, pra planejar, executar e analisar experimentos a partir de
-linguagem natural. São três peças: o Planner interpreta o pedido em
-português e decide quais ferramentas chamar — record, replay, go_to_point,
-campanha inteira; o Executor é quem realmente fala com o Fleet UI, chamando
-os mesmos endpoints REST que a própria interface web usa — ele não tem
-acesso direto ao ROS 2; e o Analyst só lê o summary.json — RMSE, duração —
-e aponta quando uma execução saiu do esperado; é leitura pura, nunca executa
-nada. O ponto central: cada agente só atua no próprio robô. Mais adiante
-mostro um piloto que mede justamente até onde dá pra confiar na decisão de
-um LLM quando a missão envolve vários robôs.
+O sistema é organizado em camadas, de cima pra baixo. No topo, a tela web
+— o Fleet UI — onde o pesquisador configura e acompanha o experimento, com
+um botão que liga ou desliga a simulação inteira sem precisar abrir
+terminal nenhum, e um painel de agentes de IA que explico no próximo
+slide. Logo abaixo, o "orquestrador": um programa que oferece comandos
+prontos — gravar rota, repetir rota, ir até um ponto — usando o Nav2, que
+é a pilha de navegação autônoma padrão do ROS 2 (é ela que decide como o
+robô desvia de obstáculo e chega no destino). Aqui teve um problema real:
+quando eu tentava ligar a navegação completa de dois robôs ao mesmo tempo
+nessa máquina, o relógio interno da simulação "pulava pra trás" e o
+sistema que sabe onde cada robô está no espaço (chamado TF) ficava
+inválido. A solução que uso hoje é ligar um robô de cada vez, em
+sequência — funciona em 70% das tentativas. Mais pro fim mostro uma
+descoberta sobre esse mesmo problema. Descendo mais, a coleta de dados
+grava tudo num arquivo por robô, cada sensor com a configuração certa de
+"quão importante é não perder essa mensagem" (isso se chama QoS). A
+navegação usa o Nav2 junto com o SLAM Toolbox, o programa que faz o robô
+construir um mapa do ambiente enquanto anda. E na base, a simulação roda
+no Gazebo, um simulador de física e sensores bem realista, com robôs
+TurtleBot4.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 7 — Papéis Experimentais (MUUT / FUUT / SU)   [Essencial · 1,1 min]
+SLIDE 6 — Camada de Agentes de IA
 ────────────────────────────────────────────────────────────────────────────
-Pra testbeds distribuídos, defini três papéis. MUUT — Mobile Unit Under
-Test/Tasking — é o robô que navega autonomamente, grava e reproduz rotas, e
-coleta seus próprios sensores. FUUT — Fixed Unit Under Test/Tasking —
-permanece em posição fixa no ambiente, observando a passagem do MUUT, e
-coleta dados de uma perspectiva externa, mas não recebe comandos de
-navegação. Já a SU — Support Unit — é infraestrutura de rede e
-monitoramento, sem participação direta na navegação ou na coleta. E isso
-não é só documentação: pedidos de navegação para um FUUT ou um SU são
-bloqueados no orquestrador — a restrição é estrutural, não uma convenção. A
-mesma regra vale no painel Missão Coordenada. Nos resultados, mostro que
-esse papel do FUUT deixou de ser só arquitetura, com um primeiro piloto
-real.
+Em cima dessa base, construí uma camada que permite controlar tudo isso
+por linguagem natural, em português, usando a IA da Anthropic (Claude).
+São três partes. O Planner lê o que eu pedi em português e decide quais
+comandos chamar. O Executor é quem realmente executa — mas ele não fala
+direto com o robô: ele usa os mesmos comandos que a própria tela web usa,
+e cada agente só pode mexer no robô que foi designado pra ele. E o Analyst
+só lê o resultado já calculado (RMSE, duração) e avisa se alguma execução
+saiu fora do esperado — ele nunca executa nada. O ponto mais importante:
+um agente de IA nunca consegue mover o robô de outro agente, e isso é
+garantido no próprio código, não é só uma regra de boa conduta. Mais
+adiante mostro um teste que mede justamente até onde dá pra confiar na
+decisão da IA quando a missão envolve vários robôs.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 8 — Metodologia                               [Essencial · 0,8 min]
+SLIDE 7 — Papéis Experimentais (MUUT / FUUT / SU)
 ────────────────────────────────────────────────────────────────────────────
-O protocolo segue quatro etapas. Primeiro, o Record: waypoints são enviados
-via Nav2, e a TF vira um YAML de rota mais um bag MCAP — essa é a baseline.
-Depois, Replay ×N: a mesma rota é reproduzida N vezes via FollowWaypoints,
-gerando um bag MCAP por repetição. Em seguida, a Análise: a odometria dos
-bags vira RMSE par a par e um overlay visual em PNG. E por fim, o Resultado:
-um summary.json consolidado com RMSE, duração e erro de endpoint. Um detalhe
-metodológico importante: entre repetições, o robô volta explicitamente ao
-ponto de partida via go_to_point — isso é condição necessária pra poder
-comparar as trajetórias de forma justa.
+Pra organizar experimentos com vários robôs, criei três papéis diferentes
+que um robô pode ter. O MUUT é o robô que efetivamente navega: ele anda
+sozinho, grava e repete rotas, e coleta os próprios sensores. O FUUT é um
+robô que fica parado, de propósito, observando a cena de um ponto fixo —
+como uma câmera de segurança que também tem sensores: ele não recebe
+nenhum comando de movimento. E o SU é um robô ou computador que só dá
+suporte de rede, tipo um repetidor de sinal — também não se move. Isso não
+é só uma ideia no papel: se alguém tentar mandar um robô marcado como FUUT
+ou SU se mover, o próprio sistema recusa o comando — é uma regra garantida
+em código. Mais adiante mostro que esse papel do FUUT, que até pouco tempo
+era só teoria, eu consegui testar de verdade.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 9 — Perguntas de Pesquisa e Hipóteses         [Essencial · 1,2 min]
+SLIDE 8 — Metodologia
 ────────────────────────────────────────────────────────────────────────────
-Antes dos números, vale retomar o que eu me propus a responder. Defini
-quatro perguntas de pesquisa, cada uma com uma hipótese. PP1, automação de
-protocolo: os serviços ROS 2 mais o script orquestrador bastam pra expressar
-o protocolo sem código extra por experimento — corroborada. PP2,
-repetibilidade mensurável: o RMSE inter-replay fica abaixo de 25
-centímetros — corroborada, com os 3,35 centímetros médios que mostro já já.
-PP3, se a baixa variabilidade se mantém fora do protocolo rigorosamente
-controlado: a evidência é exploratória — há sinais de que sim, mas não
-consigo atribuir causalidade, então trato como questão em aberto. E PP4, se
-o framework reduz esforço de engenharia: tenho evidência funcional — a
-interface existe e funciona — mas não medi esforço percebido; não foi um
-estudo de usabilidade controlado. Resumindo: duas corroboradas com número,
-duas com evidência parcial e honesta sobre os limites — nenhuma refutada. Os
-dois pilotos que mostro depois são evidência complementar, não respondem a
-essas quatro perguntas.
+O método tem quatro passos. Primeiro, eu gravo uma rota de referência: o
+robô navega por uma sequência de pontos e eu guardo tanto a lista de
+pontos quanto os dados brutos dos sensores durante essa navegação — essa é
+a "baseline", a referência contra a qual tudo depois vai ser comparado.
+Segundo, repito essa mesma rota quantas vezes eu quiser, e cada repetição
+grava seus próprios dados. Terceiro, a análise: pego os dados de posição de
+cada repetição e calculo o RMSE contra a referência — de novo, isso é só
+"o quanto, em média, o caminho dessa repetição diferiu do caminho
+original", em centímetros. Quarto, o resultado final junta tudo num resumo
+com os números principais. Um detalhe importante: entre uma repetição e
+outra, eu mando o robô voltar exatamente pro ponto de partida antes de
+começar de novo — sem isso, eu estaria comparando coisas que não
+começaram do mesmo lugar, o que invalidaria a comparação.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 10 — Resultados: Validação em Simulação       [Essencial · 1,4 min]
+SLIDE 9 — Perguntas de Pesquisa e Hipóteses
 ────────────────────────────────────────────────────────────────────────────
-Esses são os resultados da campanha final, controlada: dez réplicas
-independentes de uma única rota — dissertation_clean01 — com a simulação, o
-Nav2, o orquestrador e o coletor relançados do zero antes de cada réplica,
-pra garantir que todas partem do mesmo estado inicial. O percurso tem cerca
-de 0,826 metro, com RMSE médio de 3,35 centímetros contra a execução de
-referência — máximo de 4,76 — e erro final médio de 1,64 centímetro. A
-duração média foi de 17,51 segundos, com desvio de só 0,36. Do lado direito
-está uma validação complementar, com a rota dissertacao_teste1: comparando
-réplicas que usam o mesmo mecanismo de navegação, o RMSE cai pra 2
-centímetros; mas contra uma baseline gravada com outro mecanismo —
-go_to_point em vez de play_route — sobe pra quase 14 centímetros, quase sete
-vezes mais. Isso não é falha de repetibilidade do robô — é a prova de que a
-métrica certa precisa comparar execuções com o mesmo mecanismo de
-navegação. Daqui a dois slides mostro um resultado mais completo sobre essa
-questão.
+Antes de mostrar os números, quero retomar o que eu me propus a responder
+— quatro perguntas, cada uma com uma expectativa que eu tinha antes de
+testar. Primeira: dá pra automatizar o processo inteiro sem escrever
+código novo a cada experimento? Sim, confirmado. Segunda: as repetições
+realmente se parecem entre si, em números? Sim, confirmado — o erro médio
+ficou bem abaixo do limite de 25 centímetros que eu tinha estabelecido (já
+mostro o número). Terceira: essa repetibilidade boa se mantém fora de um
+ambiente super controlado? Aqui sou mais cauteloso: os dados que tenho dão
+sinais de que se mantém, mas não consigo provar o porquê — então trato
+como uma pergunta em aberto, não como conclusão. Quarta: o sistema
+realmente reduz o trabalho do pesquisador? Tenho evidência de que a
+ferramenta funciona, mas não medi formalmente se ela economiza tempo de
+alguém — não fiz um teste de usabilidade com outras pessoas. Resumindo:
+duas respostas com números sólidos, duas parciais e honestas sobre o que
+falta — nenhuma contrariada pelos dados. Os dois testes-piloto que mostro
+depois são evidência complementar; não respondem a essas quatro perguntas.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 11 — Distribuição do RMSE (10 Réplicas)       [Importante · 0,7 min]
+SLIDE 10 — Resultados: Validação em Simulação
 ────────────────────────────────────────────────────────────────────────────
-Aqui está o detalhe réplica por réplica da campanha final, todas comparadas
-contra o replay 01 como referência: os valores vão de 1,65 até 4,76
-centímetros, com média de 3,35 e desvio-padrão de 1,10 — baixa dispersão
-espacial entre as execuções. Como referência operacional, esses valores
-também ficam bem abaixo da tolerância padrão de chegada do Nav2, que é de
-25 centímetros, embora sejam métricas conceitualmente diferentes — uma mede
-erro ao longo da trajetória, a outra mede precisão de chegada no destino.
-O overlay completo dessa campanha está no repositório, na pasta de runs do
-dissertation_clean01.
+Esse é o resultado principal: repeti uma rota dez vezes, de forma
+independente — ou seja, reiniciei a simulação inteira antes de cada
+repetição, pra garantir que todas começaram exatamente do mesmo jeito, sem
+nenhuma "memória" de uma repetição pra outra. O erro médio entre as
+repetições e a referência foi de 3,35 centímetros. Repetição por
+repetição, o menor erro foi 1,65 centímetro e o maior 4,76 — pouca
+variação entre elas. Como referência, o Nav2 considera que o robô
+"chegou" no destino se estiver a até 25 centímetros do alvo, e meu erro
+fica bem abaixo disso — mas são medidas diferentes: uma é o erro ao longo
+do caminho todo, a outra é a precisão de chegada. O erro na posição final
+foi de 1,64 centímetro em média, e cada repetição levou cerca de 17,5
+segundos, com pouquíssima variação. Também fiz um teste à parte: se eu
+comparar repetições que usaram o mesmo jeito de navegar, o erro cai pra 2
+centímetros; mas contra uma referência gravada de um jeito diferente, ele
+sobe pra quase 14 centímetros — quase sete vezes maior. Isso não significa
+que o robô é inconsistente: significa que, pra medir repetibilidade
+direito, é preciso comparar execuções que usaram o mesmo método de
+navegação.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 12 — Fonte de Trajetória: Odometria, SLAM e Ground Truth
-                                                    [Importante · 1,4 min]
+SLIDE 11 — Fonte de Trajetória: Odometria, SLAM e Ground Truth
 ────────────────────────────────────────────────────────────────────────────
-Fiz um experimento adicional pra responder uma pergunta que ficou em aberto:
-a fonte usada pra representar a trajetória — odometria crua ou a pose
-corrigida pelo SLAM — importa pra interpretação da repetibilidade? Comparei
-as duas contra a pose verdadeira do simulador, o ground truth do Gazebo, em
-três rotas de complexidade crescente, com dez réplicas em cada: uma rota
-curta de menos de um metro, uma de sete metros com uma curva de noventa
-graus, e um loop fechado de onze metros com quatro curvas. O erro da
-odometria crua cresce com o tamanho da rota — de praticamente zero na rota
-curta até quatorze centímetros no loop. Já o erro da pose do SLAM fica baixo
-e praticamente constante, entre dois e três centímetros. Ou seja: numa rota
-curta, como a da campanha principal, a escolha da fonte não faz diferença
-prática — o que valida a decisão metodológica que tomei. Mas numa rota mais
-longa e com mais curvas, a diferença passa a ser substancial, a ponto de
-poder mudar a conclusão sobre repetibilidade.
+Fiz um teste extra pra responder uma dúvida: a fonte de dados que eu uso
+pra saber "onde o robô esteve" importa pro resultado? Um robô pode saber
+sua posição de duas formas principais: pela odometria, que é basicamente
+contar quantas voltas as rodas deram (simples, mas acumula erro com o
+tempo), ou pela posição corrigida pelo SLAM — o programa que constrói o
+mapa e reposiciona o robô nele enquanto anda. Comparei as duas contra a
+posição verdadeira que o próprio simulador conhece — o "ground truth", a
+referência perfeita que só existe porque estou em simulação. Testei em
+três rotas de dificuldade crescente: uma bem curta, uma média com uma
+curva, e um circuito fechado com quatro curvas. O erro da odometria cresce
+junto com o tamanho da rota — de quase zero na curta até 14 centímetros no
+circuito. Já o erro da posição do SLAM fica baixo e praticamente igual nas
+três, entre 2 e 3 centímetros. Ou seja: numa rota curta como a da minha
+campanha principal, não faz diferença qual das duas eu uso — o que
+confirma que a escolha que fiz foi segura. Mas numa rota mais longa, a
+escolha passa a importar de verdade.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 13 — Piloto FUUT: Primeira Evidência Empírica [Complementar · 1,3 min]
+SLIDE 12 — Piloto FUUT: Primeira Evidência Empírica
 ────────────────────────────────────────────────────────────────────────────
-Lembram do papel FUUT? Até pouco tempo, era só arquitetura. Rodei o
-primeiro piloto real: tb1 navega como MUUT, enquanto tb2 fica parado como
-FUUT, observando com o LiDAR. O tb1 diz onde está, pela pose do próprio
-SLAM; o tb2, de uma posição fixa conhecida, detecta onde o tb1 realmente
-passou, por subtração contra um scan do ambiente vazio. Se as duas fontes
-baterem, é uma confirmação independente de que o robô está onde diz estar.
-Na primeira tentativa, a discrepância deu quase três metros. Investigando,
-a distância detectada estava certa, só a direção estava errada por cerca de
-noventa graus — um offset de montagem do LiDAR que eu nunca tinha
-verificado. Com a correção empírica, a discrepância caiu pra entre três e
-seis centímetros, dentro do ruído de sensor, e as três réplicas foram
-classificadas como correspondência forte, com confiança entre 0,86 e 0,96.
-É preliminar — N pequeno, uma rota, uma calibração que ainda preciso
-confirmar contra o desenho do robô — mas é a primeira vez que o FUUT vira
-dado.
+Lembram do papel FUUT — o robô que fica parado só observando? Até pouco
+tempo, isso existia só na arquitetura. Rodei o primeiro teste real. Um
+robô (tb1) navega normalmente, enquanto outro (tb2) fica parado ao lado,
+como FUUT, só usando o sensor a laser pra observar. O tb1 diz "eu estou
+aqui" usando a própria estimativa de posição; o tb2, de um ponto fixo cuja
+posição eu conheço, detecta onde o tb1 realmente passou, comparando o que
+o laser vê agora com o que via quando o ambiente estava vazio. Se as duas
+informações baterem, é uma segunda confirmação, independente, de que o
+robô está onde diz estar. Na primeira tentativa, a diferença deu quase
+três metros. Investigando, a distância calculada estava certa; só a
+direção estava errada, por cerca de 90 graus — o sensor do robô parado
+estava montado girado em relação ao que eu tinha assumido. Corrigi esse
+ângulo e repeti: a diferença caiu pra entre 3 e 6 centímetros, dentro do
+ruído normal de sensor, e nas três repetições as duas fontes concordaram
+fortemente. É preliminar — poucas repetições, uma rota, e a correção do
+ângulo ainda precisa ser conferida no desenho técnico do robô — mas é a
+primeira vez que o papel do FUUT vira dado real.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 14 — Piloto: Alocação de Missão — LLM vs. Ótimo   (NOVO)
-                                                   [Complementar · 1,8 min]
+SLIDE 13 — Piloto de Missão — LLM vs. Ótimo   (NOVO)
 ────────────────────────────────────────────────────────────────────────────
-O segundo piloto olha pra camada de IA. A pergunta: quando a missão chega em
-português — "faça a ronda dos três corredores do sul" —, quem distribui
-melhor as zonas entre os robôs, e quem decide de forma repetível? Comparei
-o despacho por ordem fixa, que é o que o painel Missão Coordenada faz hoje,
-uma regra gulosa, a busca exaustiva — que dá o ótimo — e o Claude lendo o
-texto, repetido várias vezes. Só a decisão, sem executar no Gazebo. Na
-linha de cima, um cenário simples, sem obstáculos: o despacho fixo ficou
-até 42% acima do ótimo, e o LLM acertou o ótimo nas 50 chamadas, sempre com
-a mesma resposta. Na linha de baixo, um armazém com estantes e paredes, em
-que o robô mais perto em linha reta pode ser o mais longe pelo caminho. Aí o
-despacho fixo chega a 106% acima do ótimo. O LLM só com o mapa ficou no
-ótimo em 35 de 50, com pior caso de 54%, e deu sempre a mesma resposta em
-só metade das missões. Quando recebe as distâncias reais pelo caminho,
-volta ao ótimo nas 50. Em compensação, ele entendeu certo todas as
-missões — negação, robô que falhou no meio, papéis — e nunca moveu o FUUT.
-A leitura que faço: o LLM é bom pra interpretar a missão; quem otimiza deve
-ser o cálculo de caminho. Uma observação de método: o LLM apontou uma
-ambiguidade no texto de quatro missões que eu tinha escrito; corrigi e
-rodei de novo, e isso está registrado.
+O segundo teste-piloto olha pra camada de IA. A pergunta: quando eu dou
+uma missão em português — tipo "faça a ronda dos três corredores do sul" —
+quem decide melhor qual robô faz cada parte? E essa decisão sai igual se
+eu pedir de novo? Comparei quatro jeitos de decidir: o que o painel faz
+hoje, que é distribuir na ordem da lista; uma regra simples, que dá cada
+parte pro robô que menos atrasa a missão; um cálculo que testa todas as
+combinações e acha a melhor possível — o "ótimo"; e o Claude lendo o
+texto da missão, repetido várias vezes. Testei só a decisão, sem botar os
+robôs pra andar no simulador. No gráfico, cada barra é o quanto cada jeito
+ficou acima do melhor possível, no pior caso. Num cenário sem obstáculos
+(as barras azuis), o jeito atual do painel chegou a 42% acima do ótimo, e a
+IA acertou o ótimo nas 50 vezes, sempre com a mesma resposta. Num armazém
+com estantes e paredes (as barras laranja), onde o robô mais perto em
+linha reta pode ser o mais longe pelo caminho, o painel chega a 106%. A IA
+recebendo só o mapa acertou 35 de 50, errou até 54% nesses casos de
+"armadilha", e só em metade das missões deu sempre a mesma resposta.
+Quando ela recebe a distância real pelo caminho, acerta as 50. E ela
+entendeu certo todas as missões — inclusive "todos menos aquele", "esse
+robô quebrou, refaça a divisão" — e nunca mandou mover o robô que só
+observa. A leitura: a IA é ótima pra entender o que a missão pede; quem
+deve calcular a melhor divisão é o cálculo de caminho. Um detalhe de
+método: a própria IA apontou uma ambiguidade em quatro missões que eu
+tinha escrito; corrigi, rodei de novo, e isso está registrado.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 15 — Desafios Técnicos Superados              [Complementar · 0,9 min]
+SLIDE 14 — Desafios Técnicos Superados
 ────────────────────────────────────────────────────────────────────────────
-Quatro problemas técnicos reais que precisei resolver. Primeiro, TF por
-robô: o SLAM publicava em /tb1/tf, mas o buffer TF global só escutava /tf —
-o lookup falhava em silêncio. Resolvi com um buffer TF dedicado por robô.
-Segundo, cmd_vel por robô: o DiffDrive do TurtleBot4 usava /cmd_vel global —
-os dois robôs respondiam ao mesmo comando. Resolvi gerando o SDF em runtime
-com o tópico prefixado. Terceiro, timing entre SLAM e scan: o scan chegava
-antes do TF estar populado e a fila enchia — resolvi atrasando o bridge do
-scan em 2 segundos. E quarto, um bug de argparse: um ponto negativo como
--1.0,0,0 era lido como flag e derrubava o programa — resolvi exigindo a
-sintaxe --points=VALOR.
+Quatro problemas técnicos reais que precisei resolver no caminho.
+Primeiro: o sistema que sabe a posição de cada robô (o TF) publicava as
+informações num canal separado por robô, mas o programa que lia só
+escutava o canal genérico — então a leitura falhava sem nenhum aviso.
+Resolvi dando a cada robô seu próprio "escutador". Segundo: o comando de
+movimento de um robô estava valendo pros dois ao mesmo tempo — um comando
+movia os dois juntos. Resolvi separando esse canal por robô. Terceiro: o
+sensor a laser às vezes começava a mandar dados antes do sistema de
+posição estar pronto, e isso enchia a fila de processamento até travar —
+resolvi com um pequeno atraso proposital no início. Quarto: digitar um
+número negativo era confundido com uma opção de linha de comando e
+travava o programa — resolvi exigindo uma sintaxe sem ambiguidade.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 16 — Desafios Recentes: Multi-Robô, CI e Confiabilidade
-                                                   [Complementar · 1,1 min]
+SLIDE 15 — Desafios Recentes: Multi-Robô, CI e Confiabilidade
 ────────────────────────────────────────────────────────────────────────────
-Mais quatro, esses mais recentes. Xacro multi-robô: o TurtleBot4 publicava
-tópicos do Gazebo de forma global — resolvido com um fork do xacro que
-prefixa todo tópico pelo robot_id. CI que não testava ROS de verdade:
-testes dependentes de ROS eram pulados em silêncio e o badge verde não
-provava nada — criei um job que roda ROS 2 de verdade e falha se algum teste
-for pulado. Repetibilidade mal-medida: a detecção automática de tópico da
-análise caía direto pra odometria bruta, inflando o RMSE por deriva —
-corrigi a prioridade pra pose do SLAM e documentei o MPPI como fonte de
-variância esperada; a campanha principal segue em odom de propósito, uma
-escolha que, como mostrei há pouco, não muda o resultado numa rota curta. E
-processos órfãos: uma simulação antiga às vezes seguia rodando junto com a
-nova — resolvido matando a árvore de processos inteira no painel.
+Mais quatro desafios, esses mais recentes. Primeiro: o comando de
+movimento de todos os robôs ia pro mesmo canal global — resolvido
+separando esse canal por robô dentro do próprio modelo do robô que a
+simulação usa. Segundo: meus testes automáticos (que rodam sozinhos a cada
+mudança no código — isso se chama CI, integração contínua) estavam
+pulando em silêncio os testes que dependiam do ROS 2 de verdade, então o
+"sinal verde" não provava nada. Criei uma verificação que falha se algum
+teste for pulado. Terceiro: meu script de análise, no modo automático,
+estava usando a fonte de posição que acumula erro (a odometria) em vez da
+posição corrigida, o que inflava o erro medido. Corrigi a ordem de
+prioridade. E deixo claro: a campanha principal usa a odometria de
+propósito, e o slide 11 mostrou que, numa rota curta, isso não muda o
+resultado. Quarto: ao reiniciar a simulação, às vezes o processo antigo
+continuava rodando junto com o novo, causando falhas difíceis de entender
+— resolvi fazendo o sistema encerrar o processo antigo e todos os seus
+sub-processos antes de começar outro.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 17 — Nav2 Simultâneo: Achado Cyclone DDS      [Complementar · 1,3 min]
+SLIDE 16 — Nav2 Simultâneo: Achado Cyclone DDS
 ────────────────────────────────────────────────────────────────────────────
-Voltando ao bug da arquitetura — o salto no relógio simulado que me obrigou
-a ativar os robôs um de cada vez. Fui mais fundo: dá pra ligar os dois ao
-mesmo tempo de verdade? Testei ao vivo contra o Gazebo. Com o middleware
-padrão do ROS 2, o Fast DDS, a ativação simultânea funcionou em uma de cinco
-tentativas, 20%. Troquei pra Cyclone DDS — uma variável de ambiente, nenhuma
-mudança de código — e foram dez de dez, em duas baterias de cinco, sem o
-bug. O motivo: o limiar que detecta esse salto está fixo em um segundo no
-código do tf2, não é configurável, então só a troca de middleware
-resolveria. E um projeto real no GitHub, com as mesmas versões, recomenda
-exatamente essa configuração pra Nav2 em múltiplos robôs. Isso ainda não é
-a arquitetura padrão — toda a avaliação de RMSE que mostrei segue sob
-ativação sequencial —, mas é um candidato testado, não uma ideia.
+Voltando ao problema da arquitetura — o relógio da simulação pulando pra
+trás quando eu ligava dois robôs ao mesmo tempo. Investiguei mais a fundo:
+dá pra ligar os dois de verdade juntos, em vez de só contornar ligando um
+de cada vez? O ROS 2 usa por baixo um "correio interno" que leva as
+mensagens de um programa pro outro. O que vem por padrão se chama Fast
+DDS. Com ele, ligar os dois robôs juntos funcionou em só 1 de 5
+tentativas. Troquei esse correio por uma alternativa chamada Cyclone DDS —
+só mudando uma configuração, nenhuma linha de código — e funcionou 10 de
+10 vezes, em duas rodadas, sem o problema do relógio. O motivo técnico:
+no código do sistema de posição, o limite que detecta "o relógio pulou" é
+fixo, não dá pra ajustar — então só trocar o correio resolveria. E achei
+um projeto público, com a mesma versão do ROS 2, que recomenda exatamente
+essa troca pra vários robôs. Importante: ainda não adotei isso como padrão
+— todos os números que mostrei foram medidos com os robôs ligados um de
+cada vez. Mas agora tenho um caminho testado pra resolver isso de vez.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 18 — Trabalho Futuro e Conclusão              [Essencial · 1,4 min]
+SLIDE 17 — Trabalho Futuro e Conclusão
 ────────────────────────────────────────────────────────────────────────────
-Pra fechar: o framework está funcional em simulação, com RMSE médio de 3,35
-centímetros — máximo de 4,76 — entre réplicas, baixa dispersão entre
-execuções. O modo multi-robô tem dois resultados: a ativação sequencial,
-com 70% de sucesso, e o achado com Cyclone DDS, cem por cento em ativação
-simultânea, ainda sem avaliação de RMSE nessa configuração. O piloto FUUT
-deu a primeira evidência empírica desse papel. E o piloto de missão mostrou
-que o LLM interpreta bem a missão, mas, sem as distâncias reais, decide pior
-e de forma menos repetível — o que indica uma arquitetura híbrida. Como
-próximos passos, priorizo dois: adotar o Cyclone DDS como padrão e medir
-RMSE sob ativação simultânea; e ampliar o piloto FUUT pra mais réplicas e
-geometrias. Junto com isso: levar a alocação híbrida pro painel e executar
-as missões no Gazebo; definir a baseline via play_route; migrar o backend
-pra ROS 2 nativo; validar em hardware real; e fazer uma análise
-multi-sessão. Obrigado — fico à disposição pra perguntas.
+Pra fechar: o sistema funciona em simulação, com erro médio de 3,35
+centímetros entre repetições, e no máximo 4,76. No modo com vários robôs,
+tenho dois resultados: o jeito que uso hoje (ligar um de cada vez, 70% de
+sucesso) e a descoberta recente (trocar o correio interno do ROS 2, 100%
+ligando os dois juntos) — ainda preciso medir a repetibilidade nessa
+configuração nova. O piloto do FUUT deu os primeiros dados reais de que
+esse papel funciona. E o piloto de missão mostrou que a IA entende bem a
+missão, mas, sem a distância real pelo caminho, decide pior e de forma
+menos repetível — então o caminho é uma arquitetura híbrida: a IA
+interpreta e o cálculo decide. Como próximos passos, priorizo: adotar o
+Cyclone DDS como padrão e medir a repetibilidade com os robôs ligados
+juntos; repetir o piloto do FUUT com mais tentativas e posições; e
+executar as missões no simulador com essa divisão híbrida. Além disso:
+testar outro jeito de gravar a rota de referência; fazer o sistema falar
+com o ROS 2 de forma mais direta; testar num robô físico de verdade; e
+repetir os testes em dias diferentes pra ver se o resultado se mantém.
+
+────────────────────────────────────────────────────────────────────────────
+SLIDE 18 — Obrigado
+────────────────────────────────────────────────────────────────────────────
+Obrigado — fico à disposição pra perguntas.
