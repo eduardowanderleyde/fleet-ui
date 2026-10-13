@@ -24,7 +24,9 @@ map:
 
 map_notes: >
   Ao sul da base há três estantes longas no sentido norte-sul (de y=-4 a
-  y=-22), em x≈-9, x≈-2 e x≈6, formando corredores entre elas; ao fim delas
+  y=-22), em x≈-9, x≈-2 e x≈6. Os "três corredores do sul" são o oeste
+  (entre a primeira e a segunda estante), o central (entre a segunda e a
+  terceira) e o leste (a leste da terceira estante); ao fim das estantes
   (y≈-22) dá para passar de um corredor ao outro. Uma estante baixa corta o
   corredor leste em y≈-15. Ao norte da base há uma estante longa no sentido
   leste-oeste (y≈8 a 10, de x≈-5,5 a 12,5) e outra mais ao norte (y≈17 a 19,
@@ -75,8 +77,8 @@ missions:
   e2_cinco_zonas:
     category: escala
     text: >
-      Inspecione os três corredores entre as estantes do sul, o corredor da
-      parede oeste e a faixa do extremo norte.
+      Inspecione os três corredores do sul, o corredor da parede oeste e a
+      faixa do extremo norte.
     zones: [corredor_sul_oeste, corredor_sul_central, corredor_sul_leste, corredor_parede_oeste,
             faixa_extremo_norte]
   o1_doca:
@@ -89,7 +91,7 @@ missions:
     zones: [sala_noroeste]
   o3_corredores_sul:
     category: obstaculo
-    text: Faça a ronda dos corredores entre as estantes do sul.
+    text: Faça a ronda dos três corredores do sul.
     zones: [corredor_sul_oeste, corredor_sul_central, corredor_sul_leste]
   l1_norte_vago:
     category: linguagem
@@ -98,13 +100,13 @@ missions:
   l2_negacao:
     category: linguagem
     text: >
-      Verifique os corredores entre as estantes do sul, exceto o que é
-      fechado por uma estante baixa.
+      Verifique os três corredores do sul, exceto o que é fechado por uma
+      estante baixa.
     zones: [corredor_sul_oeste, corredor_sul_central]
   f1_tb2_falhou:
     category: falha
     text: >
-      Durante a ronda dos corredores entre as estantes do sul, o tb2 parou
+      Durante a ronda dos três corredores do sul, o tb2 parou
       com falha de bateria. O tb1 já terminou o corredor sul central e está
       parado no fim dele. Realoque o que falta da ronda.
     zones: [corredor_sul_oeste, corredor_sul_leste]
