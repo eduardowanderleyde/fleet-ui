@@ -616,7 +616,20 @@ aleatória ou heurística e não medem a variação da decisão entre execuçõe
 Esta seção reporta um piloto que mede as duas coisas. Assim como o piloto
 FUUT, ele fica fora do desenho formal QA1--QA4 (Seção~\ref{sec:questoes}) e
 avalia apenas a \emph{decisão} de alocação, sem executar a missão no
-simulador.
+simulador. A Figura~\ref{fig:missao_fluxo} resume o fluxo de uma missão e
+o que foi medido.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{diagrama_missao.pdf}
+\caption{Fluxo de uma missão no Fleet UI, ilustrado com uma missão do
+piloto (realocação após falha do tb2): o texto é interpretado (zonas
+pedidas e robôs aptos, excluindo o robô com falha e o FUUT), a divisão
+entre os robôs é decidida sobre as distâncias pelo caminho e a execução
+no Gazebo (tracejada) fica como trabalho futuro. A faixa inferior resume
+o resultado do piloto (Tabela~\ref{tab:missao_piloto}).}
+\label{fig:missao_fluxo}
+\end{figure}
 
 \subsection{Protocolo}
 
