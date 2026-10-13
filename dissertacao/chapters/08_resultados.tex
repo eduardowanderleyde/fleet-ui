@@ -601,6 +601,153 @@ acima:
     independente dela.
 \end{itemize}
 
+\section{Piloto: Alocação de Missão em Linguagem Natural}
+\label{sec:res_missao_piloto}
+
+A camada de agentes (Seção~\ref{sec:agentes}) e o painel Missão Coordenada
+(Seção~\ref{sec:painel_simulacao}) deixam em aberto uma pergunta que a
+literatura de LLM para sistemas multi-robô costuma responder só em termos
+de taxa de sucesso \cite{li2025llmmultirobot}: quando a missão chega em
+linguagem natural, a distribuição de tarefas entre os robôs é boa e,
+sobretudo, é \emph{repetível}? Trabalhos como SMART-LLM
+\cite{kannan2023smartllm} e LaMMA-P \cite{zhang2025lammap} decompõem a
+instrução e alocam subtarefas com LLM, mas comparam contra alocação
+aleatória ou heurística e não medem a variação da decisão entre execuções.
+Esta seção reporta um piloto que mede as duas coisas. Assim como o piloto
+FUUT, ele fica fora do desenho formal QA1--QA4 (Seção~\ref{sec:questoes}) e
+avalia apenas a \emph{decisão} de alocação, sem executar a missão no
+simulador.
+
+\subsection{Protocolo}
+
+Cada missão é um texto em português (por exemplo, ``Faça a ronda dos três
+corredores do sul'') sobre um conjunto de zonas nomeadas do mundo
+\textit{warehouse}, cada zona descrita por um percurso de entrada e saída.
+O gabarito de cada missão é o conjunto de zonas que o texto pede, e os
+textos citam as zonas pela descrição (``corredor oeste'', ``doca de
+carga''), não pelo identificador, de modo que a interpretação também é
+testada. Cada robô percorre as zonas que recebe, na ordem dada, e volta à
+posição inicial; como os robôs trabalham em paralelo, o custo de uma
+alocação é o \textit{makespan} (a maior distância percorrida por um único
+robô), com a distância total como desempate. Só robôs MUUT podem receber
+zonas, a mesma regra que o orquestrador impõe (Seção~\ref{sec:papeis}).
+
+Quatro alocadores são comparados sob esse mesmo custo: (i) despacho fixo,
+em que a zona $i$ vai para o robô $i \bmod N$, que é o comportamento atual
+do painel Missão Coordenada; (ii) uma regra gulosa, que dá cada zona ao
+robô que menos aumenta o \textit{makespan}; (iii) busca exaustiva das
+atribuições com programação dinâmica na ordem de cada robô, que fornece o
+ótimo de referência; e (iv) o modelo Claude Opus~5.5, com saída JSON
+restrita a nomes de robôs e zonas existentes, em duas variantes:
+\texttt{llm}, que recebe o texto da missão, as zonas, os robôs (com papel e
+posição) e uma descrição textual do mapa, e \texttt{llm\_\allowbreak dist},
+que recebe também a tabela de distâncias. O modelo não aceita parâmetro de
+temperatura, de modo que a variação entre chamadas não pode ser fixada pelo
+cliente, apenas medida; por isso cada missão é repetida.
+
+Foram usados dois cenários. No \emph{simples}, dois robôs MUUT e um FUUT,
+cinco missões de duas a cinco zonas, com distância em linha reta, e dez
+repetições por missão e variante. No \emph{difícil}, três robôs MUUT e um
+FUUT, dez missões de uma a nove zonas, com distância calculada pelo caminho
+livre no mapa de ocupação do \textit{warehouse} (obstáculos inflados em
+0,25\,m), e cinco repetições. As missões do cenário difícil cobrem cinco
+categorias: escala, obstáculo (o robô mais próximo em linha reta é o mais
+distante pelo caminho), linguagem (texto vago e negação), falha (um robô
+fica indisponível no meio da missão e o restante é realocado) e papel
+(o FUUT posicionado ao lado das zonas).
+
+Durante o estudo, o próprio LLM evidenciou uma ambiguidade no texto de
+quatro missões do cenário difícil: o termo ``corredores entre as estantes
+do sul'' descreve dois corredores, não três, e o gabarito incluía o
+terceiro. O modelo excluiu esse corredor com justificativa correta. O texto
+do cenário foi corrigido para definir ``os três corredores do sul'' e as
+quatro missões foram executadas novamente; os números abaixo usam essa
+rodada corrigida para as quatro missões e a rodada original para as outras
+seis.
+
+\subsection{Resultado}
+
+A Tabela~\ref{tab:missao_piloto} resume os dois cenários.
+
+\begin{table}[H]
+\centering
+\caption{Piloto de alocação de missão: distância ao ótimo, validade e repetibilidade da decisão por alocador. ``Pior caso'' é o maior \textit{makespan} observado acima do ótimo; ``mesma alocação'' conta as missões em que todas as repetições produziram o mesmo plano.}
+\label{tab:missao_piloto}
+\begin{tabular}{llrrr}
+\toprule
+\textbf{Cenário} & \textbf{Alocador} & \textbf{No ótimo} & \textbf{Pior caso} & \textbf{Mesma alocação} \\
+\midrule
+Simples (5 missões) & Fixo (painel) & 1/5 & +42,3\% & --- \\
+ & Guloso & 1/5 & +28,9\% & --- \\
+ & \texttt{llm} & 50/50 & 0\% & 5/5 \\
+ & \texttt{llm\_\allowbreak dist} & 50/50 & 0\% & 5/5 \\
+\midrule
+Difícil (10 missões) & Fixo (painel) & 2/10 & +105,9\% & --- \\
+ & Guloso & 5/10 & +56,8\% & --- \\
+ & \texttt{llm} & 35/50 & +53,7\% & 5/10 \\
+ & \texttt{llm\_\allowbreak dist} & 50/50 & 0\% & 9/10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Todas as 200 alocações do LLM consideradas foram válidas: o modelo
+identificou as zonas pedidas, inclusive sob negação (``exceto o que é
+fechado por uma estante baixa'') e no relato de falha (``o tb2 parou; realoque
+o que falta''), e em nenhum caso atribuiu zona ao robô FUUT ou a um robô
+indisponível. O despacho fixo, que é o comportamento atual do painel, ficou
+até 105,9\% acima do ótimo no cenário difícil.
+
+A diferença entre as duas variantes do LLM aparece no cenário difícil. Sem
+a tabela de distâncias, o modelo raciocinou pela proximidade aparente: na
+missão que pede só a sala do canto noroeste, acessível apenas pelo norte,
+escolheu em duas de cinco repetições o robô mais próximo em linha reta,
+que precisa de cerca de 61\,m pelo caminho contra 38\,m de outro robô
+(+53,7\%); na missão ``tudo que fica ao norte da estante do meio'', fez a
+mesma escolha nas cinco repetições, ou seja, foi repetível e errado ao mesmo
+tempo; e na missão de falha deu o plano errado em três de cinco repetições
+(+32,5\%). Além disso, em cinco das dez missões a mesma entrada produziu
+mais de um plano. Com a tabela de distâncias pelo caminho, o mesmo modelo
+ficou no ótimo nas 50 chamadas, e a única missão com mais de um plano
+alternou entre planos de mesmo custo.
+
+O piloto sustenta, portanto, uma divisão de responsabilidades: o LLM é
+confiável para \emph{interpretar} a missão (quais zonas, quais robôs podem
+participar), mas não para \emph{otimizar} sobre a geometria do ambiente sem
+receber as distâncias reais; quando as recebe, a decisão volta a ser ótima e
+repetível. Essa é a mesma combinação, interpretação por LLM e otimização por
+um procedimento clássico, adotada por LaMMA-P \cite{zhang2025lammap}. No
+cenário simples, o custo dessa escolha também ficou visível: a latência do
+LLM cresceu de cerca de 7\,s para 26\,s entre missões de duas e cinco zonas,
+enquanto a busca exaustiva resolve as mesmas instâncias em milissegundos.
+Os dados brutos, com o modelo que respondeu, os \textit{tokens} e a
+justificativa de cada decisão, estão versionados em
+\texttt{fleet\_\allowbreak ws/\allowbreak runs/\allowbreak mission\_\allowbreak allocation/}.
+
+\subsection{Limitações Específicas Deste Piloto}
+\label{sec:res_missao_limitacoes}
+
+\begin{itemize}
+    \item \textbf{Só a decisão, sem execução.} O \textit{makespan} é
+    calculado, não medido com robôs navegando; o efeito da alocação sobre a
+    repetibilidade da trajetória executada (RMSE) não foi avaliado. Além
+    disso, a ativação sequencial em uso (Seção~\ref{sec:limitacoes}) faria os
+    robôs percorrerem suas zonas um de cada vez, de modo que o tempo real
+    de missão seria a soma, e não o máximo, das distâncias.
+
+    \item \textbf{Distância pelo mapa estático, não pelo Nav2.} O caminho é
+    calculado sobre o mapa de ocupação com inflação fixa, sem o custo de
+    proximidade nem a cinemática que o planejador do Nav2 considera.
+
+    \item \textbf{Um ambiente, poucas repetições.} Um único mundo, cinco
+    repetições por missão no cenário difícil e missões escritas pelo
+    próprio autor; a ambiguidade encontrada durante o estudo mostra que o
+    texto das missões é ele mesmo uma fonte de erro a controlar.
+
+    \item \textbf{Um único modelo e uma única configuração.} Os resultados
+    valem para o Claude Opus~5.5 com esforço de raciocínio \textit{medium};
+    outros modelos ou configurações podem se comportar de modo diferente.
+\end{itemize}
+
 \section{Considerações Finais}
 \label{sec:res_conclusao}
 
