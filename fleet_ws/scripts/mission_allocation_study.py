@@ -121,7 +121,8 @@ def main() -> int:
           f"{n_calls} chamadas à API ({args.model}, effort={args.effort})")
     if args.dry_run:
         print("\n[dry-run] prompt da primeira missão:\n")
-        print(build_user_prompt(scenario, scenario.missions[mission_ids[0]], include_distances="llm_dist" in names))
+        first = scenario.missions[mission_ids[0]]
+        print(build_user_prompt(scenario.for_mission(first), first, include_distances="llm_dist" in names))
         return 0
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -133,7 +134,8 @@ def main() -> int:
         for mid in mission_ids:
             mission = scenario.missions[mid]
             best = optimal.allocate(scenario, mission)
-            summary[mid] = {"text": mission.text, "expected_zones": list(mission.zones),
+            summary[mid] = {"text": mission.text, "category": mission.category,
+                            "expected_zones": list(mission.zones),
                             "optimal_makespan": best.makespan, "allocators": {}}
             for allocator in allocators:
                 reps = 1 if allocator.deterministic else args.repeat
@@ -160,13 +162,14 @@ def main() -> int:
     }
     (out_dir / "summary.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    print(f"\n{'missão':24s} {'alocador':9s} {'válidas':>8s} {'distintas':>9s} {'modal':>6s} {'gap% méd':>9s} {'gap% máx':>9s}")
+    print(f"\n{'missão':24s} {'categoria':10s} {'alocador':9s} {'válidas':>8s} {'distintas':>9s} {'modal':>6s} "
+          f"{'gap% méd':>9s} {'gap% máx':>9s}")
     for mid, ms in summary.items():
         for name, s in ms["allocators"].items():
             gap_mean = f"{s['gap_pct_mean']:.1f}" if "gap_pct_mean" in s else "-"
             gap_max = f"{s['gap_pct_max']:.1f}" if "gap_pct_max" in s else "-"
-            print(f"{mid:24s} {name:9s} {s['n_valid']:>3d}/{s['n']:<4d} {s['distinct_allocations']:>9d} "
-                  f"{s['modal_share']:>6.0%} {gap_mean:>9s} {gap_max:>9s}")
+            print(f"{mid:24s} {ms['category']:10s} {name:9s} {s['n_valid']:>3d}/{s['n']:<4d} "
+                  f"{s['distinct_allocations']:>9d} {s['modal_share']:>6.0%} {gap_mean:>9s} {gap_max:>9s}")
     print(f"\n[study] resultados em {out_dir}")
     return 0
 

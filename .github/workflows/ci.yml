@@ -26,6 +26,7 @@ jobs:
             backend/ros_bridge.py \
             backend/mission/model.py \
             backend/mission/allocators.py \
+            backend/mission/gridmap.py \
             fleet_ws/scripts/health_check.py \
             fleet_ws/scripts/mission_allocation_study.py \
             fleet_ws/scripts/experiment_repeatability.py \
@@ -34,7 +35,7 @@ jobs:
             fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py
 
       - name: Install Python analysis dependencies
-        run: python3 -m pip install numpy pyyaml
+        run: python3 -m pip install numpy pyyaml pillow
 
       - name: Unit tests
         run: python3 -m unittest discover -s tests

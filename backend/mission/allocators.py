@@ -8,8 +8,8 @@ comparação entre eles seja justa:
   painel Missão Coordenada faz hoje. Referência ingênua.
 - `GreedyAllocator`: cada zona, na ordem da missão, vai pro robô que menos
   aumenta o makespan. Determinístico, barato.
-- `OptimalAllocator`: busca exaustiva (atribuição + ordem por robô). Ótimo
-  para o critério acima; viável para missões pequenas (até 8 zonas).
+- `OptimalAllocator`: busca exaustiva das atribuições + programação dinâmica
+  na ordem de cada robô. Ótimo para o critério acima; até 10 zonas.
 - `LLMAllocator`: o Claude lê o texto da missão, decide quais zonas ela pede
   e a quem atribuir. Não determinístico — por isso o estudo o repete N vezes.
 
@@ -19,15 +19,15 @@ from __future__ import annotations
 
 import itertools
 import json
+import math
 import time
 from dataclasses import asdict, dataclass, field
-from functools import lru_cache
 
-from .model import Mission, Scenario, dist, plan_costs, robot_plan_cost
+from .model import Mission, Scenario, dist, plan_costs
 
 DEFAULT_MODEL = "claude-opus-5-5"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
-MAX_OPTIMAL_ZONES = 8
+MAX_OPTIMAL_ZONES = 10
 
 
 @dataclass
@@ -64,7 +64,9 @@ def validate_plans(scenario: Scenario, mission: Mission, plans: dict[str, list[s
         if robot is None:
             issues.append(f"robo_desconhecido: {rid}")
             continue
-        if zones and not robot.movable:
+        if zones and not robot.available:
+            issues.append(f"robo_indisponivel: {rid} recebeu {zones}")
+        elif zones and not robot.movable:
             issues.append(f"papel_violado: {rid} ({robot.role}) recebeu {zones}")
         for z in zones:
             if z not in scenario.zones:
@@ -101,6 +103,7 @@ class FixedAllocator:
     deterministic = True
 
     def allocate(self, scenario: Scenario, mission: Mission) -> Allocation:
+        scenario = scenario.for_mission(mission)
         robots = scenario.movable_robots()
         plans: dict[str, list[str]] = {r.robot_id: [] for r in robots}
         for i, zone in enumerate(mission.zones):
@@ -113,6 +116,7 @@ class GreedyAllocator:
     deterministic = True
 
     def allocate(self, scenario: Scenario, mission: Mission) -> Allocation:
+        scenario = scenario.for_mission(mission)
         robots = scenario.movable_robots()
         plans: dict[str, list[str]] = {r.robot_id: [] for r in robots}
         for zone in mission.zones:
@@ -132,34 +136,74 @@ class OptimalAllocator:
     deterministic = True
 
     def allocate(self, scenario: Scenario, mission: Mission) -> Allocation:
-        zones = list(mission.zones)
+        scenario = scenario.for_mission(mission)
+        zones = sorted(mission.zones)
         if len(zones) > MAX_OPTIMAL_ZONES:
             raise ValueError(f"OptimalAllocator: {len(zones)} zonas > {MAX_OPTIMAL_ZONES} (busca exaustiva)")
         robots = scenario.movable_robots()
-
-        @lru_cache(maxsize=None)
-        def best_order(robot_id: str, subset: frozenset) -> tuple[float, tuple[str, ...]]:
-            robot = scenario.robots[robot_id]
-            best = (0.0, ())
-            for order in itertools.permutations(sorted(subset)):
-                cost = robot_plan_cost(robot, [scenario.zones[z] for z in order])
-                if not best[1] or cost < best[0] - 1e-9:
-                    best = (cost, order)
-            return best
+        # melhor ordem de cada subconjunto de zonas, por robô (índice = máscara de bits)
+        best_by_robot = [_best_orders(scenario, robot, zones) for robot in robots]
 
         best_key, best_plans = None, None
         for assignment in itertools.product(range(len(robots)), repeat=len(zones)):
             plans = {}
             costs = []
             for i, robot in enumerate(robots):
-                subset = frozenset(z for z, a in zip(zones, assignment) if a == i)
-                cost, order = best_order(robot.robot_id, subset)
+                mask = sum(1 << k for k, a in enumerate(assignment) if a == i)
+                cost, order = best_by_robot[i][mask]
                 plans[robot.robot_id] = list(order)
                 costs.append(cost)
             key = (round(max(costs), 9), round(sum(costs), 9), json.dumps(plans, sort_keys=True))
             if best_key is None or key < best_key:
                 best_key, best_plans = key, plans
         return build_allocation(self.name, scenario, mission, best_plans)
+
+
+def _best_orders(scenario: Scenario, robot, zones: list[str]) -> list[tuple[float, tuple[str, ...]]]:
+    """Para cada subconjunto de `zones` (máscara de bits), o menor custo do robô
+    percorrê-lo e voltar ao início, com a ordem correspondente.
+
+    Programação dinâmica de Held-Karp: f[máscara][última] = menor custo saindo
+    do início, visitando `máscara` e terminando na saída da zona `última`.
+    O(n² · 2ⁿ) por robô em vez de testar todas as n! ordens.
+    """
+    m = scenario.metric
+    zs = [scenario.zones[z] for z in zones]
+    n = len(zs)
+    length = [scenario.zone_length(z) for z in zs]
+    go = [m(robot.start, z.entry) for z in zs]
+    back = [m(z.exit, robot.start) for z in zs]
+    hop = [[m(a.exit, b.entry) for b in zs] for a in zs]
+
+    full = 1 << n
+    f = [[math.inf] * n for _ in range(full)]
+    parent = [[-1] * n for _ in range(full)]
+    for i in range(n):
+        f[1 << i][i] = go[i] + length[i]
+    for mask in range(1, full):
+        row = f[mask]
+        for last in range(n):
+            cost = row[last]
+            if cost == math.inf:
+                continue
+            for nxt in range(n):
+                if mask >> nxt & 1:
+                    continue
+                nmask = mask | 1 << nxt
+                ncost = cost + hop[last][nxt] + length[nxt]
+                if ncost < f[nmask][nxt] - 1e-9:
+                    f[nmask][nxt] = ncost
+                    parent[nmask][nxt] = last
+
+    best: list[tuple[float, tuple[str, ...]]] = [(0.0, ())] * full
+    for mask in range(1, full):
+        last = min((k for k in range(n) if mask >> k & 1), key=lambda k: (f[mask][k] + back[k], k))
+        order, cur, k = [], mask, last
+        while k != -1:
+            order.append(zones[k])
+            cur, k = cur & ~(1 << k), parent[cur][k]
+        best[mask] = (f[mask][last] + back[last], tuple(reversed(order)))
+    return best
 
 
 SYSTEM_PROMPT = """\
@@ -185,18 +229,39 @@ def _fmt(p) -> str:
 
 
 def build_user_prompt(scenario: Scenario, mission: Mission, include_distances: bool) -> str:
+    # Para cenários em linha reta e sem robô sobrescrito, o texto é idêntico ao
+    # do primeiro estudo (commit 1907edf), para manter aquele resultado reproduzível.
     lines = [f"Missão: {mission.text}", "", f"Zonas do ambiente (metros, frame {scenario.frame}):"]
     for zone in scenario.zones.values():
         route = " → ".join(_fmt(p) for p in zone.waypoints)
-        lines.append(f"- {zone.name}: {zone.description} Percurso {route} ({zone.length:.1f} m).")
+        lines.append(f"- {zone.name}: {zone.description} Percurso {route} ({scenario.zone_length(zone):.1f} m).")
+    if scenario.map_notes:
+        lines += ["", f"Sobre o mapa: {scenario.map_notes}"]
     lines += ["", "Robôs:"]
     for robot in sorted(scenario.robots.values(), key=lambda r: r.robot_id):
-        lines.append(f"- {robot.robot_id}: papel {robot.role}, posição inicial {_fmt(robot.start)}.")
-    if include_distances:
+        if not robot.available:
+            lines.append(f"- {robot.robot_id}: papel {robot.role}, INDISPONÍVEL (não pode receber zonas).")
+        elif robot.robot_id in mission.robot_overrides:
+            lines.append(f"- {robot.robot_id}: papel {robot.role}, posição atual {_fmt(robot.start)} "
+                         "(conta como posição inicial desta etapa).")
+        else:
+            lines.append(f"- {robot.robot_id}: papel {robot.role}, posição inicial {_fmt(robot.start)}.")
+    if include_distances and scenario.metric_name == "euclidean":
         lines += ["", "Distância em linha reta (m) de cada robô MUUT até a entrada de cada zona:"]
         for robot in scenario.movable_robots():
             cells = ", ".join(f"{z.name} {dist(robot.start, z.entry):.2f}" for z in scenario.zones.values())
             lines.append(f"- {robot.robot_id}: {cells}")
+    elif include_distances:
+        m, zones = scenario.metric, list(scenario.zones.values())
+        lines += ["", "Distâncias pelo caminho livre no mapa, contornando obstáculos (m).",
+                  "Da posição de cada robô MUUT até a entrada de cada zona, e da saída de cada zona de volta ao robô:"]
+        for robot in scenario.movable_robots():
+            cells = ", ".join(f"{z.name} {m(robot.start, z.entry):.1f}/{m(z.exit, robot.start):.1f}" for z in zones)
+            lines.append(f"- {robot.robot_id} (ida/volta pela saída): {cells}")
+        lines.append("Da saída de cada zona até a entrada de cada outra zona:")
+        for a in zones:
+            cells = ", ".join(f"{b.name} {m(a.exit, b.entry):.1f}" for b in zones if b is not a)
+            lines.append(f"- saída de {a.name}: {cells}")
     return "\n".join(lines)
 
 
@@ -281,6 +346,7 @@ class LLMAllocator:
         }
 
     def allocate(self, scenario: Scenario, mission: Mission) -> Allocation:
+        scenario = scenario.for_mission(mission)
         kwargs = self.request_kwargs(scenario, mission)
         meta = {
             "model_requested": self.model,

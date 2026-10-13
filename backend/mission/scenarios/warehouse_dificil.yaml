@@ -1,0 +1,125 @@
+# Cenário difícil de missão no mundo "warehouse" (nav2_minimal_tb4_sim).
+#
+# Diferenças em relação a warehouse.yaml:
+# - custo = caminho livre no mapa de ocupação (warehouse.pgm, obstáculos
+#   inflados em 0,25 m), não linha reta. Estantes e paredes fazem pontos
+#   próximos em linha reta ficarem longe pelo caminho;
+# - 3 robôs MUUT + 1 FUUT, missões de até 8 zonas;
+# - categorias: escala, obstaculo, linguagem (texto vago/negação), falha
+#   (robô cai no meio da missão e o resto é realocado) e papel (FUUT ao lado
+#   das zonas).
+#
+# Coordenadas em metros no frame do mundo. Os pontos foram checados contra o
+# PNG do mapa (livres após inflar e alcançáveis); antes de executar no Gazebo,
+# conferir com o mapa ao vivo. tb3/tb4 não estão nas DEFAULT_POSES do launch
+# multi-robô: na execução, passar tb3_x/tb3_y etc. no launch.
+name: warehouse_dificil
+frame: world
+distance: grid
+map:
+  image: ../../../frontend/public/warehouse_map.png
+  resolution: 0.03
+  origin: [-15.1, -25.0]
+  inflate_m: 0.25
+
+map_notes: >
+  Ao sul da base há três estantes longas no sentido norte-sul (de y=-4 a
+  y=-22), em x≈-9, x≈-2 e x≈6, formando corredores entre elas; ao fim delas
+  (y≈-22) dá para passar de um corredor ao outro. Uma estante baixa corta o
+  corredor leste em y≈-15. Ao norte da base há uma estante longa no sentido
+  leste-oeste (y≈8 a 10, de x≈-5,5 a 12,5) e outra mais ao norte (y≈17 a 19,
+  de x≈-10 a 8). Uma parede em x≈-10,5 (de y≈5 a 17) fecha a sala do canto
+  noroeste, que só tem acesso pelo norte.
+
+robots:
+  tb1: {role: MUUT, start: [0.0, 0.0]}
+  tb2: {role: MUUT, start: [8.0, 12.0]}   # ao norte da estante central
+  tb3: {role: MUUT, start: [-12.5, 2.0]}
+  tb4: {role: FUUT, start: [3.0, -3.0]}
+
+zones:
+  corredor_sul_oeste:
+    description: Corredor sul entre a primeira e a segunda estante, sentido norte-sul.
+    waypoints: [[-5.5, -5.0], [-5.5, -20.0]]
+  corredor_sul_central:
+    description: Corredor sul entre a segunda e a terceira estante, sentido norte-sul.
+    waypoints: [[2.0, -5.0], [2.0, -20.0]]
+  corredor_sul_leste:
+    description: Corredor sul a leste da terceira estante, sentido norte-sul, fechado ao sul por uma estante baixa.
+    waypoints: [[10.0, -5.0], [10.0, -13.0]]
+  corredor_parede_oeste:
+    description: Corredor ao longo da parede oeste, sentido norte-sul.
+    waypoints: [[-12.5, -3.0], [-12.5, -20.0]]
+  prateleira_base:
+    description: Frente da prateleira baixa ao sul da base, sentido oeste-leste.
+    waypoints: [[-1.5, -0.5], [1.8, -0.5]]
+  faixa_norte:
+    description: Faixa logo ao norte da estante central (leste-oeste), sentido oeste-leste.
+    waypoints: [[-2.0, 13.5], [6.0, 13.5]]
+  sala_noroeste:
+    description: Sala no canto noroeste, cercada por parede, sentido norte-sul.
+    waypoints: [[-13.0, 16.0], [-13.0, 11.0]]
+  doca_carga:
+    description: Doca de carga logo ao sul da estante central (leste-oeste), sentido oeste-leste.
+    waypoints: [[6.0, 6.5], [11.0, 6.5]]
+  faixa_extremo_norte:
+    description: Faixa no extremo norte, além da segunda estante leste-oeste, sentido oeste-leste.
+    waypoints: [[-3.0, 21.0], [6.0, 21.0]]
+
+missions:
+  e1_todas:
+    category: escala
+    text: Inspecione todas as zonas do armazém.
+    zones: [corredor_sul_oeste, corredor_sul_central, corredor_sul_leste, corredor_parede_oeste,
+            prateleira_base, faixa_norte, sala_noroeste, faixa_extremo_norte, doca_carga]
+  e2_cinco_zonas:
+    category: escala
+    text: >
+      Inspecione os três corredores entre as estantes do sul, o corredor da
+      parede oeste e a faixa do extremo norte.
+    zones: [corredor_sul_oeste, corredor_sul_central, corredor_sul_leste, corredor_parede_oeste,
+            faixa_extremo_norte]
+  o1_doca:
+    category: obstaculo
+    text: Inspecione a doca de carga.
+    zones: [doca_carga]
+  o2_sala:
+    category: obstaculo
+    text: Verifique a sala do canto noroeste.
+    zones: [sala_noroeste]
+  o3_corredores_sul:
+    category: obstaculo
+    text: Faça a ronda dos corredores entre as estantes do sul.
+    zones: [corredor_sul_oeste, corredor_sul_central, corredor_sul_leste]
+  l1_norte_vago:
+    category: linguagem
+    text: Dê uma olhada em tudo que fica ao norte da estante leste-oeste do meio.
+    zones: [faixa_norte, sala_noroeste, faixa_extremo_norte]
+  l2_negacao:
+    category: linguagem
+    text: >
+      Verifique os corredores entre as estantes do sul, exceto o que é
+      fechado por uma estante baixa.
+    zones: [corredor_sul_oeste, corredor_sul_central]
+  f1_tb2_falhou:
+    category: falha
+    text: >
+      Durante a ronda dos corredores entre as estantes do sul, o tb2 parou
+      com falha de bateria. O tb1 já terminou o corredor sul central e está
+      parado no fim dele. Realoque o que falta da ronda.
+    zones: [corredor_sul_oeste, corredor_sul_leste]
+    robots:
+      tb2: {available: false}
+      tb1: {start: [2.0, -20.0]}
+  f2_tb1_falhou:
+    category: falha
+    text: >
+      O tb1 travou e não responde. Inspecione a frente da prateleira baixa
+      perto da base e a faixa logo atrás da estante central.
+    zones: [prateleira_base, faixa_norte]
+    robots:
+      tb1: {available: false}
+  p1_fuut_ao_lado:
+    category: papel
+    text: Inspecione o corredor sul central e a frente da prateleira baixa perto da base.
+    zones: [corredor_sul_central, prateleira_base]

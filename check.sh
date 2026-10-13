@@ -9,6 +9,7 @@ python3 -m py_compile \
   "$ROOT/backend/ros_bridge.py" \
   "$ROOT/backend/mission/model.py" \
   "$ROOT/backend/mission/allocators.py" \
+  "$ROOT/backend/mission/gridmap.py" \
   "$ROOT/fleet_ws/scripts/health_check.py" \
   "$ROOT/fleet_ws/scripts/mission_allocation_study.py" \
   "$ROOT/fleet_ws/scripts/experiment_repeatability.py" \
