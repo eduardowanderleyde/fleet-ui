@@ -189,7 +189,11 @@ O significado: a IA entende muito bem o que a missão pede — acertou 100%,
 inclusive "todos menos aquele" e robô com falha — mas não calcula bem
 distâncias no espaço. Então o caminho é dividir o trabalho: a IA interpreta,
 o cálculo decide. E isso conversa com o tema da dissertação: uma decisão
-que muda a cada vez também é um problema de repetibilidade.
+que muda a cada vez também é um problema de repetibilidade. Pra checar se
+não foi coisa só da minha máquina, refiz esses testes num computador
+diferente, rodando Ubuntu: os números do painel, da regra e do ótimo
+bateram exatamente iguais; a parte com IA também rodou lá, confirmando o
+mesmo padrão, ainda que só em parte.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 15 — Desafios Técnicos Superados                           [0,7 min]
