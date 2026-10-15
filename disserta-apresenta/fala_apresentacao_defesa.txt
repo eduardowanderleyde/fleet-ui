@@ -70,7 +70,9 @@ simulador Gazebo, antes de ir pra um robô físico.
 SLIDE 5 — Arquitetura do Sistema                                 [1,1 min]
 ────────────────────────────────────────────────────────────────────────────
 O sistema tem camadas. No topo, a tela web, onde o pesquisador configura e
-acompanha o experimento, e liga a simulação com um botão. Abaixo, o
+acompanha o experimento, e liga a simulação com um botão — essa é a tela de
+verdade, à direita, com os dois robôs navegando sobre o mapa do armazém.
+Abaixo, o
 orquestrador: ele oferece os comandos prontos e usa o Nav2, a parte do ROS
 2 que leva o robô até o destino desviando de obstáculos. Aqui apareceu um
 problema real: ligar a navegação de dois robôs ao mesmo tempo fazia o
