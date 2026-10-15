@@ -674,6 +674,54 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   `.pptx` original, não aproximados de PDF); `fala_apresentacao_defesa.txt`
   sincronizado com o conteúdo novo dos slides.
 
+### 2026-10-13 — estudo de alocação de missão (LLM vs. ótimo), cenário difícil com mapa real, e defesa migrada pro deck CIn
+
+Sessão do autor com Claude Code (não é agente de pesquisa). Tudo commitado
+e com push. Onde está cada coisa:
+
+- **Código e dados — branch `windows-version`** (commits `1907edf`,
+  `344f366`, `318eb37`, `9ca98bf`): `backend/mission/` (alocadores fixo,
+  guloso, ótimo exato por programação dinâmica, e Claude `claude-opus-5-5`
+  com saída JSON de enums fechados; custo = makespan; distância em linha
+  reta ou pelo caminho livre no `warehouse.pgm` via `gridmap.py`),
+  cenários `warehouse.yaml` (simples) e `warehouse_dificil.yaml` (3 MUUT +
+  1 FUUT, 10 missões em 5 categorias: escala, obstáculo, linguagem, falha,
+  papel), script `fleet_ws/scripts/mission_allocation_study.py`, 25 testes.
+  Dados brutos + README de proveniência em `fleet_ws/runs/mission_allocation/`.
+  Roda no Windows, sem ROS/Gazebo (só Python + `anthropic`, `numpy`,
+  `pillow`). A `windows-version` NÃO tem a parte multi-robô/painel da
+  `mission-coordinate-large-scale`.
+- **Resultado** (200 decisões do LLM consideradas, ~US$ 9 no total):
+  sem obstáculos o LLM ficou no ótimo 50/50; com estantes e paredes, só
+  com o mapa, 35/50 no ótimo, pior caso +54% (armadilhas em que o robô mais
+  perto em linha reta é o mais longe pelo caminho: sala noroeste, "tudo ao
+  norte da estante"), mesma resposta em só 5/10 missões; com a tabela de
+  distâncias pelo caminho, 50/50. Interpretação 100% (negação, robô que
+  falhou, nunca usou o FUUT). Despacho fixo do painel: até +106%.
+  Leitura: LLM interpreta, cálculo de caminho otimiza (arquitetura híbrida).
+- **Erro de método registrado**: 4 missões do cenário difícil falavam em
+  "corredores entre as estantes do sul" (são 2, não 3); o LLM apontou com
+  justificativa correta. Cenário corrigido ("três corredores do sul") e as
+  4 missões rodadas de novo (rodada 03).
+- **Dissertação — branch `apresentacao-dissertacao`**: nova Seção 8.9
+  "Piloto: Alocação de Missão em Linguagem Natural" (Tabela 8.7), refs
+  novas `kannan2023smartllm` e `zhang2025lammap`; zip do Overleaf
+  regenerado e compilado pelo autor sem erros (126 páginas, nenhum "??").
+- **Defesa — branch `apresentacao-dissertacao`**: adotado como oficial o
+  deck com tema CIn/UFPE (`disserta-apresenta/apresentacao_defesa.pptx`,
+  18 slides; o deck azul anterior foi substituído) + a fala em linguagem
+  simples (`fala_apresentacao_defesa.txt`, ~22 min). Slide 13 novo (piloto
+  de missão, com gráfico). Corrigidos no deck e na fala: "essa semana",
+  "muito abaixo da tolerância do Nav2" sem ressalva, PP3 com sentido
+  invertido em relação à dissertação, protótipo antigo de roteamento na
+  conclusão. Para renderizar slides nesta máquina use o PowerPoint via COM
+  (não há LibreOffice).
+- **Ambiente da máquina do autor**: repositório em pasta de rede
+  (`Y:` = `\192.168.8.12\comum`) — não instalar `node_modules`/venv nem
+  rodar Docker a partir dela; para Gazebo/Docker, clonar em disco local.
+  Disco C: ~97% cheio. Chave da API em `ANTHROPIC_API_KEY` no usuário do
+  Windows (nunca colar no chat nem em comando).
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
