@@ -91,6 +91,29 @@ O estudo é publicado no \textit{Journal of the Brazilian Computer Society}, ref
 esse periódico como veículo relevante para avaliações empíricas rigorosas de sistemas
 baseados em ROS e a comparação empírica como metodologia científica consolidada na área.
 
+\subsection{Repetibilidade como Eixo de Benchmark de SLAM}
+
+\citeonline{du2024taskslam} propõem o TaskSLAM-Bench, um benchmark que avalia
+algoritmos de SLAM pela \emph{repetibilidade} (precisão) da navegação resultante
+ao longo de múltiplas execuções, em vez de apenas pela acurácia da trajetória
+contra um \textit{ground truth} único. O argumento central dos autores é que os
+benchmarks de SLAM convencionais negligenciam a repetibilidade apesar de sua
+importância para implantações reais, e que um SLAM visual estéreo pode atingir
+precisão comparável à de um SLAM a laser em ambientes internos típicos quando
+avaliado por esse critério. Publicado originalmente em 2024 e revisado em 2025,
+o trabalho corrobora de forma independente e recente a premissa metodológica
+central desta dissertação (Seção~\ref{sec:motivacao}): repetibilidade não é um
+detalhe de validação, é um eixo de avaliação que a literatura de SLAM está, ela
+própria, reconhecendo como subtratado.
+
+A diferença de escopo em relação a esta dissertação é, ainda assim, substancial.
+O TaskSLAM-Bench compara \emph{algoritmos de SLAM entre si} sob o mesmo robô e
+protocolo de execução, isolando a variável algorítmica; esta dissertação avalia a
+repetibilidade do \emph{pipeline completo} (SLAM + Nav2 + odometria) como ele é
+de fato operado em um experimento de navegação, sem isolar a contribuição
+individual de cada componente ao erro total observado, e sem propor um
+benchmark multiplataforma para comparação de algoritmos.
+
 \subsection{Repetibilidade em Mapeamento 3D}
 
 \citeonline{maset2022} avaliam a repetibilidade de um sistema robótico de mapeamento
@@ -130,6 +153,37 @@ tratadas como complementares, não excludentes: a simulação permite controle c
 das variáveis, enquanto o hardware real captura fenômenos físicos irreplicáveis em
 simulação. Esta dissertação adota essa visão ao focar em simulação para validação
 do framework, identificando hardware real como extensão natural.
+
+\subsection{Distinção em Relação a \textit{Teach-and-Repeat}}
+\label{sec:rel_teach_repeat}
+
+A linha de pesquisa mais próxima, em espírito, do protocolo record--replay desta
+dissertação é \textit{teach-and-repeat}, cuja formulação de referência é
+\citeonline{furgale2010teachrepeat}: um robô percorre uma rota uma vez sob
+supervisão (fase de ensino), construindo um mapa de submapas sobrepostos a partir
+de um sensor de bordo (no caso original, um par estéreo), e em seguida repete essa
+mesma rota de forma autônoma, corrigindo seu curso \emph{localmente} a partir da
+comparação entre o que o sensor vê agora e o que viu durante o ensino, sem depender
+de localização global. O sistema descrito percorreu mais de 32\,km, 99,6\% de
+forma autônoma, sem GPS.
+
+A diferença para o protocolo desta dissertação não é de grau, é de pergunta de
+pesquisa. \textit{Teach-and-repeat} responde ``o robô consegue se manter perto de
+uma rota já percorrida, usando correção sensorial local contra o que foi
+ensinado?'' --- e a resposta, nessa literatura, tende a ser sim, inclusive em
+ambientes sem GPS e ao longo de meses, quando a aparência do ambiente é modelada
+explicitamente. Esta dissertação responde uma pergunta diferente: ``se o mesmo
+sistema de navegação (SLAM + planejador global Nav2) for instruído a visitar os
+mesmos \textit{waypoints} em execuções sucessivas, replanejando do zero a cada
+vez, ele chega repetidamente ao mesmo lugar, pela mesma rota?'' Não há, no
+protocolo avaliado aqui, nenhuma correção local contra um registro sensorial da
+execução anterior: cada \textit{replay} é, do ponto de vista do planejador, uma
+navegação nova. O RMSE medido nesta dissertação captura, portanto, a
+repetibilidade do \emph{replanejamento global}, não a aderência de um seguidor de
+caminho a uma trajetória previamente ensinada --- as duas abordagens são
+complementares, não concorrentes, e uma combinação das duas (replanejamento
+global com correção local tipo \textit{teach-and-repeat} nos trechos mais
+sensíveis) é uma extensão plausível, não explorada aqui.
 
 \subsection{Fundamentos Probabilísticos da Avaliação de Navegação}
 
@@ -346,6 +400,36 @@ documenta a interface que viabiliza essa automação): a contribuição de
 Engenharia de Software do framework não está nos algoritmos de navegação em si,
 que são reaproveitados do Nav2 e do SLAM Toolbox sem modificação, mas na
 infraestrutura que torna cada execução um artefato de pesquisa autocontido.
+
+\citeonline{alt2025digitaltwin} atacam o mesmo problema de reprodutibilidade de
+experimentos robóticos por uma via distinta e mais ambiciosa: um laboratório
+virtual na nuvem (\textit{AICOR Virtual Research Building}) combinado a um
+framework de rastreamento semântico de execução, que registra não apenas dados
+de sensores, mas estados de crença anotados do robô ao longo da execução,
+permitindo que terceiros compartilhem, repliquem e validem execuções de tarefas
+robóticas em escala, por meio de um gêmeo digital (\textit{digital twin}) da
+plataforma. É a infraestrutura mais próxima, entre os trabalhos revisados, do
+objetivo declarado desta dissertação --- tornar cada execução um artefato de
+pesquisa reexecutável --- mas por um caminho de maior custo de engenharia
+(laboratório virtual, rastreamento semântico de crenças) do que o adotado aqui
+(gravação de \textit{bags} MCAP e cálculo de RMSE pairwise sobre trajetórias
+reamostradas). A escolha desta dissertação por essa via mais leve é deliberada:
+o objetivo não é replicar fielmente o estado interno de crença do robô em outra
+máquina, mas tornar verificável, com infraestrutura mínima e reaproveitável, se o
+mesmo sistema de navegação converge repetidamente ao mesmo resultado. Investigar
+se o rastreamento de execução ao estilo \citeonline{alt2025digitaltwin} agregaria
+poder diagnóstico aos relatórios de repetibilidade desta dissertação é uma
+extensão natural, não avaliada aqui (Seção~\ref{sec:futuros}).
+
+Por fim, vale registrar o estado atual do próprio artefato desta dissertação em
+relação a esse debate: o repositório inclui um \texttt{CITATION.cff} e um guia de
+replicação (\texttt{fleet\_ws/docs/REPLICATION.md}) documentando passo a passo
+como reexecutar as campanhas reportadas a partir do mesmo \textit{workspace}
+ROS~2, seguindo o espírito dos \textit{badges} ACM discutidos acima. Esses
+artefatos ainda não foram depositados em um repositório de arquivamento com DOI
+(por exemplo, Zenodo) no momento da escrita; essa é uma lacuna de baixo esforço
+e alto retorno, já identificada como trabalho futuro imediato
+(Seção~\ref{sec:futuros}), não uma limitação metodológica do framework em si.
 
 \section{Síntese Comparativa}
 \label{sec:rel_sintese}

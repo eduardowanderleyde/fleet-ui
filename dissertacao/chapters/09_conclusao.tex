@@ -445,6 +445,15 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
 
     \item Integrar câmera OAK-D para coleta de dados visuais sincronizados
     com trajetória.
+
+    \item \textbf{Depositar o artefato de replicação em repositório com DOI
+    (Zenodo).} O repositório já inclui \texttt{CITATION.cff} e um guia de
+    replicação passo a passo (\texttt{fleet\_ws/docs/REPLICATION.md},
+    Seção~\ref{sec:rel_reprodutibilidade}); falta o depósito em si, que não
+    exige nenhum desenvolvimento novo --- é o item de menor esforço e maior
+    retorno desta lista, dado que os \textit{badges} de artefato discutidos na
+    Seção~\ref{sec:rel_reprodutibilidade} dependem precisamente dessa
+    formalização para serem reivindicados.
 \end{itemize}
 
 \textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações
@@ -452,7 +461,12 @@ ambientais entre execuções; interface para exportação de dados no formato Ro
 ou HuggingFace, facilitando o uso dos bags como dataset para treinamento de modelos
 de navegação; suporte a experimentos com obstáculos dinâmicos programáveis; estudo
 de usabilidade controlado com participantes externos para quantificar a redução de
-esforço de engenharia atribuída à interface web (PP4).
+esforço de engenharia atribuída à interface web (PP4); avaliar se um framework de
+rastreamento semântico de execução ao estilo \citeonline{alt2025digitaltwin}
+(Seção~\ref{sec:rel_reprodutibilidade}) agregaria poder diagnóstico aos
+relatórios de repetibilidade hoje produzidos --- por exemplo, associando um
+desvio de RMSE a um estado de crença específico do planejador no momento em
+que ele ocorreu, não apenas à trajetória resultante.
 
 \textbf{Longo prazo}: generalização do framework para robôs além da família
 TurtleBot, incluindo manipuladores móveis; a integração contínua já criada
