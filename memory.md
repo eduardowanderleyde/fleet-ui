@@ -587,6 +587,93 @@ código/experimento a partir desses achados (ou está pendente de decisão).
   de novo: o worktree de um agente concluído não se autoremove, precisa
   limpeza manual antes de reusar a branch no checkout principal.
 
+### 2026-10-12 — frontend: bug real de clique no mapa + refatoração + responsividade + primeira suíte de testes
+
+- **[sessão]** Branch `mission-coordinate-large-scale`. Ponto de partida:
+  pedido vago do autor ("ajustar o frontend") → usei a skill
+  `frontend-ui-engineering` pra avaliar o estado atual antes de mexer.
+  Achado real nessa avaliação: `App.jsx` passava `onNavigateTo` (um no-op
+  documentado) pra prop `onAddWaypoint` do `MapView` — clicar no mapa pra
+  adicionar waypoint não fazia nada, em silêncio, apesar da UI dizer
+  "clique = +waypoint". Corrigido (`6e8d779`) e **testado de verdade**
+  com Playwright headless (instalado nesta sessão, sem navegador
+  interativo disponível) — clique real no canvas, contagem de waypoints
+  antes/depois.
+- **Refatoração estrutural** (pedido explícito "sim continue em ordem"):
+  - `a6ebff8` — `App.jsx` 999→441 linhas: extraídos `MapView.jsx`,
+    `ConnectionPanel.jsx`, `DiscoveryPanel.jsx`.
+  - `e08a496` — `MapView.jsx` 510→53 linhas: toda lógica imperativa de
+    canvas (desenho, zoom/pan, conversão mundo↔canvas) movida pro hook
+    `hooks/useMapCanvas.js`; `MapToolbar.jsx` extraído.
+  - No meio: acessibilidade real adicionada (não cosmética) —
+    `aria-expanded`/`aria-haspopup` nos 3 painéis-dropdown, `aria-label`
+    no canvas e no botão fechar do modal, `role="log"`/`role="alert"` nas
+    regiões dinâmicas (output, erros).
+- **`5ca2880`** — `styles/tokens.js` novo: 24 cores hex repetidas (uma
+  delas, `#2a3142`, usada 36×) viram tokens nomeados + função `btn()`
+  compartilhada. Aplicado em `App.jsx` + 4 componentes. Decisão
+  consciente de fronteira: `useMapCanvas.js` ficou de fora (variável
+  local `color` dentro do desenho dos robôs colidiria com o import).
+  `ConfigForm`/`AgentFleetPanel`/`SimulationPanel` também ficaram de
+  fora (não tocados nesta sessão, pra não arriscar código não revisado).
+- **`8d3ad44`** — testado com Playwright em 320/768/1024/1440px (checklist
+  do skill). Achados reais: grid principal (260px|mapa|300px) quebrava
+  por completo abaixo de ~900px (coluna do mapa ficava com largura
+  negativa, coluna de output saía da tela); barra de botões do header e
+  barra de ferramentas do mapa não quebravam linha; o toggle
+  Gravar/Reproduzir tinha `overflow:hidden`, que deixava o flexbox
+  encolher o botão abaixo do texto em vez de quebrar linha ("Reproduzir"
+  sumia) — causa raiz real, não só sintoma. Corrigido com media queries
+  em `index.css` (empilha em coluna única <768px) + `flexShrink`/
+  `flexWrap` pontuais. 1024px/1440px continuam idênticos visualmente.
+- **`5a2cfec`** — projeto não tinha nenhum teste de frontend
+  (`package.json` só tinha dev/build/preview). Configurado Vitest +
+  React Testing Library + jsdom (`vite.config.js`, `src/test/setup.js`
+  com stubs de `ResizeObserver`/canvas 2D — jsdom não implementa
+  nenhum dos dois). Primeiro teste real (`MapView.test.jsx`) cobre a
+  lógica de clique-adiciona-waypoint: clique chama `onAddWaypoint` com
+  coordenadas numéricas; sem a prop, clique não quebra nem dispara
+  nada — testa o contrato que o bug original violava. `npm test` roda a
+  suíte. O Playwright E2E (`/tmp/pw_test/test_waypoint.js`, não
+  commitado — é scratch) continua sendo a camada que valida a fiação
+  real App→MapView.
+- **Passe visual (skill `frontend-design`)**: escopo escolhido pelo autor
+  foi só diagnóstico, sem mexer em código. Achado real: a paleta atual
+  (fundo quase-preto `#0d0f14` + acento verde-menta `#6ee7b7` dominante)
+  bate literalmente com um dos clichês de design nomeados pelo skill
+  ("fundo quase preto + acento verde-ácido/vermelho único"), e os
+  eyebrow-labels em CAIXA ALTA acima de quase toda seção batem com outro
+  clichê nomeado. Em contraste, o layout em 3 colunas (config|mapa|
+  output), o uso de cor como semântica de estado (verde=sucesso,
+  vermelho=falha, índigo=conexão, roxo=agentes) e o par tipográfico
+  Outfit+JetBrains Mono são escolhas deliberadas, não clichê — mantidos
+  como estão. Nenhuma mudança de código feita (autor pediu só relatório).
+- **O que falta** (lista acordada com o autor, em ordem, restam 0 itens
+  "obrigatórios" — os 2 abaixo são melhorias opcionais, não pendências
+  da lista original):
+  - Acesso por teclado ao mapa (clique espacial pra adicionar waypoint)
+    não tem equivalente — `ConfigForm` já tem um "+ Waypoint" acessível
+    que cobre parte do caso, mas não o fluxo de apontar no mapa.
+    Precisaria de novo design de interação, não é patch rápido.
+  - Se o autor decidir agir no diagnóstico visual: trocar o acento verde
+    por algo menos genérico (ligado ao domínio: laranja de sinalização
+    industrial, azul do mapa do warehouse) e tirar o CAIXA-ALTA dos
+    eyebrows — ambas as mudanças ficariam isoladas em `styles/tokens.js`
+    e nos textos dos labels, baixo risco.
+  - **Pendência antiga, ainda não confirmada**: rotacionar/revogar as
+    chaves de API (TypeSafe e Anthropic) coladas em texto puro no chat
+    em sessão anterior.
+- Em paralelo, no branch `dissertacao`/`apresentacao-dissertacao` (fora
+  do escopo frontend, mas na mesma janela de trabalho): item (b) do
+  Cap. 9 (trabalho futuro) atualizado pra descrever o protótipo real de
+  `MissionRouter`/`decompose_and_route` (citando `gerkey2004` e a seção
+  real de coordenação multirrobô), bullet solto sobre câmera OAK-D
+  removido; apresentação de defesa (`apresentacao_defesa.pptx`)
+  reconstruída do zero pra copiar o estilo de uma apresentação real do
+  CBSOFT fornecida pelo autor (cores/logos/tamanho de slide extraídos do
+  `.pptx` original, não aproximados de PDF); `fala_apresentacao_defesa.txt`
+  sincronizado com o conteúdo novo dos slides.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
