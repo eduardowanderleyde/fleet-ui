@@ -2,16 +2,15 @@ FALA DA APRESENTAÇÃO — Defesa de Dissertação
 Framework para Experimentos de Repetibilidade em Robótica Móvel com ROS 2 (Fleet UI)
 Eduardo Wanderley — Mestrado em Robótica, 2026
 
-Acompanha apresentacao_defesa.pptx (tema CIn/UFPE, 20 slides).
+Acompanha apresentacao_defesa.pptx (tema CIn/UFPE, 19 slides).
 Estilo: linguagem simples — todo termo técnico vem com uma explicação curta
 na primeira vez que aparece. Frases curtas, uma ideia por frase.
 
-Revisado em 2026-10-15:
-- Slide 18 NOVO: "Relevância — Confirmada pela Literatura de 2025",
-  posicionando o framework contra teach-and-repeat, TaskSLAM-Bench (2025)
-  e a infraestrutura de laboratório virtual de Alt et al. (2025) — mesmas
-  3 citações novas incluídas em Trabalhos Relacionados da dissertação.
-  "Trabalho Futuro e Conclusão" passou a ser o slide 19; "Obrigado" o 20.
+Revisado em 2026-10-15 (2): o argumento de relevância contra teach-and-repeat,
+TaskSLAM-Bench (2025) e Alt et al. (2025) — testado antes como slide dedicado —
+foi dobrado pra dentro do slide "Trabalho Futuro e Conclusão" (bullet
+"Relevância") a pedido do autor, pra manter o deck mais enxuto. Volta a 19
+slides; "Obrigado" é o 19.
 
 Revisado em 2026-10-13 (2):
 - Versão enxuta: ~1.800 palavras, ~13-14 min (antes ~3.100, ~22 min). Nenhum
@@ -238,37 +237,26 @@ padrão: todos os números que mostrei foram medidos ligando um robô de cada
 vez. Mas o caminho está testado.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 18 — Relevância — Confirmada pela Literatura de 2025       [0,9 min]
-────────────────────────────────────────────────────────────────────────────
-Antes de fechar, um ponto sobre por que isso importa agora, não só pra mim.
-Comparei com a linha de pesquisa mais parecida, chamada teach-and-repeat:
-ela corrige o robô localmente contra o que um sensor viu numa rota já
-ensinada. Eu meço outra coisa: se o planejamento global, refeito do zero a
-cada repetição, chega sempre no mesmo lugar — pergunta diferente, que essa
-linha de pesquisa não responde. E não sou só eu dizendo que isso importa:
-um grupo da Georgia Tech publicou, há poucos meses, o mesmo diagnóstico que
-defendo aqui — que repetibilidade segue negligenciada nos testes de SLAM.
-E a infraestrutura mais ambiciosa que encontrei pra reprodutibilidade em
-robótica, um laboratório virtual na nuvem com rastreamento das decisões do
-robô, nem mede repetibilidade em navegação — os exemplos deles são de
-manipulação, em laboratório. A pergunta que meu framework responde segue
-sem resposta em qualquer um dos trabalhos que revisei.
-
-────────────────────────────────────────────────────────────────────────────
-SLIDE 19 — Trabalho Futuro e Conclusão                           [1,0 min]
+SLIDE 18 — Trabalho Futuro e Conclusão                           [1,2 min]
 ────────────────────────────────────────────────────────────────────────────
 Pra fechar. O sistema funciona em simulação, com erro médio de 3,35
 centímetros entre repetições. Com vários robôs, ligar um de cada vez
 funciona em 70%, e o Cyclone DDS chegou a 100% ligando juntos. O piloto do
 FUUT trouxe o primeiro dado real desse papel. E o piloto de missão mostrou
 que a IA entende bem a missão, mas a divisão deve ficar com o cálculo de
-caminho. Próximos passos: adotar o Cyclone DDS e medir a repetibilidade com
-os robôs juntos; ampliar o piloto do FUUT; executar as missões no
-simulador com essa divisão; e depositar o pacote de replicação, que já
-existe no repositório, num repositório com DOI — é o passo mais barato
-da lista. Depois, testar num robô físico.
+caminho. Um ponto sobre por que isso importa agora, não só pra mim: nem a
+linha de pesquisa mais parecida, teach-and-repeat, nem um benchmark
+publicado há poucos meses por um grupo da Georgia Tech, nem a
+infraestrutura mais ambiciosa que encontrei pra reprodutibilidade em
+robótica medem repetibilidade do planejamento global em navegação — a
+pergunta que meu framework responde segue sem resposta em qualquer um dos
+trabalhos que revisei. Próximos passos: adotar o Cyclone DDS e medir a
+repetibilidade com os robôs juntos; ampliar o piloto do FUUT; executar as
+missões no simulador com essa divisão; e depositar o pacote de replicação,
+que já existe no repositório, num repositório com DOI — é o passo mais
+barato da lista. Depois, testar num robô físico.
 
 ────────────────────────────────────────────────────────────────────────────
-SLIDE 20 — Obrigado
+SLIDE 19 — Obrigado
 ────────────────────────────────────────────────────────────────────────────
 Obrigado — fico à disposição pra perguntas.
