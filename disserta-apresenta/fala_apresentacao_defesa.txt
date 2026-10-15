@@ -189,11 +189,12 @@ O significado: a IA entende muito bem o que a missão pede — acertou 100%,
 inclusive "todos menos aquele" e robô com falha — mas não calcula bem
 distâncias no espaço. Então o caminho é dividir o trabalho: a IA interpreta,
 o cálculo decide. E isso conversa com o tema da dissertação: uma decisão
-que muda a cada vez também é um problema de repetibilidade. Pra checar se
-não foi coisa só da minha máquina, refiz esses testes num computador
-diferente, rodando Ubuntu: os números do painel, da regra e do ótimo
-bateram exatamente iguais; a parte com IA também rodou lá, confirmando o
-mesmo padrão, ainda que só em parte.
+que muda a cada vez também é um problema de repetibilidade. Pra garantir
+que não foi coincidência de uma máquina só, refiz esses testes num
+computador diferente: os números do painel, da regra e do ótimo bateram
+exatamente iguais; a parte com IA confirmou o mesmo padrão numa
+reprodução parcial — o crédito da API acabou no meio da bateria mais
+longa, antes de testar o cenário com estantes.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 15 — Desafios Técnicos Superados                           [0,7 min]
@@ -238,8 +239,10 @@ funciona em 70%, e o Cyclone DDS chegou a 100% ligando juntos. O piloto do
 FUUT trouxe o primeiro dado real desse papel. E o piloto de missão mostrou
 que a IA entende bem a missão, mas a divisão deve ficar com o cálculo de
 caminho. Próximos passos: adotar o Cyclone DDS e medir a repetibilidade com
-os robôs juntos; ampliar o piloto do FUUT; e executar as missões no
-simulador com essa divisão. Depois, testar num robô físico.
+os robôs juntos; ampliar o piloto do FUUT; executar as missões no
+simulador com essa divisão; e depositar o pacote de replicação, que já
+existe no repositório, num repositório com DOI — é o passo mais barato
+da lista. Depois, testar num robô físico.
 
 ────────────────────────────────────────────────────────────────────────────
 SLIDE 19 — Obrigado
