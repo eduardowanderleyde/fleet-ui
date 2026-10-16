@@ -722,6 +722,79 @@ e com push. Onde está cada coisa:
   Disco C: ~97% cheio. Chave da API em `ANTHROPIC_API_KEY` no usuário do
   Windows (nunca colar no chat nem em comando).
 
+### 2026-10-16 — feedback de banca prévia (Adrien/Breno) + achado do paper BLE da Bia/Fernanda + piloto de código pro experimento delas
+
+- **[sessão]** Autor colou anotações em maiúsculas de um ensaio/banca prévia
+  real com os orientadores. Resumo do que foi entendido (texto completo das
+  anotações só existe no histórico da conversa, não versionado em arquivo):
+  - **PP1 (automação)**: resposta "sim" não pode vir só do autor — precisa
+    de validação externa (outra pessoa usando sem escrever código novo).
+  - **PP2 (25cm)**: o limiar precisa de citação da literatura justificando,
+    não só "é o default do Nav2".
+  - **PP3 (fora de ambiente controlado)**: precisa ser resolvido **antes**
+    da defesa — rodar robô demora, não dá pra fazer de última hora.
+  - **PP4**: deveria ficar amarrada com PP1 (mesma evidência resolve as duas).
+  - **Reformulação sugerida da "primeira contribuição"**: não é o número de
+    RMSE — é um ambiente que alguém **sem formação em robótica** consegue
+    configurar e rodar um teste que representa a missão.
+  - **Breno** (achou que a parte de LLM/missão multi-robô "destoa muito" do
+    resto — "muita contribuição, esquecer LLM"): sugere focar na parte
+    consistente — teste automatizado é padrão bom na indústria de software,
+    mas com robô é complicado; o framework (tela web) resolve isso.
+  - **Adrien**: com robô é melhor não ser otimista; a interface importa mais
+    que a simulação; não gastar tempo falando de configuração, mostrar
+    funcionando em robô real; aproveitar o trabalho de Bia/Fernanda como
+    exemplo de aplicação real.
+  - **Ainda não decidido**: se a parte de LLM/missão (slide 18 da defesa,
+    Seção 8.9 da dissertação) fica, encolhe, ou sai — tensão real com o
+    trabalho de ontem (criou e depois mesclou o slide "Relevância").
+- **[achado]** Identifiquei o paper que a banca citou: **"Wireless
+  Connectivity Testing with Mobile Robots: A Bluetooth Low Energy Case
+  Study"**, CBSoft 2026 (8-11 set, São Paulo), Laboratório CRIAR/CIn-UFPE.
+  Autoras **Fernanda Neves** e **Beatriz Barros** (bolsistas), orientação
+  de **Adrien Durand-Petiteville** e **Breno Miranda** (os mesmos nomes
+  das anotações). Metodologia (só da notícia do portal do CIn, não do PDF
+  completo — anais do CBSoft 2026/SAST 2026 ainda não indexados
+  publicamente em sol.sbc.org.br, tentei 5 buscas diferentes): TurtleBot4
+  carrega um smartphone numa rota pré-definida em ambiente controlado
+  mapeado, outro dispositivo fica fixo numa posição conhecida, mede
+  degradação do sinal BLE até perder conexão, pra achar o limiar de
+  desconexão. Reivindica reprodutibilidade/redução de interferência humana.
+  Fonte: https://portal.cin.ufpe.br/2026/07/14/laboratorio-criar-do-cin-ufpe-tem-artigo-aprovado-no-cbsoft-2026/
+- **[achado de código]** `windows-version` (branch do próprio autor) tem um
+  setup Docker completo pra Windows: `docker-compose.windows.yml`, modo
+  headless (sem GUI do Gazebo, sem `network_mode: host`, portas 5173/8000
+  mapeadas) — existe porque ROS2 nativo não roda bem no Windows. README
+  documenta isso explicitamente. **Risco técnico levantado, não resolvido**:
+  se a Bia/Fernanda rodarem a tela via esse caminho (Docker Desktop no
+  Windows = WSL2 por baixo), passar um adaptador Bluetooth USB físico pro
+  container pra escanear BLE de verdade não é trivial (`usbipd-win` existe
+  mas é instável com Bluetooth especificamente). Não achei confirmação de
+  qual SO elas usam — autor vai perguntar direto a elas.
+- **[feito]** Pilotei a peça de código que a banca/o achado pedem, pro caso
+  de uso de Bluetooth (branch `mission-coordinate-large-scale`,
+  commit `a7c001a`):
+  - `fleet_ws/src/fleet_orchestrator/fleet_orchestrator/ble_rssi_publisher.py`
+    (novo nó): escaneia BLE via `bleak`, publica RSSI do dispositivo alvo
+    (endereço MAC via parâmetro ROS2) como `std_msgs/Int32` no tópico
+    `ble_rssi`. Degrada com log de erro (não derruba a pilha) sem adaptador
+    Bluetooth ou sem o parâmetro configurado.
+  - `fleet_data_collector/main.py`: registrei `ble_rssi` no `_TYPE_MAP`
+    (tópico→tipo) que a gravação usa — achei que esse é o gate real
+    (`UNKNOWN_TOPIC`), não o `/api/run_config` do backend, que só repassa
+    string sem validar.
+  - `ConfigForm.jsx`: `ble_rssi` como 5ª opção de tópico na tela; as 4
+    existentes ganharam descrição curta inline (ex. "odom — rodas —
+    posição estimada contando giros") em vez de só o nome cru — pedido
+    explícito do autor pra ficar mais intuitivo pra quem não é de robótica.
+  - **Limite honesto**: esta máquina de dev não tem adaptador Bluetooth
+    (confirmado, `rfkill`/`lsusb`/`/sys/class/bluetooth` vazios) — só testei
+    a lógica de filtro por endereço + conversão de tipo (4 testes novos em
+    `tests/test_ble_rssi_publisher.py`, só isso é testável sem hardware
+    real). O scan de verdade só confirma numa máquina com Bluetooth físico.
+- **Pendência explícita do autor**: ele vai perguntar direto pra Bia/Fernanda
+  qual SO/máquina elas usam antes de decidir o próximo passo nessa frente.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
