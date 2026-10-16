@@ -23,6 +23,7 @@ from fleet_msgs.srv import CollectionStatus, DisableCollection, EnableCollection
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu, LaserScan
+from std_msgs.msg import Int32
 from tf2_msgs.msg import TFMessage
 
 
@@ -53,6 +54,10 @@ class SensorCollector(Node):
         # "Plano: campanha ..."). Publicado por ground_truth_filter, só modo
         # single-robot por ora (ROBOT_INDEX fixo, não namespaced ainda).
         "ground_truth_pose_clean": ("geometry_msgs/msg/PoseStamped", PoseStamped),
+        # RSSI (dBm) do dispositivo BLE alvo, publicado por
+        # fleet_orchestrator/ble_rssi_publisher.py — teste de conectividade
+        # sem fio, não navegação (ver conhecimento do piloto BLE da Bia/Fernanda).
+        "ble_rssi": ("std_msgs/msg/Int32", Int32),
     }
 
     def __init__(self) -> None:

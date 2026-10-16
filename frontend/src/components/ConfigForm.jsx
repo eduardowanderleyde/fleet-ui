@@ -1,6 +1,14 @@
 import React from 'react'
 
-const ALL_TOPICS = ['scan', 'odom', 'imu', 'pose']
+// id = nome do tópico ROS2 gravado (bate 1:1 com o que o backend aceita,
+// ver backend/main.py); desc = explicação curta pra quem não é de robótica.
+const ALL_TOPICS = [
+  { id: 'scan',     desc: 'LiDAR — mapa dos obstáculos ao redor' },
+  { id: 'odom',     desc: 'rodas — posição estimada contando giros' },
+  { id: 'imu',      desc: 'inercial — aceleração e rotação' },
+  { id: 'pose',     desc: 'posição corrigida pelo SLAM (mais precisa que odom)' },
+  { id: 'ble_rssi', desc: 'força do sinal Bluetooth (BLE) — precisa do nó ble_rssi_publisher rodando' },
+]
 
 const S = {
   label:    { fontSize: '0.72rem', color: '#8b92a8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem', display: 'block' },
@@ -161,14 +169,15 @@ export default function ConfigForm({
         {cfg.collect && (
           <div>
             <span style={S.label}>Tópicos</span>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {ALL_TOPICS.map(t => (
-                <label key={t} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer',
-                  background: cfg.topics.includes(t) ? 'rgba(99,102,241,0.12)' : 'transparent',
-                  border: `1px solid ${cfg.topics.includes(t) ? '#6366f1' : '#2a3142'}`,
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              {ALL_TOPICS.map(({ id, desc }) => (
+                <label key={id} title={desc} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer',
+                  background: cfg.topics.includes(id) ? 'rgba(99,102,241,0.12)' : 'transparent',
+                  border: `1px solid ${cfg.topics.includes(id) ? '#6366f1' : '#2a3142'}`,
                   borderRadius: '6px', padding: '0.3rem 0.65rem' }}>
-                  <input type="checkbox" checked={cfg.topics.includes(t)} onChange={() => toggleTopic(t)} style={{ accentColor: '#6366f1', margin: 0 }} />
-                  <span style={{ fontSize: '0.82rem', color: cfg.topics.includes(t) ? '#e6e9ef' : '#8b92a8', fontFamily: 'monospace' }}>{t}</span>
+                  <input type="checkbox" checked={cfg.topics.includes(id)} onChange={() => toggleTopic(id)} style={{ accentColor: '#6366f1', margin: 0, flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.82rem', color: cfg.topics.includes(id) ? '#e6e9ef' : '#8b92a8', fontFamily: 'monospace', flexShrink: 0 }}>{id}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#4b5563' }}>— {desc}</span>
                 </label>
               ))}
             </div>
