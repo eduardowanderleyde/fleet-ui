@@ -902,6 +902,34 @@ e com push. Onde está cada coisa:
   serviço do broker). Registrado como pendência real no commit, não
   escondido atrás de "funciona".
 
+### 2026-10-17 (continuação 3) — ble_rssi_sim_bridge validado ponta a ponta de verdade (a "falha" anterior era erro de teste, não de código)
+
+- **[correção da entrada anterior]** O "não funcionou" registrado há pouco
+  não era um bug real — era eu testando o listener (`gz`/`ros2 topic echo`)
+  **depois** de publicar a mensagem, e gz-transport não reenvia mensagem
+  antiga pra assinante tardio. Corrigido a ordem (listener de pé primeiro,
+  publica depois) e funcionou de primeira.
+- **[achado de código, foi mais fundo]** Li `Broker.cc` e `MsgManager.cc`
+  (gazebosim/gz-sim, `src/comms/`) pra entender o fluxo real de entrega:
+  `Broker::OnMsg` recebe a mensagem de saída e enfileira em
+  `MsgManager::AddOutbound` (fila `outboundMsgs` do endereço de origem) —
+  sem validar nada, nem se o endereço existe. Quem decide entregar ou
+  descartar é o **modelo de comunicação** (`RFComms::Step`, chamado pelo
+  laço de simulação), que aplica a perda de sinal, sorteia o RSSI, e só se
+  o pacote "sobreviver" move ele pra `inboundMsgs` do destino. Só então
+  `MsgManager::DeliverMsgs` publica no tópico ROS2 e limpa a fila. Ou seja:
+  o Broker é só uma fila intermediária, quem decide fisicamente é o RFComms.
+- **[validado ao vivo, cadeia completa]**: `gz sim` (mundo oficial
+  `rf_comms.sdf`) + `ros2 run ros_gz_bridge parameter_bridge` + o nó
+  `ble_rssi_sim_bridge.py` (branch `perfect-bot`), tudo rodando junto.
+  Publiquei 5 mensagens via `gz topic pub -t /broker/msgs`, e o tópico
+  final `/ble_rssi` (`std_msgs/Int32`, o mesmo que `fleet_data_collector`
+  grava) recebeu **5 valores reais**: -56, -78, -76, -71, -61 dBm — a
+  variação batendo com o `sigma=10` (sombreamento gaussiano) configurado
+  no mundo de exemplo. Pipeline de simulação do piloto BLE **funciona de
+  ponta a ponta**, confirmado, não só em partes isoladas.
+- Commit: `d9966ba` em `perfect-bot`.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
