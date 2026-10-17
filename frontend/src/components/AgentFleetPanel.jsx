@@ -8,7 +8,7 @@ const S = {
     padding: '1rem', width: '640px', maxHeight: '70vh', overflowY: 'auto',
     boxShadow: '0 8px 32px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '0.75rem',
   },
-  title: { fontSize: '0.78rem', color: '#8b92a8', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  title: { fontSize: '0.78rem', fontWeight: 600, color: '#8b92a8' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' },
   card: { background: '#0d0f14', border: '1px solid #2a3142', borderRadius: '8px', padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' },
   textarea: {

@@ -25,6 +25,15 @@ export const color = {
   successDark:   '#065f46',
   successBg:     '#1a3a2a',
 
+  // Cor de marca (título, CTA principal) — deliberadamente separada de
+  // `success`: antes as duas eram a mesma cor verde, fazendo um único tom
+  // cobrir tanto "isto é o Fleet UI" quanto "isto deu certo" ao mesmo tempo.
+  // Laranja de sinalização, ligado ao domínio (placas/EPIs de armazém e
+  // chão de fábrica), não ao clichê genérico "fundo quase-preto + verde-ácido".
+  brand:     '#F2994A',
+  brandDark: '#7A3E12',
+  brandBg:   '#2E2013',
+
   danger:    '#f87171',
   dangerBg:  '#3a1a1a',
 
