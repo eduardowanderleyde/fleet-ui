@@ -930,6 +930,30 @@ e com push. Onde está cada coisa:
   ponta a ponta**, confirmado, não só em partes isoladas.
 - Commit: `d9966ba` em `perfect-bot`.
 
+### 2026-10-17 (continuação 4) — instala de verdade as 3 skills.sh de teste (antes só tinha pesquisado)
+
+- **[feito, branch `perfect-bot`]** Autor perguntou se eu tinha "trazido"
+  as habilidades do skills.sh — não tinha, só relatado o que existia.
+  Instalado de verdade agora, commit `7d57e0b`:
+  - **webapp-testing** (anthropics/skills): toolkit completo, não só o
+    SKILL.md — trouxe `scripts/with_server.py` (gerencia ciclo de vida de
+    backend+frontend juntos) e os 3 exemplos (`console_logging.py`,
+    `element_discovery.py`, `static_html_automation.py`).
+  - **verification-before-completion** (obra/superpowers): só o SKILL.md.
+  - **playwright-best-practices** (currents-dev): **decisão deliberada de
+    escopo** — essa skill tem dezenas de arquivos de referência (GraphQL,
+    Electron, pagamentos, i18n) que não se aplicam a este projeto; trouxe
+    só o SKILL.md (índice), não a árvore inteira — peso morto seria trazer
+    tudo sem uso.
+  - Hash de cada `SKILL.md` calculado com `sha256sum` real (não inventado),
+    mesmo não tendo o CLI original do skills.sh pra replicar o algoritmo
+    exato de hash dos outros registros — é um hash real do arquivo, só não
+    necessariamente idêntico byte a byte ao que a ferramenta original geraria.
+- **Confirmado**: `frontend/src/components/ConfigForm.jsx` com o tópico
+  `ble_rssi` + descrições intuitivas já estava presente em `perfect-bot`
+  (herdado de `mission-coordinate-large-scale` na hora do branch) — a parte
+  web já estava lá, só não tinha sido mencionada de novo nessa frente.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
