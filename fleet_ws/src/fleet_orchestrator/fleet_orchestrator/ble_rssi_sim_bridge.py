@@ -19,6 +19,14 @@ Verificado antes de escrever este nó (não assumido):
   (que tem um campo `float64 rssi` de primeira classe, diferente do lado
   Gazebo) é suportada de fábrica pelo ros_gz_bridge, não precisei escrever
   bridge de baixo nível.
+- **Validado ponta a ponta de verdade** (não só em partes isoladas):
+  gz sim com `rf_comms.sdf` + a bridge acima + este nó, tudo rodando junto;
+  publiquei 5 mensagens via `gz topic pub` em `/broker/msgs` e `/ble_rssi`
+  recebeu 5 `std_msgs/Int32` reais (-56, -78, -76, -71, -61, variação do
+  sombreamento gaussiano configurado). A primeira tentativa "falhou" só
+  porque o listener (`ros2 topic echo`) foi iniciado DEPOIS da publicação —
+  gz-transport não reenvia mensagem antiga pra assinante tardio; corrigido
+  subindo o listener antes de publicar.
 
 Pré-requisito pra rodar: a bridge do passo acima **já precisa estar no ar**
 (lançada à parte, ou via launch file — este nó não a inicia sozinho, só
