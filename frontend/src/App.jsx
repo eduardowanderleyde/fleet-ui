@@ -391,6 +391,7 @@ export default function App() {
               m.odom_avg_speed_ms    != null && { label: 'Vel. média',   value: `${m.odom_avg_speed_ms} m/s`,  color: color.success },
               m.scan_avg_valid_points!= null && { label: 'Scan pts',     value: `${m.scan_avg_valid_points}`,  color: color.warning },
               m.imu_accel_mean_ms2   != null && { label: 'IMU accel',    value: `${m.imu_accel_mean_ms2} m/s²`,color: color.purpleLight },
+              m.ble_rssi_mean_dbm    != null && { label: 'BLE RSSI',     value: `${m.ble_rssi_mean_dbm} dBm (${m.ble_rssi_min_dbm}…${m.ble_rssi_max_dbm}, n=${m.ble_rssi_n})`, color: color.brand },
             ].filter(Boolean)
             return cards.length > 0 && (
               <div style={{ background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', padding: '0.6rem 0.85rem', flexShrink: 0 }}>

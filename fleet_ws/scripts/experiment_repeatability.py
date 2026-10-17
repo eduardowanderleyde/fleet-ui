@@ -380,6 +380,7 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
         from rclpy.serialization import deserialize_message
         from nav_msgs.msg import Odometry as _Odom
         from sensor_msgs.msg import LaserScan as _Scan, Imu as _Imu
+        from std_msgs.msg import Int32 as _Int32
 
         # ── Duração via metadata ──────────────────────────────────────
         duration_s: Optional[float] = None
@@ -413,6 +414,7 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
         odom_n = 0
         scan_valid: list = []
         imu_norms: list = []
+        ble_rssi_vals: list = []
 
         while reader.has_next():
             try:
@@ -448,9 +450,16 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
                     imu_norms.append(_math.sqrt(a.x**2 + a.y**2 + a.z**2))
                 except Exception:
                     pass
+            elif topic == "/ble_rssi":
+                try:
+                    msg = deserialize_message(data, _Int32)
+                    ble_rssi_vals.append(msg.data)
+                except Exception:
+                    pass
 
         reader.close()
-        print(f"[TRACE] bag_metrics: odom={odom_n} msgs  path={odom_path:.4f} m  scan={len(scan_valid)}  imu={len(imu_norms)}")
+        print(f"[TRACE] bag_metrics: odom={odom_n} msgs  path={odom_path:.4f} m  scan={len(scan_valid)}  "
+              f"imu={len(imu_norms)}  ble_rssi={len(ble_rssi_vals)}")
 
         metrics: dict = {}
         if duration_s is not None:
@@ -467,6 +476,17 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
             var_a  = sum((v - mean_a) ** 2 for v in imu_norms) / len(imu_norms)
             metrics["imu_accel_mean_ms2"]    = round(mean_a, 3)
             metrics["imu_accel_variance_ms2"] = round(var_a, 4)
+        if ble_rssi_vals:
+            # Só existe leitura pra pacote que chegou (hardware real via
+            # ble_rssi_publisher.py, ou simulado via ble_rssi_sim_bridge.py
+            # + RFComms do Gazebo) — não há degradação suave até
+            # desconectar, é presença/ausência de leitura. min/max/mean dão
+            # uma noção do range e da variação (sombreamento/ruído) dentro
+            # da gravação, não da distância até a queda de sinal.
+            metrics["ble_rssi_mean_dbm"] = round(sum(ble_rssi_vals) / len(ble_rssi_vals), 1)
+            metrics["ble_rssi_min_dbm"]  = min(ble_rssi_vals)
+            metrics["ble_rssi_max_dbm"]  = max(ble_rssi_vals)
+            metrics["ble_rssi_n"]        = len(ble_rssi_vals)
 
         return metrics
     except Exception as e:
