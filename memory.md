@@ -954,6 +954,37 @@ e com push. Onde está cada coisa:
   (herdado de `mission-coordinate-large-scale` na hora do branch) — a parte
   web já estava lá, só não tinha sido mencionada de novo nessa frente.
 
+### 2026-10-17 (continuação 5) — aplica o diagnóstico estético que ficou só registrado antes (skill webapp-testing usada de verdade pela primeira vez)
+
+- **[feito, branch `perfect-bot`, commit `446bf55`]** O diagnóstico de uma
+  sessão anterior (skill `frontend-design`) achou 2 clichês reais e autor
+  tinha pedido só relatório na hora, sem aplicar. Hoje, autor confirmou
+  aplicar:
+  - `styles/tokens.js`: `color.brand` novo (`#F2994A`, laranja de
+    sinalização) — **deliberadamente separado** de `color.success`. Antes
+    as duas coisas eram a mesma cor verde (`#6ee7b7`), cobrindo "isto é o
+    Fleet UI" (marca) e "isto deu certo" (status) ao mesmo tempo — essa
+    sobreposição era parte do motivo de ler como clichê genérico. Verde
+    continua reservado só pra status semântico (NAV2 ON, Gravar ativo,
+    checkmarks) — não trocado em lugar nenhum.
+  - Título "Fleet UI" + os 2 botões de CTA principal (Executar, Iniciar
+    simulação) agora usam a cor de marca nova.
+  - 10 ocorrências de `textTransform: 'uppercase'` removidas em 6 arquivos
+    (App.jsx, ConnectionPanel, DiscoveryPanel, AgentFleetPanel,
+    SimulationPanel, ConfigForm) — confirmei antes que todo texto-fonte já
+    estava em case normal (CSS só forçava maiúsculas), então a remoção não
+    muda nenhum texto visível, só a apresentação. `fontWeight:600` mantém
+    a hierarquia de "isto é rótulo de seção" sem precisar de caixa alta.
+- **[primeira vez usando a skill `webapp-testing` de verdade, não só
+  instalada]** Segui a árvore de decisão dela (app dinâmico → 
+  `scripts/with_server.py --help` primeiro → script Python puro de
+  automação). Achei e corrigi 2 problemas reais no processo: faltava o
+  pacote Python `playwright` (só tinha instalado a versão Node antes);
+  minha primeira asserção usava `text=` (substring) e contava
+  "ble_rssi" duas vezes por bater também dentro de "ble_rssi_publisher"
+  no texto de ajuda — troquei pra `get_by_text(..., exact=True)`.
+  Resultado confirmado com screenshot real, não só "parece ter funcionado".
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
