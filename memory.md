@@ -863,6 +863,45 @@ e com push. Onde está cada coisa:
   aqui" sendo o próprio teste real); Windows e Mac são pesquisa + plano
   concreto, não validação.
 
+### 2026-10-17 (continuação 2) — RFComms do Gazebo: achado real que corrige minha resposta anterior, piloto simulado construído (não validado ponta a ponta)
+
+- **[correção]** Eu tinha dito antes que "Gazebo não tem simulação de RF/Bluetooth"
+  — errado, pelo menos parcialmente. Existe sim um sistema **oficial e
+  mantido**: `RFComms` (`gz-sim-rf-comms-system`), portado do projeto SubT
+  da OSRF. Confirmado instalado nesta máquina (`libgz-sim8-rf-comms-system.so`,
+  Gazebo Sim 8.11.0) e **rodado ao vivo** com o mundo de exemplo oficial
+  (`rf_comms.sdf`) — carregou sem erro, tópicos `/addr1/rx` e `/addr2/rx`
+  subiram.
+- **[achado de código, lido o .cc de verdade]** `RFComms.cc`
+  (gazebosim/gz-sim, branch main): perda log-distância
+  (`kPL = l0 + 10×fadingExponent×log10(distância)`) + sombreamento gaussiano
+  (`sigma`). O RSSI sorteado (`rxPower`) é escrito no cabeçalho da mensagem
+  (`rssiPtr->set_key("rssi")`) **só quando o pacote é entregue** — descarte é
+  silencioso (sem leitura nenhuma), não existe degradação suave até
+  desconectar. **Não faz raycasting nem detecta parede** — é puramente
+  distância + ruído estatístico, não geometria. Isso significa: serve pra
+  simular "sinal cai com a distância, com ruído realista", mas **não**
+  reproduz o efeito específico que o paper da Bia/Fernanda mede (paredes
+  atenuando mais que espaço aberto).
+- **[achado]** `ros_gz_interfaces/msg/Dataframe` (ROS2, já instalado) tem
+  campo `float64 rssi` de primeira classe — diferente do `gz.msgs.Dataframe`
+  cru (só tem header/endereços/payload). Confirmado ao vivo: a bridge
+  `ros2 run ros_gz_bridge parameter_bridge
+  "/addr2/rx@ros_gz_interfaces/msg/Dataframe[gz.msgs.Dataframe"` cria sem
+  erro — conversão de fábrica, não precisei escrever bridge de baixo nível.
+- **[feito, branch `perfect-bot`]** `ble_rssi_sim_bridge.py`: assina o
+  tópico já bridgeado e republica `.rssi` em `std_msgs/Int32` no MESMO
+  tópico `ble_rssi` que `ble_rssi_publisher.py` usa com hardware real —
+  gravação/análise não precisam saber a diferença.
+- **Honestidade**: tentei validar o fluxo **completo** de ponta a ponta
+  (publicar uma mensagem de teste via `gz topic pub` no `/broker/msgs` e
+  ver ela chegar em `/addr2/rx` com RSSI) — **não funcionou**, sem erro
+  visível no log. O exemplo oficial usa um publicador C++ compilado
+  (`examples/standalone/comms/publisher.cc`), não CLI; não investiguei a
+  fundo o porquê (timing de bind, serialização do payload, ou nome de
+  serviço do broker). Registrado como pendência real no commit, não
+  escondido atrás de "funciona".
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
