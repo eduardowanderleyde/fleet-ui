@@ -795,6 +795,32 @@ e com push. Onde está cada coisa:
 - **Pendência explícita do autor**: ele vai perguntar direto pra Bia/Fernanda
   qual SO/máquina elas usam antes de decidir o próximo passo nessa frente.
 
+### 2026-10-17 — pedido de confiabilidade cross-platform (Bluetooth Mac/Windows/Linux) + exploração do catálogo skills.sh
+
+- **[pedido do autor]** Quer confiança real (não "100% de certeza" — deixei
+  isso claro, software sozinho não garante isso sem testar em hardware de
+  verdade) de que conectar Bluetooth no Mac, Windows ou Linux funciona com
+  o TurtleBot4, usando o paper da Bia/Fernanda como referência. Pediu uma
+  branch `perfect-bot` usando skills.sh pra achar habilidades que
+  melhorassem frontend/backend/outros aspectos, e possivelmente branches
+  por plataforma (`perfect-bot-windows`, nomes repetidos/com erro de
+  digitação no pedido original — preciso confirmar com o autor antes de
+  criar, pra não nascerem branches com nome errado).
+- **[achado]** Catálogo público do skills.sh (fetchei a home + `/topic/testing`,
+  tentei `/topic/robotics` e `/topic/devops`, ambos 404) **não tem nada
+  específico de robótica, Bluetooth, Docker ou cross-platform** — só 8
+  tópicos: React, Next.js, Design & UI, Mobile, Agent workflows, Databases,
+  Testing, Marketing. As skills `ros2`/`robot-bringup` já instaladas vieram
+  de busca direta num repo nicho (`arpitg1304/robotics-agent-skills`), não
+  do catálogo geral — não tem mais nada parecido lá.
+  - Relevantes de verdade, da categoria Testing: **webapp-testing**
+    (anthropics/skills, padrões unit/integration/E2E), **playwright-best-practices**
+    (currents-dev, formaliza o que já venho fazendo manualmente com
+    Playwright a sessão toda), **verification-before-completion**
+    (obra/superpowers, força checagem antes de marcar como pronto).
+- **Em aberto**: aguardando o autor confirmar os nomes exatos das branches
+  por plataforma antes de criar qualquer uma.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
