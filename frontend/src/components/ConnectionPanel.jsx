@@ -24,7 +24,7 @@ export default function ConnectionPanel({
       </button>
       {isOpen && (
         <div style={{ position: 'absolute', top: '2.5rem', left: 0, zIndex: 100, background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '10px', padding: '1rem', width: '320px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-          <div style={{ fontSize: '0.78rem', color: color.textMuted, marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Selecionar robô</div>
+          <div style={{ fontSize: '0.78rem', fontWeight: 600, color: color.textMuted, marginBottom: '0.75rem' }}>Selecionar robô</div>
           <div role="radiogroup" aria-label="Robô a conectar" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
             {profiles.map(p => {
               const isSelected = selectedProfile === p.id
