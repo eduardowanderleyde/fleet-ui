@@ -24,6 +24,32 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-16 — branch `perfect-bot`: fecha a lacuna "grava BLE RSSI mas não tem como ver depois"
+
+- Revisão do enredo completo do `perfect-bot` (BLE real via `bleak` +
+  simulado via Gazebo `RFComms`, ver entradas anteriores) achou um gap:
+  dava pra gravar o tópico `ble_rssi` no bag, mas `_bag_compute_metrics()`
+  em `fleet_ws/scripts/experiment_repeatability.py` não lia esse tópico —
+  o resultado nunca aparecia em lugar nenhum depois da gravação.
+- Fechado: `_bag_compute_metrics()` agora deserializa `/ble_rssi` como
+  `std_msgs/Int32` e calcula `ble_rssi_mean_dbm`/`min`/`max`/`n`; `App.jsx`
+  mostra isso como card de métrica novo, ao lado dos cards de
+  odom/scan/imu que já existiam (mesmo padrão visual).
+- Checado: `fleet_ws/scripts/analyze_runs.py` **não** tem parser de
+  métricas de bag próprio (só `experiment_repeatability.py` tem) — não
+  havia segundo lugar pra replicar a mudança. O backend
+  (`backend/ros_bridge.py::run_experiment_step`) só faz
+  `json.loads(export_path)` genérico, sem whitelist de campos — então o
+  novo campo passa automaticamente sem precisar tocar no backend.
+- Importante manter em mente (já valia pros dados crus, vale pro
+  resumo também): RSSI aqui é presença/ausência de leitura por pacote
+  entregue, não uma curva suave de degradação até a queda de sinal —
+  então min/max/mean descrevem ruído/sombreamento *dentro* da gravação,
+  não "distância até perder o robô".
+- Testado: `py_compile` no script, `npm run build` + `vitest run` no
+  frontend, suíte Python completa via `backend/venv` (103 testes, sem
+  regressão). Commitado em `perfect-bot` (`4cc30ff`).
+
 ### 2026-10-03 — rodada 3, `experiment-gazebo-tracking`: mecanismo exato da perda de nome/timestamp no ground truth + reavaliação do `WheelSlip` + LiDAR noise confirmado não-usado
 
 - **[gazebo_tracking]** Lendo o código-fonte real do `gz-sim`
