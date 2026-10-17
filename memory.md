@@ -821,6 +821,48 @@ e com push. Onde está cada coisa:
 - **Em aberto**: aguardando o autor confirmar os nomes exatos das branches
   por plataforma antes de criar qualquer uma.
 
+### 2026-10-17 (continuação) — 4 branches `perfect-bot*` criadas e publicadas: diagnóstico BLE cross-platform
+
+- **[feito]** Confirmado com o autor (3 plataformas: Windows, Mac, Linux),
+  criadas e com push 4 branches a partir de `mission-coordinate-large-scale`:
+  `perfect-bot` (base), `perfect-bot-linux`, `perfect-bot-windows`,
+  `perfect-bot-mac`.
+- **`perfect-bot`**: `fleet_ws/scripts/check_ble_setup.py` — diagnóstico
+  cross-platform (detecta SO, confirma `bleak` instalado, tenta um scan BLE
+  de 3s). **Rodado de verdade** nesta máquina Linux sem adaptador Bluetooth:
+  reportou corretamente SO + bleak instalado, e falhou honestamente no scan
+  (timeout de 8s) — o caminho de erro funciona de ponta a ponta, não só na
+  teoria. Achei e corrigi um bug real: `bleak` 3.0.2 não expõe
+  `bleak.__version__` (troquei pra `importlib.metadata.version`).
+- **`perfect-bot-linux`**: `BLE_SETUP_LINUX.md` — testado de verdade (pip
+  install bleak, BlueZ via `systemctl`, grupo `bluetooth` do usuário). Nota
+  não confirmada: Bluetooth dentro de container Docker precisa do socket
+  D-Bus do host acessível, não validado (sem adaptador físico aqui).
+- **`perfect-bot-windows`**: **achado real de pesquisa** — `bleak` roda
+  nativamente no Windows via WinRT, **sem precisar de Docker/WSL2**. Isso
+  evita de vez o problema que eu tinha levantado antes (passar adaptador
+  Bluetooth físico pro WSL2 via `usbipd-win`, instável). Caminho proposto em
+  `BLE_SETUP_WINDOWS.md`: scanner BLE nativo fora do container, manda RSSI
+  pro backend (dentro do Docker) via HTTP no `localhost:8000` já mapeado.
+  **Não construí** o endpoint novo (`POST /api/ble_rssi`) nem o script de
+  ponte — ficaria código não verificado apresentado como pronto, sem máquina
+  Windows pra testar. Documentado como próximo passo explícito.
+- **`perfect-bot-mac`**: pesquisei a pegadinha real — macOS trata Bluetooth
+  como dado de privacidade (TCC); sem autorizar o Terminal/app em Ajustes do
+  Sistema, o processo **morre com SIGABRT** em vez de erro Python normal,
+  fácil de confundir com bug (fonte: troubleshooting oficial do bleak).
+  Ressalva de versão: macOS 12.0-12.2 tinha bug de scan sem `service_uuids`
+  (corrigido no 12.3). `BLE_SETUP_MAC.md`, também não testado ao vivo.
+- **Catálogo skills.sh, revisitado**: nada de robótica/Bluetooth/cross-platform
+  lá (já registrado na entrada anterior de hoje) — essas 4 branches foram
+  trabalho de pesquisa + código direto, não skill instalada.
+- **Honestidade explícita sobre o pedido original**: autor pediu "100% de
+  certeza" de que Bluetooth funcionaria nas 3 plataformas — deixei claro que
+  isso não existe sem testar em hardware real de cada uma. O que foi
+  entregue: Linux testado de ponta a ponta (com a limitação "sem hardware
+  aqui" sendo o próprio teste real); Windows e Mac são pesquisa + plano
+  concreto, não validação.
+
 **Como manter isto atualizado:** cada agente, ao final de uma execução,
 acrescenta uma entrada nova (data + achado em 1-2 linhas + link pro arquivo
 detalhado) nesta seção, sem apagar entradas anteriores. Se um achado tiver
