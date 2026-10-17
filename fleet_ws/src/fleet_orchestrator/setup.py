@@ -39,6 +39,7 @@ setup(
             'fleet_orchestrator = fleet_orchestrator.main:main',
             'ground_truth_filter = fleet_orchestrator.ground_truth_filter:main',
             'ble_rssi_publisher = fleet_orchestrator.ble_rssi_publisher:main',
+            'ble_rssi_sim_bridge = fleet_orchestrator.ble_rssi_sim_bridge:main',
         ],
     },
 )

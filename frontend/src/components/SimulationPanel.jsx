@@ -3,7 +3,7 @@ import { ROBOTS, SHAPES } from '../hooks/useSimulation'
 
 const S = {
   box:    { background: '#161a22', border: '1px solid #2a3142', borderRadius: '8px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' },
-  title:  { fontSize: '0.8rem', fontWeight: 600, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  title:  { fontSize: '0.8rem', fontWeight: 600, color: '#8b92a8' },
   select: { background: '#0d0f14', border: '1px solid #2a3142', borderRadius: '6px', color: '#e6e9ef', padding: '0.4rem 0.6rem', fontSize: '0.85rem', outline: 'none', width: '100%', boxSizing: 'border-box' },
   log:    { background: '#0d0f14', border: '1px solid #2a3142', borderRadius: '6px', padding: '0.4rem 0.55rem', fontSize: '0.68rem', fontFamily: 'monospace', color: '#8b92a8', maxHeight: '110px', overflowY: 'auto', whiteSpace: 'pre-wrap' },
 }
@@ -47,7 +47,7 @@ export default function SimulationPanel({ sim }) {
       <button
         onClick={() => status.running ? stop() : start({ mode: 'multi', world: 'warehouse', robots: ROBOTS })}
         disabled={starting}
-        style={status.running ? btn('#3a1a1a', '#f87171') : btn('#065f46', '#6ee7b7', starting)}>
+        style={status.running ? btn('#3a1a1a', '#f87171') : btn('#7A3E12', '#F2994A', starting)}>
         {starting ? '⏳ Iniciando…' : status.running ? '■ Parar simulação' : `▶ Iniciar simulação — ${SHAPES[shape].label}`}
       </button>
 

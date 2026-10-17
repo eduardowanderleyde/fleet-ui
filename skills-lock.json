@@ -30,6 +30,24 @@
       "sourceType": "github",
       "skillPath": "skills/ros2/SKILL.md",
       "computedHash": "8d0c5be6de5ea3cc4c143932adeda870bb07b66bdb900fb318294c8ce6ce13a3"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/webapp-testing/SKILL.md",
+      "computedHash": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
+    },
+    "verification-before-completion": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/verification-before-completion/SKILL.md",
+      "computedHash": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3"
+    },
+    "playwright-best-practices": {
+      "source": "currents-dev/playwright-best-practices-skill",
+      "sourceType": "github",
+      "skillPath": "playwright-best-practices/SKILL.md",
+      "computedHash": "42684b93abd595551d6f4b6949b951645503baa445aefa76aa2f0d52ddda2bf7"
     }
   }
 }
