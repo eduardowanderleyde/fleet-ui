@@ -14,7 +14,7 @@ export default function DiscoveryPanel({
       </button>
       {isOpen && (
         <div style={{ position: 'absolute', top: '2.5rem', left: 0, zIndex: 100, background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '10px', padding: '1rem', width: '380px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-          <div style={{ fontSize: '0.78rem', color: color.textMuted, marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Descoberta na rede</div>
+          <div style={{ fontSize: '0.78rem', fontWeight: 600, color: color.textMuted, marginBottom: '0.75rem' }}>Descoberta na rede</div>
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
             <input placeholder="Subnet (ex: 192.168.1) — auto" aria-label="Subnet a varrer" value={subnet} onChange={e => onSubnetChange(e.target.value)} style={{ ...S.input, flex: 1 }} />
             <input placeholder="user SSH" aria-label="Usuário SSH" value={sshUser} onChange={e => onSshUserChange(e.target.value)} style={{ ...S.input, width: '80px' }} />

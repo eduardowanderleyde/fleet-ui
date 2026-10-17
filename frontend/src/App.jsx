@@ -227,7 +227,7 @@ export default function App() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.3rem 1rem', borderBottom: `1px solid ${color.border}`, flexShrink: 0 }}>
-        <h1 style={{ margin: 0, fontSize: '1.1rem', color: color.success, fontWeight: 700 }}>Fleet UI</h1>
+        <h1 style={{ margin: 0, fontSize: '1.1rem', color: color.brand, fontWeight: 700 }}>Fleet UI</h1>
         <div style={{ display: 'flex', flexWrap: 'wrap', fontSize: '0.78rem', fontFamily: 'monospace', alignItems: 'stretch', background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', overflow: 'hidden' }}>
           {[
             { label: 'Nav2',   value: nav2Ok ? 'ON' : 'OFF',           color: nav2Ok ? color.success : color.danger },
@@ -238,7 +238,7 @@ export default function App() {
             { label: 'yaw',    value: pose.valid ? `${deg(pose.yaw)}°` : '—', color: pose.valid ? color.blue : color.textMuted },
           ].map(({ label, value, color: statColor }) => (
             <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.3rem 0.7rem', borderRight: `1px solid ${color.border}` }}>
-              <span style={{ fontSize: '0.62rem', color: color.textFaint, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
+              <span style={{ fontSize: '0.62rem', color: color.textFaint, fontWeight: 600 }}>{label}</span>
               <span style={{ color: statColor, fontWeight: 600, marginTop: '0.05rem' }}>{value}</span>
             </div>
           ))}
@@ -301,7 +301,7 @@ export default function App() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', overflowY: 'auto', paddingRight: '0.2rem', minHeight: 0 }}>
           <SimulationPanel sim={sim} />
 
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: color.success, textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>Configuração</span>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: color.textMuted, flexShrink: 0 }}>Configuração</span>
           <ConfigForm
             cfg={cfg}
             onChange={setCfg}
@@ -341,7 +341,7 @@ export default function App() {
 
             {/* Executar record/replay com coleta */}
             <button onClick={run} disabled={running || navigating || !isConnected}
-              style={btn(running || navigating || !isConnected ? color.successBg : color.successDark, color.success, running || navigating || !isConnected)}>
+              style={btn(running || navigating || !isConnected ? color.brandBg : color.brandDark, color.brand, running || navigating || !isConnected)}>
               {running ? '⏳ A executar…' : `▶ Executar ${cfg.command}`}
             </button>
             {running && (
@@ -364,7 +364,7 @@ export default function App() {
         {/* Coluna direita: output */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: color.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: color.textMuted }}>
               Output {jobId && <span style={{ color: color.blue2, fontWeight: 400 }}>#{jobId}</span>}
             </span>
             {job && !job.running && (
@@ -394,7 +394,7 @@ export default function App() {
             ].filter(Boolean)
             return cards.length > 0 && (
               <div style={{ background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '8px', padding: '0.6rem 0.85rem', flexShrink: 0 }}>
-                <div style={{ fontSize: '0.68rem', color: color.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>Métricas</div>
+                <div style={{ fontSize: '0.68rem', color: color.textMuted, fontWeight: 600, marginBottom: '0.4rem' }}>Métricas</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
                   {cards.map(({ label, value, color: cardColor }) => (
                     <div key={label} style={{ background: color.bgApp, borderRadius: '5px', padding: '0.3rem 0.5rem' }}>
@@ -422,7 +422,7 @@ export default function App() {
           <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Resultado JSON da execução"
             style={{ background: color.bgPanel, border: `1px solid ${color.border}`, borderRadius: '12px', width: '100%', maxWidth: '800px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: `1px solid ${color.border}` }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: color.textMuted, textTransform: 'uppercase' }}>Resultado JSON</span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: color.textMuted }}>Resultado JSON</span>
               <button onClick={() => setShowResult(false)} aria-label="Fechar" style={{ background: 'none', border: 'none', color: color.textMuted, cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
             </div>
             <pre style={{ flex: 1, overflowY: 'auto', margin: 0, padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem', lineHeight: 1.6, color: color.text }}>
