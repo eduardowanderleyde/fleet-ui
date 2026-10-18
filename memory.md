@@ -24,6 +24,20 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-18 (noite, cont. 4) — branch `perfect-bot`: README fixa `perfect-bot` nos comandos de clone
+
+- Achado real (apontado pelo usuário): `main`, a branch padrão do
+  repositório no GitHub, **não tem** `run_all.sh`/`setup.sh` nem nada
+  do que foi construído hoje — um `git clone <repo-url>` sem
+  `-b perfect-bot` cairia numa branch onde o README inteiro (Quick
+  start incluso) não bate com o que existe no disco. Toda a validação
+  de "clone limpo funciona" desta sessão foi feita clonando
+  explicitamente `perfect-bot` — sem fixar isso no README, a validação
+  não valeria pra quem seguisse o comando literal do documento.
+- Corrigido: os 2 `git clone` do README agora especificam
+  `-b perfect-bot`, com nota logo no topo do arquivo explicando o
+  porquê. Commit `93b7098` em `perfect-bot`, com push.
+
 ### 2026-10-18 (noite, cont. 3) — branch `perfect-bot`: Docker validado de ponta a ponta de verdade — é o caminho mais garantido entre máquinas
 
 - Pergunta do usuário: existe opção técnica melhor pra isso funcionar
