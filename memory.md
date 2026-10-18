@@ -24,6 +24,69 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-18 — branch `perfect-bot`: código real da Bia/Fernanda (repo mobile-robotics) analisado + 3 gaps fechados no web
+
+- Usuário recebeu o repositório real do experimento da Bia/Fernanda
+  (`mobile-robotics-main.zip`, equipe CRIAR-CIn/UFPE: Fernanda Neves,
+  **Beatriz Oliveira** — corrige nome registrado antes como "Barros" —,
+  Adrien Durand-Petiteville e Breno Miranda, orientadores). Paper-alvo:
+  "Wireless Connectivity Testing with Mobile Robots: A Bluetooth Low
+  Energy Case Study", CBSoft 2026.
+- Lido o código real (`nav_3points.py`, `script_celular.ps1`,
+  `docs/setup.md`, `docs/troubleshoot.md`, mapas): ROS 2 **Humble** (não
+  Jazzy), rota de só 3 pontos hardcoded (START/MIDPOINT/FINAL_GOAL) no
+  mapa real `hall_cin_v4` (corredor do CIn, ~64m, `.pgm`+`.yaml`,
+  convenção Nav2 map_server). A coleta BLE **não lê RSSI numérico
+  nenhum** — é tap automatizado via ADB na tela do app nRF Connect num
+  celular Android, com conectado/desconectado detectado por regex em
+  `dumpsys bluetooth_manager`; o número de RSSI nunca é logado em
+  nenhum arquivo por esse script. Dor documentada por elas em
+  `troubleshoot.md`: tiveram que trocar FastDDS→CycloneDDS por causa do
+  link USB-C RPi↔Create3, e montar hierarquia NTP/chrony pra parar de
+  corromper a TF por clock skew (achado real, candidato a alimentar
+  `conhecimento/dds_tuning.md` se for revisitado).
+- 3 gaps reais identificados e fechados no fleet-ui (commit `fce2d93`
+  em `perfect-bot`):
+  1. **Import de mapa real** (.yaml+.pgm) como fundo selecionável no
+     `MapView` — antes só dava pra ter fundo rodando SLAM ao vivo uma
+     vez (sem jeito de importar um mapa já pronto). Backend: parser PGM
+     (P2/P5) + conversão de ocupação (negate/thresholds, fórmula do
+     Nav2 map_server) pra PNG; endpoints `/api/import_map`,
+     `/api/list_maps`, `/api/slam_map_meta?name=`. Frontend: seletor de
+     mapa + mini-form de import em `MapToolbar`. Validado ponta a ponta
+     com o `hall_cin_v4.pgm` real delas (985×1369px) — corredor
+     renderiza alinhado com as coordenadas reais do `nav_3points.py`
+     delas (START no topo do corredor vertical, MIDPOINT na junção,
+     FINAL_GOAL no corredor horizontal à esquerda).
+  2. **Campo "Rótulo da execução"** em `ConfigForm` — metadado livre
+     (ex.: par de dispositivo BLE testado, homogênea/heterogênea) que
+     viaja pro JSON exportado. Resolve a perda de contexto que o fluxo
+     delas tem hoje (qual par de celular foi aquele run vira
+     conhecimento tácito de quem rodou, não fica em nenhum arquivo).
+  3. **Campo "Endereço BLE alvo"** em `ConfigForm`, setado via
+     `ros2 param set` antes de cada execução. Isso exigiu consertar
+     `ble_rssi_publisher.py`: o nó só lia `target_address` uma vez na
+     construção — sem callback de parâmetro, o campo seria cosmético,
+     não funcional. Adicionado `add_on_set_parameters_callback` +
+     início do scanner sob demanda quando o endereço é setado em
+     runtime.
+- Achado colateral consertado (bug real, não relacionado aos 3 gaps):
+  `useMapCanvas.js` tinha um efeito de carregar o fundo que dependia de
+  `draw`, e `draw` muda de identidade a cada poll de pose/status
+  (~300ms, não tem nada a ver com qual mapa está selecionado) — isso
+  causava reload infinito do fundo (fetch + decode de imagem em loop
+  sem nunca estabilizar) toda vez que o mapa mudava. Corrigido trocando
+  a dependência do efeito pra só `[mapName]`. Achado ao vivo testando o
+  import do `hall_cin_v4` via Playwright — parecia "travado" mas era
+  centenas de requisições disparando em loop.
+- Nota de ambiente (não é bug do produto): testando via Playwright
+  headless neste sandbox, a primeira requisição de uma página recém-
+  carregada contra o Vite dev server pode levar ~15-20s pra responder
+  (conexão fria do Chromium headless); depois disso tudo fica
+  instantâneo. Isso mascarou o diagnóstico do bug acima por um tempo —
+  qualquer teste futuro com Playwright nesse ambiente deve esperar esse
+  "aquecimento" passar antes de medir timing.
+
 ### 2026-10-16 — branch `perfect-bot`: fecha a lacuna "grava BLE RSSI mas não tem como ver depois"
 
 - Revisão do enredo completo do `perfect-bot` (BLE real via `bleak` +
