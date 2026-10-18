@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { getMap, getSlamMapMeta, saveBackgroundMap } from '../api/fleetApi'
+import { getMap, getSlamMapMeta, saveBackgroundMap, listMaps, importMap } from '../api/fleetApi'
 
 // Mapa pré-construído do warehouse (turtlebot4_navigation/maps/warehouse.pgm)
 // Metadados exactos do warehouse.yaml — alinhamento perfeito com o mundo Gazebo
@@ -34,6 +34,10 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
   const [savedMapMeta, setSavedMapMeta] = useState(null)
   const [savingMap, setSavingMap]       = useState(false)
   const [saveMsg, setSaveMsg]           = useState(null)
+  const [mapName, setMapName]           = useState('slam')   // 'slam' | 'warehouse' | nome importado
+  const [mapOptions, setMapOptions]     = useState(['warehouse'])
+  const [importingMap, setImportingMap] = useState(false)
+  const [importMsg, setImportMsg]       = useState(null)
   const [hoverCoord, setHoverCoord]     = useState(null)  // {x, y} em coords mundo
   const [floorOffset] = useState({ x: HOUSE_WORLD.x0, y: HOUSE_WORLD.y0 })
   const [floorScale]  = useState(HOUSE_WORLD.x1 - HOUSE_WORLD.x0)
@@ -245,31 +249,67 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
     }
   }, [poses, robotId, waypoints, worldToCanvas, activeMap, showFloor, floorOpacity, floorOffset, floorScale, savedMapMeta])
 
-  // Carrega fundo: prefere slam_map.png (guardado) > warehouse_map.png (pré-construído)
+  // Lista mapas disponíveis (warehouse sempre presente + o que o backend
+  // tiver salvo: 'slam' se já rodou SLAM, ou qualquer mapa importado via
+  // /api/import_map — ex.: o hall_cin_v4 da Bia/Fernanda).
   useEffect(() => {
-    const loadImg = (src, meta) => {
+    listMaps()
+      .then(d => setMapOptions(['warehouse', ...(d.maps || []).filter(n => n !== 'warehouse')]))
+      .catch(() => {})
+  }, [])
+
+  // Carrega fundo pelo mapName actual: 'warehouse' usa o PNG pré-construído
+  // direto; qualquer outro nome busca os metadados salvos no backend
+  // (slam_map.json ou <nome>_map.json) e cai pro warehouse se não existir.
+  useEffect(() => {
+    const loadWarehouse = () => {
       const img = new Image()
-      img.src = src + '?t=' + Date.now()
-      img.onload = () => { floorImgRef.current = img; if (meta) setSavedMapMeta(meta); draw() }
+      img.src = WAREHOUSE_MAP.src + '?t=' + Date.now()
+      img.onload = () => {
+        floorImgRef.current = img
+        setSavedMapMeta(WAREHOUSE_MAP)
+        fitMap()
+        draw()
+      }
     }
-    getSlamMapMeta()
+    if (mapName === 'warehouse') { loadWarehouse(); return }
+
+    const prefix = mapName === 'slam' ? 'slam_map' : `${mapName}_map`
+    getSlamMapMeta(mapName)
       .then(d => {
-        if (d.available) loadImg('/slam_map.png', d)
-        else {
-          // Warehouse: faz fit automático quando carrega
-          const img = new Image()
-          img.src = WAREHOUSE_MAP.src + '?t=' + Date.now()
-          img.onload = () => {
-            floorImgRef.current = img
-            setSavedMapMeta(WAREHOUSE_MAP)
-            fitMap()   // <-- encaixa imediatamente
-            draw()
-          }
+        if (!d.available) { loadWarehouse(); return }
+        const img = new Image()
+        img.src = `/${prefix}.png?t=` + Date.now()
+        img.onload = () => {
+          floorImgRef.current = img
+          setSavedMapMeta(d)
+          fitMap()
+          draw()
         }
       })
-      .catch(() => loadImg(WAREHOUSE_MAP.src, WAREHOUSE_MAP))
+      .catch(loadWarehouse)
+    // Só [mapName]: draw muda de identidade a cada poll de status/pose (não
+    // tem nada a ver com qual mapa está selecionado) — depender de draw
+    // aqui faz o efeito recarregar o fundo (fetch + decode de imagem) a
+    // cada ~300ms pra sempre, num loop que nunca estabiliza porque poses é
+    // recriado a cada resposta de /api/status. draw() já é chamado
+    // manualmente nos callbacks acima pra repintar depois do load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draw])
+  }, [mapName])
+
+  const doImportMap = async ({ name, yamlPath }) => {
+    setImportingMap(true); setImportMsg(null)
+    try {
+      const d = await importMap({ name, yamlPath })
+      setImportMsg(d.success ? 'ok' : (d.message || 'erro'))
+      if (d.success) {
+        const d2 = await listMaps()
+        setMapOptions(['warehouse', ...(d2.maps || []).filter(n => n !== 'warehouse')])
+        setMapName(name)
+      }
+    } catch (e) { setImportMsg(e.message || 'erro') }
+    finally { setImportingMap(false); setTimeout(() => setImportMsg(null), 5000) }
+  }
 
   // Busca mapa periodicamente (do robô selecionado — cada robô tem seu
   // próprio SLAM, não um mapa global). Troca de robô limpa o mapa anterior
@@ -407,13 +447,18 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
       const d = await saveBackgroundMap()
       setSaveMsg(d.success ? 'ok' : 'erro')
       if (d.success) {
-        const img = new Image()
-        img.src = '/slam_map.png?t=' + Date.now()
-        img.onload = () => {
-          floorImgRef.current = img
-          getSlamMapMeta().then(d => {
-            if (d.available) setSavedMapMeta(d); draw()
-          })
+        setMapOptions(prev => prev.includes('slam') ? prev : [...prev, 'slam'])
+        if (mapName === 'slam') {
+          const img = new Image()
+          img.src = '/slam_map.png?t=' + Date.now()
+          img.onload = () => {
+            floorImgRef.current = img
+            getSlamMapMeta('slam').then(d => {
+              if (d.available) setSavedMapMeta(d); draw()
+            })
+          }
+        } else {
+          setMapName('slam')
         }
       }
     } catch { setSaveMsg('erro') }
@@ -424,6 +469,7 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
     canvasRef,
     mapOk, showFloor, setShowFloor, floorOpacity, setFloorOpacity,
     savedMapMeta, savingMap, saveMsg, hoverCoord,
+    mapName, setMapName, mapOptions, importingMap, importMsg, importMap: doImportMap,
     fitMap, draw, saveBackground,
     onWheelBound: onWheel,
     onMouseDown, onMouseMove, onMouseLeave, onMouseUp, onClick,

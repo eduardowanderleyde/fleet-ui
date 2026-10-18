@@ -19,6 +19,12 @@ export default function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
         onSave={map.saveBackground}
         onCenter={() => { map.fitMap(); map.draw() }}
         hoverCoord={map.hoverCoord}
+        mapName={map.mapName}
+        setMapName={map.setMapName}
+        mapOptions={map.mapOptions}
+        importingMap={map.importingMap}
+        importMsg={map.importMsg}
+        onImportMap={map.importMap}
       />
 
       {/* Interação é mouse-only (clique adiciona waypoint, scroll dá zoom,

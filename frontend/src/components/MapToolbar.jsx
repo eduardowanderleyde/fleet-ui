@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { color } from '../styles/tokens'
 
 export default function MapToolbar({
@@ -5,7 +6,19 @@ export default function MapToolbar({
   floorOpacity, onFloorOpacityChange,
   mapOk, savingMap, saveMsg, onSave,
   onCenter, hoverCoord,
+  mapName, setMapName, mapOptions, importingMap, importMsg, onImportMap,
 }) {
+  const [showImport, setShowImport] = useState(false)
+  const [importName, setImportName] = useState('')
+  const [importPath, setImportPath] = useState('')
+
+  const submitImport = () => {
+    if (!importName.trim() || !importPath.trim()) return
+    onImportMap({ name: importName.trim(), yamlPath: importPath.trim() })
+    setShowImport(false)
+    setImportName(''); setImportPath('')
+  }
+
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', flexShrink: 0,
                   background: color.bgPanel, borderRadius: '8px', padding: '0.4rem 0.7rem',
@@ -33,8 +46,50 @@ export default function MapToolbar({
                  border: `1.5px solid ${showFloor ? color.success : color.border}`,
                  borderRadius: '6px', padding: '0.3rem 0.65rem', fontSize: '0.75rem',
                  fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-        🏭 {savedMapMeta ? 'Warehouse' : 'Mapa'}
+        🏭 {savedMapMeta ? 'Planta' : 'Mapa'}
       </button>
+
+      {mapOptions && (
+        <select value={mapName} onChange={e => setMapName(e.target.value)}
+          aria-label="Mapa de fundo"
+          style={{ background: color.bgApp, color: color.textMuted2, border: `1.5px solid ${color.border}`,
+                   borderRadius: '6px', padding: '0.28rem 0.4rem', fontSize: '0.75rem', fontFamily: 'inherit', cursor: 'pointer' }}>
+          {mapOptions.map(n => <option key={n} value={n}>{n}</option>)}
+        </select>
+      )}
+
+      {onImportMap && (
+        <button onClick={() => setShowImport(v => !v)}
+          title="Importar mapa real (.yaml + .pgm)"
+          style={{ background: 'transparent', color: color.indigo, border: `1.5px solid ${color.indigo}`,
+                   borderRadius: '6px', padding: '0.3rem 0.5rem', fontSize: '0.75rem',
+                   fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+          📥
+        </button>
+      )}
+
+      {showImport && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <input value={importName} onChange={e => setImportName(e.target.value)} placeholder="nome (ex.: hall_cin_v4)"
+            style={{ background: color.bgApp, border: `1px solid ${color.border}`, borderRadius: '5px',
+                     color: color.text, padding: '0.25rem 0.45rem', fontSize: '0.72rem', width: '150px', fontFamily: 'inherit' }} />
+          <input value={importPath} onChange={e => setImportPath(e.target.value)} placeholder="caminho do .yaml"
+            style={{ background: color.bgApp, border: `1px solid ${color.border}`, borderRadius: '5px',
+                     color: color.text, padding: '0.25rem 0.45rem', fontSize: '0.72rem', width: '220px', fontFamily: 'monospace' }} />
+          <button onClick={submitImport} disabled={importingMap}
+            style={{ background: 'transparent', color: color.success, border: `1.5px solid ${color.success}`,
+                     borderRadius: '5px', padding: '0.25rem 0.55rem', fontSize: '0.72rem', fontWeight: 600,
+                     cursor: importingMap ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+            {importingMap ? '⏳' : 'Importar'}
+          </button>
+        </div>
+      )}
+
+      {importMsg && (
+        <span style={{ fontSize: '0.7rem', color: importMsg === 'ok' ? color.success : color.danger }}>
+          {importMsg === 'ok' ? '✓ importado' : importMsg}
+        </span>
+      )}
 
       {showFloor && (
         <input type="range" min="0" max="1" step="0.05" value={floorOpacity}

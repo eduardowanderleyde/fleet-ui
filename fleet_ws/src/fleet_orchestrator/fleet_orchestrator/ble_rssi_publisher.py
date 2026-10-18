@@ -9,6 +9,11 @@ Precisa de um adaptador Bluetooth real na máquina que roda este nó e da lib
 `bleak` (BLE cross-platform via BlueZ no Linux). Sem adaptador ou sem
 `target_address` configurado, o nó loga o erro e fica de pé sem publicar —
 não derruba o resto da pilha.
+
+`target_address` aceita `ros2 param set /ble_rssi_publisher target_address
+<MAC>` em tempo real (via callback de parâmetro) — o scanner, que só começa
+quando o endereço vira não-vazio, é o que permite o Fleet UI escolher o
+dispositivo alvo por execução sem precisar reiniciar o nó.
 """
 from __future__ import annotations
 
@@ -17,6 +22,7 @@ import threading
 
 import rclpy
 from rclpy.node import Node
+from rcl_interfaces.msg import SetParametersResult
 from std_msgs.msg import Int32
 
 try:
@@ -32,22 +38,37 @@ class BleRssiPublisher(Node):
         self.declare_parameter('scan_interval_s', 1.0)
         self._target = self.get_parameter('target_address').value
         self._interval = float(self.get_parameter('scan_interval_s').value)
+        self._loop_thread: threading.Thread | None = None
 
         self._pub = self.create_publisher(Int32, 'ble_rssi', 10)
+        self.add_on_set_parameters_callback(self._on_param_change)
 
         if BleakScanner is None:
             self.get_logger().error(
                 "bleak não instalado — rode 'pip install bleak'. Nó fica de pé sem publicar."
             )
             return
-        if not self._target:
+        if self._target:
+            self._start_scanner_loop()
+        else:
             self.get_logger().error(
-                "parâmetro 'target_address' vazio — informe o endereço MAC do dispositivo BLE alvo."
+                "parâmetro 'target_address' vazio — informe via launch ou "
+                "'ros2 param set /ble_rssi_publisher target_address <MAC>'."
             )
-            return
 
+    def _start_scanner_loop(self) -> None:
+        if self._loop_thread is not None:
+            return
         self._loop_thread = threading.Thread(target=self._run_scanner_loop, daemon=True)
         self._loop_thread.start()
+
+    def _on_param_change(self, params) -> SetParametersResult:
+        for p in params:
+            if p.name == 'target_address':
+                self._target = p.value
+                if BleakScanner is not None and self._target:
+                    self._start_scanner_loop()
+        return SetParametersResult(successful=True)
 
     def _on_detection(self, device, advertisement_data) -> None:
         """Callback do BleakScanner — roda na thread do loop asyncio, não na

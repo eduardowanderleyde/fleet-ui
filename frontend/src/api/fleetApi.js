@@ -36,12 +36,25 @@ export async function getMap(robotId = '') {
   return readJson(await fetch(apiPath(`/map${qs ? `?${qs}` : ''}`)))
 }
 
-export async function getSlamMapMeta() {
-  return readJson(await fetch(apiPath('/slam_map_meta')))
+export async function getSlamMapMeta(name = 'slam') {
+  const qs = name && name !== 'slam' ? `?name=${encodeURIComponent(name)}` : ''
+  return readJson(await fetch(apiPath(`/slam_map_meta${qs}`)))
 }
 
 export async function saveBackgroundMap() {
   return readJson(await fetch(apiPath('/save_background_map'), { method: 'POST' }))
+}
+
+export async function listMaps() {
+  return readJson(await fetch(apiPath('/list_maps')))
+}
+
+export async function importMap({ name, yamlPath }) {
+  return readJson(await fetch(apiPath('/import_map'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, yaml_path: yamlPath }),
+  }))
 }
 
 export async function listRoutes(robotId = '') {

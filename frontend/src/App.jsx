@@ -27,6 +27,8 @@ const DEFAULT_CFG = {
   initial_pose:    [0, 0, 0],
   points:          [[0.5, 0.0, 0.0], [1.0, 0.0, 0.0]],
   return_to_start: [0, 0, 0],
+  run_label:          '',
+  ble_target_address: '',
 }
 
 // Pose de spawn de cada robô no mundo Gazebo compartilhado — tem que bater

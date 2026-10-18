@@ -181,8 +181,24 @@ export default function ConfigForm({
                 </label>
               ))}
             </div>
+            {cfg.topics.includes('ble_rssi') && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <span style={S.label}>Endereço BLE alvo</span>
+                <input value={cfg.ble_target_address || ''} onChange={e => set('ble_target_address', e.target.value)}
+                  placeholder="AA:BB:CC:DD:EE:FF" style={{ ...S.input, fontFamily: 'monospace' }} />
+                <span style={{ fontSize: '0.68rem', color: '#4b5563' }}>
+                  Seta via ros2 param set antes de rodar — ble_rssi_publisher já precisa estar de pé.
+                </span>
+              </div>
+            )}
           </div>
         )}
+      </div>
+
+      <div style={S.section}>
+        <span style={S.label}>Rótulo da execução <span style={{ color: '#4b5563', fontWeight: 400 }}>— opcional</span></span>
+        <input value={cfg.run_label || ''} onChange={e => set('run_label', e.target.value)}
+          placeholder="ex.: moto-moto, homogênea" style={S.input} />
       </div>
 
       <div style={S.section}>

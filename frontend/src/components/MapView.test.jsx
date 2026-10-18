@@ -8,6 +8,8 @@ vi.mock('../api/fleetApi', () => ({
   getMap:            vi.fn().mockResolvedValue({ available: false }),
   getSlamMapMeta:    vi.fn().mockResolvedValue({ available: false }),
   saveBackgroundMap: vi.fn(),
+  listMaps:          vi.fn().mockResolvedValue({ maps: [] }),
+  importMap:         vi.fn(),
 }))
 
 describe('MapView', () => {

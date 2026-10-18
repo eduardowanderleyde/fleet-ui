@@ -67,6 +67,26 @@ class RosBridge:
         except Exception as exc:
             return False, str(exc)
 
+    def run_param_set(self, node: str, param: str, value: str, timeout: int = 10) -> tuple[bool, str]:
+        cmd = f"{self.ros_setup_prefix()}ros2 param set {shlex.quote(node)} {shlex.quote(param)} {shlex.quote(value)}"
+        try:
+            result = subprocess.run(
+                ["bash", "-c", cmd],
+                env=self.ros_env(),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=self.ros_ws,
+            )
+            out = (result.stdout or "").strip() + (result.stderr or "").strip()
+            if result.returncode != 0:
+                return False, out or "ros2 param set failed"
+            return True, out
+        except subprocess.TimeoutExpired:
+            return False, "timeout"
+        except Exception as exc:
+            return False, str(exc)
+
     @staticmethod
     def extract_list_field(out: str, field: str) -> list:
         """Extrai um campo de lista do texto que `ros2 service call` imprime.

@@ -125,6 +125,79 @@ def _encode_map_png(data: list, width: int, height: int) -> bytes:
     return png
 
 
+def _read_pgm(path: Path) -> tuple[int, int, int, bytes]:
+    """Lê .pgm P2 (ASCII) ou P5 (binário, o formato padrão gerado pelo
+    map_saver do Nav2/ROS). Devolve (width, height, maxval, pixels)."""
+    data = path.read_bytes()
+    pos = 0
+
+    def next_token() -> bytes:
+        nonlocal pos
+        while True:
+            while pos < len(data) and data[pos:pos + 1].isspace():
+                pos += 1
+            if pos < len(data) and data[pos:pos + 1] == b'#':
+                while pos < len(data) and data[pos:pos + 1] != b'\n':
+                    pos += 1
+                continue
+            break
+        start = pos
+        while pos < len(data) and not data[pos:pos + 1].isspace():
+            pos += 1
+        return data[start:pos]
+
+    magic = next_token()
+    if magic not in (b'P2', b'P5'):
+        raise ValueError(f"PGM inválido (magic={magic!r})")
+    width  = int(next_token())
+    height = int(next_token())
+    _maxval = int(next_token())
+    pos += 1  # 1 byte de whitespace exato separando o header dos dados (convenção PGM)
+
+    if magic == b'P5':
+        pixels = data[pos:pos + width * height]
+    else:
+        pixels = bytes(int(t) for t in data[pos:].split()[: width * height])
+
+    return width, height, _maxval, pixels
+
+
+def _pgm_to_occupancy_png(width: int, height: int, pixels: bytes, negate: bool,
+                           occupied_thresh: float, free_thresh: float) -> bytes:
+    """Converte pixels PGM em PNG RGBA com a mesma paleta de _encode_map_png,
+    usando a fórmula de ocupação do map_server do Nav2 (modo trinary).
+    PGM já é top-down como o PNG de saída — sem flip de Y aqui (diferente de
+    _encode_map_png, que parte de OccupancyGrid, armazenado bottom-up)."""
+    pixel_colors = []
+    for v in pixels:
+        occ = (v / 255.0) if negate else ((255 - v) / 255.0)
+        if occ > occupied_thresh:
+            pixel_colors.append((45, 55, 72, 255))     # ocupado
+        elif occ < free_thresh:
+            pixel_colors.append((245, 245, 240, 255))  # livre
+        else:
+            pixel_colors.append((176, 188, 200, 210))  # desconhecido
+
+    def make_row(row_idx: int) -> bytes:
+        row = bytearray([0])
+        for r, g, b, a in pixel_colors[row_idx * width:(row_idx + 1) * width]:
+            row.extend([r, g, b, a])
+        return bytes(row)
+
+    raw = b''.join(make_row(y) for y in range(height))
+    compressed = zlib.compress(raw, 6)
+
+    def png_chunk(tag: bytes, payload: bytes) -> bytes:
+        body = tag + payload
+        return struct.pack('>I', len(payload)) + body + struct.pack('>I', zlib.crc32(body) & 0xFFFFFFFF)
+
+    png = b'\x89PNG\r\n\x1a\n'
+    png += png_chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 6, 0, 0, 0))
+    png += png_chunk(b'IDAT', compressed)
+    png += png_chunk(b'IEND', b'')
+    return png
+
+
 class RunConfigRequest(BaseModel):
     command: Literal["record", "replay"] = "record"
     robot: str = "default"
@@ -134,6 +207,8 @@ class RunConfigRequest(BaseModel):
     initial_pose: list[float] | None = None
     points: list[list[float]] = Field(default_factory=list)
     return_to_start: list[float] | None = None
+    run_label: str | None = None           # metadado livre (ex.: par de dispositivo BLE) — só viaja pro JSON exportado
+    ble_target_address: str | None = None  # se dado, seta via `ros2 param set` antes de rodar (ble_rssi_publisher já tem que estar de pé)
 
 
 class SaveRouteWaypointsRequest(BaseModel):
@@ -497,12 +572,17 @@ async def run_config(cfg: RunConfigRequest):
 
     def _run():
         job = _jobs[job_id]
+        if cfg_data.get("ble_target_address"):
+            ok, out = _bridge.run_param_set("/ble_rssi_publisher", "target_address", cfg_data["ble_target_address"])
+            job["lines"].append(f"[ble_target_address] {'ok' if ok else 'falhou'}: {out}")
         job["lines"].append(f"[CMD] {' '.join(cmd)}")
         try:
             step = _bridge.run_experiment_step(cmd, export_path, line_callback=job["lines"].append)
             job["result"] = step["result"]
             job["error"] = step["error"]
             job["exit_code"] = step["exit_code"]
+            if job["result"] is not None and cfg_data.get("run_label"):
+                job["result"]["run_label"] = cfg_data["run_label"]
         except Exception as ex:
             job["error"] = str(ex)
         finally:
@@ -987,14 +1067,85 @@ async def save_background_map(robot_id: str = ""):
     return {"success": True, "message": f"Mapa guardado ({meta['width']}×{meta['height']} px, res={meta['resolution']:.3f} m/px)"}
 
 
+def _map_prefix(name: str) -> str:
+    return "slam_map" if (not name or name == "slam") else f"{name}_map"
+
+
 @app.get("/api/slam_map_meta")
-async def get_slam_map_meta():
-    """Devolve metadados do slam_map.json guardado (se existir)."""
-    meta_path = Path(WORKSPACE) / "frontend" / "public" / "slam_map.json"
+async def get_slam_map_meta(name: str = "slam"):
+    """Devolve metadados do mapa de fundo guardado (slam_map.json por
+    default, ou <name>_map.json pra um mapa importado via /api/import_map)."""
+    meta_path = Path(WORKSPACE) / "frontend" / "public" / f"{_map_prefix(name)}.json"
     if not meta_path.exists():
         return JSONResponse({"available": False})
     import json as _json
     return {"available": True, **_json.loads(meta_path.read_text())}
+
+
+@app.get("/api/list_maps")
+async def list_maps():
+    """Lista os mapas de fundo disponíveis (nomes, sem extensão) — 'slam'
+    (se já foi salvo um SLAM ao vivo) + qualquer mapa importado via
+    /api/import_map."""
+    public_dir = Path(WORKSPACE) / "frontend" / "public"
+    names = []
+    if (public_dir / "slam_map.json").exists():
+        names.append("slam")
+    for p in sorted(public_dir.glob("*_map.json")):
+        stem = p.stem[: -len("_map")]
+        if stem:
+            names.append(stem)
+    return {"maps": names}
+
+
+class ImportMapRequest(BaseModel):
+    name: str
+    yaml_path: str
+
+
+@app.post("/api/import_map")
+async def import_map(req: ImportMapRequest):
+    """Importa um mapa real já pronto (par .yaml+.pgm, convenção do
+    map_server do Nav2 — ex.: o hall_cin_v4 da Bia/Fernanda) como fundo
+    selecionável no MapView, sem precisar rodar SLAM nesse ambiente."""
+    name = req.name.strip()
+    if not name or not all(c.isalnum() or c in "_-" for c in name):
+        return JSONResponse({"success": False, "message": "Nome inválido (use letras/números/_/-)."}, status_code=400)
+
+    yaml_path = Path(req.yaml_path).expanduser()
+    if not yaml_path.exists():
+        return JSONResponse({"success": False, "message": f"YAML não encontrado: {yaml_path}"}, status_code=400)
+
+    try:
+        map_meta = yaml.safe_load(yaml_path.read_text())
+        pgm_path = (yaml_path.parent / map_meta["image"]).resolve()
+        if not pgm_path.exists():
+            return JSONResponse({"success": False, "message": f"PGM não encontrado: {pgm_path}"}, status_code=400)
+
+        resolution = float(map_meta["resolution"])
+        origin = map_meta.get("origin", [0.0, 0.0, 0.0])
+        negate = bool(map_meta.get("negate", 0))
+        occupied_thresh = float(map_meta.get("occupied_thresh", 0.65))
+        free_thresh = float(map_meta.get("free_thresh", 0.25))
+
+        width, height, _maxval, pixels = _read_pgm(pgm_path)
+        png_bytes = _pgm_to_occupancy_png(width, height, pixels, negate, occupied_thresh, free_thresh)
+    except Exception as exc:
+        return JSONResponse({"success": False, "message": f"Falha ao importar: {exc}"}, status_code=400)
+
+    public_dir = Path(WORKSPACE) / "frontend" / "public"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    prefix = _map_prefix(name)
+    (public_dir / f"{prefix}.png").write_bytes(png_bytes)
+    (public_dir / f"{prefix}.json").write_text(json.dumps({
+        "resolution": resolution,
+        "origin_x": float(origin[0]),
+        "origin_y": float(origin[1]),
+        "width": width,
+        "height": height,
+    }))
+
+    return {"success": True, "message": f"Mapa '{name}' importado ({width}×{height} px, res={resolution:.3f} m/px)"}
 
 
 @app.post("/api/start_record")
