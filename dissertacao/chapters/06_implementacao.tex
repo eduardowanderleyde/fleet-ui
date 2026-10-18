@@ -24,8 +24,8 @@ Essa distinção exigiu que os parâmetros de navegação do Nav2 fossem gerados
 de launch com \texttt{enable\_\allowbreak stamped\_\allowbreak cmd\_\allowbreak vel: false} em todos os onze nós afetados,
 via leitura e patch programático do arquivo \texttt{nav2.yaml} padrão.
 
-Parte considerável do esforço de implementação, contudo, não esteve na camada
-de IA descrita nos capítulos anteriores, e sim em descobrir que a simulação de
+Parte considerável do esforço de implementação, contudo, esteve em descobrir
+que a simulação de
 base do TurtleBot4 (\texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim}) nunca havia sido pensada
 para múltiplos robôs simultâneos. O plugin \texttt{DiffDrive} do Gazebo, embutido
 no xacro do TurtleBot4, publica em tópicos gz-transport absolutos e fixos:

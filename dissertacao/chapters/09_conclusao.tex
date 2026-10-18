@@ -59,23 +59,15 @@ abrir terminais para subir a simulação: o pesquisador escolhe mapa, modo e
 robôs pela tela, e o backend lança os mesmos processos que antes eram
 digitados manualmente.
 
-\textbf{Extensão de automação e qualidade de engenharia}: sobre essa base
-arquitetural foi construída, já após a campanha de avaliação quantitativa, uma
-camada de agentes de IA (\texttt{backend/\allowbreak agents/}, Seção~\ref{sec:agentes})
-que substitui a interação direta com a interface por instruções em linguagem
-natural, sem que o agente jamais fale com ROS~2 diretamente: ele chama os
-mesmos endpoints REST já expostos ao frontend, e o isolamento por robô é
-reforçado estruturalmente em \texttt{\_scope\_\allowbreak input()}, não deixado como
-convenção que dependa do modelo ``se comportar''. A ferramenta
-\texttt{run\_\allowbreak campaign} fecha o ciclo planejamento--execução--análise de
-ponta a ponta a partir de uma única instrução. Paralelamente, uma suíte de
-integração contínua (\texttt{.github/\allowbreak workflows/\allowbreak ci.yml}) passou a
+\textbf{Extensão de qualidade de engenharia}: paralelamente à campanha de
+avaliação quantitativa, uma suíte de integração contínua
+(\texttt{.github/\allowbreak workflows/\allowbreak ci.yml}) passou a
 validar o lado ROS~2 do projeto a cada alteração: compilação via
 \texttt{colcon}, validação de xacro/URDF por robô (incluindo os
 \textit{namespaces} multi-robô), verificação dos \textit{launch files} e
 execução da suíte de testes específicos de ROS~2 sem permitir que sejam
 pulados silenciosamente, o que evita que um ambiente ROS incompleto produza um
-selo verde enganoso. Nenhuma dessas extensões foi exercitada pela campanha
+selo verde enganoso. Essa extensão não foi exercitada pela campanha
 quantitativa de repetibilidade relatada nos Capítulos~\ref{chap:avaliacao}
 e~\ref{chap:resultados}, que permanece restrita a um único robô
 (Seção~\ref{sec:limitacoes}); seu valor é ampliar a base de engenharia sobre a
@@ -350,27 +342,6 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     essa validação em hardware exigiria um sistema de rastreamento externo
     independente (ex.: captura de movimento ou RTK-GPS).
 
-    \item \textbf{Avaliar se a camada de orquestração por agentes de IA
-    (Seção~\ref{sec:agentes}) degrada a repetibilidade pairwise medida sem
-    ela.} Levantamento de literatura recente (2025--2026) mostra que
-    LLMs já são usados para orquestrar robôs móveis e frotas
-    \cite{li2025llmmultirobot}, inclusive sobre a mesma pilha
-    deste trabalho — TurtleBot4, Nav2 e ROS~2 —, mas medindo latência e
-    taxa de sucesso de tarefa, não repetibilidade de trajetória
-    \cite{das2026latency}. Como este framework já mede repetibilidade
-    pairwise de forma controlada (QA2, Seção~\ref{sec:res_qa2}), um
-    experimento natural é inserir a camada de comando em linguagem natural
-    entre a missão e o Nav2 e comparar o RMSE pairwise resultante contra a
-    baseline sem LLM — testando diretamente se a decisão não-determinística
-    adicional do agente de IA se soma, de forma mensurável, à variância já
-    caracterizada do controlador MPPI (Seção~\ref{sec:limitacoes}). Essa
-    direção também responde, de forma empírica, à preocupação levantada por
-    \citeonline{kim2026robocritics} de que decisões de LLM em sistemas
-    robóticos físicos são opacas e difíceis de verificar: medir o efeito
-    sobre a repetibilidade é uma forma concreta e quantificável de
-    verificação, complementar à abordagem de \textit{críticos}
-    especializados que os autores propõem.
-
     \item Avaliar também AMCL com mapa pré-construído
     (Seção~\ref{sec:localizacao_bayes}) como alternativa ao SLAM ao vivo em
     sessões experimentais longas, motivado pela variabilidade observada nos
@@ -409,57 +380,6 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     dessa lacuna é ampliar o piloto FUUT para mais réplicas e mais
     geometrias de observação, não um alvo de escala de ativação.
 
-    \item \textbf{Estender o piloto de repetibilidade sob agente de IA
-    (item anterior sobre LLM) para o cenário multi-robô acima.} O
-    \texttt{POST~/\allowbreak api/\allowbreak agent/\allowbreak run\_\allowbreak fleet}
-    (Seção~\ref{sec:agentes}) já existe e já roda um \texttt{Planner}
-    independente por robô em paralelo — mas, como o próprio texto da
-    Seção~\ref{sec:agentes} é explícito, são agentes independentes, \textbf{sem
-    coordenação entre si}: cada um decide sozinho a sequência de ferramentas
-    pro seu robô, sem noção do que os outros estão fazendo. Isso é
-    exatamente o nível que \citeonline{li2025llmmultirobot} identificam como
-    menos maduro na literatura de LLM para sistemas multi-robô — a maior
-    parte do que existe atua em alocação de tarefa centralizada ou geração
-    de ação de baixo nível por um único robô, não coordenação descentralizada
-    entre múltiplos agentes de IA independentes. Dois experimentos ficam em
-    aberto, em ordem crescente de ambição: (a) o mais direto — rodar
-    \texttt{run\_\allowbreak fleet} com uma instrução equivalente por robô (dois
-    agentes independentes, duas missões paralelas) e medir se o RMSE pairwise
-    por robô se mantém igual ao medido sem LLM (item anterior), agora também
-    na presença da contenção de CPU/DDS da ativação sequencial
-    (Seção~\ref{sec:limitacoes}) — testando se as duas fontes de variância
-    (agente de IA, ativação sequencial) se somam ou interagem; (b) o mais
-    ambicioso — introduzir coordenação real entre os agentes, em vez de um
-    mapa robô~\textrightarrow{}~instrução já decidido por um humano — já
-    tem um primeiro protótipo, não mais só uma ideia fora do que a
-    arquitetura suporta: \texttt{MissionRouter} e
-    \texttt{decompose\_\allowbreak and\_\allowbreak route}
-    (\texttt{backend/\allowbreak agents/\allowbreak router.py}) decompõem
-    uma instrução de missão única em sub-tarefas e alocam cada uma ao
-    robô mais adequado dentre os disponíveis, sem repetir robô —
-    formulação que a literatura de alocação de tarefas multi-robô chama
-    de MRTA (\textit{Multi-Robot Task Allocation}), cuja taxonomia
-    original \citeonline{gerkey2004} também já fundamenta a arquitetura
-    de papéis desta dissertação (Seção~\ref{sec:coordenacao_multirrobo}). O protótipo
-    foi testado manualmente em dois cenários sintéticos, não uma campanha
-    sistemática: roteamento de uma instrução única entre dois robôs
-    (escolheu corretamente o robô livre mais próximo, confiança de 98\%)
-    e decomposição de uma missão em duas sub-tarefas geograficamente
-    distintas ("um robô cobre o setor norte, outro o sul"), roteadas cada
-    uma ao robô mais próximo do respectivo setor. Isso posiciona o
-    framework, ainda que em estágio de protótipo não avaliado
-    sistematicamente, no nível que a literatura atual trata como gap
-    aberto, não resolvido. Trabalho bem recente ataca exatamente esse
-    cenário — \citeonline{song2025climrs} partem da mesma arquitetura de
-    base (um agente de IA por robô) e propõem negociação dinâmica em
-    subgrupos entre os agentes antes da execução, com replanejamento por
-    feedback — uma referência concreta de para onde esse protótipo
-    poderia evoluir, mais específica que o panorama geral de
-    \citeonline{li2025llmmultirobot}. A extensão natural é substituir os
-    dois cenários sintéticos por uma avaliação sistemática (mais missões,
-    mais robôs candidatos, casos de ambiguidade deliberada) e medir se a
-    alocação decidida pelo roteador se sustenta sob RMSE pairwise, não só
-    "pareceu certa" num teste manual.
 \end{itemize}
 
 \textbf{Médio prazo}: extensão do protocolo para detectar e compensar variações

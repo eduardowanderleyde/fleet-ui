@@ -59,10 +59,12 @@ um backend REST e de uma interface web (Seção~\ref{sec:backend_web}) permite
 que a operação cotidiana do framework (lançar uma formação, iniciar uma
 gravação, consultar um resultado) não dependa de conhecimento de tópicos,
 serviços ou \textit{namespaces} do DDS. Terceiro, a \textbf{extensibilidade}:
-a camada de agentes de IA (Seção~\ref{sec:agentes}), construída
-integralmente sobre a API REST já existente sem alterar o orquestrador
-ROS~2 ou o coletor de dados, é a evidência de que essas fronteiras entre
-camadas sustentam extensões substanciais sem retrabalho na base. É essa
+o Painel de Simulação (Seção~\ref{sec:painel_simulacao}), adicionado
+posteriormente à campanha de avaliação, introduz endpoints de gerenciamento
+de processos de longa duração inteiramente sobre a API REST já existente,
+sem alterar o orquestrador ROS~2 ou o coletor de dados --- evidência de que
+essas fronteiras entre camadas sustentam extensões substanciais sem
+retrabalho na base. É essa
 combinação de requisitos --- e não só a ordem em que os problemas foram
 encontrados durante o desenvolvimento --- que motiva a divisão em camadas
 da Figura~\ref{fig:arquitetura}, ainda que, como a Seção~\ref{sec:arq_conclusao}
@@ -260,70 +262,6 @@ execuções de record ou replay, monitorem o estado dos sensores em tempo real e
 visualizem o overlay de trajetórias após cada execução, tudo sem necessidade
 de terminal.
 
-\subsection{A Camada de Agentes de IA}
-\label{sec:agentes}
-
-Sobre essa arquitetura de cinco camadas foi construída, posteriormente, uma
-camada de agentes de IA (\texttt{backend/\allowbreak agents/}) que permite substituir a
-interação direta com a interface web por instruções em linguagem natural. Um
-agente decide \textit{o quê} fazer; a execução em si continua passando pelos
-mesmos endpoints REST que o frontend já usa: o agente nunca fala com
-ROS~2 diretamente, o que limita o raio de ação de uma eventual alucinação do
-modelo ao conjunto de ferramentas explicitamente exposto a ele.
-
-A camada é dividida em três componentes. O \texttt{Planner}
-(\texttt{backend/\allowbreak agents/\allowbreak planner.py}) implementa o laço de
-\textit{tool calling} da API da Anthropic: recebe uma instrução, decide uma
-sequência de chamadas de ferramenta e devolve o texto final mais o histórico
-de passos executados. O \texttt{Executor}
-(\texttt{backend/\allowbreak agents/\allowbreak executor.py}) é a única fronteira HTTP entre o
-agente e o Fleet UI: cada um de seus métodos corresponde a um endpoint já
-existente (\texttt{/\allowbreak api/\allowbreak go\_\allowbreak to\_\allowbreak point},
-\texttt{/\allowbreak api/\allowbreak start\_\allowbreak record}, \texttt{/\allowbreak api/\allowbreak run\_\allowbreak campaign},
-entre outros), incluindo um \texttt{wait\_\allowbreak for\_\allowbreak job} que faz \textit{polling}
-de jobs assíncronos até a conclusão. O \texttt{Analyst}
-(\texttt{backend/\allowbreak agents/\allowbreak analyst.py}) não fala nem com ROS~2 nem com a
-API REST; ele lê os artefatos que \texttt{analyze\_\allowbreak runs.py} já produz
-(\texttt{summary.json}) para responder perguntas sobre uma campanha e, na
-ferramenta \texttt{diagnose\_\allowbreak experiment}, cruzar sinais já calculados
-(trajetória estática, duração muito diferente do baseline, erro concentrado
-no ponto final) em uma hipótese de causa em linguagem natural.
-
-Uma ferramenta adicional, \texttt{run\_\allowbreak campaign} (exposta também como
-\texttt{POST~/\allowbreak api/\allowbreak run\_\allowbreak campaign} no backend), fecha o ciclo
-planejamento--execução--análise: grava uma execução baseline, reproduz a
-mesma rota um número configurável de vezes e roda a análise automaticamente,
-devolvendo um \texttt{run\_id} pronto para as ferramentas de análise.
-
-O isolamento entre robôs é uma restrição estrutural, não uma convenção que
-depende do modelo "se comportar": \texttt{Planner} aceita um parâmetro
-opcional \texttt{robot\_\allowbreak id} e, quando definido, todo \texttt{tool\_\allowbreak input}
-que contém \texttt{robot\_\allowbreak id} (ou \texttt{config.\allowbreak robot}, no caso de
-\texttt{run\_\allowbreak experiment}) é reescrito à força para esse valor antes de
-qualquer chamada real, em \texttt{\_scope\_\allowbreak input()}, mesmo que o modelo
-peça outro robô. O endpoint \texttt{POST~/\allowbreak api/\allowbreak agent/\allowbreak run\_\allowbreak fleet}
-recebe um mapa \{robô: instrução\} e roda um \texttt{Planner} escopado por robô
-para cada entrada em paralelo, como agentes independentes, sem coordenação
-entre si. O histórico dessas execuções é persistido em disco
-(\texttt{fleet\_\allowbreak ws/\allowbreak agent\_\allowbreak runs/*.json}) e consultável via
-\texttt{GET~/\allowbreak api/\allowbreak agent/\allowbreak history}, sobrevivendo a um reinício do backend.
-
-Uma alternativa de design seria expor as mesmas ferramentas do
-\texttt{Executor} por um servidor MCP (\textit{Model Context Protocol})
-genérico, de modo que qualquer cliente LLM externo (Claude Desktop, Codex)
-pudesse consumi-las, não apenas o \texttt{Planner} interno, caminho que o
-próprio registro de desenvolvimento do projeto já identifica como extensão
-natural. Essa generalização foi deliberadamente deixada fora do escopo desta
-dissertação: o objetivo aqui é um experimento único e controlado, em que
-Planner e Executor são acoplados diretamente via chamadas de \textit{tool
-calling} da API da Anthropic, com o escopo por robô imposto internamente em
-\texttt{\_scope\_\allowbreak input()}. Esse acoplamento direto simplifica a
-implementação e manteve o controle do raio de ação do agente dentro do que
-esta dissertação precisava validar, ao custo de amarrar o framework a um
-único provedor de LLM, um custo aceitável para a pergunta de pesquisa
-tratada aqui, mas que tornaria um servidor MCP genérico a escolha mais
-apropriada caso o objetivo fosse reutilização por clientes LLM de terceiros.
-
 \subsection{O Painel de Simulação}
 \label{sec:painel_simulacao}
 
@@ -376,9 +314,9 @@ compatibilidade entre QoS oferecida e requisitada \cite{omgdds2015} ---
 não é um detalhe de configuração arbitrário, é um contrato de
 interoperabilidade que o framework precisa satisfazer explicitamente.
 
-Sobre essa base, a camada
-de agentes de IA descrita na Seção~\ref{sec:agentes} foi construída inteiramente por
-cima da API REST já existente, sem alterar o orquestrador ROS~2 ou o coletor de
-dados, uma confirmação prática de que a separação em camadas cumpriu seu papel de
+Sobre essa base, o Painel de Simulação descrito na
+Seção~\ref{sec:painel_simulacao} foi construído inteiramente por cima da API
+REST já existente, sem alterar o orquestrador ROS~2 ou o coletor de dados,
+uma confirmação prática de que a separação em camadas cumpriu seu papel de
 permitir extensões futuras sem retrabalho na base. O próximo capítulo descreve
 como essa arquitetura é usada no protocolo experimental de repetibilidade.
