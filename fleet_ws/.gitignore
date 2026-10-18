@@ -6,6 +6,7 @@ log/
 # dados gravados (rotas e bags)
 routes/
 collections/
+runs_history/
 
 # relatórios locais do script diagnose_nav_fleet.sh
 diagnostics/

@@ -3,7 +3,11 @@
 [![CI](https://github.com/eduardowanderleyde/fleet-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/eduardowanderleyde/fleet-ui/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Web interface for operating a TurtleBot4 fleet in simulation. Record navigation routes with full sensor data, replay them, and measure trajectory repeatability.
+**Fleet UI tests whether a mobile robot repeats the same route the same way,
+every time.** Click points on a map to record a route once, replay it as many
+times as you want, and see exactly how much the robot's path varied between
+runs — distance, speed, duration, how closely it matched the original. It all
+happens on a web page; you never have to type a robot command by hand.
 
 > Built on top of this: an **AI agent orchestration layer** (Claude/Anthropic) that
 > can plan and run experiments — move robots, record/replay routes, run full
@@ -13,6 +17,61 @@ Web interface for operating a TurtleBot4 fleet in simulation. Record navigation 
 > [`orquestracion.md`](orquestracion.md) (Portuguese) for the architecture, how
 > it was built, and known limitations — start with its "TL;DR" section at the
 > top for a plain-language overview.
+
+## Quick start
+
+You need a Linux computer with ROS 2 already installed for this to work — the
+robot simulation underneath is real robotics software, that part can't be
+skipped. See [Prerequisites](#prerequisites) below if you don't have it yet.
+Once that one-time setup is done, day-to-day use is 3 steps and no code.
+
+### 1. Get the code and build it (one time only)
+
+```bash
+git clone <repo-url> ~/fleet-ui
+cd ~/fleet-ui
+bash build.sh
+cd frontend && npm install && cd ..
+```
+
+### 2. Start everything with one command
+
+```bash
+./run_all.sh
+```
+
+This starts the simulated robot, the backend, and the web page, in the
+correct order, and tells you when everything is actually ready (about 25
+seconds on a normal machine). Leave this terminal open; press **Ctrl+C** in
+it whenever you want to stop everything — it shuts down cleanly, nothing is
+left running in the background.
+
+### 3. Open the page and run your first test
+
+Open **http://localhost:5173** in your browser. You should see something
+like this:
+
+![Fleet UI — map, controls, live robot](docs/images/screenshot.png)
+
+Then:
+
+1. Click **Conectar robô** (top left) → **Conectar**. (The run button stays
+   disabled until you do this.)
+2. Leave "Comando" set to **Gravar** (record) — a short route is already
+   filled in for you, so you don't need to click the map yet.
+3. Click **▶ Executar record** and watch the robot move on the map.
+4. When it finishes, a card with numbers appears (distance travelled,
+   average speed, duration) — that's your first recorded run.
+5. To actually test repeatability: switch "Comando" to **Reproduzir**
+   (replay), pick the route you just recorded from the dropdown, and click
+   **▶ Executar replay**. Open **📊 Execuções** at the top to see both runs
+   and compare their numbers side by side.
+
+That covers the whole day-to-day workflow. Everything else in this README is
+reference material: setting up from scratch, running the four processes
+manually instead of with the script, the command-line analysis tools, and
+configuration options — useful if you're developing on Fleet UI itself, not
+needed just to use it.
 
 ## Architecture
 
@@ -45,7 +104,7 @@ fleet-ui/
 │   └── fix_ament_hooks.sh  # Required after every colcon build (see below)
 ├── backend/                # FastAPI + ROS 2 bridge
 ├── frontend/               # React + Vite
-├── run_all.sh               # Starts all 4 processes in order, one command
+├── run_all.sh              # Starts all 4 processes in order, one command
 └── check.sh                # Local frontend/Python validation
 ```
 
@@ -196,32 +255,19 @@ WORLD=depot make docker-up
 
 ---
 
-## Running
+## Running manually
 
-### Quick start: one script
-
-```bash
-./run_all.sh
-```
-
-Starts all 4 processes below in the right order, waiting for each one to
-report actually ready (not just "launched") before starting the next —
-same checks described in the manual steps, automated. Prints
-`Tudo pronto -> http://localhost:5173` when the whole stack is up (~25 s
-total on a normal machine). Logs for each process go to `.run_all_logs/`.
-Ctrl+C stops everything cleanly, including Gazebo's child processes.
-
-Uses `backend/venv/` for the backend if it exists (`python3 -m venv
+`./run_all.sh` (see [Quick start](#quick-start)) covers day-to-day use. It
+uses `backend/venv/` for the backend if it exists (`python3 -m venv
 backend/venv && backend/venv/bin/pip install -r backend/requirements.txt`),
-falling back to system `python3` otherwise — the system-Python path below
+falling back to system `python3` otherwise — the manual Terminal 3 path below
 needs the AI-agents layer's extra dependencies (`httpx`, `anthropic`,
 `typesafe-sdk` in `backend/requirements.txt`) installed some other way, since
-those aren't available as `apt` packages.
+those aren't available as `apt` packages. Logs from `run_all.sh` go to
+`.run_all_logs/`.
 
 Use the manual steps below instead when you need to restart just one
 process, watch a specific log live, or debug a startup failure in detail.
-
-### Manual: 4 terminals
 
 Open **4 terminals**. Start them in order — Terminal 1 takes ~12 s to be ready.
 
