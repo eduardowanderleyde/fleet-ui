@@ -25,6 +25,10 @@ robot simulation underneath is real robotics software, that part can't be
 skipped. See [Prerequisites](#prerequisites) below if you don't have it yet.
 Once that one-time setup is done, day-to-day use is 3 steps and no code.
 
+Moving to a different machine and want the closest thing to a guarantee it
+works the same way there? Use [Docker](#docker-quickstart) instead — it
+avoids depending on that machine's own ROS 2 install matching this one.
+
 ### 1. Get the code and set it up (one time only)
 
 ```bash
@@ -197,6 +201,19 @@ npm install
 ---
 
 ## Docker quickstart
+
+**This is the path most likely to work identically on a different Linux
+machine.** The native setup above (`setup.sh` + `run_all.sh`) still depends
+on the host having ROS 2 Jazzy installed correctly, which varies with the
+Ubuntu version and whatever else is on that system. Docker pins the exact OS
+and ROS 2 version inside the image, so it doesn't drift between machines —
+verified end-to-end on this Linux host (`docker compose build` +
+`docker compose up`: simulation, backend, and frontend all came up and the
+live map/LiDAR/robot pose rendered correctly). The remaining source of
+per-machine variation is the Gazebo GUI needing X11/GPU passthrough from the
+container to the host, which is straightforward on Linux (`xhost
++local:docker`, done once below) but needs extra setup on Docker Desktop
+(macOS/Windows) — see the note below.
 
 Docker is the easiest path on Linux when you want a reproducible ROS 2 Jazzy
 environment without installing ROS directly on the host.
