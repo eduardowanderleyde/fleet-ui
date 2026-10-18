@@ -25,14 +25,20 @@ robot simulation underneath is real robotics software, that part can't be
 skipped. See [Prerequisites](#prerequisites) below if you don't have it yet.
 Once that one-time setup is done, day-to-day use is 3 steps and no code.
 
-### 1. Get the code and build it (one time only)
+### 1. Get the code and set it up (one time only)
 
 ```bash
 git clone <repo-url> ~/fleet-ui
 cd ~/fleet-ui
-bash build.sh
-cd frontend && npm install && cd ..
+./setup.sh
 ```
+
+`setup.sh` builds the ROS 2 packages, creates `backend/venv/` with the
+Python dependencies, and runs `npm install` for the frontend — everything
+`run_all.sh` needs. It only installs things inside this repository; it
+checks that ROS 2 Jazzy itself is already installed (see
+[Prerequisites](#prerequisites)) and stops with a clear message if it isn't,
+rather than failing confusingly later.
 
 ### 2. Start everything with one command
 
@@ -104,6 +110,7 @@ fleet-ui/
 │   └── fix_ament_hooks.sh  # Required after every colcon build (see below)
 ├── backend/                # FastAPI + ROS 2 bridge
 ├── frontend/               # React + Vite
+├── setup.sh                # One-time: venv, pip, npm install, colcon build
 ├── run_all.sh              # Starts all 4 processes in order, one command
 └── check.sh                # Local frontend/Python validation
 ```
