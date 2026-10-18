@@ -24,6 +24,36 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-18 (noite) — branch `perfect-bot`: run_all.sh — stack inteiro com 1 comando
+
+- Pedido do usuário: um script documentado no README pra subir tudo
+  sem precisar mexer em código além de rodar. Criado `run_all.sh`
+  (raiz do repo) — sobe simulação → nós da frota → backend → frontend
+  nessa ordem, esperando cada um reportar pronto de verdade (grep no
+  log de cada processo) antes do próximo; Ctrl+C derruba tudo limpo
+  (cada processo em sessão própria via `setsid`, alcança os
+  sub-processos que `gz sim`/`ros2 launch` spawnam — sem isso sobra
+  processo órfão, o mesmo problema já visto antes nesta sessão com
+  `pkill`).
+- 2 achados reais testando ao vivo (não só escrevendo o script às
+  cegas):
+  1. O README mandava esperar `All BT navigator servers are active`
+     no Terminal 1 — essa frase **nunca aparece** de verdade; o sinal
+     certo, confirmado em duas execuções reais, é
+     `Managed nodes are active` (do `lifecycle_manager_navigation`,
+     a mesma string que a lógica de prontidão do Painel de Simulação
+     no backend já usava — só o README estava desatualizado).
+  2. `python3 main.py` direto pro backend (caminho documentado no
+     README/`backend/run.sh`) **quebra hoje**: `backend/agents/
+     executor.py` importa `httpx`, que não está nos pacotes apt
+     listados — provavelmente porque esse caminho é anterior à
+     camada de agentes de IA. `backend/venv/` (usado a sessão toda)
+     tem tudo certo; `run_all.sh` usa ele quando existe, com fallback
+     pro python do sistema. Ambos os achados corrigidos no README.
+- Testado ao vivo, 2x: stack completo sobe em ~25s, mapa SLAM real +
+  LiDAR + pose do robô aparecem na tela, `/api/status` confirma pose
+  válida. Commit `5aa5b2d` em `perfect-bot`, com push.
+
 ### 2026-10-18 (tarde) — branch `dissertacao`: camada de agentes de IA removida a pedido da banca; branch `perfect-bot`: histórico de execuções + comparação
 
 - **Dissertação** (`dissertacao`, commit `1102972`, com push): pedido
