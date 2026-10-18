@@ -24,6 +24,31 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-18 (noite, cont.) — branch `perfect-bot`: README reescrito pra quem não é da robótica + validação real ao vivo
+
+- Pedido do usuário: reescrever o README pensando em gente que não usa
+  robótica — fácil, quick start. Nova seção "Quick start" logo no
+  topo (antes de Architecture/Prerequisites): 3 passos (clonar+buildar
+  uma vez, `./run_all.sh`, abrir a página) + passo a passo de botões
+  em linguagem simples, com um screenshot real do app rodando
+  (`docs/images/screenshot.png`, capturado ao vivo nesta sessão). O
+  resto do README (instalação do zero, rodar na mão, CLI, config) virou
+  material de referência explícito pra quem for desenvolver no
+  projeto, não pra quem só quer usar. "## Running" renomeada pra
+  "## Running manually" (o caminho fácil mora no topo agora).
+- Achado no caminho: `fleet_ws/runs_history/` (a feature de histórico
+  de execuções, criada mais cedo hoje) não estava no `.gitignore`
+  igual `routes/`/`collections/` já estavam — corrigido.
+- **Sinal forte de que o pedido de hoje deu certo**: enquanto o stack
+  ficou de pé pro usuário acessar (`run_all.sh` rodando, link
+  `localhost:5173` compartilhado), apareceu uma gravação REAL no
+  histórico — `percurso_initial`, 36s, 5.43m, `exit_code=0`,
+  `success=true` — ou seja, alguém (provavelmente o próprio usuário)
+  clicou em "Executar record" na tela e funcionou de ponta a ponta,
+  sem eu ter disparado esse run. Não é um teste meu — é a primeira
+  evidência real de uso espontâneo da interface.
+- Commit `89129fc` em `perfect-bot`, com push.
+
 ### 2026-10-18 (noite) — branch `perfect-bot`: run_all.sh — stack inteiro com 1 comando
 
 - Pedido do usuário: um script documentado no README pra subir tudo
