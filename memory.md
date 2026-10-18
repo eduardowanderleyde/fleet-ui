@@ -24,6 +24,44 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-18 (tarde) — branch `dissertacao`: camada de agentes de IA removida a pedido da banca; branch `perfect-bot`: histórico de execuções + comparação
+
+- **Dissertação** (`dissertacao`, commit `1102972`, com push): pedido
+  explícito da banca (via Breno Miranda) — manter só a parte web do
+  framework, tirar a camada de agentes de IA (Planner/Executor/Analyst,
+  MissionRouter) da narrativa. Removida a subseção inteira "A Camada de
+  Agentes de IA" do Cap. 4, os 2 itens de trabalhos futuros sobre LLM/
+  coordenação multi-agente do Cap. 9, e os pontos menores nos Caps. 1 e
+  6. Os argumentos de extensibilidade que usavam a camada de IA como
+  evidência foram reescritos usando o **Painel de Simulação** no lugar
+  (mesma estrutura: construído sobre a API REST sem alterar o
+  orquestrador ROS 2). 4 citações que só apareciam nos trechos cortados
+  removidas do `.bib`. Compilação verificada via `latexmk` (117
+  páginas, zero referência/citação quebrada). **Importante**: isso é
+  só sobre o TEXTO da dissertação — o código/feature de agentes IA
+  continua existindo no software (`backend/agents/`), só não é mais
+  descrito como contribuição científica.
+- Contexto do Breno (relayed pelo usuário, duas vezes): a parte
+  consistente/valorizada é a de **automação de teste/cenário**
+  (protocolo record-replay + interface web pra montar o cenário
+  experimental), com ênfase em mostrar que funciona com robô real, não
+  só simulação — não a camada de IA. Isso motivou a feature abaixo.
+- **Software** (`perfect-bot`, commit `9bf2947`, com push): fechada a
+  lacuna que isso expôs — não existia histórico persistente de
+  execuções de `/api/run_config` (resultado vivia só na memória do
+  backend, apagado do disco logo após ser lido) nem jeito de comparar
+  duas execuções lado a lado. Backend agora persiste cada job em
+  `fleet_ws/runs_history/<job_id>.json`; `GET /api/runs` lista; painel
+  novo "📊 Execuções" no frontend mostra cards com métricas e permite
+  selecionar 2 pra comparar numa tabela. Testado ao vivo com execuções
+  reais via Playwright (card com `bag_metrics` reais comparando certo
+  contra um sem métricas, mostrando "—" corretamente).
+- Pesquisa de referência de UI mal-sucedida, registrada pra não
+  repetir: Foxglove Studio (visualizador de `.mcap`) virou produto
+  pago/corporativo — o app web (`app.foxglove.dev`, antigo
+  `studio.foxglove.dev`) agora exige conta, não dá mais pra abrir um
+  `.mcap` local sem login.
+
 ### 2026-10-18 — branch `perfect-bot`: código real da Bia/Fernanda (repo mobile-robotics) analisado + 3 gaps fechados no web
 
 - Usuário recebeu o repositório real do experimento da Bia/Fernanda
