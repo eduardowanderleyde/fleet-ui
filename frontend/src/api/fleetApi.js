@@ -57,6 +57,10 @@ export async function importMap({ name, yamlPath }) {
   }))
 }
 
+export async function listRunHistory(limit = 50) {
+  return readJson(await fetch(apiPath(`/runs?limit=${limit}`)))
+}
+
 export async function listRoutes(robotId = '') {
   const params = new URLSearchParams()
   if (robotId && robotId !== 'default') params.set('robot_id', robotId)

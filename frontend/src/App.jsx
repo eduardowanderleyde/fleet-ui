@@ -5,6 +5,7 @@ import SimulationPanel from './components/SimulationPanel'
 import MapView from './components/MapView'
 import ConnectionPanel, { ROBOT_PROFILES } from './components/ConnectionPanel'
 import DiscoveryPanel from './components/DiscoveryPanel'
+import RunHistoryPanel from './components/RunHistoryPanel'
 import { color, btn } from './styles/tokens'
 import {
   discoverRobots as fetchDiscoveredRobots,
@@ -16,6 +17,7 @@ import {
 import { useFleetStatus } from './hooks/useFleetStatus'
 import { useJobPolling } from './hooks/useJobPolling'
 import { useRoutes } from './hooks/useRoutes'
+import { useRunHistory } from './hooks/useRunHistory'
 import { useSimulation } from './hooks/useSimulation'
 
 const DEFAULT_CFG = {
@@ -55,6 +57,8 @@ export default function App() {
   const [connMsg, setConnMsg]                 = useState('')
   const [discoverPanel, setDiscoverPanel]     = useState(false)
   const [agentPanel, setAgentPanel]           = useState(false)
+  const [historyPanel, setHistoryPanel]       = useState(false)
+  const runHistory                            = useRunHistory()
   const [discovering, setDiscovering]         = useState(false)
   const [discovered, setDiscovered]           = useState([])
   const [discoverError, setDiscoverError]     = useState(null)
@@ -67,6 +71,7 @@ export default function App() {
   const panelRef    = useRef(null)
   const discoverRef = useRef(null)
   const agentRef    = useRef(null)
+  const historyRef  = useRef(null)
 
   // Fecha painéis ao clicar fora
   useEffect(() => {
@@ -74,6 +79,7 @@ export default function App() {
       if (panelRef.current && !panelRef.current.contains(e.target))    setConnPanel(false)
       if (discoverRef.current && !discoverRef.current.contains(e.target)) setDiscoverPanel(false)
       if (agentRef.current && !agentRef.current.contains(e.target))    setAgentPanel(false)
+      if (historyRef.current && !historyRef.current.contains(e.target)) setHistoryPanel(false)
     }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
@@ -86,6 +92,10 @@ export default function App() {
   useEffect(() => {
     if (job && !job.running && job.exit_code === 0) refreshRoutes()
   }, [job?.running, job?.exit_code, refreshRoutes])
+
+  useEffect(() => {
+    if (job && !job.running) runHistory.refresh()
+  }, [job?.running, runHistory.refresh])
 
   // Navega pela rota definida sem gravar (teste rápido de percurso)
   const [navigating, setNavigating] = useState(false)
@@ -220,9 +230,10 @@ export default function App() {
 
   const deg = r => (r * 180 / Math.PI).toFixed(1)
 
-  const openConnPanel     = () => { setConnPanel(v => !v); setDiscoverPanel(false); setAgentPanel(false) }
-  const openDiscoverPanel = () => { setDiscoverPanel(v => !v); setConnPanel(false); setAgentPanel(false) }
-  const openAgentPanel    = () => { setAgentPanel(v => !v); setConnPanel(false); setDiscoverPanel(false) }
+  const openConnPanel     = () => { setConnPanel(v => !v); setDiscoverPanel(false); setAgentPanel(false); setHistoryPanel(false) }
+  const openDiscoverPanel = () => { setDiscoverPanel(v => !v); setConnPanel(false); setAgentPanel(false); setHistoryPanel(false) }
+  const openAgentPanel    = () => { setAgentPanel(v => !v); setConnPanel(false); setDiscoverPanel(false); setHistoryPanel(false) }
+  const openHistoryPanel  = () => { setHistoryPanel(v => !v); setConnPanel(false); setDiscoverPanel(false); setAgentPanel(false) }
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', background: color.bgApp, color: color.text, height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -291,6 +302,13 @@ export default function App() {
           </button>
           {agentPanel && <AgentFleetPanel robotIds={['tb1', 'tb2', 'tb3']} />}
         </div>
+
+        <RunHistoryPanel
+          containerRef={historyRef}
+          isOpen={historyPanel}
+          onToggle={openHistoryPanel}
+          history={runHistory}
+        />
 
         {isConnected && <span style={{ fontSize: '0.8rem', color: color.success, fontFamily: 'monospace' }}>● Conectado — {[...ROBOT_PROFILES, ...extraProfiles].find(p => p.id === selectedProfile)?.label}</span>}
         {connStatus === 'error' && <span style={{ fontSize: '0.8rem', color: color.danger, fontFamily: 'monospace' }}>✗ {connMsg}</span>}

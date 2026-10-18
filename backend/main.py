@@ -552,6 +552,34 @@ import uuid
 
 _jobs: dict = {}   # job_id → {running, lines, result, error}
 
+# Histórico persistente de execuções de /api/run_config — sobrevive a um
+# restart do backend. O job em si (_jobs) é só memória e o JSON exportado
+# por run_experiment_step é apagado logo depois de lido
+# (ros_bridge.py::run_experiment_step); sem isso, todo resultado de record/
+# replay (bag_metrics, run_label) desaparecia pra sempre ao reiniciar.
+_RUNS_HISTORY_DIR = Path(ROS_WS) / "runs_history"
+
+
+def _save_run_history(job_id: str, cfg_data: dict, job: dict) -> None:
+    try:
+        _RUNS_HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+        entry = {
+            "job_id": job_id,
+            "timestamp": _now_iso(),
+            "command": cfg_data.get("command"),
+            "robot": cfg_data.get("robot"),
+            "route": cfg_data.get("route"),
+            "run_label": cfg_data.get("run_label"),
+            "result": job.get("result"),
+            "error": job.get("error"),
+            "exit_code": job.get("exit_code"),
+        }
+        (_RUNS_HISTORY_DIR / f"{job_id}.json").write_text(
+            json.dumps(entry, ensure_ascii=False, indent=2, default=str)
+        )
+    except Exception as exc:
+        print(f"[fleet_ui] falha ao salvar run_history {job_id}: {exc}")
+
 
 def _build_cmd(cfg: dict) -> list[str]:
     return _bridge.build_experiment_cmd(cfg)
@@ -587,9 +615,28 @@ async def run_config(cfg: RunConfigRequest):
             job["error"] = str(ex)
         finally:
             job["running"] = False
+            _save_run_history(job_id, cfg_data, job)
 
     threading.Thread(target=_run, daemon=True).start()
     return {"job_id": job_id}
+
+
+@app.get("/api/runs")
+async def list_run_history(limit: int = 50):
+    """Lista execuções passadas de /api/run_config (persistidas em disco por
+    _save_run_history), mais recentes primeiro — sobrevive a um restart do
+    backend. Cada entrada já vem com bag_metrics/run_label prontos pro
+    frontend montar cards e comparar execuções lado a lado."""
+    if not _RUNS_HISTORY_DIR.exists():
+        return {"runs": []}
+    files = sorted(_RUNS_HISTORY_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    runs = []
+    for f in files[:max(1, limit)]:
+        try:
+            runs.append(json.loads(f.read_text()))
+        except Exception:
+            continue
+    return {"runs": runs}
 
 
 @app.get("/api/job/{job_id}")
