@@ -45,6 +45,7 @@ fleet-ui/
 │   └── fix_ament_hooks.sh  # Required after every colcon build (see below)
 ├── backend/                # FastAPI + ROS 2 bridge
 ├── frontend/               # React + Vite
+├── run_all.sh               # Starts all 4 processes in order, one command
 └── check.sh                # Local frontend/Python validation
 ```
 
@@ -197,6 +198,31 @@ WORLD=depot make docker-up
 
 ## Running
 
+### Quick start: one script
+
+```bash
+./run_all.sh
+```
+
+Starts all 4 processes below in the right order, waiting for each one to
+report actually ready (not just "launched") before starting the next —
+same checks described in the manual steps, automated. Prints
+`Tudo pronto -> http://localhost:5173` when the whole stack is up (~25 s
+total on a normal machine). Logs for each process go to `.run_all_logs/`.
+Ctrl+C stops everything cleanly, including Gazebo's child processes.
+
+Uses `backend/venv/` for the backend if it exists (`python3 -m venv
+backend/venv && backend/venv/bin/pip install -r backend/requirements.txt`),
+falling back to system `python3` otherwise — the system-Python path below
+needs the AI-agents layer's extra dependencies (`httpx`, `anthropic`,
+`typesafe-sdk` in `backend/requirements.txt`) installed some other way, since
+those aren't available as `apt` packages.
+
+Use the manual steps below instead when you need to restart just one
+process, watch a specific log live, or debug a startup failure in detail.
+
+### Manual: 4 terminals
+
 Open **4 terminals**. Start them in order — Terminal 1 takes ~12 s to be ready.
 
 ### Terminal 1 — Simulation
@@ -209,7 +235,7 @@ source /opt/ros/jazzy/setup.bash && source install/setup.bash
 ros2 launch fleet_orchestrator turtlebot4_sim.launch.py
 ```
 
-Wait until you see `All BT navigator servers are active` before continuing.
+Wait until you see `Managed nodes are active` before continuing.
 
 Optional argument: `world:=depot` (default is `warehouse`).
 
