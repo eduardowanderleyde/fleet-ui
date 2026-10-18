@@ -24,6 +24,50 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-18 (noite, cont. 2) — branch `perfect-bot`: setup.sh — validação real de "baixa num PC novo e funciona"
+
+- Pergunta do usuário que motivou tudo isso: será que um clone novo,
+  só seguindo o Quick Start, realmente funciona sem mexer em código?
+  Testado de verdade (não só raciocinado): `git clone` do repo local
+  pra uma pasta nova, sem reaproveitar nada da máquina de dev (sem
+  `backend/venv/`, sem `fleet_ws/install/`, sem `frontend/
+  node_modules/`), e segui o Quick Start à risca.
+- Gap real encontrado: `run_all.sh` só INICIA processos, não instala
+  nada. Numa máquina nova ele caía no mesmo erro de `httpx` faltando
+  já documentado antes (sem `backend/venv/`, cai pro python do
+  sistema, que não tem as deps da camada de agentes de IA). Faltava
+  um script que preparasse o ambiente ANTES do `run_all.sh`.
+- Criado `setup.sh`: builda os pacotes ROS 2 (`build.sh`), cria e
+  popula `backend/venv/`, roda `npm install` — tudo automatizado.
+  Único pré-requisito que continua manual de propósito: ROS 2 Jazzy
+  já instalado no sistema (não é algo que um script de repo deveria
+  instalar sozinho sem o usuário saber). Testado no mesmo clone limpo:
+  `./setup.sh` sozinho deixou tudo pronto pro `run_all.sh` funcionar.
+- Verificado também o caminho Docker (alternativa que evita precisar
+  instalar ROS2 no host): `docker compose build` builda do zero com
+  sucesso hoje. Não testado subindo os containers de verdade (portas
+  8000/5173 já ocupadas pela stack nativa rodando na mesma máquina
+  durante o teste) — não é falha do Docker, só as duas rodando junto.
+- **2 incidentes reais durante o teste, ambos corrigidos**:
+  1. Rodei um teste de `run_all.sh` no clone de teste com `timeout
+     40s` sem perceber que isso deixaria uma SEGUNDA simulação
+     (Gazebo+Nav2) rodando ao mesmo tempo da stack original do
+     usuário (que ele estava usando de verdade, com dados reais
+     gravados) — achado porque o próprio usuário notou ("tem 2 abertos
+     né"). `kill -TERM` no grupo de processo certo (confirmado por
+     PGID antes de matar) resolveu sem tocar na stack dele. Lição: não
+     usar `timeout` externo pra testar `run_all.sh` — o trap de
+     cleanup do script nem sempre dispara a tempo com esse mecanismo
+     de sinal; usar controle de processo em segundo plano de verdade
+     (`run_in_background` + `TaskStop`, que já confirmado funcionar
+     limpo) em vez disso.
+  2. `docker compose build` falhou na primeira tentativa por disco
+     cheio (`/tmp` a 0MB livre, ENOSPC) — a máquina já tinha ~29GB em
+     imagens/cache Docker de builds anteriores (91% do disco usado).
+     `docker builder prune -af` liberou 15.44GB, build refeito com
+     sucesso na segunda tentativa.
+- Commit `61eb929` em `perfect-bot`, com push.
+
 ### 2026-10-18 (noite, cont.) — branch `perfect-bot`: README reescrito pra quem não é da robótica + validação real ao vivo
 
 - Pedido do usuário: reescrever o README pensando em gente que não usa
