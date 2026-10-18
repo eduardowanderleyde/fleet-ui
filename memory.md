@@ -24,6 +24,29 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-18 (noite, cont. 3) — branch `perfect-bot`: Docker validado de ponta a ponta de verdade — é o caminho mais garantido entre máquinas
+
+- Pergunta do usuário: existe opção técnica melhor pra isso funcionar
+  100%? Resposta: Docker, porque fixa a versão de SO+ROS2+deps dentro
+  da imagem — o caminho nativo (`setup.sh`+`run_all.sh`) continua
+  dependendo do ROS2 Jazzy do sistema bater certinho, o que varia
+  entre máquinas; essa é a fonte real de "funcionou aqui, não lá".
+- Validado de verdade, não só o build (que já tinha sido confirmado
+  antes): pausei a stack nativa do usuário (só backend+frontend,
+  simulação e dados gravados intactos), subi `docker compose up` de
+  verdade — sim+fleet+backend+frontend todos de pé, mapa/LiDAR/pose do
+  robô renderizando ao vivo na tela, idêntico ao caminho nativo.
+  Confirmado via curl + screenshot Playwright. Depois derrubei o
+  Docker (`docker compose down`, zero container sobrando) e subi a
+  stack nativa de novo pro usuário continuar usando do jeito que
+  estava.
+- README atualizado: seção Docker agora abre dizendo explicitamente
+  que é o caminho mais garantido entre máquinas diferentes, com a
+  ressalva que continua de pé (GUI do Gazebo via X11/GPU é tranquila
+  no Linux, mais chata no Docker Desktop macOS/Windows); Quick start
+  aponta pra lá logo de cara pra quem for trocar de máquina.
+- Commit `a7434d1` em `perfect-bot`, com push.
+
 ### 2026-10-18 (noite, cont. 2) — branch `perfect-bot`: setup.sh — validação real de "baixa num PC novo e funciona"
 
 - Pergunta do usuário que motivou tudo isso: será que um clone novo,
