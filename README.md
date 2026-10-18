@@ -9,6 +9,10 @@ times as you want, and see exactly how much the robot's path varied between
 runs — distance, speed, duration, how closely it matched the original. It all
 happens on a web page; you never have to type a robot command by hand.
 
+> **Use the `perfect-bot` branch**, not `main` — it's the one with
+> `setup.sh`/`run_all.sh` and the features this README describes. Every
+> `git clone` command below already includes `-b perfect-bot`.
+
 > Built on top of this: an **AI agent orchestration layer** (Claude/Anthropic) that
 > can plan and run experiments — move robots, record/replay routes, run full
 > repeatability campaigns, diagnose flagged runs — through natural-language
@@ -32,7 +36,7 @@ avoids depending on that machine's own ROS 2 install matching this one.
 ### 1. Get the code and set it up (one time only)
 
 ```bash
-git clone <repo-url> ~/fleet-ui
+git clone -b perfect-bot <repo-url> ~/fleet-ui
 cd ~/fleet-ui
 ./setup.sh
 ```
@@ -175,7 +179,7 @@ sudo apt install nodejs npm
 > Use a plain path like `~/fleet-ui`.
 
 ```bash
-git clone <repo-url> ~/fleet-ui
+git clone -b perfect-bot <repo-url> ~/fleet-ui
 ```
 
 ### Build ROS 2 packages
