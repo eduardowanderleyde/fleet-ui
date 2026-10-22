@@ -178,8 +178,10 @@ export default function ConfigForm({
                   border: `1px solid ${cfg.topics.includes(id) ? '#6366f1' : '#2a3142'}`,
                   borderRadius: '6px', padding: '0.3rem 0.65rem' }}>
                   <input type="checkbox" checked={cfg.topics.includes(id)} onChange={() => toggleTopic(id)} style={{ accentColor: '#6366f1', margin: 0, flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.82rem', color: cfg.topics.includes(id) ? '#e6e9ef' : '#8b92a8', fontFamily: 'monospace', flexShrink: 0 }}>{id}</span>
-                  <span style={{ fontSize: '0.72rem', color: '#4b5563' }}>— {desc}</span>
+                  <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                    <span style={{ fontSize: '0.82rem', color: cfg.topics.includes(id) ? '#e6e9ef' : '#8b92a8', fontFamily: 'monospace', overflowWrap: 'anywhere' }}>{id}</span>
+                    <span style={{ fontSize: '0.72rem', color: '#4b5563' }}>{desc}</span>
+                  </span>
                 </label>
               ))}
             </div>

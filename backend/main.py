@@ -56,6 +56,7 @@ _status_lock = threading.Lock()
 # lifespan — usado por _reset_robot_pose_tracking() pra limpar o buffer
 # quando a navegação sequencial desliga/religa um robô (ver comentário lá).
 _robot_tf_buffers: dict[str, object] = {}
+_robot_tf_last_rx: dict[str, dict[str, float]] = {}
 
 
 def _reset_robot_pose_tracking(robot_id: str) -> None:
@@ -281,6 +282,7 @@ async def lifespan(app: FastAPI):
         try:
             import rclpy
             from rclpy.node import Node
+            import rclpy.callback_groups
             from fleet_msgs.msg import FleetStatus
             from geometry_msgs.msg import PoseWithCovarianceStamped
             from nav_msgs.msg import OccupancyGrid
@@ -326,9 +328,16 @@ async def lifespan(app: FastAPI):
                 tf_buffer = tf2_ros.Buffer()
                 _robot_tf_buffers[rid] = tf_buffer
 
+                tf_last_rx: dict[str, float] = {}
+                _robot_tf_last_rx[rid] = tf_last_rx
+
                 def _tf_dynamic_cb(msg):
                     for t in msg.transforms:
                         tf_buffer.set_transform(t, "default_authority")
+                        if t.child_frame_id in ("odom", "base_link"):
+                            tf_last_rx[f"{t.header.frame_id}->{t.child_frame_id}"] = (
+                                t.header.stamp.sec + t.header.stamp.nanosec * 1e-9
+                            )
 
                 def _tf_static_cb(msg):
                     for t in msg.transforms:
@@ -354,10 +363,12 @@ async def lifespan(app: FastAPI):
                         )
                         with _status_lock:
                             _robot_poses.setdefault(rid, {}).update(
-                                {"x": tr.x, "y": tr.y, "yaw": yaw, "valid": True}
+                                {"x": tr.x, "y": tr.y, "yaw": yaw, "valid": True,
+                                 "source": "tf", "tf_ok_at": time.time()}
                             )
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        with _status_lock:
+                            _robot_poses.setdefault(rid, {})["tf_error"] = f"{type(exc).__name__}: {exc}"[:200]
 
                 node.create_timer(0.1, tf_timer_cb)
 
@@ -370,7 +381,7 @@ async def lifespan(app: FastAPI):
                     )
                     with _status_lock:
                         _robot_poses.setdefault(rid, {}).update(
-                            {"x": p.x, "y": p.y, "yaw": yaw, "valid": True}
+                            {"x": p.x, "y": p.y, "yaw": yaw, "valid": True, "source": "pose_topic"}
                         )
 
                 # AMCL publica /amcl_pose TRANSIENT_LOCAL e só republica com movimento.
@@ -495,7 +506,14 @@ async def lifespan(app: FastAPI):
                 finally:
                     _nav2_check_busy.release()
 
-            node.create_timer(3.0, nav2_check_cb)
+            # Grupo próprio: nav2_check_cb bloqueia ~2 s num subprocess. No grupo
+            # padrão (mutuamente exclusivo) isso travava todos os outros callbacks
+            # mesmo com MultiThreadedExecutor — /tf chegava em rajadas a cada 3 s,
+            # o map→odom se perdia e a pose na tela ficava até 4 m atrasada.
+            node.create_timer(
+                3.0, nav2_check_cb,
+                callback_group=rclpy.callback_groups.MutuallyExclusiveCallbackGroup(),
+            )
 
             node.create_subscription(FleetStatus, "fleet/status", fleet_cb, 10)
             executor = rclpy.executors.MultiThreadedExecutor()
@@ -538,6 +556,7 @@ def _status_payload() -> dict:
         **_fleet_status,
         "pose": _robot_poses.get(_default_robot_id(), _EMPTY_POSE),
         "poses": _robot_poses,
+        "tf_last_rx": _robot_tf_last_rx,
     }
 
 
@@ -1240,7 +1259,7 @@ async def import_map(req: ImportMapRequest):
 
 
 @app.post("/api/start_record")
-async def start_record(robot_id: str = "", route_name: str = "r1"):
+def start_record(robot_id: str = "", route_name: str = "r1"):
     robot_id = robot_id or ""
     if (err := _require_muut(robot_id)) is not None:
         return err
@@ -1252,7 +1271,7 @@ async def start_record(robot_id: str = "", route_name: str = "r1"):
 
 
 @app.post("/api/stop_record")
-async def stop_record(robot_id: str = ""):
+def stop_record(robot_id: str = ""):
     robot_id = robot_id or ""
     if (err := _require_muut(robot_id)) is not None:
         return err
@@ -1264,7 +1283,7 @@ async def stop_record(robot_id: str = ""):
 
 
 @app.post("/api/play_route")
-async def play_route(robot_id: str = "", route_name: str = "r1"):
+def play_route(robot_id: str = "", route_name: str = "r1"):
     robot_id = robot_id or ""
     if (err := _require_muut(robot_id)) is not None:
         return err
@@ -1276,7 +1295,7 @@ async def play_route(robot_id: str = "", route_name: str = "r1"):
 
 
 @app.post("/api/go_to_point")
-async def go_to_point(robot_id: str = "", x: float = 0.0, y: float = 0.0, yaw: float = 0.0):
+def go_to_point(robot_id: str = "", x: float = 0.0, y: float = 0.0, yaw: float = 0.0):
     robot_id = robot_id or ""
     if (err := _require_muut(robot_id)) is not None:
         return err
@@ -1288,7 +1307,7 @@ async def go_to_point(robot_id: str = "", x: float = 0.0, y: float = 0.0, yaw: f
 
 
 @app.post("/api/cancel")
-async def cancel(robot_id: str = ""):
+def cancel(robot_id: str = ""):
     robot_id = robot_id or ""
     ok, out = _run_ros2_service(
         "cancel", "fleet_msgs/srv/Cancel",
@@ -1298,7 +1317,7 @@ async def cancel(robot_id: str = ""):
 
 
 @app.get("/api/list_robots")
-async def list_robots():
+def list_robots():
     ok, out = _run_ros2_service("list_robots", "fleet_msgs/srv/ListRobots", "{}")
     if not ok:
         return JSONResponse(content={"robot_ids": []}, status_code=200)
@@ -1306,7 +1325,7 @@ async def list_robots():
 
 
 @app.get("/api/list_routes")
-async def list_routes(robot_id: str = ""):
+def list_routes(robot_id: str = ""):
     robot_id = robot_id or ""
     ok, out = _run_ros2_service(
         "list_routes", "fleet_msgs/srv/ListRoutes",
@@ -1318,7 +1337,7 @@ async def list_routes(robot_id: str = ""):
 
 
 @app.post("/api/enable_collection")
-async def enable_collection(robot_id: str = "", topics: str = "scan,odom", output_mode: str = "rosbag2"):
+def enable_collection(robot_id: str = "", topics: str = "scan,odom", output_mode: str = "rosbag2"):
     robot_id = robot_id or ""
     topic_list = [t.strip() for t in topics.split(",") if t.strip()] or ["scan", "odom"]
     ok, out = _run_ros2_service(
@@ -1329,7 +1348,7 @@ async def enable_collection(robot_id: str = "", topics: str = "scan,odom", outpu
 
 
 @app.post("/api/disable_collection")
-async def disable_collection(robot_id: str = ""):
+def disable_collection(robot_id: str = ""):
     robot_id = robot_id or ""
     ok, out = _run_ros2_service(
         "disable_collection", "fleet_msgs/srv/DisableCollection",
@@ -1339,7 +1358,7 @@ async def disable_collection(robot_id: str = ""):
 
 
 @app.get("/api/discover_robots")
-async def discover_robots(subnet: str = ""):
+def discover_robots(subnet: str = ""):
     """
     Varre a subnet por hosts com porta 22 aberta e testa se têm ROS 2.
     subnet ex: '192.168.1' (varre .1–.254).
@@ -1349,7 +1368,7 @@ async def discover_robots(subnet: str = ""):
 
 
 @app.post("/api/test_ssh")
-async def test_ssh(body: SshTestRequest):
+def test_ssh(body: SshTestRequest):
     """Testa SSH num host: verifica conexão e presença do ROS 2."""
     data = _model_dump(body)
     host = (data.get("host") or "").strip()
