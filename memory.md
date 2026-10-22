@@ -24,6 +24,33 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-22 (noite, cont. 2) — análise do experimento CBSoft incorporada ao fleet-ui
+
+- Pedido: incorporar a análise das meninas (antes só a navegação estava
+  integrada). Commit `116d8d0` em `new-way-samsung`, com push.
+- `fleet_ws/scripts/cbsoft/bag_to_nav_csv.py`: converte a gravação MCAP do
+  replay do fleet-ui no CSV do nav_3points.py (mesmas colunas, 0,2 s).
+  Achados no caminho: (1) a /amcl_pose é TRANSIENT_LOCAL e chega na
+  gravação com o horário do último publish, ~40 s antes, o que deslocava a
+  corrida inteira; agora o início é o 1º /odom. (2) O container usa UTC e
+  o log do nRF Connect é local; os comandos make passam o TZ do host.
+- `fleet_ws/scripts/cbsoft/analise/`: sync_rssi_nav.py e
+  analise_agregados.py delas, com argumentos, PNG sem janela, linhas (0,0)
+  descartadas e base do celular = 1ª pose válida.
+- `make cbsoft-csv` / `make cbsoft-analise`: rodam como o usuário do host
+  (a pasta collections/cbsoft tinha virado do root via nav_3points no
+  container).
+- **Validação com dados reais de 19/05:** recalculando a Tabela 3 do artigo
+  com a sincronização delas, RSSI médio e distância até desconectar batem
+  (diferenças de décimos). A corrida com o bug (0,0) (homogênea 1, 15:57)
+  deu 68,6 m contra 68,4 m do artigo, então **o artigo NÃO foi afetado**.
+  Isso fecha a dúvida aberta nas notas anteriores.
+- Dados delas copiados em `fleet_ws/collections/cbsoft/ufpe_2026-05-19/`
+  (gitignored, não vai pro repositório), junto do `tabela3.py` de
+  validação.
+- Ainda não integrado: leitura de BLE no robô real e mapa real do CIn
+  (hall_cin_v4).
+
 ### 2026-10-22 (noite, cont.) — `new-way-samsung` pronta pra máquina do laboratório (UFPE)
 
 - Pergunta do usuário: "vai funcionar o experimento na UFPE?". Dois
