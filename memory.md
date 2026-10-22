@@ -24,6 +24,40 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-21 — branch `new-way-samsung`: percurso BLE do CBSoft'26 rodando no Docker num mundo aberto
+
+- Contexto: artigo da Fernanda Neves e da Beatriz Barros (UFPE, com Adrien
+  Durand-Petiteville e Breno Miranda), premiado como Artigo de Destaque no
+  CBSoft'26 / SBES IIER. Material recebido em
+  `~/Downloads/CBSoft-*/CBSoft/`. O TurtleBot4 leva um celular por um "L"
+  (64 m reto + 31 m) até a conexão BLE cair. Tem 6 corridas do robô
+  (2026-05-19) e uma pasta `human_test/` com 12 corridas a pé com GPS
+  (2026-07-14) que ainda não estão no PDF submetido. Esse é o experimento
+  de comparação que o artigo promete, mas não mostra.
+- Pedido do usuário: rodar o percurso do script delas (`nav_3points.py`)
+  pelo Docker do fleet-ui, num lugar aberto (sem bater em nada), vendo
+  pelo frontend.
+- Feito: mundo `cbsoft_open` (gerado por
+  `fleet_ws/scripts/cbsoft/gen_open_world.py`), com chão aberto, paredes
+  na borda e pilares a ≥2,5 m do percurso. Usa mapa pronto + AMCL e o
+  frame `map` igual às coordenadas do hall_cin_v4, então o script roda
+  com as coordenadas originais. O launch ganhou `localization:=slam|amcl`.
+  Atalhos: `make cbsoft-up` / `make cbsoft-run`.
+- Bug achado (vale avisar as autoras): o script original assina
+  `/amcl_pose` como VOLATILE, mas o AMCL publica TRANSIENT_LOCAL e só
+  republica com movimento. Resultado: as primeiras linhas do CSV saem em
+  (0,0). Aconteceu em 1 das 6 corridas reais (`2026-05-19_15-57-33`, a da
+  Fig. 4 esquerda). Somar o caminho a partir da 1ª linha infla a distância
+  em ~17 m. A Tabela 3 parece coerente, provavelmente tratado, mas falta
+  confirmar. O backend tinha o mesmo problema em `/map` e `/amcl_pose`.
+  Corrigido nos dois.
+- Validado: 2 corridas completas, 96,3 vs 96,5 m, 0,254 vs 0,253 m/s
+  (artigo: 0,244 a 0,253), 382 vs 383 s.
+- Incidente: na 1ª subida do Docker o servidor do Gazebo morreu e só a
+  janela (`gz sim -g`) ficou viva, pedindo "list of world names" em loop.
+  Não era RAM nem GPU. `docker compose down` + subir de novo resolveu.
+- Commit `2006f4a` em `new-way-samsung`, com push.
+
 ### 2026-10-18 (noite, cont. 4) — branch `perfect-bot`: README fixa `perfect-bot` nos comandos de clone
 
 - Achado real (apontado pelo usuário): `main`, a branch padrão do
