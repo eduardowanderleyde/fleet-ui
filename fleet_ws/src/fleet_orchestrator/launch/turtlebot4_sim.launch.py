@@ -69,9 +69,29 @@ def _make_nav2_params(_ctx):
     return tmp.name
 
 
+def _make_localization_params(x, y, yaw):
+    """localization.yaml do TB4 com a pose inicial do AMCL igual à pose de spawn.
+
+    Sem isso o AMCL só publica map→odom depois que alguém manda /initialpose,
+    e o Nav2/frontend ficam parados até lá.
+    """
+    pkg_nav4 = get_package_share_directory('turtlebot4_navigation')
+    with open(os.path.join(pkg_nav4, 'config', 'localization.yaml')) as f:
+        cfg = yaml.safe_load(f)
+    amcl = cfg['amcl']['ros__parameters']
+    amcl['set_initial_pose'] = True
+    amcl['initial_pose'] = {'x': float(x), 'y': float(y), 'z': 0.0, 'yaw': float(yaw)}
+    tmp = tempfile.NamedTemporaryFile(mode='w', suffix='_localization.yaml', delete=False)
+    yaml.safe_dump(cfg, tmp)
+    tmp.close()
+    return tmp.name
+
+
 ARGUMENTS = [
     DeclareLaunchArgument('world', default_value='warehouse',
-                          description='Mundo: warehouse | depot'),
+                          description='Mundo: warehouse | depot | cbsoft_open'),
+    DeclareLaunchArgument('localization', default_value='slam',
+                          description='slam (mapeia ao vivo) | amcl (mapa pronto em maps/<world>.yaml)'),
     DeclareLaunchArgument('x_pose', default_value='0.0'),
     DeclareLaunchArgument('y_pose', default_value='0.0'),
     DeclareLaunchArgument('yaw',    default_value='0.0'),
@@ -93,8 +113,14 @@ def _launch_setup(context, *args, **kwargs):
     # O bridge de ground truth (abaixo) que lesse LaunchConfiguration('world')
     # depois disso pegaria o caminho completo por engano, não "warehouse".
     world_name = LaunchConfiguration('world').perform(context)
+    localization = LaunchConfiguration('localization').perform(context)
 
-    world_path = PathJoinSubstitution([pkg_minimal, 'worlds', [world_name, '.sdf']])
+    pkg_fleet = get_package_share_directory('fleet_orchestrator')
+    own_world = os.path.join(pkg_fleet, 'worlds', f'{world_name}.sdf')
+    if os.path.exists(own_world):
+        world_path = own_world
+    else:
+        world_path = PathJoinSubstitution([pkg_minimal, 'worlds', [world_name, '.sdf']])
 
     # ── Simulação mínima TB4 (Gazebo Harmonic nativo) ─────────────────────────
     sim = IncludeLaunchDescription(
@@ -137,16 +163,35 @@ def _launch_setup(context, *args, **kwargs):
         parameters=[{'use_sim_time': True}],
     )
 
-    # ── SLAM Toolbox (8s após Gazebo) ─────────────────────────────────────────
-    slam = TimerAction(
-        period=8.0,
-        actions=[IncludeLaunchDescription(
+    # ── Localização (8s após Gazebo): SLAM Toolbox ou map_server + AMCL ───────
+    if localization == 'amcl':
+        map_yaml = os.path.join(pkg_fleet, 'maps', f'{world_name}.yaml')
+        if not os.path.exists(map_yaml):
+            raise RuntimeError(f'localization:=amcl exige mapa pronto em {map_yaml}')
+        localizer = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(pkg_nav4, 'launch', 'localization.launch.py')
+            ),
+            launch_arguments=[
+                ('use_sim_time', 'true'),
+                ('map', map_yaml),
+                ('params', _make_localization_params(
+                    LaunchConfiguration('x_pose').perform(context),
+                    LaunchConfiguration('y_pose').perform(context),
+                    LaunchConfiguration('yaw').perform(context),
+                )),
+            ],
+        )
+    elif localization == 'slam':
+        localizer = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(pkg_nav4, 'launch', 'slam.launch.py')
             ),
             launch_arguments=[('use_sim_time', 'true'), ('sync', 'true')],
-        )],
-    )
+        )
+    else:
+        raise RuntimeError(f'localization inválido: {localization!r} (use slam | amcl)')
+    slam = TimerAction(period=8.0, actions=[localizer])
 
     # ── Nav2 (12s após Gazebo) ────────────────────────────────────────────────
     # Gera params com enable_stamped_cmd_vel=False (bridge usa Twist, não TwistStamped)

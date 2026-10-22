@@ -281,6 +281,27 @@ You can change the simulation world with:
 WORLD=depot make docker-up
 ```
 
+### CBSoft BLE route in an open world
+
+Replays the route from the CBSoft'26 BLE connectivity experiment (Neves,
+Barros et al. — script `fleet_ws/scripts/cbsoft/nav_3points.py`) in
+simulation: start → 64 m straight → turn → 31 m, at the same 0.26 m/s.
+The world `cbsoft_open` is an open floor with only sparse pillars (≥2.5 m
+from the route) so the robot doesn't hit anything; it uses a prebuilt map +
+AMCL like the real robot, and the map frame matches the original
+`hall_cin_v4` coordinates, so the script runs unchanged.
+
+```bash
+make cbsoft-up    # terminal 1: sim + backend + frontend, robot at the start point
+make cbsoft-run   # terminal 2: runs nav_3points.py (~6.5 min)
+```
+
+Watch it at http://localhost:5173 (turn off **Planta** — that's the
+warehouse floor plan). The CSV lands in `fleet_ws/collections/cbsoft/`. The
+route is also available as `percurso_cbsoft` in the replay dropdown. To
+change the world layout, edit and rerun
+`fleet_ws/scripts/cbsoft/gen_open_world.py`, then `make docker-build`.
+
 ---
 
 ## Running manually

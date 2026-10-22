@@ -317,7 +317,7 @@ async def lifespan(app: FastAPI):
             # de /tf de N robôs atrasar fleet/status e os N maps.
             import tf2_ros
             from rclpy.time import Time as RclpyTime
-            from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
+            from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy, ReliabilityPolicy
             from tf2_msgs.msg import TFMessage
 
             def _setup_robot(rid: str) -> None:
@@ -372,7 +372,13 @@ async def lifespan(app: FastAPI):
                             {"x": p.x, "y": p.y, "yaw": yaw, "valid": True}
                         )
 
-                node.create_subscription(PoseWithCovarianceStamped, f"{prefix}/amcl_pose", amcl_cb, 10)
+                # AMCL publica /amcl_pose TRANSIENT_LOCAL e só republica com movimento.
+                amcl_qos = QoSProfile(
+                    depth=1,
+                    reliability=ReliabilityPolicy.RELIABLE,
+                    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+                )
+                node.create_subscription(PoseWithCovarianceStamped, f"{prefix}/amcl_pose", amcl_cb, amcl_qos)
                 node.create_subscription(PoseWithCovarianceStamped, f"{prefix}/pose", amcl_cb, 10)
 
                 def map_cb(msg):
@@ -394,7 +400,14 @@ async def lifespan(app: FastAPI):
                     except Exception as e:
                         node.get_logger().warning(f"map_cb({rid!r}) error: {e}")
 
-                node.create_subscription(OccupancyGrid, f"{prefix}/map", map_cb, 1)
+                # TRANSIENT_LOCAL: map_server (modo AMCL) publica /map uma vez só;
+                # assinatura VOLATILE nunca recebe esse mapa travado.
+                map_qos = QoSProfile(
+                    depth=1,
+                    reliability=ReliabilityPolicy.RELIABLE,
+                    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+                )
+                node.create_subscription(OccupancyGrid, f"{prefix}/map", map_cb, map_qos)
 
             for _rid in _ROBOTS:
                 _setup_robot(_rid)

@@ -7,6 +7,10 @@ x-fleet-common: &fleet-common
   environment:
     ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
     WORLD: ${WORLD:-warehouse}
+    LOCALIZATION: ${LOCALIZATION:-slam}
+    X_POSE: ${X_POSE:-0.0}
+    Y_POSE: ${Y_POSE:-0.0}
+    YAW: ${YAW:-0.0}
     DISPLAY: ${DISPLAY:-}
     QT_X11_NO_MITSHM: "1"
     FLEET_CORS_ORIGINS: ${FLEET_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
