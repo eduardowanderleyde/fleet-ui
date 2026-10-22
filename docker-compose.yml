@@ -6,6 +6,10 @@ x-fleet-common: &fleet-common
   ipc: host
   environment:
     ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+    # Só UDP (sem memória compartilhada do Fast DDS): com ipc: host, os
+    # segmentos em /dev/shm deixados por containers derrubados acumulam e o
+    # backend morreu com SIGBUS (exit 135) no meio de um replay.
+    FASTDDS_BUILTIN_TRANSPORTS: UDPv4
     WORLD: ${WORLD:-warehouse}
     LOCALIZATION: ${LOCALIZATION:-slam}
     HEADLESS: ${HEADLESS:-False}
@@ -21,6 +25,7 @@ x-fleet-common: &fleet-common
     - /tmp/.X11-unix:/tmp/.X11-unix:rw
     - ./fleet_ws/routes:/workspace/fleet_ws/routes
     - ./fleet_ws/collections:/workspace/fleet_ws/collections
+    - ./fleet_ws/runs_history:/workspace/fleet_ws/runs_history
     - ./frontend/public:/workspace/frontend/public
 
 services:
@@ -34,16 +39,20 @@ services:
       - sim
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      FASTDDS_BUILTIN_TRANSPORTS: UDPv4
       FLEET_START_DELAY: ${FLEET_START_DELAY:-18}
     command: ["/workspace/docker/run-fleet.sh"]
 
   backend:
     <<: *fleet-common
+    restart: on-failure
     depends_on:
       - fleet
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      FASTDDS_BUILTIN_TRANSPORTS: UDPv4
       BACKEND_START_DELAY: ${BACKEND_START_DELAY:-22}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       FLEET_CORS_ORIGINS: ${FLEET_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
     command: ["/workspace/docker/run-backend.sh"]
 

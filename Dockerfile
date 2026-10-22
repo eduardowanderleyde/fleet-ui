@@ -46,8 +46,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR ${FLEET_ROOT}
 
-COPY backend/requirements.txt ${FLEET_ROOT}/backend/requirements.txt
-RUN pip install --no-cache-dir --break-system-packages --ignore-installed -r backend/requirements.txt
+COPY backend/requirements.lock.txt ${FLEET_ROOT}/backend/requirements.lock.txt
+# Versões travadas: com o requirements.txt solto (>=) a imagem pegou anthropic
+# 1.15.0, que quebra os Agentes IA ("Connection error", TypeError interno).
+RUN pip install --no-cache-dir --break-system-packages --ignore-installed -r backend/requirements.lock.txt
+# O python3-brotli 1.1.0 do Ubuntu (vem com o ROS) não aceita output_buffer_limit,
+# que o httpx2 passa ao descompressor: toda chamada à API da Anthropic falhava
+# como "Connection error". Fora do Docker o venv não tem brotli e não sofre isso.
+RUN pip install --no-cache-dir --break-system-packages --ignore-installed brotli==1.2.0
 
 COPY frontend/package*.json ${FLEET_ROOT}/frontend/
 RUN npm --prefix frontend ci

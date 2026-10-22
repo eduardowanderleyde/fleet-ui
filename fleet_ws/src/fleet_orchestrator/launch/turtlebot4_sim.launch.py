@@ -79,6 +79,9 @@ def _make_nav2_params(_ctx):
     return tmp.name
 
 
+_GROUND_TRUTH_ROBOT_INDEX = {'cbsoft_open': 0}
+
+
 def _make_localization_params(x, y, yaw):
     """localization.yaml do TB4 com a pose inicial do AMCL igual à pose de spawn.
 
@@ -171,12 +174,18 @@ def _launch_setup(context, *args, **kwargs):
     # O bridge acima perde o nome de cada entidade (child_frame_id vazio) —
     # este nó extrai só a entrada do robô por índice fixo e publica como
     # PoseStamped limpo (ver fleet_orchestrator/ground_truth_filter.py).
+    # Índice do robô no array de dynamic_pose depende do mundo: no warehouse
+    # há 2 entidades dinâmicas antes dele; no cbsoft_open (tudo estático) ele
+    # é o primeiro. Conferido ao vivo comparando com a pose de spawn.
+    gt_params = {'use_sim_time': True}
+    if world_name in _GROUND_TRUTH_ROBOT_INDEX:
+        gt_params['robot_index'] = _GROUND_TRUTH_ROBOT_INDEX[world_name]
     ground_truth_filter = Node(
         package='fleet_orchestrator',
         executable='ground_truth_filter',
         name='ground_truth_filter',
         output='screen',
-        parameters=[{'use_sim_time': True}],
+        parameters=[gt_params],
     )
 
     # ── Localização (8s após Gazebo): SLAM Toolbox ou map_server + AMCL ───────

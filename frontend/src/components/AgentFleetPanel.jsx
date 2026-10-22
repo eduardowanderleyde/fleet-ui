@@ -40,7 +40,7 @@ function RobotAgentCard({ robotId, instruction, onInstructionChange, state, disa
   return (
     <div style={S.card}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a5b4fc', fontFamily: 'monospace' }}>{robotId}</span>
+        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a5b4fc', fontFamily: 'monospace' }}>{robotId || 'único'}</span>
         <span style={{ fontSize: '0.7rem', color: st.color, fontWeight: 600 }}>{st.label}</span>
       </div>
       <textarea
@@ -85,6 +85,12 @@ export default function AgentFleetPanel({ robotIds = ['tb1', 'tb2', 'tb3'] }) {
         <span style={S.title}>Agentes de IA — 1 por robô</span>
         <span style={{ fontSize: '0.7rem', color: '#4b5563' }}>escreva uma instrução por robô e dispare</span>
       </div>
+
+      {robotIds.length === 0 && (
+        <div role="status" style={{ fontSize: '0.78rem', color: '#8b92a8' }}>
+          Nenhum robô visível no backend ainda — suba a simulação ou conecte o robô.
+        </div>
+      )}
 
       <div style={S.grid}>
         {robotIds.map(robotId => (

@@ -7,6 +7,8 @@ const ALL_TOPICS = [
   { id: 'odom',     desc: 'rodas — posição estimada contando giros' },
   { id: 'imu',      desc: 'inercial — aceleração e rotação' },
   { id: 'pose',     desc: 'posição corrigida pelo SLAM (mais precisa que odom)' },
+  { id: 'amcl_pose', desc: 'posição no mapa pronto (AMCL) — modo do robô real e do mundo CBSoft' },
+  { id: 'ground_truth_pose_clean', desc: 'posição real exata, sem erro de estimativa — só na simulação' },
   { id: 'ble_rssi', desc: 'força do sinal Bluetooth (BLE) — precisa do nó ble_rssi_publisher rodando' },
 ]
 

@@ -28,7 +28,7 @@ if [ ! -x "$ROOT/backend/venv/bin/python3" ]; then
   python3 -m venv "$ROOT/backend/venv"
 fi
 "$ROOT/backend/venv/bin/pip" install --quiet --upgrade pip
-"$ROOT/backend/venv/bin/pip" install --quiet -r "$ROOT/backend/requirements.txt"
+"$ROOT/backend/venv/bin/pip" install --quiet -r "$ROOT/backend/requirements.lock.txt"
 echo "✓ Dependências Python do backend instaladas."
 
 echo "[setup] Instalando dependências do frontend (npm install)..."

@@ -11,9 +11,10 @@
     </physics>
     <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
     <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
-  <xacro:unless value="$(arg headless)">
+    <!-- Sempre, mesmo headless: publica /world/<w>/dynamic_pose/info, de onde
+         sai o ground truth (ground_truth_pose_clean). Os mundos do vendor só o
+         carregam com GUI. -->
     <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
-  </xacro:unless>
     <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>

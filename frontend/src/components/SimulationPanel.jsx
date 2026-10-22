@@ -19,7 +19,9 @@ function statusLine(status) {
   return null
 }
 
-export default function SimulationPanel({ sim }) {
+// externalSim: Nav2 de pé sem ter sido iniciado por este painel (Docker,
+// run_all.sh). Iniciar outra simulação aqui sobreporia as duas no mesmo ROS.
+export default function SimulationPanel({ sim, externalSim = false }) {
   const { status, actionError, starting, start, stop, shape, setShape, dispatch } = sim
   const st = statusLine(status)
   const activeRobots = status.robots?.length ? status.robots : ROBOTS
@@ -44,10 +46,16 @@ export default function SimulationPanel({ sim }) {
 
       {actionError && <div style={{ fontSize: '0.78rem', color: '#f87171' }}>{actionError}</div>}
 
+      {externalSim && !status.running && (
+        <div role="status" style={{ fontSize: '0.72rem', color: '#fbbf24' }}>
+          Já há uma simulação rodando (Docker ou run_all.sh). Pare-a antes de iniciar outra aqui.
+        </div>
+      )}
+
       <button
         onClick={() => status.running ? stop() : start({ mode: 'multi', world: 'warehouse', robots: ROBOTS })}
-        disabled={starting}
-        style={status.running ? btn('#3a1a1a', '#f87171') : btn('#7A3E12', '#F2994A', starting)}>
+        disabled={starting || (externalSim && !status.running)}
+        style={status.running ? btn('#3a1a1a', '#f87171') : btn('#7A3E12', '#F2994A', starting || externalSim)}>
         {starting ? '⏳ Iniciando…' : status.running ? '■ Parar simulação' : `▶ Iniciar simulação — ${SHAPES[shape].label}`}
       </button>
 

@@ -25,7 +25,9 @@ const DEFAULT_CFG = {
   robot:           'default',
   route:           'percurso_cbsoft',
   collect:         true,
-  topics:          ['scan', 'odom', 'pose'],
+  // pose (SLAM) e amcl_pose (mapa pronto): só um existe em cada modo, o outro
+  // grava 0 mensagens; ground truth idem fora da simulação.
+  topics:          ['scan', 'odom', 'pose', 'amcl_pose', 'ground_truth_pose_clean'],
   initial_pose:    [0, 0, 0],
   points:          [[0.5, 0.0, 0.0], [1.0, 0.0, 0.0]],
   return_to_start: [0, 0, 0],
@@ -301,7 +303,7 @@ export default function App() {
             style={{ ...btn(color.bgPanel, color.purple), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             🤖 Agentes IA <span aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.7 }}>{agentPanel ? '▲' : '▼'}</span>
           </button>
-          {agentPanel && <AgentFleetPanel robotIds={['tb1', 'tb2', 'tb3']} />}
+          {agentPanel && <AgentFleetPanel robotIds={(status.robots || []).map(r => r.robot_id)} />}
         </div>
 
         <RunHistoryPanel
@@ -320,7 +322,7 @@ export default function App() {
 
         {/* Coluna esquerda: formulário */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', overflowY: 'auto', paddingRight: '0.2rem', minHeight: 0 }}>
-          <SimulationPanel sim={sim} />
+          <SimulationPanel sim={sim} externalSim={nav2Ok && !sim.status.running} />
 
           <span style={{ fontSize: '0.8rem', fontWeight: 600, color: color.textMuted, flexShrink: 0 }}>Configuração</span>
           <ConfigForm
