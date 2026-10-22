@@ -46,6 +46,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR ${FLEET_ROOT}
 
+# Análise do experimento BLE do CBSoft (fleet_ws/scripts/cbsoft/analise/).
+# Camada separada pra não invalidar o cache da instalação do ROS acima.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pandas \
+    python3-seaborn \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY backend/requirements.lock.txt ${FLEET_ROOT}/backend/requirements.lock.txt
 # Versões travadas: com o requirements.txt solto (>=) a imagem pegou anthropic
 # 1.15.0, que quebra os Agentes IA ("Connection error", TypeError interno).

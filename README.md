@@ -319,6 +319,29 @@ both GUIs the machine saturated and Nav2 aborted long paths. To change the
 world layout, edit and rerun `fleet_ws/scripts/cbsoft/gen_open_world.py`,
 then `make docker-build`.
 
+#### Analysing runs (their analysis scripts)
+
+The analysis from the CBSoft paper (`sync_rssi_nav.py`, `analise_agregados.py`)
+lives in `fleet_ws/scripts/cbsoft/analise/`. It reads the navigation CSV
+written by `nav_3points.py`. Runs made with the **▶ Executar replay** button
+are recorded as MCAP instead; convert them to the same CSV first:
+
+```bash
+make cbsoft-csv     # latest recording → fleet_ws/collections/cbsoft/navegacao_2_trechos_<time>.csv
+make cbsoft-csv BAG=collections/default/<folder> POSE=ground_truth   # specific run, exact sim pose
+```
+
+Then put the nRF Connect log under `fleet_ws/collections/` and plot RSSI vs
+position:
+
+```bash
+make cbsoft-analise NAV=collections/cbsoft/<nav>.csv NRF="collections/cbsoft/nrf/<log>.txt"
+```
+
+Validated against the paper's real data (2026-05-19, 6 runs): mean RSSI and
+distance to disconnection match Table 3 within a few tenths. CSV timestamps
+use the host's time zone, so they line up with the phone's log.
+
 #### On another machine (e.g. the lab PC, Ubuntu 22.04)
 
 The host's Ubuntu/ROS version doesn't matter — everything runs inside the

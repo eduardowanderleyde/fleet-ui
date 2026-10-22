@@ -13,7 +13,21 @@ CBSOFT_ENV = ROS_DOMAIN_ID=$(CBSOFT_DOMAIN) WORLD=cbsoft_open LOCALIZATION=amcl 
 	NAV2_DEFAULT_SERVER_TIMEOUT_MS=1000 NAV2_NAVFN_USE_ASTAR=true \
 	X_POSE=1.0216323137283325 Y_POSE=16.61626625061035 YAW=0.0
 
-.PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-check cbsoft-up cbsoft-run
+.PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-check cbsoft-up cbsoft-run cbsoft-csv cbsoft-analise
+
+# Fuso local no container: o Timestamp_Legivel do CSV precisa casar com o
+# horário do celular (log do nRF Connect), que é local.
+TZ_LOCAL := $(shell cat /etc/timezone 2>/dev/null || echo UTC)
+# Gravação mais recente, relativa a fleet_ws/ (onde os comandos rodam no container).
+LATEST_BAG = $(patsubst fleet_ws/%/,%,$(firstword $(shell ls -td fleet_ws/collections/default/*/ 2>/dev/null)))
+# Roda com o usuário do host: assim os CSV/PNG gerados são seus, não do root.
+HOST_IDS := $(shell id -u):$(shell id -g)
+CBSOFT_RUN = $(COMPOSE) run --rm --no-deps --user $(HOST_IDS) -e HOME=/tmp -e TZ=$(TZ_LOCAL) \
+	-v $(CURDIR)/fleet_ws/scripts/cbsoft:/workspace/fleet_ws/scripts/cbsoft:ro -w /workspace/fleet_ws backend
+# collections/cbsoft pode ter sido criada pelo root (nav_3points.py roda como
+# root no container); devolve só a pasta pro usuário, e só se precisar.
+CBSOFT_OWN_DIR = mkdir -p fleet_ws/collections/cbsoft 2>/dev/null; test -w fleet_ws/collections/cbsoft || \
+	$(COMPOSE) run --rm --no-deps backend chown $(HOST_IDS) /workspace/fleet_ws/collections/cbsoft
 
 docker-build:
 	$(COMPOSE) build
@@ -40,3 +54,19 @@ cbsoft-up:
 
 cbsoft-run:
 	$(COMPOSE) exec -w /workspace/fleet_ws sim bash -c "source /opt/ros/jazzy/setup.bash && source install/setup.bash && python3 -u scripts/cbsoft/nav_3points.py --sim --log-dir collections/cbsoft"
+
+# Gravação do replay (MCAP) → CSV no formato do nav_3points.py, em collections/cbsoft/.
+#   make cbsoft-csv                       (gravação mais recente)
+#   make cbsoft-csv BAG=collections/default/<pasta> POSE=ground_truth
+cbsoft-csv:
+	@$(CBSOFT_OWN_DIR)
+	$(CBSOFT_RUN) python3 scripts/cbsoft/bag_to_nav_csv.py $(or $(BAG),$(LATEST_BAG)) \
+		--route routes/default/percurso_cbsoft.yaml --out-dir collections/cbsoft --pose-source $(or $(POSE),amcl)
+
+# Gráficos RSSI × posição (script da Fernanda e da Bia). Os arquivos têm de
+# estar dentro de fleet_ws/collections/ (pasta montada no container):
+#   make cbsoft-analise NAV=collections/cbsoft/<nav>.csv NRF="collections/cbsoft/nrf/<log>.txt"
+cbsoft-analise:
+	@$(CBSOFT_OWN_DIR)
+	$(CBSOFT_RUN) python3 scripts/cbsoft/analise/sync_rssi_nav.py "$(NAV)" "$(NRF)" \
+		--out "$(basename $(NAV))_rssi.png"
