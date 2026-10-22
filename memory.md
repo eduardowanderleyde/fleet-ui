@@ -24,6 +24,50 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-21 (noite, cont.) — branch `new-way-samsung`: replay do percurso CBSoft pelo frontend + prints
+
+- Pedido do usuário: abrir o frontend já em Reproduzir + `percurso_cbsoft`
+  e clicar pra executar. Também: tirar os 2 mapas sobrepostos (a planta
+  do armazém por cima do mundo aberto) e "usar os plugins de frontend"
+  (skill frontend-ui-engineering) pra melhorar a tela.
+- Esclarecido pro usuário: "Conectar robô" NÃO procura Bluetooth, só testa
+  se o backend responde. BLE no fleet-ui é o nó opcional
+  `ble_rssi_publisher` (tópico ble_rssi + MAC). Na simulação ele não
+  significa nada (o celular não se mexe) e não está ligado no Docker.
+- Frontend: abre em Reproduzir + percurso_cbsoft. Desenha o percurso da
+  rota escolhida (novo `GET /api/route_poses`, nome validado contra
+  `../`). A planta só aparece se o mapa ao vivo cabe na área dela; senão o
+  botão vira "Planta · outro mapa", desativado.
+- Bugs achados ao vivo, corrigidos e testados:
+  1. `--wait-goal` fixo de 300 s cortava o replay (~390 s): marcava
+     FALHOU, desligava a coleta no meio e o "Percurso" saía 75 m. Agora é
+     proporcional ao tamanho da rota (694 s pro CBSoft).
+  2. "Nav2 OFF/offline" com o robô andando: a checagem só olhava
+     simulação subida pelo backend, e `ros2 lifecycle get` leva ~2,0 s
+     contra um timeout de 2 s. Agora checa sim externa (Docker/run_all.sh)
+     e o timeout é 5 s.
+  3. CPU saturada (carga ~20 em 16 núcleos; GUI do Gazebo ~430% + RViz
+     ~270%): o controle caía pra 3 Hz e o Nav2 abortava. O modo CBSoft
+     agora é HEADLESS + RViz com config vazia a 1 fps + mapa a 0,10 m.
+     Carga ficou em ~2,4.
+  4. Nav2 abortava rota longa com "Timed out ... acknowledge goal request
+     for compute_path_to_pose": `default_server_timeout` do TB4 é de
+     20 ms. Com `NAV2_DEFAULT_SERVER_TIMEOUT_MS=1000` e
+     `NAV2_NAVFN_USE_ASTAR=true` (opt-in por env, só no `make
+     cbsoft-up`), as campanhas do armazém não mudam.
+- Validado: replay pelo navegador (Playwright clicando os mesmos botões)
+  deu "Sucesso", 96,13 m, 0,247 m/s, Nav2 ON. Prints em
+  `docs/images/cbsoft/` e no README.
+- NÃO resolvido: volta automática ao início ("Retornar ao início") numa
+  rota de ~95 m. Primeiro abortava num goal diagonal único; refazendo o
+  percurso ao contrário (já implementado, a partir do ponto mais próximo)
+  chegou até ~19 m do início e abortou com "extrapolation into the past"
+  (pose com carimbo antigo no replanejamento após recuperação do Nav2).
+  O preenchimento automático foi retirado. Pra repetir: `make cbsoft-up`.
+  Solução melhor pendente: reposicionar o robô direto no Gazebo
+  (set_pose + /initialpose) em vez de dirigir de volta.
+- Commits `4750926`, `80ef60c`, `765e608` em `new-way-samsung`, com push.
+
 ### 2026-10-21 — branch `new-way-samsung`: percurso BLE do CBSoft'26 rodando no Docker num mundo aberto
 
 - Contexto: artigo da Fernanda Neves e da Beatriz Barros (UFPE, com Adrien
