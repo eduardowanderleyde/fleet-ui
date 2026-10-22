@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { color } from '../styles/tokens'
 
 export default function MapToolbar({
-  showFloor, onToggleFloor, savedMapMeta,
+  showFloor, floorMismatch, onToggleFloor, savedMapMeta,
   floorOpacity, onFloorOpacityChange,
   mapOk, savingMap, saveMsg, onSave,
   onCenter, hoverCoord,
@@ -40,13 +40,14 @@ export default function MapToolbar({
       </button>
 
       {/* Planta / Salvar */}
-      <button onClick={onToggleFloor}
-        style={{ background: showFloor ? 'rgba(110,231,183,0.1)' : 'transparent',
-                 color: showFloor ? color.success : color.textFaint2,
-                 border: `1.5px solid ${showFloor ? color.success : color.border}`,
+      <button onClick={onToggleFloor} disabled={floorMismatch} aria-pressed={showFloor && !floorMismatch}
+        title={floorMismatch ? 'A planta é de outro lugar: o mapa ao vivo não cabe nela.' : undefined}
+        style={{ background: showFloor && !floorMismatch ? 'rgba(110,231,183,0.1)' : 'transparent',
+                 color: showFloor && !floorMismatch ? color.success : color.textFaint2,
+                 border: `1.5px solid ${showFloor && !floorMismatch ? color.success : color.border}`,
                  borderRadius: '6px', padding: '0.3rem 0.65rem', fontSize: '0.75rem',
-                 fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-        🏭 {savedMapMeta ? 'Planta' : 'Mapa'}
+                 fontWeight: 600, cursor: floorMismatch ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+        🏭 {savedMapMeta ? 'Planta' : 'Mapa'}{floorMismatch ? ' · outro mapa' : ''}
       </button>
 
       {mapOptions && (

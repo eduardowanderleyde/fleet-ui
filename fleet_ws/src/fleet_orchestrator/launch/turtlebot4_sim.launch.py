@@ -123,17 +123,23 @@ def _launch_setup(context, *args, **kwargs):
         world_path = PathJoinSubstitution([pkg_minimal, 'worlds', [world_name, '.sdf']])
 
     # ── Simulação mínima TB4 (Gazebo Harmonic nativo) ─────────────────────────
+    sim_args = [
+        ('world',   world_path),
+        ('headless', LaunchConfiguration('headless')),
+        ('x_pose',  LaunchConfiguration('x_pose')),
+        ('y_pose',  LaunchConfiguration('y_pose')),
+        ('yaw',     LaunchConfiguration('yaw')),
+    ]
+    # O launch do vendor sempre abre o RViz, sem opção de desligar. Sem GUI,
+    # ele vai com uma config vazia a 1 fps: com a config padrão consome ~270%
+    # de CPU e, junto com a GUI do Gazebo, o Nav2 aborta trajetos longos.
+    if LaunchConfiguration('headless').perform(context).lower() == 'true':
+        sim_args.append(('rviz_config_file', os.path.join(pkg_fleet, 'config', 'rviz_minimal.rviz')))
     sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_minimal, 'launch', 'simulation.launch.py')
         ),
-        launch_arguments=[
-            ('world',   world_path),
-            ('headless', LaunchConfiguration('headless')),
-            ('x_pose',  LaunchConfiguration('x_pose')),
-            ('y_pose',  LaunchConfiguration('y_pose')),
-            ('yaw',     LaunchConfiguration('yaw')),
-        ],
+        launch_arguments=sim_args,
     )
 
     # ── Ground truth: pose real do robô no mundo Gazebo, direto da cena ──────

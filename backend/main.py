@@ -8,6 +8,7 @@ import base64
 import json
 import math
 import os
+import re
 import shlex
 import signal
 import struct
@@ -476,7 +477,9 @@ async def lifespan(app: FastAPI):
                         mode = _sim_state["mode"]
                         sim_robots = list(_sim_state.get("robots") or [])
                     if not running:
-                        robots_to_check: list[str] = []
+                        # Simulação subida fora do backend (Docker, run_all.sh):
+                        # só dá pra ser single-robot sem namespace.
+                        robots_to_check: list[str] = [""]
                     elif mode == "multi":
                         robots_to_check = sim_robots
                     else:
@@ -1091,6 +1094,25 @@ async def save_route_waypoints(body: SaveRouteWaypointsRequest):
     }
     path.write_text(yaml.dump(data, default_flow_style=False))
     return {"success": True, "message": f"Salvo {len(waypoints)} waypoints em {path}"}
+
+
+_SAFE_NAME = re.compile(r"^[A-Za-z0-9_\-]+$")
+
+
+@app.get("/api/route_poses")
+async def route_poses(name: str, robot_id: str = ""):
+    """Poses (x, y, yaw) de uma rota salva, pro frontend desenhar o percurso antes do replay."""
+    if not _SAFE_NAME.match(name) or (robot_id and not _SAFE_NAME.match(robot_id)):
+        return JSONResponse(content={"poses": [], "message": "nome inválido"}, status_code=400)
+    path = Path(ROS_WS) / "routes" / (robot_id or "default") / f"{name}.yaml"
+    if not path.exists():
+        return {"poses": []}
+    data = yaml.safe_load(path.read_text()) or {}
+    poses = [
+        [float(p.get("x", 0)), float(p.get("y", 0)), float(p.get("yaw", 0))]
+        for p in data.get("poses") or []
+    ]
+    return {"poses": poses}
 
 
 @app.get("/api/map")

@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -49,6 +50,24 @@ class RosBridgeCommandTests(unittest.TestCase):
         self.assertIn("tb1", cmd)
         self.assertIn("--skip-collection", cmd)
         self.assertIn("--return-to-start=0.1,-0.2,0.3", cmd)
+
+    def test_replay_wait_goal_scales_with_route_length(self):
+        with tempfile.TemporaryDirectory() as ws:
+            routes = Path(ws) / "routes" / "default"
+            routes.mkdir(parents=True)
+            (routes / "longa.yaml").write_text(
+                "poses:\n- {x: 0, y: 0, yaw: 0}\n- {x: 0, y: -64, yaw: 0}\n- {x: -31, y: -64, yaw: 0}\n"
+            )
+            (routes / "curta.yaml").write_text("poses:\n- {x: 0, y: 0, yaw: 0}\n- {x: 1, y: 0, yaw: 0}\n")
+            bridge = RosBridge(ws)
+
+            longa = bridge.build_experiment_cmd({"command": "replay", "robot": "default", "route": "longa"})
+            curta = bridge.build_experiment_cmd({"command": "replay", "robot": "default", "route": "curta"})
+            ausente = bridge.build_experiment_cmd({"command": "replay", "robot": "default", "route": "nao_existe"})
+
+        self.assertIn("--wait-goal=693", longa)
+        self.assertIn("--wait-goal=300", curta)
+        self.assertIn("--wait-goal=300", ausente)
 
     def test_invalid_discovery_subnet_returns_error(self):
         result = self.bridge.discover_robots("999.bad")

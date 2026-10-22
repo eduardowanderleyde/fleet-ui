@@ -16,14 +16,14 @@ import {
 } from './api/fleetApi'
 import { useFleetStatus } from './hooks/useFleetStatus'
 import { useJobPolling } from './hooks/useJobPolling'
-import { useRoutes } from './hooks/useRoutes'
+import { useRoutePoses, useRoutes } from './hooks/useRoutes'
 import { useRunHistory } from './hooks/useRunHistory'
 import { useSimulation } from './hooks/useSimulation'
 
 const DEFAULT_CFG = {
-  command:         'record',
+  command:         'replay',
   robot:           'default',
-  route:           'percurso_initial',
+  route:           'percurso_cbsoft',
   collect:         true,
   topics:          ['scan', 'odom', 'pose'],
   initial_pose:    [0, 0, 0],
@@ -47,6 +47,12 @@ export default function App() {
   const [showResult, setShowResult] = useState(false)
   const status                      = useFleetStatus()
   const { routes, loading: routesLoading, error: routesError, refreshRoutes } = useRoutes(cfg.robot)
+  const replayPoses = useRoutePoses(cfg.command === 'replay' ? cfg.route : '', cfg.robot)
+  // Cada replay começa do primeiro ponto da rota: depois de uma corrida o robô
+  // está no fim do percurso, e sem isso a próxima repetição partiria de lá.
+  useEffect(() => {
+    if (replayPoses.length) setCfg(c => ({ ...c, return_to_start: replayPoses[0] }))
+  }, [replayPoses])
   const [resetMsg, setResetMsg]     = useState(null)
   const [resetting, setResetting]   = useState(false)
   const sim                         = useSimulation()
@@ -376,7 +382,7 @@ export default function App() {
           <MapView
             robotId={effectiveRobotId}
             poses={allPoses}
-            waypoints={cfg.command === 'record' ? cfg.points : []}
+            waypoints={cfg.command === 'record' ? cfg.points : replayPoses}
             onAddWaypoint={cfg.command === 'record' ? addWaypoint : undefined}
           />
         </div>

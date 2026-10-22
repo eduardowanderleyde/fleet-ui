@@ -1,5 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
-import { listRoutes } from '../api/fleetApi'
+import { getRoutePoses, listRoutes } from '../api/fleetApi'
+
+export function useRoutePoses(name, robotId) {
+  const [poses, setPoses] = useState([])
+
+  useEffect(() => {
+    if (!name) { setPoses([]); return }
+    let alive = true
+    getRoutePoses(name, robotId)
+      .then(d => { if (alive) setPoses(d.poses || []) })
+      .catch(() => { if (alive) setPoses([]) })
+    return () => { alive = false }
+  }, [name, robotId])
+
+  return poses
+}
 
 export function useRoutes(robotId) {
   const [routes, setRoutes] = useState([])

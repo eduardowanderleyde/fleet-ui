@@ -3,12 +3,15 @@ from __future__ import annotations
 import ast
 import concurrent.futures
 import json
+import math
 import os
 import re
 import shlex
 import socket
 import subprocess
 from pathlib import Path
+
+import yaml
 
 
 class RosBridge:
@@ -143,7 +146,28 @@ class RosBridge:
             return_to_start = cfg.get("return_to_start")
             if return_to_start and any(v != 0 for v in return_to_start):
                 args += [f"--return-to-start={return_to_start[0]},{return_to_start[1]},{return_to_start[2]}"]
+            args += [f"--wait-goal={self._replay_wait_sec(route, robot if not single else '')}"]
         return args
+
+    # Velocidade bem abaixo do limite de 0,26 m/s do velocity_smoother, pra
+    # sobrar folga pra curvas e replanejamento.
+    _REPLAY_SPEED_FLOOR_MPS = 0.15
+
+    def _replay_wait_sec(self, route: str, robot_id: str) -> int:
+        """Timeout do replay proporcional ao tamanho da rota.
+
+        O padrão fixo de 300 s do experiment_repeatability.py corta rotas
+        longas no meio (o percurso do CBSoft leva ~390 s): o script desiste,
+        marca falha e desliga a coleta com o robô ainda andando."""
+        path = Path(self.ros_ws) / "routes" / (robot_id or "default") / f"{route}.yaml"
+        try:
+            poses = (yaml.safe_load(path.read_text()) or {}).get("poses") or []
+            length = sum(
+                math.hypot(b["x"] - a["x"], b["y"] - a["y"]) for a, b in zip(poses, poses[1:])
+            )
+        except (OSError, yaml.YAMLError, KeyError, TypeError):
+            return 300
+        return max(300, int(length / self._REPLAY_SPEED_FLOOR_MPS) + 60)
 
     def run_experiment_step(
         self, cmd: list[str], export_path: str, line_callback=None,

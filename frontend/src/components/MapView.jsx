@@ -9,6 +9,7 @@ export default function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.5rem' }}>
       <MapToolbar
         showFloor={map.showFloor}
+        floorMismatch={map.floorMismatch}
         onToggleFloor={() => map.setShowFloor(v => !v)}
         savedMapMeta={map.savedMapMeta}
         floorOpacity={map.floorOpacity}

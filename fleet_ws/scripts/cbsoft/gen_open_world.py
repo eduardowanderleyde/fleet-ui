@@ -29,7 +29,7 @@ PILLAR_H = 1.0
 PILLAR_SPACING = 7.0
 PATH_CLEARANCE = 2.5
 EDGE_CLEARANCE = 2.0
-RESOLUTION = 0.05
+RESOLUTION = 0.1
 
 PKG_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'fleet_orchestrator')
 WORLD_NAME = 'cbsoft_open'

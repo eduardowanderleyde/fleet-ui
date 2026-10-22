@@ -8,6 +8,7 @@ x-fleet-common: &fleet-common
     ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
     WORLD: ${WORLD:-warehouse}
     LOCALIZATION: ${LOCALIZATION:-slam}
+    HEADLESS: ${HEADLESS:-False}
     X_POSE: ${X_POSE:-0.0}
     Y_POSE: ${Y_POSE:-0.0}
     YAW: ${YAW:-0.0}

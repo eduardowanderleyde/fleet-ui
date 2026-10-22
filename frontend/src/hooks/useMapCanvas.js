@@ -16,6 +16,21 @@ export const HOUSE_WORLD = { x0: -5.0, y0: -5.0, x1: 7.0, y1: 7.0 }
 
 const OTHER_ROBOT_COLORS = ['#93c5fd', '#fbbf24', '#f472b6', '#a78bfa', '#5eead4']
 
+// Folga pro mapa SLAM, que costuma enxergar um pouco além das paredes da planta.
+const FLOOR_FIT_MARGIN_M = 5
+
+// A planta só faz sentido sobre um mapa ao vivo do mesmo lugar: se o mapa ao
+// vivo não cabe na área da planta, é outro mundo (ex.: cbsoft_open) e
+// desenhar a planta por cima só confunde.
+function floorFitsLive(plan, live) {
+  if (!plan || !live) return true
+  const bounds = m => [m.origin_x, m.origin_y, m.origin_x + m.width * m.resolution, m.origin_y + m.height * m.resolution]
+  const [px0, py0, px1, py1] = bounds(plan)
+  const [lx0, ly0, lx1, ly1] = bounds(live)
+  return lx0 >= px0 - FLOOR_FIT_MARGIN_M && ly0 >= py0 - FLOOR_FIT_MARGIN_M
+      && lx1 <= px1 + FLOOR_FIT_MARGIN_M && ly1 <= py1 + FLOOR_FIT_MARGIN_M
+}
+
 // Toda a lógica imperativa do mapa (desenho em canvas, carga de imagens,
 // zoom/pan, conversão de coordenadas) — separada de MapView pra deixar o
 // componente só com composição/JSX. Devolve refs + estado + handlers.
@@ -30,6 +45,8 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
 
   const [mapOk, setMapOk]               = useState(false)
   const [showFloor, setShowFloor]       = useState(true)
+  const [floorMismatch, setFloorMismatch] = useState(false)
+  const floorMismatchRef = useRef(false)
   const [floorOpacity, setFloorOpacity] = useState(0.55)
   const [savedMapMeta, setSavedMapMeta] = useState(null)
   const [savingMap, setSavingMap]       = useState(false)
@@ -87,8 +104,15 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
 
     const m = activeMap()  // SLAM ou WAREHOUSE_MAP
 
+    const mismatch = !floorFitsLive(savedMapMeta, mapMeta.current)
+    if (mismatch !== floorMismatchRef.current) {
+      floorMismatchRef.current = mismatch
+      setFloorMismatch(mismatch)
+    }
+    const drawFloor = showFloor && !mismatch
+
     // ── Planta de fundo (warehouse ou slam_map guardado) ──────────────────────
-    if (showFloor && floorImgRef.current?.complete) {
+    if (drawFloor && floorImgRef.current?.complete) {
       const fi = floorImgRef.current
       ctx.globalAlpha = floorOpacity
       ctx.imageSmoothingEnabled = true
@@ -113,7 +137,7 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
     // ── Mapa SLAM ao vivo (sobreposto ao fundo) ───────────────────────────────
     if (mapMeta.current && imgRef.current?.complete) {
       ctx.imageSmoothingEnabled = false
-      ctx.globalAlpha = showFloor ? 0.82 : 1
+      ctx.globalAlpha = drawFloor ? 0.82 : 1
       ctx.drawImage(imgRef.current,
         panRef.current.x, panRef.current.y,
         mapMeta.current.width * scaleRef.current,
@@ -467,7 +491,7 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
 
   return {
     canvasRef,
-    mapOk, showFloor, setShowFloor, floorOpacity, setFloorOpacity,
+    mapOk, showFloor, setShowFloor, floorMismatch, floorOpacity, setFloorOpacity,
     savedMapMeta, savingMap, saveMsg, hoverCoord,
     mapName, setMapName, mapOptions, importingMap, importMsg, importMap: doImportMap,
     fitMap, draw, saveBackground,
