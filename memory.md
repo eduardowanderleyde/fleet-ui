@@ -24,6 +24,60 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-22 (madrugada) — ⚠️ HARDWARE COM DEFEITO nesta máquina + auditoria completa do frontend/backend
+
+- **Achado mais importante:** a máquina de dev (AMD Ryzen 7 5800XT, 48 GB
+  RAM) tem **erros de hardware não corrigíveis (MCE)**, registrados no
+  kernel. `journalctl -k -b 0 | grep -E "Hardware Error|MCE: Killing"`
+  mostra 4 nesta inicialização, em núcleos diferentes (7, 12, 15), todos
+  "Instruction Fetch Unit… Poison". A inicialização `-b -3` (18/10) teve
+  `MC15 … UECC … Deferred … Poison … Scrub` no controlador de memória.
+  Suspeita principal: **RAM instável** (pente com defeito ou perfil
+  XMP/EXPO agressivo). Recomendado ao usuário: memtest86+ (opção no menu
+  do GRUB), testar sem XMP/EXPO e testar pente a pente.
+- O kernel mata com SIGBUS todo processo que mapeia a página corrompida.
+  Quando a página é código do Python, morrem todos os processos Python de
+  todos os containers juntos. Isso explicou falhas que pareciam bugs:
+  - 22:44: matou o `amcl`. O `map→odom` parou de ser publicado e o
+    planner abortou a "volta ao início" com "extrapolation into the past"
+    (o "relógio congelado" das notas anteriores).
+  - 23:12: matou o Nav2 inteiro na 2ª tentativa de volta ao início.
+  - 23:49: matou backend, fleet_orchestrator, sensor_collector e
+    ground_truth_filter juntos (exit -7 / 135).
+  - Provavelmente também o "Gazebo server morreu e só a GUI ficou" de
+    2026-10-21.
+  **Antes de culpar o software por um crash aleatório nesta máquina,
+  rode o grep acima.** Testes de estabilidade/repetibilidade feitos aqui
+  podem ter falhas que não são do código.
+- Bugs de software reais achados na auditoria, corrigidos e medidos
+  (commits `eb8ef33`, `f81b090` em `new-way-samsung`):
+  1. Sincronia: no backend, `nav2_check_cb` (subprocess de ~2 s) estava no
+     callback group padrão, que é mutuamente exclusivo. Isso travava todos
+     os callbacks e o /tf chegava em rajadas. Com group próprio, a pose
+     na tela vs real passou de mediana 1,04 m (máx 4,3) a 0,16 m (máx
+     0,52), as atualizações de 0,8/s a 5/s e a latência HTTP máxima de
+     1,7 s a 25 ms.
+  2. 11 endpoints `async def` com subprocess bloqueante congelavam o
+     servidor HTTP (até 40 s no "Procurar"). Viraram `def`.
+  3. Agentes IA "Connection error" no Docker: a imagem pegava versões
+     soltas do pip, e o python3-brotli 1.1.0 do Ubuntu quebra o httpx2.
+     Agora usa requirements.lock.txt + brotli==1.2.0 (setup.sh também usa
+     o lock).
+  4. Histórico de Execuções sumia: runs_history virou volume montado.
+  5. Ground truth mudo no headless (faltava SceneBroadcaster) e com índice
+     errado no cbsoft_open (robô = entidade 0, não 2).
+  6. Gravação: amcl_pose e ground_truth_pose_clean na interface (com AMCL,
+     /pose gravava 0 msgs).
+  7. Agentes IA com tb1/tb2/tb3 fixos → robôs que o backend vê.
+     "Iniciar simulação" bloqueado com simulação externa rodando.
+  8. DDS só por UDP (FASTDDS_BUILTIN_TRANSPORTS=UDPv4) e restart:
+     on-failure no backend. Isso foi aplicado achando que o SIGBUS era
+     /dev/shm; era hardware, mas a mudança é inofensiva e evita acumular
+     segmentos órfãos.
+- Revisitar: a "volta ao início" automática foi retirada do frontend por
+  um diagnóstico errado (era o hardware matando o AMCL/Nav2). Vale
+  re-testar numa máquina estável antes de religar.
+
 ### 2026-10-21 (noite, cont.) — branch `new-way-samsung`: replay do percurso CBSoft pelo frontend + prints
 
 - Pedido do usuário: abrir o frontend já em Reproduzir + `percurso_cbsoft`
