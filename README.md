@@ -9,9 +9,10 @@ times as you want, and see exactly how much the robot's path varied between
 runs — distance, speed, duration, how closely it matched the original. It all
 happens on a web page; you never have to type a robot command by hand.
 
-> **Use the `perfect-bot` branch**, not `main` — it's the one with
-> `setup.sh`/`run_all.sh` and the features this README describes. Every
-> `git clone` command below already includes `-b perfect-bot`.
+> **Use the `new-way-samsung` branch**, not `main` — it's the one with
+> `setup.sh`/`run_all.sh`, the CBSoft open-world route and the features this
+> README describes. Every `git clone` command below already includes
+> `-b new-way-samsung`.
 
 > Built on top of this: an **AI agent orchestration layer** (Claude/Anthropic) that
 > can plan and run experiments — move robots, record/replay routes, run full
@@ -36,7 +37,7 @@ avoids depending on that machine's own ROS 2 install matching this one.
 ### 1. Get the code and set it up (one time only)
 
 ```bash
-git clone -b perfect-bot <repo-url> ~/fleet-ui
+git clone -b new-way-samsung <repo-url> ~/fleet-ui
 cd ~/fleet-ui
 ./setup.sh
 ```
@@ -179,7 +180,7 @@ sudo apt install nodejs npm
 > Use a plain path like `~/fleet-ui`.
 
 ```bash
-git clone -b perfect-bot <repo-url> ~/fleet-ui
+git clone -b new-way-samsung <repo-url> ~/fleet-ui
 ```
 
 ### Build ROS 2 packages
@@ -305,8 +306,10 @@ with the route drawn on the map; click **Conectar robô → Conectar**, then
 | ![](docs/images/cbsoft/1_abertura.png) | ![](docs/images/cbsoft/2_descendo.png) | ![](docs/images/cbsoft/4_fim_sucesso.png) |
 
 To repeat a run, restart with `make cbsoft-up` (~1 min) so the robot is
-back at the start: driving back automatically (the "Retornar ao início"
-field) still aborts in Nav2 on part of the attempts on this ~95 m route.
+back at the start. Driving back automatically (the "Retornar ao início"
+field, retracing the route backwards) is implemented but not validated: the
+failures seen so far were caused by hardware memory errors on the dev
+machine killing AMCL/Nav2, not by the feature itself.
 
 The original script also works: `make cbsoft-run` in a second terminal runs
 `nav_3points.py` and writes its CSV to `fleet_ws/collections/cbsoft/`.
@@ -315,6 +318,25 @@ The original script also works: `make cbsoft-run` in a second terminal runs
 both GUIs the machine saturated and Nav2 aborted long paths. To change the
 world layout, edit and rerun `fleet_ws/scripts/cbsoft/gen_open_world.py`,
 then `make docker-build`.
+
+#### On another machine (e.g. the lab PC, Ubuntu 22.04)
+
+The host's Ubuntu/ROS version doesn't matter — everything runs inside the
+image (Ubuntu 24.04 + ROS 2 Jazzy). You only need Docker Engine with the
+`docker compose` plugin (install from docs.docker.com, not the old
+`docker.io`/`docker-compose` apt packages), your user in the `docker` group,
+and ~15 GB free disk.
+
+```bash
+git clone -b new-way-samsung <repo-url> ~/fleet-ui
+cd ~/fleet-ui
+make docker-build   # first time: ~15–30 min, downloads ROS 2 + Gazebo
+make cbsoft-up
+```
+
+`cbsoft-up` uses ROS domain 42 so the simulation never talks to real
+TurtleBot4s on the same network (they default to domain 0). If someone else
+on the network also uses 42, pick another: `make cbsoft-up CBSOFT_DOMAIN=57`.
 
 ---
 
