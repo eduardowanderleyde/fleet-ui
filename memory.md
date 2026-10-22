@@ -24,6 +24,25 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-22 (noite, cont.) — `new-way-samsung` pronta pra máquina do laboratório (UFPE)
+
+- Pergunta do usuário: "vai funcionar o experimento na UFPE?". Dois
+  bloqueios achados e corrigidos (commit `a320f8f`):
+  1. O README mandava `git clone -b perfect-bot`, que não tem o percurso
+     CBSoft. Agora aponta pra `new-way-samsung`.
+  2. ROS_DOMAIN_ID=0 no Docker: na rede da UFPE, a simulação se misturaria
+     com TurtleBot4 reais (padrão 0), e o Nav2 simulado poderia comandar
+     robô real. `make cbsoft-up` agora usa o domínio 42 (CBSOFT_DOMAIN).
+     Testado: funciona no 42 e é invisível pro domínio 0.
+- Ainda não validado na máquina de lá (Ubuntu 22.04): instalação do Docker
+  Engine + plugin compose, primeiro build (~15–30 min), RViz/X11 sem
+  monitor. O experimento com o ROBÔ REAL não passa pelo fleet-ui (conectar
+  por SSH não está implementado); o script delas (nav_3points.py) no robô
+  real continua como era.
+- Erros MCE: o histórico real são 3 dias com erro em ~3 semanas
+  (30/09: 1, 18/10: 1, 21/10: 4). O "7 erros em 18/10" das notas
+  anteriores estava errado: era 1 erro com 7 linhas de log.
+
 ### 2026-10-22 (noite) — branch `new-way-samsung`: revisão de código do diff inteiro da branch
 
 - Pedido: "aprofunde no código". Revisei os 6 commits sobre a
