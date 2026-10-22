@@ -50,6 +50,8 @@ export default function App() {
   const status                      = useFleetStatus()
   const { routes, loading: routesLoading, error: routesError, refreshRoutes } = useRoutes(cfg.robot)
   const replayPoses = useRoutePoses(cfg.command === 'replay' ? cfg.route : '', cfg.robot)
+  const [routeOutside, setRouteOutside] = useState(null)
+  const replayOffMap = cfg.command === 'replay' && routeOutside > 0
   const [resetMsg, setResetMsg]     = useState(null)
   const [resetting, setResetting]   = useState(false)
   const sim                         = useSimulation()
@@ -346,6 +348,11 @@ export default function App() {
             </div>
           )}
           {error && <div role="alert" style={{ color: color.danger, fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(248,113,113,0.1)', borderRadius: '6px' }}>{error}</div>}
+          {replayOffMap && (
+            <div role="status" style={{ color: color.warning, fontSize: '0.82rem', padding: '0.5rem 0.75rem', background: 'rgba(251,191,36,0.08)', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.2)' }}>
+              ⚠ {routeOutside} ponto(s) da rota “{cfg.route}” ficam fora do mapa atual — ela é de outro mundo. Escolha outra rota ou suba o mundo certo.
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
             {/* Navegar rota — percorre waypoints sem gravar */}
@@ -363,8 +370,8 @@ export default function App() {
             )}
 
             {/* Executar record/replay com coleta */}
-            <button onClick={run} disabled={running || navigating || !isConnected}
-              style={btn(running || navigating || !isConnected ? color.brandBg : color.brandDark, color.brand, running || navigating || !isConnected)}>
+            <button onClick={run} disabled={running || navigating || !isConnected || replayOffMap}
+              style={btn(running || navigating || !isConnected || replayOffMap ? color.brandBg : color.brandDark, color.brand, running || navigating || !isConnected || replayOffMap)}>
               {running ? '⏳ A executar…' : `▶ Executar ${cfg.command}`}
             </button>
             {running && (
@@ -381,6 +388,7 @@ export default function App() {
             poses={allPoses}
             waypoints={cfg.command === 'record' ? cfg.points : replayPoses}
             onAddWaypoint={cfg.command === 'record' ? addWaypoint : undefined}
+            onRouteOutsideChange={setRouteOutside}
           />
         </div>
 

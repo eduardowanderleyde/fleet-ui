@@ -6,9 +6,10 @@ x-fleet-common: &fleet-common
   ipc: host
   environment:
     ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
-    # Só UDP (sem memória compartilhada do Fast DDS): com ipc: host, os
-    # segmentos em /dev/shm deixados por containers derrubados acumulam e o
-    # backend morreu com SIGBUS (exit 135) no meio de um replay.
+    # Só UDP (sem memória compartilhada do Fast DDS): com ipc: host, cada
+    # container derrubado deixa segmentos órfãos em /dev/shm (já vimos 257).
+    # Obs.: os SIGBUS (exit 135 / -7) vistos em 2026-10-22 eram erro de
+    # hardware da máquina de dev (MCE no kernel), não isto — ver memory.md.
     FASTDDS_BUILTIN_TRANSPORTS: UDPv4
     WORLD: ${WORLD:-warehouse}
     LOCALIZATION: ${LOCALIZATION:-slam}

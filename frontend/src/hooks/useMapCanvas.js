@@ -31,10 +31,30 @@ function floorFitsLive(plan, live) {
       && lx1 <= px1 + FLOOR_FIT_MARGIN_M && ly1 <= py1 + FLOOR_FIT_MARGIN_M
 }
 
+// Folga ao checar se um ponto da rota cai dentro da área conhecida.
+const ROUTE_FIT_MARGIN_M = 1
+
+function mapBounds(m) {
+  return [m.origin_x, m.origin_y, m.origin_x + m.width * m.resolution, m.origin_y + m.height * m.resolution]
+}
+
+// Quantos pontos da rota caem fora da área conhecida (mapa ao vivo, mais a
+// planta quando ela é do mesmo lugar). null = ainda não há mapa pra comparar.
+// Pega rota de outro mundo (ex.: percurso_cbsoft com o armazém aberto), que
+// mandaria o robô pra fora do mapa.
+function countOutside(points, live, plan) {
+  const refs = [live, plan].filter(Boolean).map(mapBounds)
+  if (!refs.length) return null
+  const inside = ([x, y]) => refs.some(([x0, y0, x1, y1]) =>
+    x >= x0 - ROUTE_FIT_MARGIN_M && x <= x1 + ROUTE_FIT_MARGIN_M &&
+    y >= y0 - ROUTE_FIT_MARGIN_M && y <= y1 + ROUTE_FIT_MARGIN_M)
+  return points.filter(p => !inside(p)).length
+}
+
 // Toda a lógica imperativa do mapa (desenho em canvas, carga de imagens,
 // zoom/pan, conversão de coordenadas) — separada de MapView pra deixar o
 // componente só com composição/JSX. Devolve refs + estado + handlers.
-export function useMapCanvas({ robotId, poses, waypoints }) {
+export function useMapCanvas({ robotId, poses, waypoints, onRouteOutsideChange }) {
   const canvasRef    = useRef(null)
   const imgRef       = useRef(null)   // SLAM PNG
   const floorImgRef  = useRef(null)   // Planta estática
@@ -47,6 +67,9 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
   const [showFloor, setShowFloor]       = useState(true)
   const [floorMismatch, setFloorMismatch] = useState(false)
   const floorMismatchRef = useRef(false)
+  const routeOutsideRef = useRef(undefined)
+  const onRouteOutsideRef = useRef(onRouteOutsideChange)
+  onRouteOutsideRef.current = onRouteOutsideChange
   const [floorOpacity, setFloorOpacity] = useState(0.55)
   const [savedMapMeta, setSavedMapMeta] = useState(null)
   const [savingMap, setSavingMap]       = useState(false)
@@ -110,6 +133,12 @@ export function useMapCanvas({ robotId, poses, waypoints }) {
       setFloorMismatch(mismatch)
     }
     const drawFloor = showFloor && !mismatch
+
+    const outside = countOutside(waypoints, mapMeta.current, mismatch ? null : savedMapMeta)
+    if (outside !== routeOutsideRef.current) {
+      routeOutsideRef.current = outside
+      onRouteOutsideRef.current?.(outside)
+    }
 
     // ── Planta de fundo (warehouse ou slam_map guardado) ──────────────────────
     if (drawFloor && floorImgRef.current?.complete) {

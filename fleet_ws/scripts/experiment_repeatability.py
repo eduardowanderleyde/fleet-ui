@@ -817,6 +817,7 @@ def cmd_replay(args: argparse.Namespace) -> int:
             except ValueError as e:
                 print(f"Erro: {e}", file=sys.stderr)
                 return 2
+            returned = True
             for i, (rx, ry, ryaw) in enumerate(legs, start=1):
                 print(f"[TRACE] Retornando ao início ({i}/{len(legs)}): go_to_point({rx:.3f}, {ry:.3f}, yaw={ryaw:.3f}) ...")
                 req_g = GoToPoint.Request()
@@ -829,13 +830,33 @@ def cmd_replay(args: argparse.Namespace) -> int:
                 _print(good_g, "return_to_start go_to_point", (resp_g.message if resp_g else err_g))
                 fails += int(not good_g)
                 if not good_g:
+                    returned = False
                     break
                 node.wait_nav_state(rid, "navigating", timeout_sec=10.0)
                 rts_done = node.wait_nav_state(rid, "idle", timeout_sec=args.wait_goal)
                 _print(rts_done, f"return_to_start trecho {i}/{len(legs)} concluído (idle)")
                 fails += int(not rts_done)
                 if not rts_done:
+                    returned = False
                     break
+            if not returned:
+                # Sem estar no início, a corrida partiria de outro lugar e não
+                # seria comparável com as outras: não grava nem reproduz.
+                print("[FALHOU] robô não voltou ao início — replay cancelado, nada gravado")
+                if args.export:
+                    _write_export(
+                        args.export,
+                        {
+                            "command": "replay",
+                            "robot_id": rid,
+                            "route": args.route,
+                            "success": False,
+                            "failures_reported": fails,
+                            "error_code": "RETURN_TO_START_FAILED",
+                        },
+                        args=args,
+                    )
+                return 1
 
         if args.initial_pose is not None:
             try:

@@ -335,9 +335,10 @@ async def lifespan(app: FastAPI):
                     for t in msg.transforms:
                         tf_buffer.set_transform(t, "default_authority")
                         if t.child_frame_id in ("odom", "base_link"):
-                            tf_last_rx[f"{t.header.frame_id}->{t.child_frame_id}"] = (
-                                t.header.stamp.sec + t.header.stamp.nanosec * 1e-9
-                            )
+                            with _status_lock:
+                                tf_last_rx[f"{t.header.frame_id}->{t.child_frame_id}"] = (
+                                    t.header.stamp.sec + t.header.stamp.nanosec * 1e-9
+                                )
 
                 def _tf_static_cb(msg):
                     for t in msg.transforms:
@@ -380,8 +381,16 @@ async def lifespan(app: FastAPI):
                         1.0 - 2.0 * (q.y * q.y + q.z * q.z),
                     )
                     with _status_lock:
-                        _robot_poses.setdefault(rid, {}).update(
-                            {"x": p.x, "y": p.y, "yaw": yaw, "valid": True, "source": "pose_topic"}
+                        cur = _robot_poses.setdefault(rid, {})
+                        # O TF (map→base_link a 10 Hz) é mais novo que esta pose,
+                        # que sai da última atualização do filtro; sobrescrever
+                        # fazia o robô "pular pra trás" na tela. Só vale como
+                        # reserva quando o TF parou de responder.
+                        if time.time() - cur.get("tf_ok_at", 0.0) < _TF_FRESH_S:
+                            return
+                        cur.update(
+                            {"x": p.x, "y": p.y, "yaw": yaw, "valid": True,
+                             "source": "pose_topic", "pose_topic_at": time.time()}
                         )
 
                 # AMCL publica /amcl_pose TRANSIENT_LOCAL e só republica com movimento.
@@ -535,6 +544,23 @@ app.add_middleware(CORSMiddleware, allow_origins=_cors_origins(), allow_methods=
 
 _EMPTY_POSE = {"x": 0.0, "y": 0.0, "yaw": 0.0, "valid": False}
 
+# TF mais novo que isso → /amcl_pose (/pose) não sobrescreve a posição.
+_TF_FRESH_S = 1.0
+# Sem TF nem pose_topic por mais que isso (depois de o TF já ter funcionado)
+# → posição marcada inválida: a localização parou (ex.: AMCL morreu) e a tela
+# não deve continuar mostrando a última posição como se fosse atual.
+_POSE_STALE_S = 2.0
+
+
+def _pose_view(pose: dict, now: float) -> dict:
+    view = dict(pose)
+    if "tf_ok_at" in view:
+        last = max(view["tf_ok_at"], view.get("pose_topic_at", 0.0))
+        if now - last > _POSE_STALE_S:
+            view["valid"] = False
+            view["stale"] = True
+    return view
+
 
 def _default_robot_id() -> str:
     """modo single roda com robot_id="" (tópicos sem prefixo); multi usa
@@ -552,11 +578,15 @@ def _default_robot_id() -> str:
 def _status_payload() -> dict:
     # "pose" (singular) fica de compat com quem ainda não sabe que existe
     # mais de um robô; "poses" traz todos, é o que a UI multi-robô usa.
+    # Cópias: chamado com _status_lock, mas o JSON é serializado depois que a
+    # trava é liberada, enquanto as threads do ROS seguem alterando os dicts.
+    now = time.time()
+    poses = {rid: _pose_view(p, now) for rid, p in _robot_poses.items()}
     return {
         **_fleet_status,
-        "pose": _robot_poses.get(_default_robot_id(), _EMPTY_POSE),
-        "poses": _robot_poses,
-        "tf_last_rx": _robot_tf_last_rx,
+        "pose": poses.get(_default_robot_id(), dict(_EMPTY_POSE)),
+        "poses": poses,
+        "tf_last_rx": {rid: dict(rx) for rid, rx in _robot_tf_last_rx.items()},
     }
 
 
@@ -623,7 +653,7 @@ def _build_cmd(cfg: dict) -> list[str]:
     robot = cfg.get("robot", "")
     rid = "" if not robot or robot == "default" else robot
     with _status_lock:
-        pose = dict(_robot_poses.get(rid) or {})
+        pose = _pose_view(_robot_poses.get(rid) or {}, time.time())
     if pose.get("valid"):
         cfg = {**cfg, "current_pose": [pose["x"], pose["y"]]}
     return _bridge.build_experiment_cmd(cfg)

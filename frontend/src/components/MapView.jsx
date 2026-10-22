@@ -2,8 +2,8 @@ import { useMapCanvas } from '../hooks/useMapCanvas'
 import MapToolbar from './MapToolbar'
 import { color } from '../styles/tokens'
 
-export default function MapView({ robotId, poses, waypoints, onAddWaypoint }) {
-  const map = useMapCanvas({ robotId, poses, waypoints })
+export default function MapView({ robotId, poses, waypoints, onAddWaypoint, onRouteOutsideChange }) {
+  const map = useMapCanvas({ robotId, poses, waypoints, onRouteOutsideChange })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.5rem' }}>
