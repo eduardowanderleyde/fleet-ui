@@ -24,6 +24,31 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-22 (noite) — branch `new-way-samsung`: revisão de código do diff inteiro da branch
+
+- Pedido: "aprofunde no código". Revisei os 6 commits sobre a
+  `perfect-bot` (~400 linhas de lógica) e corrigi o que importava (commit
+  `e5dc4b3`, com push):
+  1. Frontend: rota de outro mundo (percurso_cbsoft com o armazém aberto)
+     podia ser executada e mandava o robô pra fora do mapa. Agora conta os
+     pontos fora da área conhecida (mapa ao vivo + planta do mesmo lugar)
+     e bloqueia o "Executar replay" com aviso. Testado nos dois mundos.
+  2. experiment_repeatability.py: volta ao início que falhava seguia pro
+     replay e gravava corrida partindo do lugar errado. Agora aborta antes
+     de gravar (error_code RETURN_TO_START_FAILED).
+  3. Backend: /amcl_pose sobrescrevia a pose do TF ("pulo pra trás");
+     agora só entra se o TF está sem responder há mais de 1 s. Pose vira
+     inválida/stale sem TF nem pose_topic há mais de 2 s: testado matando
+     o AMCL, fica inválida em ~12 s (10 s de buffer TF + 2 s). Antes,
+     ficava válida pra sempre.
+  4. /api/status devolve cópias (o JSON sai fora da trava); tf_last_rx sob
+     trava. Comentário errado sobre SIGBUS/shm no compose corrigido.
+- Não corrigido (menor): a planta do armazém aparece um instante antes do
+  mapa ao vivo chegar; no armazém isso é útil.
+- Máquina reiniciada em 2026-10-22 19:42: 0 erros MCE desde então (até
+  ~21h). Memtest ainda não rodado.
+- 110 testes passam no container.
+
 ### 2026-10-22 (madrugada) — ⚠️ HARDWARE COM DEFEITO nesta máquina + auditoria completa do frontend/backend
 
 - **Achado mais importante:** a máquina de dev (AMD Ryzen 7 5800XT, 48 GB
