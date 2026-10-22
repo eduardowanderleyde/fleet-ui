@@ -69,6 +69,22 @@ class RosBridgeCommandTests(unittest.TestCase):
         self.assertIn("--wait-goal=300", curta)
         self.assertIn("--wait-goal=300", ausente)
 
+    def test_return_to_route_start_retraces_route_backwards(self):
+        with tempfile.TemporaryDirectory() as ws:
+            routes = Path(ws) / "routes" / "default"
+            routes.mkdir(parents=True)
+            (routes / "l.yaml").write_text(
+                "poses:\n- {x: 1, y: 16, yaw: 0}\n- {x: -2, y: -47, yaw: 0}\n- {x: -33, y: -47, yaw: 0}\n"
+            )
+            bridge = RosBridge(ws)
+            base = {"command": "replay", "robot": "default", "route": "l"}
+
+            retrace = bridge.build_experiment_cmd({**base, "return_to_start": [1, 16, 0]})
+            manual = bridge.build_experiment_cmd({**base, "return_to_start": [5, 5, 0]})
+
+        self.assertIn("--return-to-start=-2.0,-47.0,0.0;1.0,16.0,0.0", retrace)
+        self.assertIn("--return-to-start=5.0,5.0,0.0", manual)
+
     def test_invalid_discovery_subnet_returns_error(self):
         result = self.bridge.discover_robots("999.bad")
 

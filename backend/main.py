@@ -444,8 +444,11 @@ async def lifespan(app: FastAPI):
                 node_name = f"/{rid}/bt_navigator" if rid else "/bt_navigator"
                 try:
                     r = subprocess.run(
-                        ["bash", "-c", f"source /opt/ros/jazzy/setup.bash 2>/dev/null; timeout 2 ros2 lifecycle get {shlex.quote(node_name)} 2>/dev/null"],
-                        capture_output=True, text=True, timeout=4,
+                        # 5 s: a chamada leva ~2,0 s mesmo com o daemon do ros2
+                        # de pé (medido no Docker); com 2 s estourava sob carga
+                        # e o frontend mostrava "Nav2 offline" com o robô andando.
+                        ["bash", "-c", f"source /opt/ros/jazzy/setup.bash 2>/dev/null; timeout 5 ros2 lifecycle get {shlex.quote(node_name)} 2>/dev/null"],
+                        capture_output=True, text=True, timeout=7,
                     )
                     return r.stdout.strip().lower().startswith("active")
                 except Exception:

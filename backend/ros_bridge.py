@@ -143,11 +143,34 @@ class RosBridge:
                 joined = ";".join(f"{p[0]},{p[1]},{p[2] if len(p) > 2 else 0}" for p in points)
                 args += [f"--points={joined}"]
         elif command == "replay":
+            route_robot = robot if not single else ""
             return_to_start = cfg.get("return_to_start")
             if return_to_start and any(v != 0 for v in return_to_start):
-                args += [f"--return-to-start={return_to_start[0]},{return_to_start[1]},{return_to_start[2]}"]
-            args += [f"--wait-goal={self._replay_wait_sec(route, robot if not single else '')}"]
+                legs = self._return_legs(route, route_robot, return_to_start)
+                joined = ";".join(f"{x},{y},{yaw}" for x, y, yaw in legs)
+                args += [f"--return-to-start={joined}"]
+            args += [f"--wait-goal={self._replay_wait_sec(route, route_robot)}"]
         return args
+
+    def _route_poses(self, route: str, robot_id: str) -> list[tuple[float, float, float]] | None:
+        path = Path(self.ros_ws) / "routes" / (robot_id or "default") / f"{route}.yaml"
+        try:
+            poses = (yaml.safe_load(path.read_text()) or {}).get("poses") or []
+            return [(float(p["x"]), float(p["y"]), float(p.get("yaw", 0.0))) for p in poses]
+        except (OSError, yaml.YAMLError, KeyError, TypeError, ValueError):
+            return None
+
+    def _return_legs(self, route: str, robot_id: str, target) -> list[tuple[float, float, float]]:
+        """Volta ao início pelo percurso ao contrário quando o alvo é o 1º ponto da rota.
+
+        Um goal único direto até o início (diagonal de ~75 m no percurso do
+        CBSoft) abortava no Nav2; refazendo os trechos da ida, que sempre
+        funcionaram, chega. Alvo digitado à mão (≠ 1º ponto) segue direto."""
+        target = (float(target[0]), float(target[1]), float(target[2]))
+        poses = self._route_poses(route, robot_id)
+        if not poses or math.hypot(poses[0][0] - target[0], poses[0][1] - target[1]) > 0.05:
+            return [target]
+        return list(reversed(poses[:-1]))
 
     # Velocidade bem abaixo do limite de 0,26 m/s do velocity_smoother, pra
     # sobrar folga pra curvas e replanejamento.
@@ -159,14 +182,10 @@ class RosBridge:
         O padrão fixo de 300 s do experiment_repeatability.py corta rotas
         longas no meio (o percurso do CBSoft leva ~390 s): o script desiste,
         marca falha e desliga a coleta com o robô ainda andando."""
-        path = Path(self.ros_ws) / "routes" / (robot_id or "default") / f"{route}.yaml"
-        try:
-            poses = (yaml.safe_load(path.read_text()) or {}).get("poses") or []
-            length = sum(
-                math.hypot(b["x"] - a["x"], b["y"] - a["y"]) for a, b in zip(poses, poses[1:])
-            )
-        except (OSError, yaml.YAMLError, KeyError, TypeError):
+        poses = self._route_poses(route, robot_id)
+        if not poses:
             return 300
+        length = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(poses, poses[1:]))
         return max(300, int(length / self._REPLAY_SPEED_FLOOR_MPS) + 60)
 
     def run_experiment_step(

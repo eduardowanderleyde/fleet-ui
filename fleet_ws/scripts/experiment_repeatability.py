@@ -809,26 +809,33 @@ def cmd_replay(args: argparse.Namespace) -> int:
         print(f"topics={args.topics} skip_collection={args.skip_collection} export={args.export!r}")
 
         if args.return_to_start is not None:
+            # Um ou mais pontos "x,y,yaw;x,y,yaw": com vários, o robô refaz o
+            # percurso ao contrário em vez de cortar caminho até o início
+            # (um único goal diagonal longo abortava no Nav2).
             try:
-                rx, ry, ryaw = _parse_initial_pose(args.return_to_start)
+                legs = [_parse_initial_pose(s) for s in args.return_to_start.split(";") if s.strip()]
             except ValueError as e:
                 print(f"Erro: {e}", file=sys.stderr)
                 return 2
-            print(f"[TRACE] Retornando ao início: go_to_point({rx:.3f}, {ry:.3f}, yaw={ryaw:.3f}) ...")
-            req_g = GoToPoint.Request()
-            req_g.robot_id = rid
-            req_g.x = rx
-            req_g.y = ry
-            req_g.yaw = ryaw
-            resp_g, ok_g, err_g = node.call_srv(GoToPoint, "go_to_point", req_g, timeout_sec=20.0)
-            good_g = ok_g and resp_g is not None and resp_g.success
-            _print(good_g, "return_to_start go_to_point", (resp_g.message if resp_g else err_g))
-            fails += int(not good_g)
-            if good_g:
+            for i, (rx, ry, ryaw) in enumerate(legs, start=1):
+                print(f"[TRACE] Retornando ao início ({i}/{len(legs)}): go_to_point({rx:.3f}, {ry:.3f}, yaw={ryaw:.3f}) ...")
+                req_g = GoToPoint.Request()
+                req_g.robot_id = rid
+                req_g.x = rx
+                req_g.y = ry
+                req_g.yaw = ryaw
+                resp_g, ok_g, err_g = node.call_srv(GoToPoint, "go_to_point", req_g, timeout_sec=20.0)
+                good_g = ok_g and resp_g is not None and resp_g.success
+                _print(good_g, "return_to_start go_to_point", (resp_g.message if resp_g else err_g))
+                fails += int(not good_g)
+                if not good_g:
+                    break
                 node.wait_nav_state(rid, "navigating", timeout_sec=10.0)
                 rts_done = node.wait_nav_state(rid, "idle", timeout_sec=args.wait_goal)
-                _print(rts_done, "return_to_start concluído (idle)")
+                _print(rts_done, f"return_to_start trecho {i}/{len(legs)} concluído (idle)")
                 fails += int(not rts_done)
+                if not rts_done:
+                    break
 
         if args.initial_pose is not None:
             try:
@@ -1085,9 +1092,9 @@ def main() -> int:
     )
     pb.add_argument(
         "--return-to-start",
-        metavar="x,y,yaw",
+        metavar="x,y,yaw[;x,y,yaw...]",
         default=None,
-        help="Antes da coleta: navega para esta pose via go_to_point (retorno ao início da rota).",
+        help="Antes da coleta: navega via go_to_point por estas poses, em ordem (retorno ao início da rota).",
     )
     pb.add_argument("--repeat", type=int, default=1, help="Número de réplicas de replay a executar em sequência")
     pb.add_argument(
