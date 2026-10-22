@@ -292,15 +292,29 @@ AMCL like the real robot, and the map frame matches the original
 `hall_cin_v4` coordinates, so the script runs unchanged.
 
 ```bash
-make cbsoft-up    # terminal 1: sim + backend + frontend, robot at the start point
-make cbsoft-run   # terminal 2: runs nav_3points.py (~6.5 min)
+make docker-build   # once, or after pulling changes
+make cbsoft-up      # sim + backend + frontend, robot at the start point
 ```
 
-Watch it at http://localhost:5173 (turn off **Planta** — that's the
-warehouse floor plan). The CSV lands in `fleet_ws/collections/cbsoft/`. The
-route is also available as `percurso_cbsoft` in the replay dropdown. To
-change the world layout, edit and rerun
-`fleet_ws/scripts/cbsoft/gen_open_world.py`, then `make docker-build`.
+Open http://localhost:5173. It opens on **Reproduzir** + `percurso_cbsoft`
+with the route drawn on the map; click **Conectar robô → Conectar**, then
+**▶ Executar replay** (~6.5 min, sensor bag recorded):
+
+| Opening | Running | Done |
+|---|---|---|
+| ![](docs/images/cbsoft/1_abertura.png) | ![](docs/images/cbsoft/2_descendo.png) | ![](docs/images/cbsoft/4_fim_sucesso.png) |
+
+To repeat a run, restart with `make cbsoft-up` (~1 min) so the robot is
+back at the start: driving back automatically (the "Retornar ao início"
+field) still aborts in Nav2 on part of the attempts on this ~95 m route.
+
+The original script also works: `make cbsoft-run` in a second terminal runs
+`nav_3points.py` and writes its CSV to `fleet_ws/collections/cbsoft/`.
+
+`cbsoft-up` runs without the Gazebo window and with an empty RViz: with
+both GUIs the machine saturated and Nav2 aborted long paths. To change the
+world layout, edit and rerun `fleet_ws/scripts/cbsoft/gen_open_world.py`,
+then `make docker-build`.
 
 ---
 

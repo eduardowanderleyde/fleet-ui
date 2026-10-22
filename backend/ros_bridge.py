@@ -146,7 +146,7 @@ class RosBridge:
             route_robot = robot if not single else ""
             return_to_start = cfg.get("return_to_start")
             if return_to_start and any(v != 0 for v in return_to_start):
-                legs = self._return_legs(route, route_robot, return_to_start)
+                legs = self._return_legs(route, route_robot, return_to_start, cfg.get("current_pose"))
                 joined = ";".join(f"{x},{y},{yaw}" for x, y, yaw in legs)
                 args += [f"--return-to-start={joined}"]
             args += [f"--wait-goal={self._replay_wait_sec(route, route_robot)}"]
@@ -160,17 +160,21 @@ class RosBridge:
         except (OSError, yaml.YAMLError, KeyError, TypeError, ValueError):
             return None
 
-    def _return_legs(self, route: str, robot_id: str, target) -> list[tuple[float, float, float]]:
+    def _return_legs(self, route: str, robot_id: str, target, current=None) -> list[tuple[float, float, float]]:
         """Volta ao início pelo percurso ao contrário quando o alvo é o 1º ponto da rota.
 
         Um goal único direto até o início (diagonal de ~75 m no percurso do
-        CBSoft) abortava no Nav2; refazendo os trechos da ida, que sempre
-        funcionaram, chega. Alvo digitado à mão (≠ 1º ponto) segue direto."""
+        CBSoft) abortava no Nav2; refazendo os trechos da ida a partir do ponto
+        da rota mais próximo do robô, chega. Sem pose atual, ou com alvo
+        digitado à mão (≠ 1º ponto), segue direto como antes."""
         target = (float(target[0]), float(target[1]), float(target[2]))
         poses = self._route_poses(route, robot_id)
-        if not poses or math.hypot(poses[0][0] - target[0], poses[0][1] - target[1]) > 0.05:
+        if not poses or current is None or math.hypot(poses[0][0] - target[0], poses[0][1] - target[1]) > 0.05:
             return [target]
-        return list(reversed(poses[:-1]))
+        nearest = min(range(len(poses)), key=lambda i: math.hypot(poses[i][0] - current[0], poses[i][1] - current[1]))
+        if nearest == 0:
+            return [target]
+        return list(reversed(poses[:nearest]))
 
     # Velocidade bem abaixo do limite de 0,26 m/s do velocity_smoother, pra
     # sobrar folga pra curvas e replanejamento.

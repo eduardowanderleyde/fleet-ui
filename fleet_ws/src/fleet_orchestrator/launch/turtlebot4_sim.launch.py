@@ -63,6 +63,16 @@ def _make_nav2_params(_ctx):
     except KeyError:
         pass
 
+    # Rotas longas (percurso do CBSoft, ~95 m): o BT replaneja a 1 Hz e só
+    # espera 20 ms (default_server_timeout do TB4) o planner aceitar o pedido;
+    # com o NavFn ainda calculando o anterior, estoura e aborta a navegação
+    # inteira. Opt-in por env para não mudar as campanhas já reportadas.
+    server_timeout = os.environ.get('NAV2_DEFAULT_SERVER_TIMEOUT_MS', '').strip()
+    if server_timeout:
+        cfg['bt_navigator']['ros__parameters']['default_server_timeout'] = int(server_timeout)
+    if os.environ.get('NAV2_NAVFN_USE_ASTAR', '').strip().lower() in ('true', '1', 'yes'):
+        cfg['planner_server']['ros__parameters']['GridBased']['use_astar'] = True
+
     tmp = tempfile.NamedTemporaryFile(mode='w', suffix='_nav2.yaml', delete=False)
     yaml.safe_dump(cfg, tmp)
     tmp.close()

@@ -79,10 +79,14 @@ class RosBridgeCommandTests(unittest.TestCase):
             bridge = RosBridge(ws)
             base = {"command": "replay", "robot": "default", "route": "l"}
 
-            retrace = bridge.build_experiment_cmd({**base, "return_to_start": [1, 16, 0]})
-            manual = bridge.build_experiment_cmd({**base, "return_to_start": [5, 5, 0]})
+            at_end = bridge.build_experiment_cmd({**base, "return_to_start": [1, 16, 0], "current_pose": [-33, -47]})
+            at_start = bridge.build_experiment_cmd({**base, "return_to_start": [1, 16, 0], "current_pose": [1.1, 16.0]})
+            no_pose = bridge.build_experiment_cmd({**base, "return_to_start": [1, 16, 0]})
+            manual = bridge.build_experiment_cmd({**base, "return_to_start": [5, 5, 0], "current_pose": [-33, -47]})
 
-        self.assertIn("--return-to-start=-2.0,-47.0,0.0;1.0,16.0,0.0", retrace)
+        self.assertIn("--return-to-start=-2.0,-47.0,0.0;1.0,16.0,0.0", at_end)
+        self.assertIn("--return-to-start=1.0,16.0,0.0", at_start)
+        self.assertIn("--return-to-start=1.0,16.0,0.0", no_pose)
         self.assertIn("--return-to-start=5.0,5.0,0.0", manual)
 
     def test_invalid_discovery_subnet_returns_error(self):

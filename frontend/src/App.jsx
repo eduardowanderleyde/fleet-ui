@@ -48,11 +48,6 @@ export default function App() {
   const status                      = useFleetStatus()
   const { routes, loading: routesLoading, error: routesError, refreshRoutes } = useRoutes(cfg.robot)
   const replayPoses = useRoutePoses(cfg.command === 'replay' ? cfg.route : '', cfg.robot)
-  // Cada replay começa do primeiro ponto da rota: depois de uma corrida o robô
-  // está no fim do percurso, e sem isso a próxima repetição partiria de lá.
-  useEffect(() => {
-    if (replayPoses.length) setCfg(c => ({ ...c, return_to_start: replayPoses[0] }))
-  }, [replayPoses])
   const [resetMsg, setResetMsg]     = useState(null)
   const [resetting, setResetting]   = useState(false)
   const sim                         = useSimulation()

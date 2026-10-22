@@ -3,7 +3,11 @@ COMPOSE ?= docker compose
 # Percurso do experimento BLE do CBSoft'26 num mundo aberto (ver fleet_ws/scripts/cbsoft/).
 # HEADLESS: sem a janela do Gazebo (o frontend mostra o robô); com ela a CPU
 # satura e o Nav2 aborta trajetos longos.
-CBSOFT_ENV = WORLD=cbsoft_open LOCALIZATION=amcl HEADLESS=True X_POSE=1.0216323137283325 Y_POSE=16.61626625061035 YAW=0.0
+# NAV2_*: rota de ~95 m precisa de mais folga no BT e de A* no planner
+# (ver _make_nav2_params em turtlebot4_sim.launch.py).
+CBSOFT_ENV = WORLD=cbsoft_open LOCALIZATION=amcl HEADLESS=True \
+	NAV2_DEFAULT_SERVER_TIMEOUT_MS=1000 NAV2_NAVFN_USE_ASTAR=true \
+	X_POSE=1.0216323137283325 Y_POSE=16.61626625061035 YAW=0.0
 
 .PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-check cbsoft-up cbsoft-run
 

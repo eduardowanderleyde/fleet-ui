@@ -9,6 +9,8 @@ x-fleet-common: &fleet-common
     WORLD: ${WORLD:-warehouse}
     LOCALIZATION: ${LOCALIZATION:-slam}
     HEADLESS: ${HEADLESS:-False}
+    NAV2_DEFAULT_SERVER_TIMEOUT_MS: ${NAV2_DEFAULT_SERVER_TIMEOUT_MS:-}
+    NAV2_NAVFN_USE_ASTAR: ${NAV2_NAVFN_USE_ASTAR:-}
     X_POSE: ${X_POSE:-0.0}
     Y_POSE: ${Y_POSE:-0.0}
     YAW: ${YAW:-0.0}

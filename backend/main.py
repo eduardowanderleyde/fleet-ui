@@ -601,6 +601,12 @@ def _save_run_history(job_id: str, cfg_data: dict, job: dict) -> None:
 
 
 def _build_cmd(cfg: dict) -> list[str]:
+    robot = cfg.get("robot", "")
+    rid = "" if not robot or robot == "default" else robot
+    with _status_lock:
+        pose = dict(_robot_poses.get(rid) or {})
+    if pose.get("valid"):
+        cfg = {**cfg, "current_pose": [pose["x"], pose["y"]]}
     return _bridge.build_experiment_cmd(cfg)
 
 
