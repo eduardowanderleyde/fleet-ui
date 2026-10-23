@@ -1,0 +1,514 @@
+[INFO] [launch]: All log files can be found below /home/eduardo/fleet-ui/fleet_ws/log/ros/2026-09-14-22-38-54-305502-eduardo-B550M-AORUS-ELITE-85449
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [xacro-1]: process started with pid [85466]
+[INFO] [parameter_bridge-2]: process started with pid [85467]
+[INFO] [image_bridge-3]: process started with pid [85468]
+[INFO] [image_bridge-4]: process started with pid [85469]
+[INFO] [create-5]: process started with pid [85470]
+[INFO] [gazebo-6]: process started with pid [85471]
+[INFO] [gazebo-7]: process started with pid [85472]
+[INFO] [robot_state_publisher-8]: process started with pid [85473]
+[INFO] [rviz2-9]: process started with pid [85475]
+[create-5] [INFO] [1789436335.026605818] [ros_gz_sim]: Requesting list of world names.
+[robot_state_publisher-8] [WARN] [1789436335.026754142] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-8] [INFO] [1789436335.026914239] [robot_state_publisher]: Robot initialized
+[INFO] [xacro-1]: process has finished cleanly [pid 85466]
+[rviz2-9] [INFO] [1789436335.275830069] [rviz2]: Stereo is NOT SUPPORTED
+[rviz2-9] [INFO] [1789436335.275958243] [rviz2]: OpenGl version: 4.6 (GLSL 4.6)
+[rviz2-9] [INFO] [1789436335.293812430] [rviz2]: Stereo is NOT SUPPORTED
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:413:17: QML ToolButton: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:413:17: QML ToolButton: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:413:17: QML ToolButton: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[parameter_bridge-2] [INFO] [1789436336.044465974] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1789436336.045682706] [bridge_ros_gz]: Creating GZ->ROS Bridge: [joint_states (gz.msgs.Model) -> joint_states (sensor_msgs/msg/JointState)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1789436336.048311428] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/odom (gz.msgs.Odometry) -> odom (nav_msgs/msg/Odometry)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1789436336.049983753] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/tf (gz.msgs.Pose_V) -> tf (tf2_msgs/msg/TFMessage)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1789436336.051400041] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/imu (gz.msgs.IMU) -> imu (sensor_msgs/msg/Imu)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1789436336.052070290] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/scan (gz.msgs.LaserScan) -> scan (sensor_msgs/msg/LaserScan)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1789436336.052687464] [bridge_ros_gz]: Creating ROS->GZ Bridge: [cmd_vel (geometry_msgs/msg/Twist) -> /cmd_vel (gz.msgs.Twist)] (Lazy 0)
+[parameter_bridge-2] [INFO] [1789436336.053435547] [bridge_ros_gz]: Creating GZ->ROS Bridge: [/rgbd_camera/camera_info (gz.msgs.CameraInfo) -> /rgbd_camera/camera_info (sensor_msgs/msg/CameraInfo)] (Lazy 0)
+[create-5] [INFO] [1789436336.086349559] [ros_gz_sim]: Waiting messages on topic [robot_description].
+[create-5] [INFO] [1789436336.097823627] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-5]: process has finished cleanly [pid 85470]
+[gazebo-7] [1;32m[Msg] [0m[1;32mGazebo Sim GUI    v[0m[1;32m8.11.0[0m[1;32m[0m
+[gazebo-7] [1;32m[Msg] [0m[1;32mDetected Wayland. Setting Qt to use the xcb plugin: [0m[1;32m'QT_QPA_PLATFORM=xcb'.[0m[1;32m[0m
+[gazebo-7] [1;36m[Dbg] [Application.cc:96] [0m[1;36mInitializing application.[0m[1;36m[0m
+[gazebo-7] [1;36m[Dbg] [Application.cc:170] [0m[1;36mQt using OpenGL graphics interface[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:657] [0m[1;36mCreate main window[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [PathManager.cc:68] [0m[1;36mRequesting resource paths through [[0m[1;36m/gazebo/resource_paths/get[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Gui.cc:355] [0m[1;36mGUI requesting list of world names. The server may be busy [0m[1;36mdownloading resources. Please be patient.[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Gui.cc:413] [0m[1;36mRequesting GUI from [[0m[1;36m/world/warehouse/gui/info[0m[1;36m]...[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [PathManager.cc:57] [0m[1;36mReceived resource paths.[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [GuiRunner.cc:149] [0m[1;36mRequesting initial state from [[0m[1;36m/world/warehouse/state[0m[1;36m]...[0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoading config [[0m[1;32m/home/eduardo/.gz/sim/8/gui.config[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mMinimalScene[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:802] [0m[1;36mCreating gz-rendering interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:802] [0m[1;36mCreating gz-rendering interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:986] [0m[1;36mCreating render thread interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:802] [0m[1;36mCreating gz-rendering interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:986] [0m[1;36mCreating render thread interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32m3D View[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mMinimalScene[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_gui_vendor/lib/gz-gui-8/plugins/libMinimalScene.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mEntityContextMenuPlugin[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mCurrently tracking topic on [[0m[1;32m/gui/currently_tracked[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mEntity Context Menu[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mEntityContextMenuPlugin[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libEntityContextMenuPlugin.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mGzSceneManager[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mScene Manager[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mGzSceneManager[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libGzSceneManager.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mInteractiveViewControl[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mCamera view controller topic advertised on [[0m[1;32m/gui/camera/view_control[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mCamera reference visual topic advertised on [[0m[1;32m/gui/camera/view_control/reference_visual[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mCamera view control sensitivity advertised on [[0m[1;32m/gui/camera/view_control/sensitivity[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mInteractive view control[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mInteractiveViewControl[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_gui_vendor/lib/gz-gui-8/plugins/libInteractiveViewControl.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mCameraTracking[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mCamera tracking[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mCameraTracking[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_gui_vendor/lib/gz-gui-8/plugins/libCameraTracking.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mMarkerManager[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mListening to stats on [[0m[1;32m/world/warehouse/stats[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mMarker Manager[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mMarkerManager[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_gui_vendor/lib/gz-gui-8/plugins/libMarkerManager.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mSelectEntities[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mSelect entities[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mSelectEntities[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libSelectEntities.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mSpawn[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mSpawn[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mSpawn[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libSpawn.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mVisualizationCapabilities[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mView as transparent service on [[0m[1;32m/gui/view/transparent[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mView as wireframes service on [[0m[1;32m/gui/view/wireframes[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mView center of mass service on [[0m[1;32m/gui/view/com[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mView inertia service on [[0m[1;32m/gui/view/inertia[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mView collisions service on [[0m[1;32m/gui/view/collisions[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mView joints service on [[0m[1;32m/gui/view/joints[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mView frames service on [[0m[1;32m/gui/view/frames[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mVisualization capabilities[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mVisualizationCapabilities[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libVisualizationCapabilities.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mWorldControl[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mUsing world control service [[0m[1;32m/world/warehouse/control[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mListening to stats on [[0m[1;32m/world/warehouse/stats[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [WorldControl.cc:237] [0m[1;36mUsing an event to share WorldControl msgs with the server[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:413:17: QML ToolButton: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file::/ComponentInspector/ComponentInspector.qml:251:3: QML Dialog: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:413:17: QML ToolButton: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file:///usr/lib/x86_64-linux-gnu/qt5/qml/QtQuick/Dialogs/DefaultFileDialog.qml:309:21: QML Button: Binding loop detected for property "implicitHeight"[0m[1;33m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mWorld control[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mWorldControl[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_gui_vendor/lib/gz-gui-8/plugins/libWorldControl.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mWorldStats[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mListening to stats on [[0m[1;32m/world/warehouse/stats[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mWorld stats[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mWorldStats[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_gui_vendor/lib/gz-gui-8/plugins/libWorldStats.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mShapes[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mShapes[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mShapes[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libShapes.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mLights[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mLights[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mLights[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libLights.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mTransformControl[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mTransform control[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mTransformControl[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libTransformControl.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mScreenshot[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mScreenshot service on [[0m[1;32m/gui/screenshot[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mScreenshot[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mScreenshot[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_gui_vendor/lib/gz-gui-8/plugins/libScreenshot.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mCopyPaste[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mCopy/Paste[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mCopyPaste[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libCopyPaste.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mComponentInspector[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mComponent inspector[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mComponentInspector[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libComponentInspector.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:528] [0m[1;36mLoading plugin [[0m[1;36mEntityTree[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mCurrently tracking topic on [[0m[1;32m/gui/currently_tracked[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mAdded plugin [[0m[1;32mEntity tree[0m[1;32m] to main window[0m[1;32m[0m
+[gazebo-7] [1;33m[GUI] [Wrn] [Application.cc:908] [0m[1;33m[QT] file::/WorldStats/WorldStats.qml:53:3: QML RowLayout: Binding loop detected for property "x"[0m[1;33m[0m
+[gazebo-6] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<urdf-string>:L0]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoaded plugin [[0m[1;32mEntityTree[0m[1;32m] from path [[0m[1;32m/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/gui/libEntityTree.so[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:398] [0m[1;36mLoading window config[0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mUsing server control service [[0m[1;32m/server_control[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Application.cc:671] [0m[1;36mApplying config[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:802] [0m[1;36mCreating gz-rendering interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:986] [0m[1;36mCreating render thread interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mLoading plugin [[0m[1;32mgz-rendering-ogre2[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:749] [0m[1;36mCreate scene [[0m[1;36mscene[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MinimalScene.cc:1037] [0m[1;36mCreating texture node render interface for OpenGL[0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [TransformControl.cc:453] [0m[1;36mTransformControl plugin is using camera [[0m[1;36mscene::Camera(65527)[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [Spawn.cc:308] [0m[1;36mSpawn plugin is using camera [[0m[1;36mscene::Camera(65527)[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [SelectEntities.cc:452] [0m[1;36mSelectEntities plugin is using camera [[0m[1;36mscene::Camera(65527)[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MarkerManager.cc:169] [0m[1;36mAdvertise [0m[1;36m/marker[0m[1;36m/list service.[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MarkerManager.cc:179] [0m[1;36mAdvertise [0m[1;36m/marker[0m[1;36m/list.[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [MarkerManager.cc:189] [0m[1;36mAdvertise [0m[1;36m/marker[0m[1;36m_array.[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [CameraTracking.cc:205] [0m[1;36mCameraTrackingPrivate plugin is moving camera [[0m[1;36mscene::Camera(65527)[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mMove to service on [[0m[1;32m/gui/move_to[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mFollow service on [[0m[1;32m/gui/follow[0m[1;32m] (deprecated)[0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mTracking topic on [[0m[1;32m/gui/track[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mTracking status topic on [[0m[1;32m/gui/currently_tracked[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mMove to pose service on [[0m[1;32m/gui/move_to/pose[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mCamera pose topic advertised on [[0m[1;32m/gui/camera/pose[0m[1;32m][0m[1;32m[0m
+[gazebo-7] [1;32m[GUI] [0m[1;32m[Msg] [0m[1;32mFollow offset service on [[0m[1;32m/gui/follow/offset[0m[1;32m] (deprecated)[0m[1;32m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [InteractiveViewControl.cc:176] [0m[1;36mInteractiveViewControl plugin is moving camera [[0m[1;36mscene::Camera(65527)[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;36m[GUI] [Dbg] [EntityContextMenuPlugin.cc:79] [0m[1;36mEntity context menu plugin is using camera [[0m[1;36mscene::Camera(65527)[0m[1;36m][0m[1;36m[0m
+[gazebo-7] [1;33mWarning [Utils.cc:132][0m [/sdf/model[@name="turtlebot4"]/link[@name="rplidar_link"]/sensor[@name="rplidar"]/gz_frame_id:<data-string>:L1399]: XML Element[gz_frame_id], child of element[sensor], not defined in SDF. Copying[gz_frame_id] as children of [sensor].
+[gazebo-7] [1;33m[GUI] [Wrn] [OBJLoader.cc:91] [0m[1;33mBoth `d` and `Tr` parameters defined for "Chair". Use the value of `d` for dissolve (line 8 in .mtl.)[0m
+[gazebo-7] [1;33m[0m
+[INFO] [sync_slam_toolbox_node-10]: process started with pid [85909]
+[sync_slam_toolbox_node-10] [INFO] [1789436343.194868281] [slam_toolbox]: Node using stack size 40000000
+[sync_slam_toolbox_node-10] [INFO] [1789436343.507867957] [slam_toolbox]: Configuring
+[sync_slam_toolbox_node-10] [INFO] [1789436343.515409138] [slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[sync_slam_toolbox_node-10] [INFO] [1789436343.515759693] [slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[INFO] [launch.user]: [LifecycleLaunch] Slamtoolbox node is activating.
+[sync_slam_toolbox_node-10] [INFO] [1789436343.532697483] [slam_toolbox]: Activating
+[sync_slam_toolbox_node-10] Registering sensor: [Custom Described Lidar]
+[INFO] [controller_server-11]: process started with pid [85940]
+[INFO] [smoother_server-12]: process started with pid [85941]
+[INFO] [planner_server-13]: process started with pid [85942]
+[INFO] [route_server-14]: process started with pid [85943]
+[INFO] [behavior_server-15]: process started with pid [85944]
+[INFO] [bt_navigator-16]: process started with pid [85945]
+[INFO] [waypoint_follower-17]: process started with pid [85946]
+[INFO] [velocity_smoother-18]: process started with pid [85947]
+[INFO] [collision_monitor-19]: process started with pid [85948]
+[INFO] [opennav_docking-20]: process started with pid [85949]
+[INFO] [lifecycle_manager-21]: process started with pid [85950]
+[velocity_smoother-18] [INFO] [1789436347.169492689] [velocity_smoother]: 
+[velocity_smoother-18] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-18] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-18] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-21] [INFO] [1789436347.170847495] [lifecycle_manager_navigation]: Creating
+[lifecycle_manager-21] [INFO] [1789436347.181627136] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[controller_server-11] [INFO] [1789436347.189771383] [controller_server]: 
+[controller_server-11] 	controller_server lifecycle node launched. 
+[controller_server-11] 	Waiting on external lifecycle transitions to activate
+[controller_server-11] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[behavior_server-15] [INFO] [1789436347.190197077] [behavior_server]: 
+[behavior_server-15] 	behavior_server lifecycle node launched. 
+[behavior_server-15] 	Waiting on external lifecycle transitions to activate
+[behavior_server-15] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[route_server-14] [INFO] [1789436347.190202117] [route_server]: 
+[route_server-14] 	route_server lifecycle node launched. 
+[route_server-14] 	Waiting on external lifecycle transitions to activate
+[route_server-14] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-11] [INFO] [1789436347.194554115] [controller_server]: Creating controller server
+[waypoint_follower-17] [INFO] [1789436347.203682252] [waypoint_follower]: 
+[waypoint_follower-17] 	waypoint_follower lifecycle node launched. 
+[waypoint_follower-17] 	Waiting on external lifecycle transitions to activate
+[waypoint_follower-17] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-17] [INFO] [1789436347.204302792] [waypoint_follower]: Creating
+[smoother_server-12] [INFO] [1789436347.205756604] [smoother_server]: 
+[smoother_server-12] 	smoother_server lifecycle node launched. 
+[smoother_server-12] 	Waiting on external lifecycle transitions to activate
+[smoother_server-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-13] [INFO] [1789436347.206847006] [planner_server]: 
+[planner_server-13] 	planner_server lifecycle node launched. 
+[planner_server-13] 	Waiting on external lifecycle transitions to activate
+[planner_server-13] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-12] [INFO] [1789436347.207494109] [smoother_server]: Creating smoother server
+[planner_server-13] [INFO] [1789436347.208616424] [planner_server]: Creating
+[controller_server-11] [INFO] [1789436347.214780385] [local_costmap.local_costmap]: 
+[controller_server-11] 	local_costmap lifecycle node launched. 
+[controller_server-11] 	Waiting on external lifecycle transitions to activate
+[controller_server-11] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-11] [INFO] [1789436347.215266959] [local_costmap.local_costmap]: Creating Costmap
+[collision_monitor-19] [INFO] [1789436347.224588610] [collision_monitor]: 
+[collision_monitor-19] 	collision_monitor lifecycle node launched. 
+[collision_monitor-19] 	Waiting on external lifecycle transitions to activate
+[collision_monitor-19] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-16] [INFO] [1789436347.225427383] [bt_navigator]: 
+[bt_navigator-16] 	bt_navigator lifecycle node launched. 
+[bt_navigator-16] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-16] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-16] [INFO] [1789436347.227101983] [bt_navigator]: Creating
+[opennav_docking-20] [INFO] [1789436347.228713208] [docking_server]: 
+[opennav_docking-20] 	docking_server lifecycle node launched. 
+[opennav_docking-20] 	Waiting on external lifecycle transitions to activate
+[opennav_docking-20] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-20] [INFO] [1789436347.228827855] [docking_server]: Creating docking_server
+[planner_server-13] [INFO] [1789436347.232414105] [global_costmap.global_costmap]: 
+[planner_server-13] 	global_costmap lifecycle node launched. 
+[planner_server-13] 	Waiting on external lifecycle transitions to activate
+[planner_server-13] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-13] [INFO] [1789436347.232888886] [global_costmap.global_costmap]: Creating Costmap
+[lifecycle_manager-21] [INFO] [1789436347.986052838] [lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-21] [INFO] [1789436347.986088399] [lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[controller_server-11] [INFO] [1789436348.439281002] [controller_server]: Configuring controller interface
+[controller_server-11] [INFO] [1789436348.439308546] [controller_server]: getting progress checker plugins..
+[controller_server-11] [INFO] [1789436348.439560626] [controller_server]: getting goal checker plugins..
+[controller_server-11] [INFO] [1789436348.439911682] [controller_server]: Controller frequency set to 20.0000Hz
+[controller_server-11] [INFO] [1789436348.439975789] [local_costmap.local_costmap]: Configuring
+[controller_server-11] [INFO] [1789436348.450007538] [local_costmap.local_costmap]: Using plugin "static_layer"
+[controller_server-11] [INFO] [1789436348.453842080] [local_costmap.local_costmap]: Subscribing to the map topic (/map) with transient local durability
+[controller_server-11] [INFO] [1789436348.455528484] [local_costmap.local_costmap]: Initialized plugin "static_layer"
+[controller_server-11] [INFO] [1789436348.455545157] [local_costmap.local_costmap]: Using plugin "voxel_layer"
+[controller_server-11] [INFO] [1789436348.456506893] [local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-11] [INFO] [1789436348.479994649] [local_costmap.local_costmap]: Initialized plugin "voxel_layer"
+[controller_server-11] [INFO] [1789436348.480030210] [local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-11] [INFO] [1789436348.481144098] [local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-11] [INFO] [1789436348.499894772] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 436 X 301 at 0.050000 m/pix
+[controller_server-11] [INFO] [1789436348.500049840] [controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-11] [INFO] [1789436348.500470303] [controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-11] [INFO] [1789436348.500988300] [controller_server]: Created goal checker : general_goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-11] [INFO] [1789436348.501694410] [controller_server]: Controller Server has general_goal_checker  goal checkers available.
+[controller_server-11] [INFO] [1789436348.502959839] [controller_server]: Created controller : FollowPath of type nav2_mppi_controller::MPPIController
+[controller_server-11] [INFO] [1789436348.505972772] [controller_server]: Controller period is equal to model dt. Control sequence shifting is ON
+[controller_server-11] [INFO] [1789436348.507543126] [controller_server]: ConstraintCritic instantiated with 1 power and 4.000000 weight.
+[controller_server-11] [INFO] [1789436348.507587744] [controller_server]: Critic loaded : mppi::critics::ConstraintCritic
+[controller_server-11] [INFO] [1789436348.508973662] [controller_server]: InflationCostCritic instantiated with 1 power and 300.000000 / 0.015000 weights. Critic will collision check based on footprint cost.
+[controller_server-11] [INFO] [1789436348.508999974] [controller_server]: Critic loaded : mppi::critics::CostCritic
+[controller_server-11] [INFO] [1789436348.509355309] [controller_server]: GoalCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-11] [INFO] [1789436348.509374837] [controller_server]: Critic loaded : mppi::critics::GoalCritic
+[controller_server-11] [INFO] [1789436348.509953454] [controller_server]: GoalAngleCritic instantiated with 1 power, 3.000000 weight, 0.500000 angular threshold and symmetric_yaw_tolerance disabled
+[controller_server-11] [INFO] [1789436348.509970949] [controller_server]: Critic loaded : mppi::critics::GoalAngleCritic
+[controller_server-11] [INFO] [1789436348.511397257] [controller_server]: ReferenceTrajectoryCritic instantiated with 1 power and 14.000000 weight
+[controller_server-11] [INFO] [1789436348.511418920] [controller_server]: Critic loaded : mppi::critics::PathAlignCritic
+[controller_server-11] [INFO] [1789436348.512117615] [controller_server]: Critic loaded : mppi::critics::PathFollowCritic
+[controller_server-11] [INFO] [1789436348.513155112] [controller_server]: PathAngleCritic instantiated with 1 power and 2.000000 weight. Mode set to: Forward Preference
+[controller_server-11] [INFO] [1789436348.513213427] [controller_server]: Critic loaded : mppi::critics::PathAngleCritic
+[controller_server-11] [INFO] [1789436348.513755422] [controller_server]: PreferForwardCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-11] [INFO] [1789436348.513771414] [controller_server]: Critic loaded : mppi::critics::PreferForwardCritic
+[controller_server-11] [INFO] [1789436348.516319736] [controller_server]: Optimizer reset
+[controller_server-11] [INFO] [1789436348.520782333] [MPPIController]: Configured MPPI Controller: FollowPath
+[controller_server-11] [INFO] [1789436348.520803936] [controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-21] [INFO] [1789436348.530011842] [lifecycle_manager_navigation]: [34m[1mConfiguring smoother_server[0m[0m
+[smoother_server-12] [INFO] [1789436348.530335593] [smoother_server]: Configuring smoother server
+[smoother_server-12] [INFO] [1789436348.875160180] [smoother_server]: Created smoother : simple_smoother of type nav2_smoother::SimpleSmoother
+[smoother_server-12] [INFO] [1789436348.876476610] [smoother_server]: Smoother Server has simple_smoother  smoothers available.
+[lifecycle_manager-21] [INFO] [1789436348.884064673] [lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-13] [INFO] [1789436348.884288788] [planner_server]: Configuring
+[planner_server-13] [INFO] [1789436348.884319649] [global_costmap.global_costmap]: Configuring
+[planner_server-13] [INFO] [1789436348.892809681] [global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-13] [INFO] [1789436348.896080636] [global_costmap.global_costmap]: Subscribing to the map topic (/map) with transient local durability
+[planner_server-13] [INFO] [1789436348.898409523] [global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-13] [INFO] [1789436348.898429703] [global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-13] [INFO] [1789436348.899334096] [global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-13] [INFO] [1789436348.905357207] [global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-13] [INFO] [1789436348.905397497] [global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-13] [INFO] [1789436348.906413501] [global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-13] [INFO] [1789436348.930799428] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 436 X 301 at 0.050000 m/pix
+[planner_server-13] [INFO] [1789436348.931086116] [planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner
+[planner_server-13] [INFO] [1789436348.931107509] [planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[planner_server-13] [INFO] [1789436348.932212870] [planner_server]: Planner Server has GridBased  planners available.
+[lifecycle_manager-21] [INFO] [1789436348.944183733] [lifecycle_manager_navigation]: [34m[1mConfiguring route_server[0m[0m
+[route_server-14] [INFO] [1789436348.944402457] [route_server]: Configuring
+[route_server-14] [INFO] [1789436348.970619093] [route_server]: Created GraphFileLoader GeoJsonGraphFileLoader of type nav2_route::GeoJsonGraphFileLoader
+[route_server-14] [INFO] [1789436348.970648792] [route_server]: Configuring geojson graph file loader
+[route_server-14] [INFO] [1789436348.970654774] [route_server]: No graph file provided to load yet.
+[route_server-14] [INFO] [1789436348.972921568] [route_server]: Created edge cost function plugin DistanceScorer of type nav2_route::DistanceScorer
+[route_server-14] [INFO] [1789436348.972942600] [route_server]: Configuring distance scorer.
+[route_server-14] [INFO] [1789436348.973256542] [route_server]: Created edge cost function plugin DynamicEdgesScorer of type nav2_route::DynamicEdgesScorer
+[route_server-14] [INFO] [1789436348.973270921] [route_server]: Configuring adjust edges scorer.
+[route_server-14] [INFO] [1789436348.976553729] [route_server]: Created route operation AdjustSpeedLimit of type nav2_route::AdjustSpeedLimit
+[route_server-14] [INFO] [1789436348.976572506] [route_server]: Configuring Adjust speed limit operation.
+[route_server-14] [INFO] [1789436348.977807234] [route_server]: Created route operation ReroutingService of type nav2_route::ReroutingService
+[route_server-14] [INFO] [1789436348.977826292] [route_server]: Configuring Rerouting service operation.
+[lifecycle_manager-21] [INFO] [1789436348.981209098] [lifecycle_manager_navigation]: [34m[1mConfiguring behavior_server[0m[0m
+[behavior_server-15] [INFO] [1789436348.981459996] [behavior_server]: Configuring
+[behavior_server-15] [INFO] [1789436348.987148574] [behavior_server]: Creating behavior plugin spin of type nav2_behaviors::Spin
+[behavior_server-15] [INFO] [1789436348.988152113] [behavior_server]: Creating behavior plugin backup of type nav2_behaviors::BackUp
+[behavior_server-15] [INFO] [1789436348.988958192] [behavior_server]: Creating behavior plugin drive_on_heading of type nav2_behaviors::DriveOnHeading
+[behavior_server-15] [INFO] [1789436348.989777967] [behavior_server]: Creating behavior plugin assisted_teleop of type nav2_behaviors::AssistedTeleop
+[behavior_server-15] [INFO] [1789436348.991485302] [behavior_server]: Creating behavior plugin wait of type nav2_behaviors::Wait
+[behavior_server-15] [INFO] [1789436349.000431318] [behavior_server]: Configuring spin
+[behavior_server-15] [INFO] [1789436349.012094871] [behavior_server]: Configuring backup
+[behavior_server-15] [INFO] [1789436349.017917515] [behavior_server]: Configuring drive_on_heading
+[behavior_server-15] [INFO] [1789436349.022821718] [behavior_server]: Configuring assisted_teleop
+[behavior_server-15] [INFO] [1789436349.029475770] [behavior_server]: Configuring wait
+[lifecycle_manager-21] [INFO] [1789436349.036385449] [lifecycle_manager_navigation]: [34m[1mConfiguring velocity_smoother[0m[0m
+[velocity_smoother-18] [INFO] [1789436349.036627970] [velocity_smoother]: Configuring velocity smoother
+[lifecycle_manager-21] [INFO] [1789436349.042538638] [lifecycle_manager_navigation]: [34m[1mConfiguring collision_monitor[0m[0m
+[collision_monitor-19] [INFO] [1789436349.042738074] [collision_monitor]: Configuring
+[collision_monitor-19] [INFO] [1789436349.049964631] [collision_monitor]: [scan]: Creating Scan
+[collision_monitor-19] [INFO] [1789436349.053067282] [collision_monitor]: [FootprintApproach]: Creating Polygon
+[collision_monitor-19] [INFO] [1789436349.053347257] [collision_monitor]: [FootprintApproach]: Polygon points are not defined. Using dynamic subscription instead.
+[collision_monitor-19] [INFO] [1789436349.054401547] [collision_monitor]: [FootprintApproach]: Making footprint subscriber on local_costmap/published_footprint topic
+[lifecycle_manager-21] [INFO] [1789436349.069184937] [lifecycle_manager_navigation]: [34m[1mConfiguring bt_navigator[0m[0m
+[bt_navigator-16] [INFO] [1789436349.069459591] [bt_navigator]: Configuring
+[bt_navigator-16] [INFO] [1789436349.077126261] [bt_navigator]: Creating navigator id navigate_to_pose of type nav2_bt_navigator::NavigateToPoseNavigator
+[bt_navigator-16] [INFO] [1789436349.155020912] [bt_navigator]: Creating navigator id navigate_through_poses of type nav2_bt_navigator::NavigateThroughPosesNavigator
+[lifecycle_manager-21] [INFO] [1789436349.188254319] [lifecycle_manager_navigation]: [34m[1mConfiguring waypoint_follower[0m[0m
+[waypoint_follower-17] [INFO] [1789436349.188457933] [waypoint_follower]: Configuring
+[waypoint_follower-17] [INFO] [1789436349.216416663] [waypoint_follower]: Created waypoint_task_executor : wait_at_waypoint of type nav2_waypoint_follower::WaitAtWaypoint
+[lifecycle_manager-21] [INFO] [1789436349.217516854] [lifecycle_manager_navigation]: [34m[1mConfiguring docking_server[0m[0m
+[opennav_docking-20] [INFO] [1789436349.217860486] [docking_server]: Configuring docking_server
+[opennav_docking-20] [INFO] [1789436349.217899333] [docking_server]: Controller frequency set to 50.0000Hz
+[opennav_docking-20] [INFO] [1789436349.249607506] [docking_server]: Created charging dock plugin simple_charging_dock of type opennav_docking::SimpleChargingDock
+[opennav_docking-20] [WARN] [1789436349.255966333] [docking_server]: Dock database filepath nor dock parameters set. Docking actions can only be executed specifying the dock pose via the action request. Or update the dock database via the reload_database service.
+[opennav_docking-20] [INFO] [1789436349.256007745] [docking_server]: Docking Server has 1 dock types and 0 dock instances available.
+[lifecycle_manager-21] [INFO] [1789436349.257999554] [lifecycle_manager_navigation]: [34m[1mActivating controller_server[0m[0m
+[controller_server-11] [INFO] [1789436349.258224941] [controller_server]: Activating
+[controller_server-11] [INFO] [1789436349.258268477] [local_costmap.local_costmap]: Activating
+[controller_server-11] [INFO] [1789436349.258278326] [local_costmap.local_costmap]: Checking transform
+[controller_server-11] [INFO] [1789436349.258494856] [local_costmap.local_costmap]: start
+[controller_server-11] [WARN] [1789436349.459911868] [controller_server]: Parameter controller_server.verbose not found
+[controller_server-11] [INFO] [1789436349.462314071] [controller_server]: Optimizer reset
+[controller_server-11] [INFO] [1789436349.462665087] [MPPIController]: Activated MPPI Controller: FollowPath
+[controller_server-11] [INFO] [1789436349.462691870] [controller_server]: Creating bond (controller_server) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436349.570192066] [lifecycle_manager_navigation]: Server controller_server connected with bond.
+[lifecycle_manager-21] [INFO] [1789436349.570226565] [lifecycle_manager_navigation]: [34m[1mActivating smoother_server[0m[0m
+[smoother_server-12] [INFO] [1789436349.570542120] [smoother_server]: Activating
+[smoother_server-12] [INFO] [1789436349.570571088] [smoother_server]: Creating bond (smoother_server) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436349.676193051] [lifecycle_manager_navigation]: Server smoother_server connected with bond.
+[lifecycle_manager-21] [INFO] [1789436349.676226467] [lifecycle_manager_navigation]: [34m[1mActivating planner_server[0m[0m
+[planner_server-13] [INFO] [1789436349.676515520] [planner_server]: Activating
+[planner_server-13] [INFO] [1789436349.676544287] [global_costmap.global_costmap]: Activating
+[planner_server-13] [INFO] [1789436349.676551481] [global_costmap.global_costmap]: Checking transform
+[planner_server-13] [INFO] [1789436349.676651970] [global_costmap.global_costmap]: start
+[planner_server-13] [INFO] [1789436350.677922337] [planner_server]: Activating plugin GridBased of type NavfnPlanner
+[planner_server-13] [INFO] [1789436350.680449047] [planner_server]: Creating bond (planner_server) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436350.786183483] [lifecycle_manager_navigation]: Server planner_server connected with bond.
+[lifecycle_manager-21] [INFO] [1789436350.786257089] [lifecycle_manager_navigation]: [34m[1mActivating route_server[0m[0m
+[route_server-14] [INFO] [1789436350.786611291] [route_server]: Activating
+[route_server-14] [INFO] [1789436350.786782280] [route_server]: Creating bond (route_server) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436350.892938312] [lifecycle_manager_navigation]: Server route_server connected with bond.
+[lifecycle_manager-21] [INFO] [1789436350.892972259] [lifecycle_manager_navigation]: [34m[1mActivating behavior_server[0m[0m
+[behavior_server-15] [INFO] [1789436350.893357513] [behavior_server]: Activating
+[behavior_server-15] [INFO] [1789436350.893383133] [behavior_server]: Activating spin
+[behavior_server-15] [INFO] [1789436350.893398324] [behavior_server]: Activating backup
+[behavior_server-15] [INFO] [1789436350.893407822] [behavior_server]: Activating drive_on_heading
+[behavior_server-15] [INFO] [1789436350.893416209] [behavior_server]: Activating assisted_teleop
+[behavior_server-15] [INFO] [1789436350.893426469] [behavior_server]: Activating wait
+[behavior_server-15] [INFO] [1789436350.893442501] [behavior_server]: Creating bond (behavior_server) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436350.999094744] [lifecycle_manager_navigation]: Server behavior_server connected with bond.
+[lifecycle_manager-21] [INFO] [1789436350.999130736] [lifecycle_manager_navigation]: [34m[1mActivating velocity_smoother[0m[0m
+[velocity_smoother-18] [INFO] [1789436350.999475199] [velocity_smoother]: Activating
+[velocity_smoother-18] [INFO] [1789436350.999523875] [velocity_smoother]: Creating bond (velocity_smoother) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436351.108453756] [lifecycle_manager_navigation]: Server velocity_smoother connected with bond.
+[lifecycle_manager-21] [INFO] [1789436351.108491591] [lifecycle_manager_navigation]: [34m[1mActivating collision_monitor[0m[0m
+[collision_monitor-19] [INFO] [1789436351.108843649] [collision_monitor]: Activating
+[collision_monitor-19] [INFO] [1789436351.108874150] [collision_monitor]: Creating bond (collision_monitor) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436351.215330918] [lifecycle_manager_navigation]: Server collision_monitor connected with bond.
+[lifecycle_manager-21] [INFO] [1789436351.215365737] [lifecycle_manager_navigation]: [34m[1mActivating bt_navigator[0m[0m
+[bt_navigator-16] [INFO] [1789436351.215754267] [bt_navigator]: Activating
+[bt_navigator-16] [INFO] [1789436351.286696365] [bt_navigator]: Creating bond (bt_navigator) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436351.392773241] [lifecycle_manager_navigation]: Server bt_navigator connected with bond.
+[lifecycle_manager-21] [INFO] [1789436351.392806747] [lifecycle_manager_navigation]: [34m[1mActivating waypoint_follower[0m[0m
+[waypoint_follower-17] [INFO] [1789436351.393229224] [waypoint_follower]: Activating
+[waypoint_follower-17] [INFO] [1789436351.393260266] [waypoint_follower]: Creating bond (waypoint_follower) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436351.499390006] [lifecycle_manager_navigation]: Server waypoint_follower connected with bond.
+[lifecycle_manager-21] [INFO] [1789436351.499427491] [lifecycle_manager_navigation]: [34m[1mActivating docking_server[0m[0m
+[opennav_docking-20] [INFO] [1789436351.499783105] [docking_server]: Activating docking_server
+[opennav_docking-20] [INFO] [1789436351.514434543] [docking_server]: Creating bond (docking_server) to lifecycle manager.
+[lifecycle_manager-21] [INFO] [1789436351.619887652] [lifecycle_manager_navigation]: Server docking_server connected with bond.
+[lifecycle_manager-21] [INFO] [1789436351.619940096] [lifecycle_manager_navigation]: [34m[1mManaged nodes are active[0m[0m
+[lifecycle_manager-21] [INFO] [1789436351.619955657] [lifecycle_manager_navigation]: [34m[1mCreating bond timer...[0m[0m
+[waypoint_follower-17] [INFO] [1789436369.340287260] [waypoint_follower]: Received follow waypoint request with 11 waypoints.
+[bt_navigator-16] [INFO] [1789436369.341131424] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.00, -0.00)
+[controller_server-11] [INFO] [1789436369.361967304] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [WARN] [1789436369.362008094] [controller_server]: No goal checker was specified in parameter 'current_goal_checker'. Server will use only plugin loaded general_goal_checker . This warning will appear once.
+[controller_server-11] [WARN] [1789436369.362019547] [controller_server]: No progress checker was specified in parameter 'current_progress_checker'. Server will use only plugin loaded progress_checker . This warning will appear once.
+[controller_server-11] [INFO] [1789436369.367947099] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436369.369667881] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436369.391448223] [bt_navigator]: Goal succeeded
+[parameter_bridge-2] [INFO] [1789436369.399959458] [bridge_ros_gz]: Passing message from ROS geometry_msgs/msg/Twist to Gazebo gz.msgs.Twist (showing msg only once per type)
+[waypoint_follower-17] [INFO] [1789436369.740525024] [waypoint_follower]: Succeeded processing waypoint 0, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436369.740584382] [waypoint_follower]: Arrived at 0'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436369.939757519] [waypoint_follower]: Task execution at waypoint 0 succeeded
+[waypoint_follower-17] [INFO] [1789436369.939856195] [waypoint_follower]: Handled task execution on waypoint 0, moving to next.
+[bt_navigator-16] [INFO] [1789436369.940717062] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.11, 0.00)
+[controller_server-11] [INFO] [1789436369.961400049] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436369.966288180] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436369.966613365] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436369.990966749] [bt_navigator]: Goal succeeded
+[waypoint_follower-17] [INFO] [1789436370.341453015] [waypoint_follower]: Succeeded processing waypoint 1, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436370.341504688] [waypoint_follower]: Arrived at 1'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436370.539831708] [waypoint_follower]: Task execution at waypoint 1 succeeded
+[waypoint_follower-17] [INFO] [1789436370.539896005] [waypoint_follower]: Handled task execution on waypoint 1, moving to next.
+[bt_navigator-16] [INFO] [1789436370.540471206] [bt_navigator]: Begin navigating from current location (0.00, -0.00) to (0.45, 0.00)
+[controller_server-11] [INFO] [1789436370.561033523] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436371.611160175] [controller_server]: Passing new path to controller.
+[controller_server-11] [INFO] [1789436371.664402695] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436371.665199485] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436371.690693320] [bt_navigator]: Goal succeeded
+[waypoint_follower-17] [INFO] [1789436372.346306175] [waypoint_follower]: Succeeded processing waypoint 2, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436372.346347417] [waypoint_follower]: Arrived at 2'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436372.546631989] [waypoint_follower]: Task execution at waypoint 2 succeeded
+[waypoint_follower-17] [INFO] [1789436372.546701407] [waypoint_follower]: Handled task execution on waypoint 2, moving to next.
+[bt_navigator-16] [INFO] [1789436372.547191799] [bt_navigator]: Begin navigating from current location (0.25, 0.01) to (0.23, 0.01)
+[controller_server-11] [INFO] [1789436372.567764568] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436372.571739258] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436372.572376772] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436372.597438490] [bt_navigator]: Goal succeeded
+[controller_server-11] [INFO] [1789436372.658645752] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 444 X 301 at 0.050000 m/pix
+[planner_server-13] [INFO] [1789436372.676786028] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 444 X 301 at 0.050000 m/pix
+[waypoint_follower-17] [INFO] [1789436372.948354682] [waypoint_follower]: Succeeded processing waypoint 3, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436372.948390423] [waypoint_follower]: Arrived at 3'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436373.146620713] [waypoint_follower]: Task execution at waypoint 3 succeeded
+[waypoint_follower-17] [INFO] [1789436373.146665221] [waypoint_follower]: Handled task execution on waypoint 3, moving to next.
+[bt_navigator-16] [INFO] [1789436373.147221995] [bt_navigator]: Begin navigating from current location (0.25, 0.01) to (0.38, -0.00)
+[controller_server-11] [INFO] [1789436373.167859201] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436373.171844673] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436373.172099027] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436373.197483726] [bt_navigator]: Goal succeeded
+[waypoint_follower-17] [INFO] [1789436373.548086798] [waypoint_follower]: Succeeded processing waypoint 4, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436373.548119383] [waypoint_follower]: Arrived at 4'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436373.746556433] [waypoint_follower]: Task execution at waypoint 4 succeeded
+[waypoint_follower-17] [INFO] [1789436373.746626742] [waypoint_follower]: Handled task execution on waypoint 4, moving to next.
+[bt_navigator-16] [INFO] [1789436373.747048939] [bt_navigator]: Begin navigating from current location (0.25, 0.01) to (0.75, 0.00)
+[controller_server-11] [INFO] [1789436373.767617099] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436374.817762848] [controller_server]: Passing new path to controller.
+[controller_server-11] [INFO] [1789436375.172504307] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436375.172856385] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436375.197267343] [bt_navigator]: Goal succeeded
+[controller_server-11] [INFO] [1789436375.658672339] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 447 X 301 at 0.050000 m/pix
+[planner_server-13] [INFO] [1789436375.676783627] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 447 X 301 at 0.050000 m/pix
+[waypoint_follower-17] [INFO] [1789436375.852450233] [waypoint_follower]: Succeeded processing waypoint 5, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436375.852491725] [waypoint_follower]: Arrived at 5'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436376.050541048] [waypoint_follower]: Task execution at waypoint 5 succeeded
+[waypoint_follower-17] [INFO] [1789436376.050599665] [waypoint_follower]: Handled task execution on waypoint 5, moving to next.
+[bt_navigator-16] [INFO] [1789436376.051009046] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (0.50, -0.00)
+[controller_server-11] [INFO] [1789436376.071573468] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436376.075529342] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436376.075912301] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436376.101233183] [bt_navigator]: Goal succeeded
+[waypoint_follower-17] [INFO] [1789436376.451879725] [waypoint_follower]: Succeeded processing waypoint 6, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436376.451912219] [waypoint_follower]: Arrived at 6'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436376.650585189] [waypoint_follower]: Task execution at waypoint 6 succeeded
+[waypoint_follower-17] [INFO] [1789436376.650644557] [waypoint_follower]: Handled task execution on waypoint 6, moving to next.
+[bt_navigator-16] [INFO] [1789436376.651022576] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (0.62, -0.00)
+[controller_server-11] [INFO] [1789436376.671531528] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436376.675108881] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436376.675435809] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436376.701241754] [bt_navigator]: Goal succeeded
+[waypoint_follower-17] [INFO] [1789436377.051891542] [waypoint_follower]: Succeeded processing waypoint 7, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436377.051924968] [waypoint_follower]: Arrived at 7'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436377.250521918] [waypoint_follower]: Task execution at waypoint 7 succeeded
+[waypoint_follower-17] [INFO] [1789436377.250591546] [waypoint_follower]: Handled task execution on waypoint 7, moving to next.
+[bt_navigator-16] [INFO] [1789436377.250986088] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (0.73, -0.00)
+[controller_server-11] [INFO] [1789436377.271487165] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436377.275000210] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436377.275473508] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436377.301209103] [bt_navigator]: Goal succeeded
+[waypoint_follower-17] [INFO] [1789436377.651877819] [waypoint_follower]: Succeeded processing waypoint 8, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436377.651907538] [waypoint_follower]: Arrived at 8'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436377.850524708] [waypoint_follower]: Task execution at waypoint 8 succeeded
+[waypoint_follower-17] [INFO] [1789436377.850583214] [waypoint_follower]: Handled task execution on waypoint 8, moving to next.
+[bt_navigator-16] [INFO] [1789436377.850979951] [bt_navigator]: Begin navigating from current location (0.55, -0.00) to (1.05, 0.00)
+[controller_server-11] [INFO] [1789436377.871476649] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436378.921609236] [controller_server]: Passing new path to controller.
+[controller_server-11] [INFO] [1789436379.175307084] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436379.175542841] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436379.201225381] [bt_navigator]: Goal succeeded
+[controller_server-11] [INFO] [1789436379.658661303] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 452 X 309 at 0.050000 m/pix
+[planner_server-13] [INFO] [1789436379.676782632] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 452 X 309 at 0.050000 m/pix
+[waypoint_follower-17] [INFO] [1789436379.856842159] [waypoint_follower]: Succeeded processing waypoint 9, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436379.856871187] [waypoint_follower]: Arrived at 9'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436380.055605391] [waypoint_follower]: Task execution at waypoint 9 succeeded
+[waypoint_follower-17] [INFO] [1789436380.055673395] [waypoint_follower]: Handled task execution on waypoint 9, moving to next.
+[bt_navigator-16] [INFO] [1789436380.056244317] [bt_navigator]: Begin navigating from current location (0.85, 0.01) to (0.84, -0.00)
+[controller_server-11] [INFO] [1789436380.076837487] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-11] [INFO] [1789436380.081111922] [controller_server]: Reached the goal!
+[controller_server-11] [INFO] [1789436380.081385654] [controller_server]: Optimizer reset
+[bt_navigator-16] [INFO] [1789436380.106532482] [bt_navigator]: Goal succeeded
+[waypoint_follower-17] [INFO] [1789436380.457403433] [waypoint_follower]: Succeeded processing waypoint 10, processing waypoint task execution
+[waypoint_follower-17] [INFO] [1789436380.457451198] [waypoint_follower]: Arrived at 10'th waypoint, sleeping for 200 milliseconds
+[waypoint_follower-17] [INFO] [1789436380.655550583] [waypoint_follower]: Task execution at waypoint 10 succeeded
+[waypoint_follower-17] [INFO] [1789436380.655587596] [waypoint_follower]: Handled task execution on waypoint 10, moving to next.
+[waypoint_follower-17] [INFO] [1789436380.655595782] [waypoint_follower]: Completed all 11 waypoints requested.

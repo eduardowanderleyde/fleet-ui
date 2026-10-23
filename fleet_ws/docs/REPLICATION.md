@@ -9,24 +9,36 @@ estruturado nos 4 eixos de replicabilidade de Lier et al. (2017), "Can we
 Reproduce it?" — a referência usada pelo agente `experiment-artifact-publishing`
 (ver `conhecimento/artifact_publishing.md`).
 
-## Aviso honesto antes de tudo
+## Os dados originais (recuperados em 2026-10-22)
 
-**Os dados brutos originais dessa campanha (`fleet_ws/runs/dissertation_clean01_final_manual/`
-— bags MCAP, exports JSON por replay, manifesto) não existem mais neste
-repositório nem no histórico do git.** Isso foi descoberto nesta sessão
-(2026-10-02) ao tentar escrever este documento — não são dados sintéticos
-nem um placeholder, é uma lacuna real. O commit exato usado para gerar os
-números do Capítulo 8 também não foi registrado em nenhum lugar na época.
+Em 2026-10-02 este documento afirmava que os dados brutos da campanha
+tinham sido perdidos. **Não tinham:** os arquivos de análise e de execução
+(`summary.json`, CSVs de trajetória, exports JSON por replay, manifesto,
+logs) estavam guardados num `git stash` local de 2026-09-17 (commit
+`5b0a82e`, arquivos não rastreados), e foram restaurados em
+`fleet_ws/runs/dissertation_clean01_final_manual/`. Os 10 bags MCAP
+(`collections/default/2026-09-15_01-*`, listados em `rosbag_path` de cada
+export) continuam no disco da máquina de desenvolvimento, fora do git
+(`collections/` é gitignored) — **faça backup deles**.
 
-**O que isso significa na prática:** não é possível reproduzir *bit a bit* os
-números já publicados a partir deste repositório. O que *é* possível, e é o
-que este documento descreve, é reexecutar o mesmo protocolo e gerar uma nova
-campanha estatisticamente comparável (mesma rota, mesmo N, mesma métrica
-primária). A partir de 2026-10-02, toda nova execução de
-`experiment_repeatability.py` grava sozinha o commit git e se a árvore estava
-suja (`"git": {"commit": ..., "dirty": ...}` no JSON exportado) — ver
-`implementacao.md`, "Feito" — então essa lacuna específica não deve se repetir
-daqui pra frente.
+**Reprodução verificada (2026-10-22):** rodando a análise de novo sobre esses
+10 bags, os números do Capítulo 8 saem idênticos (diferença ≤ 4·10⁻¹⁵ m,
+ruído de ponto flutuante), tanto com a versão do script da época (`14fc0d3`)
+quanto com a atual, **desde que se force a fonte `/odom`**:
+
+```bash
+python3 scripts/analyze_runs.py <os 10 bags, na ordem dos replays> \
+  --output-dir runs/reanalise/ --resample-mode time --resample-samples 100 \
+  --trajectory-topic odom
+```
+
+Sem `--trajectory-topic odom`, a versão atual escolhe sozinha o `/pose` do
+SLAM (mudança de 2026-09-22, `7c546fe`, posterior à campanha) e os números
+mudam — não por erro, por ser outra fonte de trajetória.
+
+O commit exato usado na campanha não foi registrado na época. A partir de
+2026-10-02, toda execução de `experiment_repeatability.py` grava o commit e
+se a árvore estava suja (`"git": {"commit": ..., "dirty": ...}` no JSON).
 
 ## 1. Artefatos técnicos exatos
 
@@ -89,8 +101,10 @@ run, etc.) caso algo aqui precise de mais detalhe.
 python3 scripts/analyze_runs.py \
   collections/default/nova_campanha/*.mcap \
   --output-dir runs/nova_campanha/analysis/ \
-  --resample-mode time --resample-samples 100
+  --resample-mode time --resample-samples 100 --trajectory-topic odom
 ```
+
+(`--trajectory-topic odom`: a mesma fonte usada no Capítulo 8.)
 
 Saída: `summary.json` (RMSE par-a-par, erro de endpoint),
 `trajectory_overlay.png`. Esse é exatamente o par de arquivos citado nas

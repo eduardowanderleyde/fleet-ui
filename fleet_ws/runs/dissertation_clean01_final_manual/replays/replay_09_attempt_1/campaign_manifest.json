@@ -1,0 +1,41 @@
+{
+  "protocol_id": "dissertation_clean01_final_manual",
+  "route": "dissertation_clean01",
+  "single_robot": true,
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "conditions": [
+    "sim=warehouse",
+    "full_simulation_relaunch_per_replay=true",
+    "fresh_route=dissertation_clean01",
+    "same_initial_odom_state=true",
+    "replay_waits_for_map=true",
+    "nav2_lifecycle_active_required=true",
+    "fleet_use_sim_time=false",
+    "cmd_vel_smoothed_to_cmd_vel_relay=true"
+  ],
+  "notes": "Campanha final manual controlada: replay 09 attempt 1",
+  "sim_initial_pose": "0,0,0",
+  "control_method": "full_simulation_relaunch_per_replay",
+  "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_09_attempt_1",
+  "runs": [
+    {
+      "label": "replay_01",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_09_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-46-30_613835_d0ef41ec",
+      "success": true
+    }
+  ],
+  "analysis": {
+    "exit_code": 0,
+    "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_09_attempt_1/analysis",
+    "summary": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_09_attempt_1/analysis/summary.json"
+  },
+  "generated_at": "2026-09-15T01:45:59.567215+00:00"
+}

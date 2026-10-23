@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-09-15T01:40:39.595591+00:00",
+  "reference_run_index": 0,
+  "reference_label": "replay_01",
+  "runs": [
+    {
+      "label": "replay_01",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-40-18_012285_ac1e3514",
+      "traj_topic": "/odom",
+      "num_poses": 491,
+      "duration_sec": 17.64,
+      "path_length_m": 0.8072535158966054,
+      "start_xy": [
+        6.911073962914129e-12,
+        -7.1220703647894e-27
+      ],
+      "end_xy": [
+        0.8072511201872627,
+        -0.0016619610875242845
+      ],
+      "static_traj_warn": false
+    }
+  ],
+  "pairwise_rmse_m": [
+    [
+      0.0
+    ]
+  ],
+  "vs_reference": [
+    {
+      "label": "replay_01",
+      "final_endpoint_error_m": 0.0,
+      "duration_sec": 17.64,
+      "duration_ratio_vs_ref": 1.0,
+      "rmse_vs_ref_m": 0.0,
+      "mean_pointwise_distance_vs_ref_m": 0.0
+    }
+  ],
+  "labels": [
+    "replay_01"
+  ],
+  "resampling": {
+    "mode": "time",
+    "samples": 100,
+    "time_grid": "normalised_0_1"
+  }
+}

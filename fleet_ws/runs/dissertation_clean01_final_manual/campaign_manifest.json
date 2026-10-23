@@ -1,0 +1,126 @@
+{
+  "protocol_id": "dissertation_clean01_final_manual",
+  "route": "dissertation_clean01",
+  "control_method": "single_replay_relaunch_with_retry",
+  "runs": [
+    {
+      "label": "replay_01",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_01_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-39-23_290730_23669472",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_01_attempt_1"
+    },
+    {
+      "label": "replay_02",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_02_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-40-18_012285_ac1e3514",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_02_attempt_1"
+    },
+    {
+      "label": "replay_03",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_03_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-41-09_259632_c22d56cc",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_03_attempt_1"
+    },
+    {
+      "label": "replay_04",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_04_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-42-02_624010_1ecafcbb",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_04_attempt_1"
+    },
+    {
+      "label": "replay_05",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_05_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-42-59_226207_e064f863",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_05_attempt_1"
+    },
+    {
+      "label": "replay_06",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_06_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-43-50_410521_5a3db1d1",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_06_attempt_1"
+    },
+    {
+      "label": "replay_07",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_07_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-44-44_363232_e256cb63",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_07_attempt_1"
+    },
+    {
+      "label": "replay_08",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_08_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-45-38_143683_d4c4385d",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_08_attempt_1"
+    },
+    {
+      "label": "replay_09",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_09_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-46-30_613835_d0ef41ec",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_09_attempt_1"
+    },
+    {
+      "label": "replay_10",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final_manual/replays/replay_10_attempt_1/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-47-17_888761_1e607bc4",
+      "success": true,
+      "source_dir": "runs/dissertation_clean01_final_manual/replays/replay_10_attempt_1"
+    }
+  ],
+  "analysis": {
+    "exit_code": 0,
+    "output_dir": "runs/dissertation_clean01_final_manual/analysis",
+    "summary": "runs/dissertation_clean01_final_manual/analysis/summary.json",
+    "labels": [
+      "replay_01",
+      "replay_02",
+      "replay_03",
+      "replay_04",
+      "replay_05",
+      "replay_06",
+      "replay_07",
+      "replay_08",
+      "replay_09",
+      "replay_10"
+    ],
+    "bags": [
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-39-23_290730_23669472",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-40-18_012285_ac1e3514",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-41-09_259632_c22d56cc",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-42-02_624010_1ecafcbb",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-42-59_226207_e064f863",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-43-50_410521_5a3db1d1",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-44-44_363232_e256cb63",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-45-38_143683_d4c4385d",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-46-30_613835_d0ef41ec",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-47-17_888761_1e607bc4"
+    ]
+  }
+}
