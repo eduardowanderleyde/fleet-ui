@@ -14,14 +14,11 @@ happens on a web page; you never have to type a robot command by hand.
 > README describes. Every `git clone` command below already includes
 > `-b new-way-samsung`.
 
-> Built on top of this: an **AI agent orchestration layer** (Claude/Anthropic) that
-> can plan and run experiments — move robots, record/replay routes, run full
-> repeatability campaigns, diagnose flagged runs — through natural-language
-> instructions instead of clicking through the UI, including one independently
-> scoped agent per robot in a multi-robot fleet. See
-> [`orquestracion.md`](orquestracion.md) (Portuguese) for the architecture, how
-> it was built, and known limitations — start with its "TL;DR" section at the
-> top for a plain-language overview.
+> An experimental **AI agent layer** (natural-language control via
+> Claude/Anthropic, `backend/agents/`) also exists but is out of the current
+> scope: it is hidden from the UI and not covered by the dissertation. To turn
+> the panel back on, build the frontend with `VITE_SHOW_AGENTS=true`. Its
+> design notes are in [`orquestracion.md`](orquestracion.md) (Portuguese).
 
 ## Quick start
 

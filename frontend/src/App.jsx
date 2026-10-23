@@ -20,6 +20,10 @@ import { useRoutePoses, useRoutes } from './hooks/useRoutes'
 import { useRunHistory } from './hooks/useRunHistory'
 import { useSimulation } from './hooks/useSimulation'
 
+// Agentes de IA fora do escopo atual (saíram da dissertação): escondidos da
+// tela, código mantido. Religar com VITE_SHOW_AGENTS=true no build.
+const SHOW_AGENTS = import.meta.env.VITE_SHOW_AGENTS === 'true'
+
 const DEFAULT_CFG = {
   command:         'replay',
   robot:           'default',
@@ -300,13 +304,15 @@ export default function App() {
           onTestSSH={testSSH}
         />
 
-        <div ref={agentRef} style={{ position: 'relative' }}>
-          <button onClick={openAgentPanel} aria-expanded={agentPanel} aria-haspopup="true"
-            style={{ ...btn(color.bgPanel, color.purple), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🤖 Agentes IA <span aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.7 }}>{agentPanel ? '▲' : '▼'}</span>
-          </button>
-          {agentPanel && <AgentFleetPanel robotIds={(status.robots || []).map(r => r.robot_id)} />}
-        </div>
+        {SHOW_AGENTS && (
+          <div ref={agentRef} style={{ position: 'relative' }}>
+            <button onClick={openAgentPanel} aria-expanded={agentPanel} aria-haspopup="true"
+              style={{ ...btn(color.bgPanel, color.purple), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              🤖 Agentes IA <span aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.7 }}>{agentPanel ? '▲' : '▼'}</span>
+            </button>
+            {agentPanel && <AgentFleetPanel robotIds={(status.robots || []).map(r => r.robot_id)} />}
+          </div>
+        )}
 
         <RunHistoryPanel
           containerRef={historyRef}
