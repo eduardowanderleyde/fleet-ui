@@ -412,6 +412,11 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
         odom_path = 0.0
         prev_xy: Optional[Tuple[float, float]] = None
         odom_n = 0
+        # Janela de tempo da própria odometria: a duração do bag não serve pra
+        # velocidade quando há tópico TRANSIENT_LOCAL (ex.: /amcl_pose), cuja
+        # mensagem retida chega com o horário antigo e estica o bag.
+        odom_t0: Optional[int] = None
+        odom_t1: Optional[int] = None
         scan_valid: list = []
         imu_norms: list = []
         ble_rssi_vals: list = []
@@ -434,6 +439,9 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
                         odom_path += _math.hypot(x - prev_xy[0], y - prev_xy[1])
                     prev_xy = (x, y)
                     odom_n += 1
+                    if odom_t0 is None:
+                        odom_t0 = _ts
+                    odom_t1 = _ts
                 except Exception:
                     pass
             elif topic == "/scan":
@@ -466,8 +474,12 @@ def _bag_compute_metrics(bag_path: Optional[str]) -> dict:
             metrics["duration_s"] = round(duration_s, 2)
         if odom_path > 0.01:
             metrics["odom_path_length_m"] = round(odom_path, 3)
-            if duration_s and duration_s > 0:
-                metrics["odom_avg_speed_ms"] = round(odom_path / duration_s, 3)
+            odom_span_s = (odom_t1 - odom_t0) / 1e9 if odom_t0 is not None and odom_t1 is not None else None
+            speed_window_s = odom_span_s if odom_span_s and odom_span_s > 0 else duration_s
+            if speed_window_s and speed_window_s > 0:
+                metrics["odom_avg_speed_ms"] = round(odom_path / speed_window_s, 3)
+            if odom_span_s:
+                metrics["odom_duration_s"] = round(odom_span_s, 2)
         if scan_valid:
             metrics["scan_avg_valid_points"] = round(sum(scan_valid) / len(scan_valid), 1)
             metrics["scan_min_valid_points"] = min(scan_valid)
