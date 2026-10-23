@@ -36,6 +36,17 @@ Sem `--trajectory-topic odom`, a versão atual escolhe sozinha o `/pose` do
 SLAM (mudança de 2026-09-22, `7c546fe`, posterior à campanha) e os números
 mudam — não por erro, por ser outra fonte de trajetória.
 
+**Também recuperados do mesmo stash (2026-10-23):** o script que rodou a
+campanha, `scripts/run_relaunch_campaign.py` (relança Gazebo, Nav2,
+orquestrador e coletor a cada replay e espera os nós do Nav2 ficarem
+`active` via lifecycle; análise com `--trajectory-topic odom` por padrão),
+o `scripts/run_campaign.py`, o registro da baseline
+(`runs/dissertation_clean01/baseline_record.json`) e as campanhas
+exploratórias do Cap. 8 (`runs/dissertation_route01*`,
+`runs/dissertation_clean01_final`, `runs/dissertation_clean01_smoke`).
+Os scripts estão como eram em 2026-09-15; as opções que passam para
+`experiment_repeatability.py` e `analyze_runs.py` continuam existindo.
+
 O commit exato usado na campanha não foi registrado na época. A partir de
 2026-10-02, toda execução de `experiment_repeatability.py` grava o commit e
 se a árvore estava suja (`"git": {"commit": ..., "dirty": ...}` no JSON).

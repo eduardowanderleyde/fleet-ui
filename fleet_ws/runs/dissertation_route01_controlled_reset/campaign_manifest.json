@@ -1,0 +1,138 @@
+{
+  "protocol_id": "dissertation_route01_controlled_reset",
+  "route": "cursor_visible01",
+  "robot": "",
+  "single_robot": true,
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "conditions": [
+    "sim=warehouse",
+    "gazebo_reset_pose=0.354388,-0.002208,-0.001778",
+    "same_initial_pose=true",
+    "fleet_use_sim_time=false",
+    "cmd_vel_smoothed_to_cmd_vel_relay=true"
+  ],
+  "notes": "Campanha controlada para dissertação: 10 replays com reset físico do turtlebot4 para a primeira pose da rota cursor_visible01 antes de cada coleta",
+  "gazebo_reset": {
+    "pose": "0.35438830761546064,-0.002208021404637769,-0.0017782771120764091",
+    "world": "warehouse",
+    "model": "turtlebot4",
+    "settle_sec": 2.0
+  },
+  "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset",
+  "runs": [
+    {
+      "label": "replay_01",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-35-42_888314_449f313f",
+      "success": true
+    },
+    {
+      "label": "replay_02",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_02.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-36-09_827113_54e10914",
+      "success": true
+    },
+    {
+      "label": "replay_03",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_03.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-36-39_849646_71233b8b",
+      "success": true
+    },
+    {
+      "label": "replay_04",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_04.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-37-10_054590_435d1eca",
+      "success": true
+    },
+    {
+      "label": "replay_05",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_05.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-37-40_108100_02662220",
+      "success": true
+    },
+    {
+      "label": "replay_06",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_06.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-38-08_325502_a6d39cce",
+      "success": true
+    },
+    {
+      "label": "replay_07",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_07.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-38-41_866247_973103e5",
+      "success": true
+    },
+    {
+      "label": "replay_08",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_08.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-39-12_387169_a5223c18",
+      "success": true
+    },
+    {
+      "label": "replay_09",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_09.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-39-48_907793_57d165e6",
+      "success": true
+    },
+    {
+      "label": "replay_10",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_10.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-40-20_659473_17220a5d",
+      "success": true
+    }
+  ],
+  "analysis": {
+    "exit_code": 0,
+    "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/analysis",
+    "summary": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/analysis/summary.json",
+    "labels": [
+      "replay_01",
+      "replay_02",
+      "replay_03",
+      "replay_04",
+      "replay_05",
+      "replay_06",
+      "replay_07",
+      "replay_08",
+      "replay_09",
+      "replay_10"
+    ],
+    "bags": [
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-35-42_888314_449f313f",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-36-09_827113_54e10914",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-36-39_849646_71233b8b",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-37-10_054590_435d1eca",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-37-40_108100_02662220",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-38-08_325502_a6d39cce",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-38-41_866247_973103e5",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-39-12_387169_a5223c18",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-39-48_907793_57d165e6",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-40-20_659473_17220a5d"
+    ]
+  }
+}

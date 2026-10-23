@@ -1,0 +1,45 @@
+{
+  "protocol_id": "dissertation_clean01_final",
+  "route": "dissertation_clean01",
+  "single_robot": true,
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "conditions": [
+    "sim=warehouse",
+    "full_simulation_relaunch_per_replay=true",
+    "fresh_route=dissertation_clean01",
+    "same_initial_odom_state=true",
+    "replay_waits_for_map=true",
+    "nav2_lifecycle_active_required=true",
+    "fleet_use_sim_time=false",
+    "cmd_vel_smoothed_to_cmd_vel_relay=true"
+  ],
+  "notes": "Campanha final controlada para dissertação: baseline limpa dissertation_clean01 e 10 replays com relançamento completo da simulação/Nav2/collector",
+  "sim_initial_pose": "0,0,0",
+  "control_method": "full_simulation_relaunch_per_replay",
+  "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final",
+  "runs": [
+    {
+      "label": "replay_01",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-14-43_124743_a968df48",
+      "success": true
+    },
+    {
+      "label": "replay_02",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final/replay_02.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_01-15-36_649076_3bbac09e",
+      "success": true
+    }
+  ],
+  "analysis": null,
+  "generated_at": "2026-09-15T01:14:11.313062+00:00"
+}

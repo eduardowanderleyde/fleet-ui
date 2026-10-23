@@ -1,0 +1,81 @@
+{
+  "command": "replay",
+  "robot_id": "",
+  "route": "cursor_visible01",
+  "expected_route_yaml": "routes/default/cursor_visible01.yaml",
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "skip_collection": false,
+  "success": true,
+  "failures_reported": 0,
+  "error_code": "",
+  "path_length_m_estimate": 0.0,
+  "disable_collection_message": "Collection disabled for default. Bag: collections/default/2026-09-15_00-38-41_866247_973103e5",
+  "rosbag_path": "collections/default/2026-09-15_00-38-41_866247_973103e5",
+  "sensor_summary": {
+    "/pose": {
+      "msgs": 11,
+      "hz_est": 0.4
+    },
+    "/imu": {
+      "msgs": 5027,
+      "hz_est": 200.1
+    },
+    "/odom": {
+      "msgs": 698,
+      "hz_est": 27.8
+    },
+    "/scan": {
+      "msgs": 251,
+      "hz_est": 10.0
+    }
+  },
+  "bag_metrics": {
+    "duration_s": 25.13,
+    "odom_path_length_m": 1.579,
+    "odom_avg_speed_ms": 0.063,
+    "scan_avg_valid_points": 360.0,
+    "scan_min_valid_points": 359,
+    "imu_accel_mean_ms2": 9.804,
+    "imu_accel_variance_ms2": 0.0111
+  },
+  "protocol_metadata": {
+    "protocol_id": "dissertation_route01_controlled_reset",
+    "replicate_id": 7,
+    "replicate_total": 10,
+    "condition": "sim=warehouse; gazebo_reset_pose=0.354388,-0.002208,-0.001778; same_initial_pose=true; fleet_use_sim_time=false; cmd_vel_smoothed_to_cmd_vel_relay=true",
+    "notes": "Campanha controlada para dissertação: 10 replays com reset físico do turtlebot4 para a primeira pose da rota cursor_visible01 antes de cada coleta",
+    "argv": [
+      "/home/eduardo/fleet-ui/fleet_ws/scripts/experiment_repeatability.py",
+      "replay",
+      "--single-robot",
+      "--route",
+      "cursor_visible01",
+      "--topics",
+      "scan",
+      "odom",
+      "imu",
+      "pose",
+      "--wait-goal",
+      "90.0",
+      "--protocol-id",
+      "dissertation_route01_controlled_reset",
+      "--condition",
+      "sim=warehouse; gazebo_reset_pose=0.354388,-0.002208,-0.001778; same_initial_pose=true; fleet_use_sim_time=false; cmd_vel_smoothed_to_cmd_vel_relay=true",
+      "--notes",
+      "Campanha controlada para dissertação: 10 replays com reset físico do turtlebot4 para a primeira pose da rota cursor_visible01 antes de cada coleta",
+      "--no-use-sim-time",
+      "--replicate-id",
+      "7",
+      "--replicate-total",
+      "10",
+      "--export",
+      "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_controlled_reset/replay_07.json"
+    ]
+  },
+  "finished_at": "2026-09-15T00:39:07.206369+00:00"
+}

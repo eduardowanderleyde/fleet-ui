@@ -1,0 +1,81 @@
+{
+  "command": "replay",
+  "robot_id": "",
+  "route": "dissertation_clean01",
+  "expected_route_yaml": "routes/default/dissertation_clean01.yaml",
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "skip_collection": false,
+  "success": true,
+  "failures_reported": 0,
+  "error_code": "",
+  "path_length_m_estimate": 0.0,
+  "disable_collection_message": "Collection disabled for default. Bag: collections/default/2026-09-15_01-15-36_649076_3bbac09e",
+  "rosbag_path": "collections/default/2026-09-15_01-15-36_649076_3bbac09e",
+  "sensor_summary": {
+    "/pose": {
+      "msgs": 5,
+      "hz_est": 0.3
+    },
+    "/imu": {
+      "msgs": 3473,
+      "hz_est": 200.1
+    },
+    "/odom": {
+      "msgs": 482,
+      "hz_est": 27.8
+    },
+    "/scan": {
+      "msgs": 173,
+      "hz_est": 10.0
+    }
+  },
+  "bag_metrics": {
+    "duration_s": 17.36,
+    "odom_path_length_m": 0.837,
+    "odom_avg_speed_ms": 0.048,
+    "scan_avg_valid_points": 360.0,
+    "scan_min_valid_points": 360,
+    "imu_accel_mean_ms2": 9.807,
+    "imu_accel_variance_ms2": 0.0139
+  },
+  "protocol_metadata": {
+    "protocol_id": "dissertation_clean01_final",
+    "replicate_id": 2,
+    "replicate_total": 10,
+    "condition": "sim=warehouse; full_simulation_relaunch_per_replay=true; fresh_route=dissertation_clean01; same_initial_odom_state=true; replay_waits_for_map=true; nav2_lifecycle_active_required=true; fleet_use_sim_time=false; cmd_vel_smoothed_to_cmd_vel_relay=true",
+    "notes": "Campanha final controlada para dissertação: baseline limpa dissertation_clean01 e 10 replays com relançamento completo da simulação/Nav2/collector",
+    "argv": [
+      "/home/eduardo/fleet-ui/fleet_ws/scripts/experiment_repeatability.py",
+      "replay",
+      "--single-robot",
+      "--route",
+      "dissertation_clean01",
+      "--topics",
+      "scan",
+      "odom",
+      "imu",
+      "pose",
+      "--wait-goal",
+      "90.0",
+      "--protocol-id",
+      "dissertation_clean01_final",
+      "--condition",
+      "sim=warehouse; full_simulation_relaunch_per_replay=true; fresh_route=dissertation_clean01; same_initial_odom_state=true; replay_waits_for_map=true; nav2_lifecycle_active_required=true; fleet_use_sim_time=false; cmd_vel_smoothed_to_cmd_vel_relay=true",
+      "--notes",
+      "Campanha final controlada para dissertação: baseline limpa dissertation_clean01 e 10 replays com relançamento completo da simulação/Nav2/collector",
+      "--no-use-sim-time",
+      "--replicate-id",
+      "2",
+      "--replicate-total",
+      "10",
+      "--export",
+      "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_clean01_final/replay_02.json"
+    ]
+  },
+  "finished_at": "2026-09-15T01:15:54.208306+00:00"
+}

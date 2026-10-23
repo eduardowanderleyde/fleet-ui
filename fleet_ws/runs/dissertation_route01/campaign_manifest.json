@@ -1,0 +1,129 @@
+{
+  "protocol_id": "dissertation_route01",
+  "route": "cursor_visible01",
+  "robot": "",
+  "single_robot": true,
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "conditions": [
+    "sim=warehouse",
+    "return_to_start=false"
+  ],
+  "notes": "Campanha para dissertação: 10 replays da rota cursor_visible01",
+  "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01",
+  "runs": [
+    {
+      "label": "replay_01",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-14-40_998159_3496a6df",
+      "success": true
+    },
+    {
+      "label": "replay_02",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_02.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-15-13_506885_af6a181d",
+      "success": true
+    },
+    {
+      "label": "replay_03",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_03.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-15-45_196392_b60aee5f",
+      "success": true
+    },
+    {
+      "label": "replay_04",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_04.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-16-18_998910_4c87ce23",
+      "success": true
+    },
+    {
+      "label": "replay_05",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_05.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-16-49_261951_6de53989",
+      "success": true
+    },
+    {
+      "label": "replay_06",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_06.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-17-21_977129_e7dbf216",
+      "success": true
+    },
+    {
+      "label": "replay_07",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_07.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-17-55_988515_f4a25bcf",
+      "success": true
+    },
+    {
+      "label": "replay_08",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_08.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-18-28_036193_f73192e8",
+      "success": true
+    },
+    {
+      "label": "replay_09",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_09.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-18-57_982276_8715ddbf",
+      "success": true
+    },
+    {
+      "label": "replay_10",
+      "phase": "replay",
+      "exit_code": 0,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/replay_10.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-19-27_989089_d8f701fc",
+      "success": true
+    }
+  ],
+  "analysis": {
+    "exit_code": 0,
+    "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/analysis",
+    "summary": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01/analysis/summary.json",
+    "labels": [
+      "replay_01",
+      "replay_02",
+      "replay_03",
+      "replay_04",
+      "replay_05",
+      "replay_06",
+      "replay_07",
+      "replay_08",
+      "replay_09",
+      "replay_10"
+    ],
+    "bags": [
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-14-40_998159_3496a6df",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-15-13_506885_af6a181d",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-15-45_196392_b60aee5f",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-16-18_998910_4c87ce23",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-16-49_261951_6de53989",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-17-21_977129_e7dbf216",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-17-55_988515_f4a25bcf",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-18-28_036193_f73192e8",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-18-57_982276_8715ddbf",
+      "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-14_23-19-27_989089_d8f701fc"
+    ]
+  }
+}

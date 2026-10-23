@@ -1,0 +1,35 @@
+{
+  "protocol_id": "dissertation_route01_relaunch_reset",
+  "route": "cursor_visible01",
+  "single_robot": true,
+  "topics": [
+    "scan",
+    "odom",
+    "imu",
+    "pose"
+  ],
+  "conditions": [
+    "sim=warehouse",
+    "full_simulation_relaunch_per_replay=true",
+    "sim_initial_pose=0.354388,-0.002208,-0.001778",
+    "same_initial_odom_state=true",
+    "fleet_use_sim_time=false",
+    "cmd_vel_smoothed_to_cmd_vel_relay=true"
+  ],
+  "notes": "Campanha controlada para dissertação: 10 replays com relançamento completo da simulação/Nav2/collector na primeira pose da rota cursor_visible01 antes de cada coleta",
+  "sim_initial_pose": "0.35438830761546064,-0.002208021404637769,-0.0017782771120764091",
+  "control_method": "full_simulation_relaunch_per_replay",
+  "output_dir": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_relaunch_reset",
+  "runs": [
+    {
+      "label": "replay_01",
+      "phase": "replay",
+      "exit_code": 1,
+      "export": "/home/eduardo/fleet-ui/fleet_ws/runs/dissertation_route01_relaunch_reset/replay_01.json",
+      "bag_path": "/home/eduardo/fleet-ui/fleet_ws/collections/default/2026-09-15_00-48-57_230503_973b030e",
+      "success": false
+    }
+  ],
+  "analysis": null,
+  "generated_at": "2026-09-15T00:48:48.056536+00:00"
+}
