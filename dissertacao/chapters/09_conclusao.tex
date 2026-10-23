@@ -356,6 +356,16 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     baseline via \texttt{play\_\allowbreak route} para permitir comparação
     direta baseline-vs-replay sem essa diferença de implementação.
 
+    \item Organizar o versionamento do artefato: integrar o ramo de
+    desenvolvimento ao ramo principal, publicar versões marcadas por
+    \textit{tags} a cada marco (a da dissertação e a do teste na UFPE),
+    seguindo o versionamento semântico \cite{semver} (hoje todos os pacotes
+    estão em 0.1.0, faixa que a especificação reserva a desenvolvimento
+    inicial), e dividir o módulo principal do backend, com mais de 1.700
+    linhas, segundo as refatorações para classes grandes de
+    \citeonline{fowler2018}; práticas de software científico sugeridas por
+    \citeonline{wilson2017}.
+
     \item Comparar o controlador MPPI \cite{williams2016}, estocástico por
     projeto, com um controlador determinístico (DWB \cite{fox1997} ou
     Regulated Pure Pursuit \cite{macenski2023survey}) sob o mesmo protocolo,

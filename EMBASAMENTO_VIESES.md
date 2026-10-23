@@ -118,6 +118,11 @@ editora ou PDF). As marcadas "já no .bib" já estão em
 }
 ```
 
-Pendente de conferir antes de citar: DOI do Afzal 2021 e do Sturm 2012
-(títulos, autores, evento e páginas conferidos); lista completa de autores
-do Wilson 2014.
+Status (2026-10-23): todas conferidas e inseridas no texto. DOI do Sturm 2012
+= 10.1109/IROS.2012.6385773; autores completos do Wilson 2014 conferidos na
+PLoS; SemVer 2.0.0 = 2013 (tag v2.0.0 no GitHub). Afzal: o texto cita o
+preprint arXiv:2004.07368 (citação conferida no resumo), não o artigo do
+ICST, cujo DOI não foi confirmado. Onde entrou: Cap. 7, Ameaças à Validade
+(wohlin2012, runeson2009, sturm2012, borji2018, jakobi1995, afzal2020,
+zhang2018trajectory, wilson2014); Cap. 9, Trabalhos Futuros (semver,
+fowler2018, wilson2017).
