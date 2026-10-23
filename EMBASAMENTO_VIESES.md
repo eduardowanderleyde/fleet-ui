@@ -81,7 +81,7 @@ editora ou PDF). As marcadas "já no .bib" já estão em
   publisher = {Springer}, year = {1995},
   doi       = {10.1007/3-540-59496-5_337},
 }
-@inproceedings{afzal2021simulation,
+@inproceedings{afzal2021simulation,  % NÃO usado: o texto cita o preprint afzal2020
   author    = {Afzal, Afsoon and Katz, Deborah S. and Le Goues, Claire and Timperley, Christopher S.},
   title     = {Simulation for Robotics Test Automation: Developer Perspectives},
   booktitle = {14th IEEE Conference on Software Testing, Verification and Validation (ICST)},

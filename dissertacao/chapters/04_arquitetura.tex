@@ -237,7 +237,7 @@ interface web opere sem exposição direta ao DDS. A decisão de não usar o
 protocolo rosbridge \cite{toris2015} envolve um trade-off explícito entre
 latência e acoplamento: um backend FastAPI com chamadas via subprocess ao
 \texttt{ros2 service call} (Seção~\ref{sec:impl_backend_ponte}) paga o custo
-de inicializar um processo a cada chamada, medido entre 1,5 e 3\,s na
+de inicializar um processo a cada chamada, medido entre 1,2 e 3,2\,s na
 máquina de desenvolvimento (Docker, 2026) --- inadequado para comandos de alta frequência,
 mas aceitável para o padrão de uso da interface, cliques esparsos do
 pesquisador, não um laço de controle. Em troca, elimina-se a dependência de

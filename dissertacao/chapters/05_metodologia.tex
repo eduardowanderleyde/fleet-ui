@@ -225,16 +225,19 @@ do ambiente limpo ao relatório de repetibilidade, compreende:
 
 \begin{enumerate}
     \item \textbf{Inicialização da simulação}: subida do Gazebo, SLAM Toolbox
-    (após um atraso de 8\,s para permitir que o \textit{bridge} de tópicos
-    estabilize) e Nav2 (após 12\,s), aguardando a mensagem de log
-    \texttt{Managed nodes are active} antes de prosseguir, uma
+    (após um atraso fixo de 8\,s para permitir que o \textit{bridge} de
+    tópicos estabilize) e Nav2 (após 12\,s). O script de campanha só
+    prossegue quando o modelo do robô aparece no Gazebo e os nós
+    \texttt{bt\_\allowbreak navigator}, \texttt{controller\_\allowbreak server},
+    \texttt{planner\_\allowbreak server} e \texttt{waypoint\_\allowbreak follower}
+    respondem ao serviço de ciclo de vida com o estado \texttt{active}, uma
     barreira de sincronização que evita o início prematuro de comandos de
     navegação contra um Nav2 ainda não pronto.
 
     \item \textbf{Inicialização dos nós de frota}: subida do
-    \texttt{fleet\_\allowbreak orchestrator} e do \texttt{sensor\_\allowbreak collector}, aguardando as
-    mensagens de prontidão \texttt{fleet\_\allowbreak orchestrator ready} e
-    \texttt{sensor\_\allowbreak collector ready}.
+    \texttt{fleet\_\allowbreak orchestrator} e do \texttt{sensor\_\allowbreak collector},
+    aguardando que seus serviços (\texttt{play\_\allowbreak route},
+    \texttt{enable\_\allowbreak collection}) estejam disponíveis.
 
     \item \textbf{Gravação do baseline}: definição de waypoints (via clique no
     mapa SLAM ao vivo, na interface web, ou via lista de coordenadas, na CLI) e
@@ -267,13 +270,15 @@ comparáveis.
 O protocolo record--replay formaliza o que muitos experimentos de robótica fazem
 informalmente \cite{amigoni2014}, adicionando precisão nos pontos críticos: a gravação contínua do caminho
 efetivamente percorrido, a interpolação para
-grade de tempo comum antes do cálculo de RMSE e o retorno explícito ao ponto de
-partida entre execuções.
+grade de tempo comum antes do cálculo de RMSE e o controle do estado inicial
+entre execuções (relançamento completo, na campanha final, ou retorno ao ponto
+de partida).
 
 Vale registrar uma limitação de replicabilidade: os atrasos fixos de 8\,s e
 12\,s usados no fluxo de inicialização (Seção~\ref{sec:fluxo_protocolo}) foram
-calibrados empiricamente nesta máquina específica, e não derivados de uma
-barreira de sincronização determinística baseada em algum sinal de prontidão.
+calibrados empiricamente nesta máquina específica; a barreira de prontidão do
+Nav2 descrita no passo~1 só é verificada depois deles, de modo que o SLAM e o
+Nav2 sobem em tempos fixos, e não quando suas dependências ficam prontas.
 Em hardware com desempenho distinto, esses valores podem ser insuficientes
 (inicialização ainda incompleta) ou excessivamente conservadores, o que
 representa um risco de replicabilidade entre ambientes que este trabalho não

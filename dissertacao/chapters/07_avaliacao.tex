@@ -155,8 +155,8 @@ que encoders físicos reais; em robôs físicos, slip de roda e condições do p
 exigiriam uma referência externa ou comparação direta com a pose do SLAM.
 \textit{Benchmarks} de trajetória consolidados obtêm essa referência de um
 sistema externo de captura de movimento e avaliam em separado a deriva local
-e o erro global \cite{sturm2012}, justamente porque a odometria acumula erro
-com a distância percorrida \cite{borenstein1996}. A
+e o erro global \cite{sturm2012}; a odometria, por sua vez, acumula erro com
+a distância percorrida \cite{borenstein1996}. A
 Seção~\ref{sec:res_fonte_trajetoria} quantifica esse efeito com o
 \textit{ground truth} do simulador: desprezível na rota curta usada aqui,
 14,27\,cm numa rota em \textit{loop}.
@@ -172,7 +172,9 @@ vezes o maior RMSE observado (4,76\,cm), de modo que separa uma execução
 repetível de uma falha grosseira, mas não diferencia níveis de repetibilidade
 entre si. Como mitigação, os valores brutos de cada execução são reportados
 (Tabela~\ref{tab:campanha_final}), e não só a aprovação no critério, e os
-dados e scripts de análise estão versionados para conferência por terceiros.
+resultados processados, os scripts de campanha e de análise estão versionados
+para conferência por terceiros (os bags brutos, pelo tamanho, ficam fora do
+repositório).
 
 Um risco de validade de construto foi identificado e corrigido durante o
 desenvolvimento: o modo automático de detecção de tópico do
@@ -272,8 +274,8 @@ comportamento configurado do Nav2, não necessariamente imprecisão do
 framework de medição.
 
 Um viés de sobrevivência também precisa ser considerado: só entram nas
-médias as execuções que chegaram ao fim, e omitir as que falharam distorce
-a avaliação de desempenho \cite{borji2018}. Na campanha final, as dez
+médias as execuções que chegaram ao fim, e resultados negativos, embora
+frequentemente ignorados, também são resultados e têm valor \cite{borji2018}. Na campanha final, as dez
 réplicas planejadas foram executadas na primeira tentativa, sem descarte, o
 que os registros de cada réplica confirmam. A ameaça permanece, porém, para
 os resultados exploratórios: a ativação sequencial multi-robô falhou em três
@@ -284,7 +286,7 @@ não geram dados de trajetória.
 ambiente (\textit{warehouse}). A ameaça mais óbvia a essa validade é a transição
 simulação--hardware real (\textit{sim-to-real}, ou \textit{reality gap}
 \cite{jakobi1995}), que desenvolvedores de robótica apontam entre os
-principais desafios do teste em simulação \cite{afzal2020}: o
+desafios do teste em simulação \cite{afzal2020}: o
 plugin DiffDrive do Gazebo integra a cinemática do robô a partir de comandos de
 velocidade de forma determinística, sem modelar slip de roda, folga mecânica ou
 irregularidades de superfície, de modo que a odometria simulada usada como fonte
@@ -334,9 +336,9 @@ escopo ambiental para poder medir exatamente essa consistência.
 A escolha da execução de referência também afeta o número reportado. O RMSE
 médio de 3,35\,cm compara cada réplica com a primeira (\texttt{replay\_\allowbreak 01});
 sobre os mesmos dez bags, a média de todos os pares da matriz
-\texttt{pairwise\_\allowbreak rmse\_\allowbreak m} é de 2,76\,cm. Métricas de erro de
-trajetória dependem de como as trajetórias são alinhadas e de contra qual
-referência são comparadas \cite{zhang2018trajectory}; por isso as duas
+\texttt{pairwise\_\allowbreak rmse\_\allowbreak m} é de 2,76\,cm. A escolha do alinhamento
+e da métrica de erro de trajetória tem pontos fortes e fracos que precisam ser
+explicitados \cite{zhang2018trajectory}; por isso as duas
 estruturas ficam registradas no \texttt{summary.json}, e o valor contra a
 referência, o maior dos dois, é o reportado.
 
