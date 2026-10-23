@@ -20,7 +20,7 @@ ilustra essa estrutura.
 
 \node[simbox] (sim) {Gazebo Harmonic\\Nav2 \& SLAM Toolbox};
 
-\node[msgbox, below=3.6cm of sim] (msgs) {\texttt{fleet\_msgs}\\N services / M msgs};
+\node[msgbox, below=3.6cm of sim] (msgs) {\texttt{fleet\_msgs}\\10 services / 2 msgs};
 \node[modbox, left=1.4cm of msgs] (orch) {\texttt{fleet\_orchestrator}\\\scriptsize record/replay, papéis};
 \node[modbox, right=1.4cm of msgs] (coll) {\texttt{fleet\_data\_collector}\\\scriptsize bags MCAP por robô};
 
@@ -148,8 +148,8 @@ O orquestrador é um nó ROS~2 que expõe sete serviços de alto nível:
 \texttt{go\_\allowbreak to\_\allowbreak point}, \texttt{cancel}, \texttt{list\_\allowbreak robots} e
 \texttt{list\_\allowbreak routes}. Cada serviço abstrai uma sequência de operações ROS~2
 que seria custosa de implementar manualmente: \texttt{start\_\allowbreak record}, por exemplo,
-limpa o buffer de poses, ativa o estado de gravação e registra o timestamp de início,
-tudo de forma atômica, sem expor esses detalhes ao chamador.
+recusa o pedido se o robô estiver navegando, limpa o buffer de poses, ativa o
+estado de gravação e associa o nome da rota, sem expor esses detalhes ao chamador.
 
 A gestão de múltiplos robôs em modo paralelo requereu uma solução não trivial para
 o TF: o SLAM de cada robô publica sua cadeia de transformações em um tópico
@@ -237,8 +237,8 @@ interface web opere sem exposição direta ao DDS. A decisão de não usar o
 protocolo rosbridge \cite{toris2015} envolve um trade-off explícito entre
 latência e acoplamento: um backend FastAPI com chamadas via subprocess ao
 \texttt{ros2 service call} (Seção~\ref{sec:impl_backend_ponte}) paga o custo
-de inicializar um processo a cada chamada, tipicamente 50--150\,ms na
-máquina de desenvolvimento --- inadequado para comandos de alta frequência,
+de inicializar um processo a cada chamada, medido entre 1,5 e 3\,s na
+máquina de desenvolvimento (Docker, 2026) --- inadequado para comandos de alta frequência,
 mas aceitável para o padrão de uso da interface, cliques esparsos do
 pesquisador, não um laço de controle. Em troca, elimina-se a dependência de
 um servidor de WebSocket dedicado e reduz-se a superfície de acoplamento

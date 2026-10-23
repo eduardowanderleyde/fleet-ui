@@ -134,7 +134,7 @@ Replay 10 & 16,78 & 0,817 & 4,08 & 2,26 \\
 \end{table}
 
 Considerando os nove replays comparados à referência, o RMSE médio foi de
-3,35\,cm, com desvio-padrão de 1,10\,cm — seguindo a prática, adotada por
+3,35\,cm, com desvio-padrão amostral de 1,16\,cm — seguindo a prática, adotada por
 \citeonline{maset2022} na avaliação de repetibilidade de sistemas robóticos,
 de reportar a dispersão entre execuções e não apenas um valor médio isolado.
 O menor RMSE observado foi de 1,65\,cm e o maior foi de 4,76\,cm. Todos os
@@ -207,12 +207,15 @@ assimetria quantificada na Tabela~\ref{tab:mecanismo_navegacao}.}
 A causa não é degradação de repetibilidade do robô: o script
 \texttt{experiment\_\allowbreak repeatability.py} grava a baseline enviando uma
 sequência de metas individuais (\texttt{go\_\allowbreak to\_\allowbreak point}, um
-objetivo Nav2 por vez, com o robô estabilizando em cada waypoint antes do
-próximo ser enviado), enquanto o replay envia a rota inteira como uma única
-navegação contínua (\texttt{play\_\allowbreak route}). Baseline e réplicas
-percorrem os mesmos pontos por caminhos de código do Nav2 diferentes, o que
-também explica a duração média da baseline (11,70\,s) ser cerca de 2,5 vezes
-menor que a duração média das réplicas (29,47\,s) — a mesma ordem de grandeza
+objetivo Nav2 por vez, apenas para os quatro waypoints indicados pelo
+usuário), enquanto o replay envia ao \texttt{FollowWaypoints} do Nav2
+(\texttt{play\_\allowbreak route}) todas as poses gravadas durante a baseline,
+salvas a cada 10\,cm de deslocamento. O \texttt{FollowWaypoints} trata cada
+pose como uma meta própria: o robô chega, para, aguarda 200\,ms
+(\texttt{wait\_\allowbreak at\_\allowbreak waypoint}) e só então segue para a próxima.
+Baseline e réplicas percorrem a mesma região por caminhos de código do Nav2
+diferentes, e as paradas repetidas do replay explicam a duração média das
+réplicas (29,47\,s) ser cerca de 2,5 vezes maior que a da baseline (11,70\,s) — a mesma ordem de grandeza
 da razão \texttt{duration\_\allowbreak ratio\_\allowbreak vs\_\allowbreak ref} registrada
 no \texttt{summary.json} dessa campanha. Esse achado reforça a escolha
 metodológica adotada nesta seção: a métrica de repetibilidade que isola o
@@ -237,12 +240,12 @@ de controle, não um indício de degradação do protocolo de replay.
 \section{QA3 — Consistência Temporal}
 \label{sec:res_qa3}
 
-A duração média dos dez replays foi de 17,51\,s, com desvio-padrão de
-0,36\,s. O coeficiente de variação correspondente é de aproximadamente
-2,1\% ($0,36/17,51$), bem abaixo do limiar de 10\% definido na
+A duração média dos dez replays foi de 17,51\,s, com desvio-padrão amostral de
+0,38\,s. O coeficiente de variação correspondente é de aproximadamente
+2,2\% ($0,38/17,51$), bem abaixo do limiar de 10\% definido na
 Seção~\ref{sec:criterios} como critério de aceitação para QA3. O comprimento
 médio estimado por \texttt{/\allowbreak odom} foi de 0,826\,m, com
-desvio-padrão de 0,010\,m. A variação temporal observada é pequena para o
+desvio-padrão de 0,011\,m. A variação temporal observada é pequena para o
 objetivo da análise e compatível com o uso de reamostragem em tempo
 normalizado.
 
@@ -369,9 +372,8 @@ contaminação de CPU por processos remanescentes observada ao vivo durante
 esta campanha. Um mecanismo de \textit{timeout} e nova tentativa foi
 adicionado para lidar com falhas espontâneas de ativação do Nav2/SLAM
 Toolbox sob disputa de recursos (fenômeno já discutido na
-Seção~\ref{sec:limitacoes}): das 30 réplicas, uma precisou de duas
-tentativas adicionais antes de ativar com sucesso; as demais 29 ativaram
-na primeira tentativa. Todas as 30 réplicas produziram dados válidos.
+Seção~\ref{sec:limitacoes}); os manifestos da campanha registram que
+nenhuma das 30 réplicas precisou dele, e todas produziram dados válidos.
 
 O RMSE de cada fonte (\texttt{/\allowbreak odom}, \texttt{/\allowbreak pose})
 contra o \textit{ground truth} foi calculado interpolando o
@@ -496,16 +498,10 @@ A pose que o MUUT reivindica é lida de \texttt{/\allowbreak pose} (a
 mesma fonte corrigida por SLAM discutida na Seção~\ref{sec:res_fonte_trajetoria}),
 casada com o instante da detecção do FUUT por vizinho mais próximo dentro
 de uma janela de 200\,ms. As duas observações --- a pose reivindicada
-pelo MUUT e a detecção geométrica do FUUT --- alimentam um classificador
-baseado em LLM com saída estruturada (plataforma TypeSafe), que julga o
-grau de corroboração entre as duas fontes numa escala de quatro níveis.
-A escolha de um classificador qualitativo em vez de um limiar fixo de
-distância segue o mesmo raciocínio já aplicado a outras decisões de
-classificação nesta dissertação: a pergunta relevante não é só "a
-distância geométrica está abaixo de um corte arbitrário", mas se a
-distância E o alinhamento temporal, considerados juntos, são compatíveis
-com o ruído de sensor esperado --- um julgamento que combina duas
-variáveis continuamente, não um teste de limiar único.
+pelo MUUT e a detecção geométrica do FUUT --- são comparadas por duas
+grandezas calculadas deterministicamente: a discrepância geométrica
+(distância entre as duas posições) e a discrepância temporal (diferença
+entre os instantes casados).
 
 Uma calibração geométrica foi necessária antes do resultado final: a
 primeira execução completa produziu discrepância geométrica de
@@ -526,15 +522,15 @@ a correção geométrica.
 
 \begin{table}[H]
 \centering
-\caption{Resultado do piloto FUUT: discrepância geométrica/temporal entre pose reivindicada pelo MUUT e detecção do FUUT, e classificação de corroboração ($N=3$).}
+\caption{Resultado do piloto FUUT: discrepância geométrica/temporal entre pose reivindicada pelo MUUT e detecção do FUUT, ($N=3$).}
 \label{tab:fuut_piloto}
-\begin{tabular}{lrrl}
+\begin{tabular}{lrr}
 \toprule
-\textbf{Réplica} & \textbf{Discrep. geom. (cm)} & \textbf{Discrep. temporal (s)} & \textbf{Corroboração} \\
+\textbf{Réplica} & \textbf{Discrep. geom. (cm)} & \textbf{Discrep. temporal (s)} \\
 \midrule
-1 & 3,06 & 0,00 & Forte (confiança 0,86) \\
-2 & 5,88 & 0,00 & Forte (confiança 0,95) \\
-3 & 4,76 & 0,00 & Forte (confiança 0,96) \\
+1 & 3,06 & 0,00 \\
+2 & 5,88 & 0,00 \\
+3 & 4,76 & 0,00 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -545,8 +541,7 @@ pelo MUUT e a posição detectada pelo FUUT ficou entre 3,06\,cm e 5,88\,cm
 desta dissertação (ex.: erro de \texttt{/\allowbreak pose} contra o
 \textit{ground truth} de $\approx$2--3\,cm, Seção~\ref{sec:res_fonte_trajetoria}).
 A discrepância temporal foi nula nas três réplicas, dentro da janela de
-casamento de 200\,ms. O classificador julgou as três réplicas como
-"correspondência forte", com confiança entre 0,86 e 0,96.
+casamento de 200\,ms.
 
 Esse resultado é a primeira evidência empírica, ainda que preliminar, de
 que a observação exógena do FUUT é capaz de corroborar de forma
@@ -560,7 +555,7 @@ validação definitiva do papel FUUT.
 \subsection{Limitações Específicas Deste Piloto}
 \label{sec:res_fuut_limitacoes}
 
-Quatro limitações, além das já discutidas para a avaliação multi-robô em
+Três limitações, além das já discutidas para a avaliação multi-robô em
 geral (Capítulo~\ref{chap:conclusao}, Seção de Limitações), são
 específicas deste piloto e restringem a generalização do resultado
 acima:
@@ -590,16 +585,83 @@ acima:
     referência e cada réplica, a mesma suposição já assumida pelo
     protocolo record--replay em toda esta dissertação.
 
-    \item \textbf{Classificação qualitativa por LLM, não uma métrica
-    determinística de aceite.} A saída "correspondência forte" reflete o
-    julgamento do classificador treinado sobre o texto descritivo do
-    cenário, não um teste estatístico com nível de significância
-    pré-registrado. A discrepância geométrica e temporal (Tabela~\ref{tab:fuut_piloto}),
-    calculadas deterministicamente, são a evidência quantitativa
-    primária; a classificação qualitativa é um resumo interpretativo
-    sobre essa evidência, não uma fonte de evidência adicional
-    independente dela.
 \end{itemize}
+
+\section{Estudo de Caso: Teste de Conectividade BLE com TurtleBot4 (UFPE)}
+\label{sec:res_cbsoft}
+
+Esta seção aplica o framework a um experimento externo, de outro grupo:
+o teste de conectividade \textit{Bluetooth Low Energy} (BLE) de
+\citeonline{neves2026ble}, desenvolvido no CIn-UFPE. Nele, um TurtleBot4
+carrega um celular por um percurso em ``L'' (cerca de 64\,m em linha reta
+e mais 31\,m) num salão previamente mapeado, enquanto um segundo aparelho
+fica parado no ponto de partida; cada corrida segue até a conexão BLE cair.
+O robô usa ROS~2 Humble com AMCL sobre o mapa do salão, e a navegação é
+feita por um script próprio das autoras (\texttt{nav\_\allowbreak 3points.py}).
+O artigo relata seis corridas reais, de 19/05/2026.
+
+\subsection{O Que Foi Feito e Verificado}
+
+\begin{itemize}
+    \item \textbf{Percurso reproduzido em simulação.} Foi gerado um mundo
+    Gazebo aberto, com o mesmo referencial \texttt{map} do mapa do salão,
+    de modo que o script original roda sem alteração de coordenadas. Duas
+    corridas completas do script delas percorreram 96,3 e 96,5\,m a 0,254 e
+    0,253\,m/s (o artigo relata de 0,244 a 0,253\,m/s), em 382 e 383\,s.
+    \item \textbf{Mesmo percurso pela interface web.} Gravado como rota do
+    framework, o percurso foi reproduzido pelo botão de replay da interface
+    (\texttt{play\_\allowbreak route}), terminando com sucesso após 96,13\,m a
+    0,247\,m/s.
+    \item \textbf{Análise das autoras incorporada.} Um conversor transforma
+    o bag MCAP do replay no CSV que os scripts de análise delas esperam, e
+    esses scripts passaram a rodar dentro do framework. Recalculada a partir
+    dos dados brutos das seis corridas, a Tabela~3 do artigo é reproduzida
+    com diferenças de até 0,4\,dBm no RSSI médio, 0,006\,m/s na velocidade
+    média e 0,3\,m na distância até a desconexão
+    (Tabela~\ref{tab:cbsoft_tabela3}).
+    \item \textbf{Um defeito encontrado e descartado como causa de erro.} O
+    script original assina \texttt{/\allowbreak amcl\_\allowbreak pose} com QoS
+    \texttt{VOLATILE}, mas o AMCL publica com \texttt{TRANSIENT\_\allowbreak LOCAL}
+    e só republica quando o robô se move; por isso, numa das seis corridas
+    (homogênea 1), as primeiras linhas do registro saem com pose $(0,0)$.
+    Descartando essas linhas, a distância até a desconexão dá 68,6\,m, contra
+    68,4\,m no artigo: o resultado publicado não foi afetado.
+    \item \textbf{Isolamento de rede.} A pilha simulada roda em Docker com
+    \texttt{ROS\_\allowbreak DOMAIN\_\allowbreak ID=42}, para não se misturar, na rede do
+    laboratório, com TurtleBot4 reais no domínio padrão (0).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Tabela~3 de \citeonline{neves2026ble} (artigo) e o mesmo cálculo refeito sobre os dados brutos das corridas de 19/05/2026 (refeito).}
+\label{tab:cbsoft_tabela3}
+\begin{tabular}{llcccccc}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{RSSI médio (dBm)}} & \multicolumn{2}{c}{\textbf{Vel. média (m/s)}} & \multicolumn{2}{c}{\textbf{Dist. desconexão (m)}} \\
+\textbf{Config.} & \textbf{Corrida} & artigo & refeito & artigo & refeito & artigo & refeito \\
+\midrule
+Homogênea   & 1 & $-$89,83 & $-$89,72 & 0,247 & 0,252 & 68,4 & 68,6 \\
+Homogênea   & 2 & $-$90,51 & $-$90,35 & 0,244 & 0,250 & 67,3 & 67,6 \\
+Homogênea   & 3 & $-$91,97 & $-$91,70 & 0,247 & 0,252 & 66,9 & 67,2 \\
+Heterogênea & 1 & $-$95,72 & $-$95,36 & 0,253 & 0,253 & 39,4 & 39,2 \\
+Heterogênea & 2 & $-$97,30 & $-$97,16 & 0,253 & 0,254 & 47,3 & 47,3 \\
+Heterogênea & 3 & $-$97,11 & $-$96,74 & 0,253 & 0,253 & 41,6 & 41,7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Etapa Final: TurtleBot4 Real na UFPE}
+
+Tudo o que está acima foi verificado em simulação e sobre dados já
+coletados. A etapa que fecha esta dissertação é usar o framework com o
+TurtleBot4 real, no laboratório da UFPE e junto às autoras, para verificar
+se ele funciona bem no experimento delas. Três pontos estão em aberto e só
+podem ser respondidos lá: a instalação via Docker na máquina do laboratório
+(Ubuntu 22.04); a comunicação entre o framework (ROS~2 Jazzy) e o robô
+(ROS~2 Humble), versões entre as quais a interoperabilidade de mensagens
+não é garantida oficialmente; e a leitura BLE a bordo do robô real, que
+ainda não está integrada. Os resultados desse teste não estão incluídos
+neste texto.
 
 \section{Considerações Finais}
 \label{sec:res_conclusao}
@@ -610,8 +672,8 @@ geração automática de bags, CSVs, gráfico e \texttt{summary.json}. QA2 é
 respondida pelo RMSE médio de 3,35\,cm e máximo de 4,76\,cm contra a execução de
 referência, ambos muito abaixo da tolerância de 25\,cm do Nav2. QA3 é respondida
 pela baixa variabilidade temporal observada nos dez replays, com duração média
-de 17,51\,s e desvio-padrão de 0,36\,s (coeficiente de variação de
-aproximadamente 2,1\%, bem abaixo do limiar de 10\% da Seção~\ref{sec:criterios}).
+de 17,51\,s e desvio-padrão de 0,38\,s (coeficiente de variação de
+aproximadamente 2,2\%, bem abaixo do limiar de 10\% da Seção~\ref{sec:criterios}).
 
 QA4 não é respondida com o mesmo grau de certeza. Os dados exploratórios da
 Seção~\ref{sec:res_exp_complementares} são compatíveis com a repetibilidade

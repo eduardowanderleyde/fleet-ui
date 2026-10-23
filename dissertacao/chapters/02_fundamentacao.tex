@@ -235,14 +235,17 @@ andamento. Os dois actions centrais para este trabalho são:
     Utilizado no modo de exploração manual e no retorno ao ponto de partida.
 
     \item \texttt{FollowWaypoints}: percorre sequencialmente uma lista de poses.
-    Utilizado nas execuções de replay, garantindo que o robô visite exatamente
-    os pontos gravados no baseline de forma contínua e coordenada.
+    Utilizado nas execuções de replay, garantindo que o robô visite, em ordem,
+    as poses gravadas no baseline; cada pose é tratada como uma meta própria.
 \end{itemize}
 
 A diferença comportamental entre os dois actions é relevante: o \texttt{NavigateToPose}
-chamado sequencialmente para cada waypoint faz o robô parar completamente em cada
-ponto antes de replanejar para o próximo, enquanto o \texttt{FollowWaypoints} encadeia
-os planos, produzindo trajetórias mais suaves mas geometricamente diferentes. Essa
+chamado sequencialmente para cada waypoint e o \texttt{FollowWaypoints} param
+ambos em cada meta, mas no baseline as metas são os poucos waypoints do usuário,
+enquanto no replay são as dezenas de poses densas gravadas, cada uma seguida de
+uma pausa de 200\,ms (\texttt{wait\_\allowbreak at\_\allowbreak waypoint}). O replay
+para muito mais vezes, dura mais e descreve uma trajetória geometricamente
+diferente. Essa
 distinção entre baseline e replay constitui uma fonte de variação sistemática que
 o framework identifica e documenta.
 
@@ -362,11 +365,11 @@ a qualidade do mapa SLAM durante os experimentos de validação.
 O TurtleBot4 Standard integra três fontes de dados sensoriais relevantes para
 análise de repetibilidade de navegação:
 
-\subsection{LiDAR 2D (RPLIDAR S2)}
+\subsection{LiDAR 2D (RPLIDAR)}
 
-O RPLIDAR S2 é um sensor de varredura rotativo que emite pulsos laser em 360°
-e mede distâncias por ToF (\textit{Time-of-Flight}). Opera a frequências de até
-32\,kHz de amostragem e 10\,Hz de rotação. Cada scan resulta em uma mensagem
+O RPLIDAR do TurtleBot4 é um sensor de varredura rotativo que emite pulsos
+laser em 360° e mede distâncias. No modelo de simulação usado nesta dissertação,
+ele produz 360 amostras por volta a 10\,Hz, com alcance de 0,164 a 20\,m. Cada scan resulta em uma mensagem
 \texttt{sensor\_\allowbreak msgs/\allowbreak msg/\allowbreak LaserScan} com os campos \texttt{ranges} (distâncias em
 metros por ângulo), \texttt{range\_\allowbreak min} e \texttt{range\_\allowbreak max} (limites de alcance
 válido). O SLAM consome essas mensagens para atualizar o mapa e a estimativa de pose.
@@ -377,7 +380,8 @@ A odometria é publicada como \texttt{nav\_\allowbreak msgs/\allowbreak msg/\all
 estimada e a velocidade do robô. Em simulação Gazebo Harmonic
 \cite{koenig2004gazebo}, o plugin DiffDrive
 computa a odometria a partir das velocidades das juntas e publica diretamente no
-tópico \texttt{/\allowbreak odom} via bridge ROS-Gazebo. A frequência típica é 50\,Hz.
+tópico \texttt{/\allowbreak odom} via bridge ROS-Gazebo, configurado para 30\,Hz
+(27,8\,Hz medidos nos bags da campanha final).
 
 \subsection{IMU}
 
@@ -430,7 +434,7 @@ uma grade de tempo comum \cite{amigoni2010}.
 A abordagem adotada nesta dissertação normaliza cada trajetória para o intervalo
 $[0, 1]$ e interpola linearmente os valores de $x$ e $y$ em $n = 100$ pontos
 igualmente espaçados. A interpolação linear é adequada porque a frequência de
-amostragem da odometria (50\,Hz) é muito maior que a dinâmica do robô, e entre
+amostragem da odometria (30\,Hz) é muito maior que a dinâmica do robô, e entre
 amostras consecutivas o movimento é essencialmente linear.
 
 \subsection{RMSE Pairwise}

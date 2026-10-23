@@ -7,8 +7,8 @@
 Seguindo a prática estabelecida de validar algoritmos de navegação em simulação
 ROS~+~Gazebo antes de sua implantação no robô físico \cite{takaya2016}, o
 ambiente de simulação utiliza o Gazebo Harmonic, versão de suporte estendido
-pareada com o ROS~2 Jazzy, e o modelo TurtleBot4 Standard com RPLIDAR S2 (LiDAR
-2D de 360°) e câmera OAK-D. O mundo \textit{warehouse} disponível no pacote
+pareada com o ROS~2 Jazzy, e o modelo TurtleBot4 Standard com LiDAR 2D RPLIDAR
+(360 amostras por volta, 10\,Hz) e câmera OAK-D Pro. O mundo \textit{warehouse} disponível no pacote
 \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} representa um armazém industrial com prateleiras,
 barreiras e espaços abertos, oferecendo diversidade de geometria para testar o SLAM
 em diferentes condições de observabilidade.
@@ -76,8 +76,10 @@ regressões que a simples leitura do arquivo xacro não detectaria.
 
 O orquestrador (\texttt{fleet\_\allowbreak orchestrator}) é implementado como um nó ROS~2 em Python
 com \texttt{MultiThreadedExecutor} \cite{macenski2022ros2}. A estrutura de estado por robô, \texttt{RobotRuntime},
-mantém seis campos: \texttt{nav\_\allowbreak state}, \texttt{is\_\allowbreak recording}, \texttt{is\_\allowbreak navigating},
-\texttt{route\_\allowbreak poses}, \texttt{last\_\allowbreak saved} e \texttt{pending\_\allowbreak goal\_\allowbreak pose}. Este último
+mantém nove campos: \texttt{nav\_\allowbreak state}, \texttt{current\_\allowbreak route},
+\texttt{last\_\allowbreak error}, \texttt{is\_\allowbreak recording}, \texttt{is\_\allowbreak navigating},
+\texttt{route\_\allowbreak poses}, \texttt{last\_\allowbreak saved}, \texttt{goal\_\allowbreak handle} e
+\texttt{pending\_\allowbreak goal\_\allowbreak pose}. Este último
 é o mais crítico para a gravação: ao receber o callback de resultado do action Nav2,
 se o status for \texttt{STATUS\_\allowbreak SUCCEEDED} e o robô estiver em modo de gravação,
 a pose enviada como meta é imediatamente adicionada à lista de rotas, pois a pose
@@ -225,8 +227,9 @@ do JSON da requisição entre aspas simples, o que evita que caracteres
 especiais no payload (por exemplo, aspas simples dentro de um nome de rota)
 quebrem o comando \textit{shell} resultante.
 
-O custo mensurável dessa abordagem --- tipicamente 50--150\,ms de overhead
-de inicialização de processo por chamada --- e o trade-off que ele
+O custo mensurável dessa abordagem --- entre 1,5 e 3\,s por chamada, medidos
+na máquina de desenvolvimento, dominados pela inicialização do processo
+\texttt{ros2} --- e o trade-off que ele
 representa frente ao acoplamento mínimo resultante já foram discutidos na
 Seção~\ref{sec:backend_web}, onde essa decisão de arquitetura é tomada; o
 que importa destacar aqui é só a mecânica concreta: o backend nunca
@@ -316,10 +319,12 @@ a ordem de prioridade do modo \texttt{auto}.
 \subsection{A Cadeia de Fallback \texttt{amcl\_pose > pose > odom}}
 \label{sec:impl_fallback_pose}
 
-Dado que esta é, entre as correções descritas neste capítulo, a que mais
-diretamente protege a validade dos números de repetibilidade reportados
-(Seção~\ref{sec:impl_conclusao}), vale um tratamento proporcional, com
-código, e não apenas a descrição em prosa acima. O Código~\ref{lst:pose_fallback}
+Essa correção é posterior à campanha final do Capítulo~\ref{chap:resultados}
+(gravada em 15/09/2026; correção em 22/09/2026): os números daquela campanha
+foram calculados com \texttt{/\allowbreak odom} e são reproduzidos exatamente pela
+versão atual do script quando se passa \texttt{--\allowbreak trajectory-\allowbreak topic odom}.
+A correção vale, portanto, para análises posteriores, e a comparação entre as
+fontes está na Seção~\ref{sec:res_fonte_trajetoria}. O Código~\ref{lst:pose_fallback}
 reproduz o trecho de \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} que implementa a
 prioridade do modo \texttt{auto}: a primeira fonte candidata (\texttt{amcl\_\allowbreak pose},
 depois \texttt{pose} do SLAM~Toolbox, depois \texttt{odom}) que de fato tiver
@@ -440,9 +445,10 @@ O mesmo script calcula também, para cada execução, o RMSE contra a primeira
 execução da lista (tomada como referência), armazenado em \texttt{summary.json}
 como a lista \texttt{vs\_\allowbreak reference}. Nenhuma dessas duas estruturas, porém, é
 por si só o ``RMSE médio'' relatado nos capítulos de resultados e conclusão.
-Essa média é calculada fora de \texttt{analyze\_\allowbreak runs.py}, no backend, pelo
-método \texttt{analyze\_\allowbreak experiment} de \texttt{Analyst} (\texttt{backend/\allowbreak agents/\allowbreak analyst.py}),
-que lê o \texttt{summary.json} já produzido e agrega a lista \texttt{vs\_\allowbreak reference}:
+Essa média é calculada fora de \texttt{analyze\_\allowbreak runs.py}, no backend,
+lendo o \texttt{summary.json} já produzido e agregando a lista
+\texttt{vs\_\allowbreak reference} (o mesmo cálculo refeito sobre os dados da campanha
+final dá 3,35\,cm; a média da matriz pairwise completa daria 2,76\,cm):
 
 \begin{lstlisting}[style=pycode, caption={Agregação final do RMSE médio a partir de \texttt{summary.json} (\texttt{backend/\allowbreak agents/\allowbreak analyst.py}, método \texttt{Analyst.\allowbreak analyze\_\allowbreak experiment}).}, label={lst:rmse_mean}]
 summary = self.load_summary(run_id)
@@ -514,7 +520,7 @@ processos de longa duração da simulação por grupo de processos
 conversão de coordenadas canvas--mundo. Cada uma representa uma contribuição de
 engenharia que outros grupos de pesquisa não precisarão replicar ao adotar
 o framework. A correção de detecção do tópico de pose, em
-particular, protege diretamente a validade dos números de repetibilidade
-reportados no Capítulo~\ref{chap:resultados} contra um viés que não tinha
-relação alguma com o desempenho real do robô. O próximo capítulo apresenta
+particular, protege análises futuras contra um viés que não tem relação com o
+desempenho real do robô; a campanha do Capítulo~\ref{chap:resultados}, anterior
+a ela, usa \texttt{/\allowbreak odom} de forma declarada. O próximo capítulo apresenta
 o arranjo de avaliação que valida o sistema resultante.

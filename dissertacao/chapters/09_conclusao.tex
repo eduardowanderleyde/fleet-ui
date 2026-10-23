@@ -231,9 +231,9 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     janela de 25\,s), observou os dois robôs navegando simultaneamente após
     essa ativação sem o sintoma reaparecer. A leitura do código-fonte do
     \texttt{tf2\_\allowbreak ros} (pacote \texttt{geometry2}, ramo
-    \textit{jazzy}) confirma que o limiar que dispara a invalidação do
-    buffer de TF é fixo em 1\,segundo, não exposto como parâmetro
-    configurável — o que explica por que nenhuma forma de ajustar
+    \textit{jazzy}) confirma que qualquer recuo do relógio, por menor que seja
+    (limiar de $-1$\,ns), limpa o buffer de TF, e que esse limiar não é exposto
+    como parâmetro configurável — o que explica por que nenhuma forma de ajustar
     tolerância, só a troca de middleware, resolveu o sintoma. Este
     resultado não foi integrado como arquitetura padrão do projeto nem
     reavaliado quantitativamente (RMSE, consistência temporal) sob a
@@ -316,9 +316,11 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
 \textbf{Curto prazo}, coerente com a urgência declarada na Seção~\ref{sec:limitacoes}:
 
 \begin{itemize}
-    \item \textbf{Repetir o protocolo em hardware físico com TurtleBot4
-    real}, a extensão mais urgente deste trabalho, conforme discutido na
-    Seção~\ref{sec:limitacoes}.
+    \item \textbf{Usar o framework com o TurtleBot4 real na UFPE}, no
+    experimento de conectividade BLE descrito na Seção~\ref{sec:res_cbsoft}:
+    o próximo passo concreto, já preparado em simulação. Em seguida, repetir
+    o protocolo record--replay em hardware físico, a extensão mais urgente
+    deste trabalho (Seção~\ref{sec:limitacoes}).
 
     \item Ampliar a campanha controlada para múltiplas rotas com obstáculos
     dinâmicos e $N$ de réplicas por cenário maior (15--20 ou mais), para

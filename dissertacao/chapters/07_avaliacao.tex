@@ -185,12 +185,14 @@ Uma segunda fonte de viés de construto, evidenciada em execuções exploratóri
 reais (Seção~\ref{sec:res_exp_complementares}), é que a fase de gravação e a
 fase de replay não navegam pelo mesmo mecanismo: \texttt{record} envia uma
 sequência de comandos \texttt{go\_\allowbreak to\_\allowbreak point}, um objetivo Nav2 de
-cada vez, com o robô assentando em cada waypoint antes de o próximo ser
-enviado; \texttt{replay} envia uma única \texttt{play\_\allowbreak route}, percorrendo a
-rota inteira como navegação contínua. Em uma campanha exploratória com essa
+cada vez, só para os poucos waypoints indicados pelo usuário; \texttt{replay}
+envia uma \texttt{play\_\allowbreak route}, em que o \texttt{FollowWaypoints} do
+Nav2 percorre todas as poses salvas durante a gravação (uma a cada 10\,cm),
+parando em cada uma e aguardando 200\,ms antes da próxima. Em uma campanha exploratória com essa
 configuração (rota de quatro waypoints, $N=3$ replays), o RMSE par-a-par entre
 replays foi da ordem de 0,02\,m, contra cerca de 0,14\,m entre a baseline e
-cada replay, com a baseline durando cerca de 2,5$\times$ menos que os replays.
+cada replay, com os replays durando cerca de 2,5$\times$ mais que a baseline, efeito das
+paradas repetidas.
 Essa diferença é explicada quase inteiramente pelo mecanismo de navegação
 distinto, não por falta de repetibilidade do robô. Por esse motivo, o RMSE
 calculado entre os replays (que compartilham o mesmo mecanismo de
@@ -205,7 +207,8 @@ repetibilidade real e devem ser interpretadas com essa ressalva.
 
 Esse experimento exploratório, portanto, confunde dois fatores manipulados
 simultaneamente: o mecanismo de navegação (\texttt{go\_\allowbreak
-to\_\allowbreak point} sequencial vs. \texttt{play\_\allowbreak route} contínuo)
+to\_\allowbreak point} sobre poucos waypoints vs. \texttt{play\_\allowbreak route} sobre
+as poses densas gravadas)
 e a ausência de reinicialização de pose entre réplicas. Isso constitui, em
 si, uma limitação de desenho experimental, e não apenas uma observação lateral
 sobre a métrica: a partir desses dados não é possível atribuir isoladamente a

@@ -12,13 +12,11 @@ The proposed system — called \textit{Fleet UI} — orchestrates autonomous nav
 experiments with one or more mobile robots running ROS~2 Jazzy and the Nav2 navigation
 stack. A role-based architecture separates units into \textit{MUUT} (Mobile Unit Under
 Test), which executes and records routes, and \textit{FUUT} (Fixed Unit Under Test),
-which observes from a fixed position. This separation allows the same physical testbed
-to serve fundamentally different experimental designs without changing the software layer.
+which observes from a fixed position.
 
 The record--replay protocol forms the experimental nucleus: a baseline route is defined
-by navigating a set of waypoints; the orchestrator stores the visited poses; subsequent
-replay runs reproduce those poses using Nav2's \texttt{FollowWaypoints} action.
-Sensor bags in MCAP format capture LiDAR, wheel odometry, IMU, and SLAM-estimated pose
+by navigating a set of waypoints; the orchestrator stores the path travelled; replay
+runs reproduce it using Nav2's \texttt{FollowWaypoints} action, with MCAP sensor bags
 at each run. Offline analysis computes pairwise Root Mean Square Error (RMSE) between
 trajectories resampled on a normalized time grid, producing trajectory overlays and
 repeatability metrics.
@@ -26,17 +24,18 @@ repeatability metrics.
 Quantitative validation, carried out in Gazebo Harmonic simulation with a single
 TurtleBot4 Standard unit, used a clean baseline and ten independent replay executions.
 Each replay was started from the same initial state by fully relaunching the simulator,
-the Nav2 stack, and the data collection nodes, ensuring that recorded odometry started
-at practically the same point in every run. The campaign achieved a mean RMSE of
+the Nav2 stack, and the data collection nodes. The campaign achieved a mean RMSE of
 3.35\,cm between each replay and the reference run, with a maximum of 4.76\,cm, over
 trajectories with a mean length of 0.826\,m. The mean final endpoint error was
 1.64\,cm (maximum 3.26\,cm), and the mean duration was 17.51\,s with a standard
-deviation of 0.36\,s. These results are comfortably below Nav2's default 25\,cm goal
+deviation of 0.38\,s. These results are comfortably below Nav2's default 25\,cm goal
 tolerance; the architecture supports multiple units, but empirical evaluation of
 simultaneous multi-robot fleet scenarios was not conducted in this dissertation. A web
 interface built on React and FastAPI allows researchers to define experiments, monitor
 sensor state, and visualise trajectories on the SLAM map without direct exposure to the
-ROS~2 command line.
+ROS~2 command line. In a case study, the framework reproduced in simulation a BLE
+connectivity test from UFPE and its results table; use with the real TurtleBot4 there
+is the final step.
 
 \vspace{0.5cm}
 \noindent\textbf{Keywords}: autonomous navigation; path repeatability; mobile robot fleet;
