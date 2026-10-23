@@ -24,6 +24,30 @@ código/experimento a partir desses achados (ou está pendente de decisão).
 
 ## Linha do tempo (mais recente primeiro)
 
+### 2026-10-22 (noite, cont. 3) — agentes de IA fora da dissertação + re-validação completa
+
+- Pedido: tirar os agentes de IA (saem da dissertação), que agora termina no
+  teste com o TurtleBot4 real na UFPE, junto da Fernanda e da Beatriz; atualizar
+  a dissertação e re-validar cada número e afirmação técnica.
+- Código (`new-way-samsung`): painel de agentes escondido (`b7167eb`,
+  `VITE_SHOW_AGENTS=true` religa). Dados da campanha oficial recuperados do
+  stash `5b0a82e` (`6e2484d`); os 10 bags MCAP só existem no disco desta
+  máquina, **fazer backup**.
+- Dissertação (`dissertacao` `f1968c0`): números do Cap. 8 reproduzidos
+  exatamente dos bags brutos (só com `--trajectory-topic odom`). Corrigidos:
+  desvios-padrão amostrais (1,16 cm / 0,38 s / 2,2% / 0,011 m); mecanismo
+  record/replay estava invertido (o replay é que para em cada pose densa + 200 ms);
+  filtro de saltos 0,12 m @ 50 Hz que nunca existiu; odom 30 Hz; RPLIDAR genérico
+  e OAK-D Pro; 9 campos no RobotRuntime; ros2 service call 1,5–3 s; tf2 limpa
+  buffer em qualquer recuo de relógio; "uma réplica com 2 tentativas" (os manifestos
+  dizem 0); classificador LLM do piloto FUUT removido. Nova seção de estudo de caso
+  CBSoft com a Tabela 3 refeita dos dados brutos (diferenças ≤0,4 dBm, ≤0,006 m/s,
+  ≤0,3 m). Ressalva registrada: o robô da UFPE roda Humble, o fleet-ui roda Jazzy.
+- Nome certo da autora pelo certificado do CBSoft: **Beatriz Barros** (a nota de
+  2026-10-18 dizendo "Oliveira" está errada).
+- Hardware: novo MCE às 20:08, ~20 min depois do reboot (matou o orquestrador
+  no Docker). Defeito de RAM continua; memtest recomendado.
+
 ### 2026-10-22 (noite, cont. 2) — análise do experimento CBSoft incorporada ao fleet-ui
 
 - Pedido: incorporar a análise das meninas (antes só a navegação estava
