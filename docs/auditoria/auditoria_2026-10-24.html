@@ -86,15 +86,15 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
 </header>
 
 <div class="tally" aria-label="Achados por gravidade">
-  <div class="c"><b>2</b><span>críticos</span></div>
+  <div class="c"><b>1</b><span>crítico</span></div>
   <div class="h"><b>2</b><span>altos</span></div>
-  <div class="m"><b>5</b><span>médios</span></div>
+  <div class="m"><b>6</b><span>médios</span></div>
   <div class="l"><b>5</b><span>baixos</span></div>
   <div class="o"><b>10</b><span>áreas sem problema</span></div>
 </div>
 
 <section>
-  <h2>Críticos: resolver antes do teste no CIn</h2>
+  <h2>Crítico: resolver antes do teste no CIn</h2>
 
   <div class="find c">
     <div class="top"><span class="sev">crítico</span><h3>Qualquer pessoa na rede pode mover o robô</h3><span class="area">segurança · backend</span></div>
@@ -105,14 +105,6 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
     </dl>
   </div>
 
-  <div class="find c">
-    <div class="top"><span class="sev">crítico</span><h3>Tela servida pelo servidor de desenvolvimento, com falha conhecida</h3><span class="area">segurança · frontend</span></div>
-    <dl class="kv">
-      <dt>O que é</dt><dd>O Docker roda <code>npm run dev --host 0.0.0.0</code>: é o servidor de desenvolvimento do Vite, exposto na rede. A versão instalada (8.2.1) tem falha de severidade alta no recurso “abrir no editor”, que pode executar comandos.</dd>
-      <dt>Evidência</dt><dd><code>npm audit</code>: 3 altas (vite, undici, source-map-js). Ao vivo, <code>/__open-in-editor</code> responde HTTP 200 pelo IP de rede.</dd>
-      <dt>Correção</dt><dd><code>npm audit fix</code> (atualiza o Vite dentro da série 8) e servir a tela compilada (<code>vite build</code>) em vez do modo de desenvolvimento, restrita a <code>localhost</code> como no item anterior.</dd>
-    </dl>
-  </div>
 </section>
 
 <section>
@@ -139,6 +131,15 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
 
 <section>
   <h2>Médios</h2>
+
+  <div class="find m">
+    <div class="top"><span class="sev">médio</span><h3>Tela servida pelo servidor de desenvolvimento</h3><span class="area">frontend</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>O Docker roda <code>npm run dev --host 0.0.0.0</code>, o modo de desenvolvimento do Vite, exposto na rede. A versão instalada (8.2.1) tem falha alta conhecida no recurso “abrir no editor”.</dd>
+      <dt>Evidência</dt><dd><code>npm audit</code>: 3 altas (vite, undici, source-map-js). O recurso responde pela rede, mas o contêiner não tem editor instalado, então a falha provavelmente não é explorável aqui; isso não foi testado. Fica como médio: o modo de desenvolvimento é desnecessário, mais pesado e expõe o código-fonte da tela.</dd>
+      <dt>Correção</dt><dd>Restringir a <code>localhost</code> (fecha junto com o item crítico), atualizar o Vite e servir a tela compilada.</dd>
+    </dl>
+  </div>
 
   <div class="find m">
     <div class="top"><span class="sev">médio</span><h3>Nome de rota vira caminho de arquivo sem validação</h3><span class="area">segurança · backend e orquestrador</span></div>
@@ -231,7 +232,7 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
 <section>
   <h2>Ordem sugerida</h2>
   <ol class="plan">
-    <li>Restringir backend e tela a <code>localhost</code> e servir a tela compilada, com o Vite atualizado (os dois críticos).</li>
+    <li>Restringir backend e tela a <code>localhost</code> (o crítico); depois, servir a tela compilada com o Vite atualizado.</li>
     <li>Validar nomes de rota e de robô em todos os endpoints.</li>
     <li>DWB no <code>robot-up</code>, com os parâmetros do artigo.</li>
     <li>Parar pela conexão ROS já aberta.</li>
