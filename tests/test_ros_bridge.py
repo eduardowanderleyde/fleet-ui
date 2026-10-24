@@ -1,3 +1,4 @@
+import math
 import subprocess
 import sys
 import tempfile
@@ -84,7 +85,9 @@ class RosBridgeCommandTests(unittest.TestCase):
             no_pose = bridge.build_experiment_cmd({**base, "return_to_start": [1, 16, 0]})
             manual = bridge.build_experiment_cmd({**base, "return_to_start": [5, 5, 0], "current_pose": [-33, -47]})
 
-        self.assertIn("--return-to-start=-2.0,-47.0,0.0;1.0,16.0,0.0", at_end)
+        # Cada meta da volta aponta para a próxima (de (-2,-47) para (1,16)), e a
+        # última usa a orientação pedida — não a da ida, que faria o robô girar.
+        self.assertIn(f"--return-to-start=-2.0,-47.0,{math.atan2(63, 3)};1.0,16.0,0.0", at_end)
         self.assertIn("--return-to-start=1.0,16.0,0.0", at_start)
         self.assertIn("--return-to-start=1.0,16.0,0.0", no_pose)
         self.assertIn("--return-to-start=5.0,5.0,0.0", manual)

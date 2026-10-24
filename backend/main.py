@@ -853,7 +853,9 @@ def _require_muut(robot_id: str) -> JSONResponse | None:
     """Bloqueia comando de movimento se o papel declarado em roles.yaml não
     for MUUT (inclui papel ausente ou desconhecido). Devolve None se o robô
     pode se mover, ou a JSONResponse 403 já pronta pra retornar."""
-    role = _read_robot_roles().get(robot_id)
+    # Sem namespace (single-robot, ou o TurtleBot4 real) é o próprio robô
+    # móvel: mesma regra de FleetOrchestrator._role.
+    role = "MUUT" if robot_id == "" else _read_robot_roles().get(robot_id)
     if role == "MUUT":
         return None
     reason = f"papel '{role}' não permite movimento" if role else "robot_id não declarado em roles.yaml"
@@ -954,6 +956,7 @@ _SIM_PROCESS_PATTERNS = [
 
 
 def _stop_simulation() -> None:
+    started_here = bool(_sim_procs)
     with _robot_nav_lock:
         active_robot_ids = list(_robot_nav_procs.keys())
     for rid in active_robot_ids:
@@ -974,9 +977,12 @@ def _stop_simulation() -> None:
     _sim_procs.clear()
 
     # Rede de segurança: mata por padrão de nome qualquer coisa que o
-    # killpg não tenha alcançado (ver comentário acima).
-    for pattern in _SIM_PROCESS_PATTERNS:
-        subprocess.run(["pkill", "-9", "-f", pattern], capture_output=True)
+    # killpg não tenha alcançado (ver comentário acima). Só quando foi este
+    # backend que subiu a simulação: senão derrubaria um stack de fora
+    # (run_all.sh) ou outro processo da máquina com nome parecido.
+    if started_here:
+        for pattern in _SIM_PROCESS_PATTERNS:
+            subprocess.run(["pkill", "-9", "-f", pattern], capture_output=True)
 
     with _sim_lock:
         _sim_state.update({
@@ -1047,7 +1053,7 @@ async def simulation_start(cfg: StartSimulationRequest):
 
 
 @app.post("/api/simulation/stop")
-async def simulation_stop():
+def simulation_stop():  # def, não async: _stop_simulation dorme vários segundos
     _stop_simulation()
     return {"success": True}
 
@@ -1099,21 +1105,22 @@ async def activate_robot(robot_id: str):
             {"success": False, "message": f"'{robot_id}' não faz parte desta simulação ({sim_robots})."},
             status_code=400,
         )
+    # Checagem e spawn sob a mesma trava: duas ativações simultâneas (clique
+    # duplo, UI + agente) subiriam duas pilhas Nav2 e a primeira ficaria órfã.
     with _robot_nav_lock:
         if robot_id in _robot_nav_procs and _robot_nav_procs[robot_id].poll() is None:
             return {"success": True, "message": f"Navegação de '{robot_id}' já estava ativa."}
 
-    _reset_robot_pose_tracking(robot_id)
-    cmd = ["ros2", "launch", "fleet_orchestrator", "activate_robot_nav.launch.py", f"namespace:={robot_id}"]
-    env = {**_bridge.ros_env(), "PYTHONUNBUFFERED": "1"}
-    shell_cmd = _bridge.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
-    proc = subprocess.Popen(
-        ["bash", "-c", shell_cmd],
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        text=True, bufsize=1, cwd=ROS_WS, env=env,
-        preexec_fn=os.setsid,
-    )
-    with _robot_nav_lock:
+        _reset_robot_pose_tracking(robot_id)
+        cmd = ["ros2", "launch", "fleet_orchestrator", "activate_robot_nav.launch.py", f"namespace:={robot_id}"]
+        env = {**_bridge.ros_env(), "PYTHONUNBUFFERED": "1"}
+        shell_cmd = _bridge.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
+        proc = subprocess.Popen(
+            ["bash", "-c", shell_cmd],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, bufsize=1, cwd=ROS_WS, env=env,
+            preexec_fn=os.setsid,
+        )
         _robot_nav_procs[robot_id] = proc
     tag = f"nav-{robot_id}"
     threading.Thread(
@@ -1124,7 +1131,7 @@ async def activate_robot(robot_id: str):
 
 
 @app.post("/api/simulation/deactivate_robot")
-async def deactivate_robot(robot_id: str):
+def deactivate_robot(robot_id: str):  # def, não async: dorme ~17 s
     _deactivate_robot_nav(robot_id)
     return {"success": True}
 
@@ -1233,7 +1240,7 @@ async def list_maps():
         names.append("slam")
     for p in sorted(public_dir.glob("*_map.json")):
         stem = p.stem[: -len("_map")]
-        if stem:
+        if stem and stem not in names:  # slam_map.json também casa com *_map.json
             names.append(stem)
     return {"maps": names}
 
@@ -1492,7 +1499,7 @@ async def agent_run(body: AgentRunRequest):
 
 @app.get("/api/agent/job/{job_id}")
 async def agent_job(job_id: str):
-    job = _agent_jobs.get(job_id) or _load_agent_run(f"single_{job_id}")
+    job = _agent_jobs.get(job_id) or _load_agent_run(f"single_{job_id}") or _load_agent_run(f"mission_{job_id}")
     if not job:
         return JSONResponse({"error": "job not found"}, status_code=404)
     return job
@@ -1534,7 +1541,7 @@ async def agent_run_fleet(body: AgentFleetRunRequest):
 
 @app.get("/api/agent/fleet_job/{job_id}")
 async def agent_fleet_job(job_id: str):
-    job = _fleet_jobs.get(job_id) or _load_agent_run(f"fleet_{job_id}")
+    job = _fleet_jobs.get(job_id) or _load_agent_run(f"fleet_{job_id}") or _load_agent_run(f"mission_fleet_{job_id}")
     if not job:
         return JSONResponse({"error": "job not found"}, status_code=404)
     return job
@@ -1670,7 +1677,7 @@ def _summarize_agent_run(data: dict) -> dict:
         "started_at": data.get("started_at"),
         "finished_at": data.get("finished_at"),
     }
-    if data.get("kind") == "fleet":
+    if data.get("kind") in ("fleet", "mission_fleet"):
         base["robots"] = {
             rid: {"instruction": r.get("instruction"), "final_text": r.get("final_text"), "error": r.get("error")}
             for rid, r in (data.get("robots") or {}).items()

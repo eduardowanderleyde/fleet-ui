@@ -65,7 +65,9 @@ class Executor:
         status = await self.get_fleet_status()
         for robot in status.get("robots", []):
             if robot.get("robot_id") == robot_id:
-                return {**robot, "pose": status.get("pose")}
+                # Pose deste robô (status["pose"] é só a do robô padrão).
+                pose = (status.get("poses") or {}).get(robot_id) or status.get("pose")
+                return {**robot, "pose": pose}
         raise ExecutorError(f"Robô '{robot_id}' não encontrado na frota")
 
     async def list_robots(self) -> list[str]:

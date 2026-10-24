@@ -174,7 +174,16 @@ class RosBridge:
         nearest = min(range(len(poses)), key=lambda i: math.hypot(poses[i][0] - current[0], poses[i][1] - current[1]))
         if nearest == 0:
             return [target]
-        return list(reversed(poses[:nearest]))
+        # Na volta, cada meta aponta para a próxima (sentido da volta), não para
+        # a orientação gravada na ida, que faria o robô girar ~180° a cada
+        # trecho; a última usa a orientação pedida em return_to_start.
+        points = [(p[0], p[1]) for p in reversed(poses[:nearest])]
+        legs = [
+            (x, y, math.atan2(ny - y, nx - x))
+            for (x, y), (nx, ny) in zip(points, points[1:])
+        ]
+        legs.append((points[-1][0], points[-1][1], target[2]))
+        return legs
 
     # Velocidade bem abaixo do limite de 0,26 m/s do velocity_smoother, pra
     # sobrar folga pra curvas e replanejamento.
