@@ -204,12 +204,14 @@ class RosBridge:
         return max(300, int(length / self._REPLAY_SPEED_FLOOR_MPS) + 60)
 
     def run_experiment_step(
-        self, cmd: list[str], export_path: str, line_callback=None,
+        self, cmd: list[str], export_path: str, line_callback=None, on_start=None,
     ) -> dict:
         """Roda um record/replay do experiment_repeatability.py até o fim (bloqueante).
         Usado tanto por /api/run_config (1 passo) quanto por uma campanha (N passos em
         sequência) — ver /api/run_campaign. `line_callback`, se dado, recebe cada linha
-        de saída assim que chega (para streaming de progresso)."""
+        de saída assim que chega (para streaming de progresso). `on_start`, se dado,
+        recebe o Popen logo depois de criado: o processo roda no próprio grupo
+        (setsid), para /api/job/<id>/stop poder encerrá-lo inteiro."""
         env = {**self.ros_env(), "PYTHONUNBUFFERED": "1"}
         shell_cmd = self.ros_setup_prefix() + " ".join(shlex.quote(c) for c in cmd)
         lines: list[str] = []
@@ -220,7 +222,10 @@ class RosBridge:
                 ["bash", "-c", shell_cmd],
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 text=True, bufsize=1, cwd=self.ros_ws, env=env,
+                preexec_fn=os.setsid,
             )
+            if on_start:
+                on_start(proc)
             for line in proc.stdout:
                 l = line.rstrip()
                 if any(n in l for n in noise):

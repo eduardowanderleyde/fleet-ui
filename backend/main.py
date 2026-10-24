@@ -619,6 +619,8 @@ async def websocket_status(websocket: WebSocket):
 import uuid
 
 _jobs: dict = {}   # job_id → {running, lines, result, error}
+_job_procs: dict = {}  # job_id → Popen do experiment_repeatability (fora de _jobs: não vai no JSON)
+_job_robots: dict = {}  # job_id → robot_id do orquestrador ("" = single-robot)
 
 # Histórico persistente de execuções de /api/run_config — sobrevive a um
 # restart do backend. O job em si (_jobs) é só memória e o JSON exportado
@@ -671,6 +673,8 @@ async def run_config(cfg: RunConfigRequest):
         return JSONResponse({"success": False, "message": str(e)}, status_code=400)
 
     _jobs[job_id] = {"running": True, "lines": [], "result": None, "error": None, "exit_code": None}
+    robot = cfg_data.get("robot") or ""
+    _job_robots[job_id] = "" if robot == "default" else robot
 
     def _run():
         job = _jobs[job_id]
@@ -679,7 +683,10 @@ async def run_config(cfg: RunConfigRequest):
             job["lines"].append(f"[ble_target_address] {'ok' if ok else 'falhou'}: {out}")
         job["lines"].append(f"[CMD] {' '.join(cmd)}")
         try:
-            step = _bridge.run_experiment_step(cmd, export_path, line_callback=job["lines"].append)
+            step = _bridge.run_experiment_step(
+                cmd, export_path, line_callback=job["lines"].append,
+                on_start=lambda p: _job_procs.__setitem__(job_id, p),
+            )
             job["result"] = step["result"]
             job["error"] = step["error"]
             job["exit_code"] = step["exit_code"]
@@ -688,11 +695,36 @@ async def run_config(cfg: RunConfigRequest):
         except Exception as ex:
             job["error"] = str(ex)
         finally:
+            _job_procs.pop(job_id, None)
             job["running"] = False
             _save_run_history(job_id, cfg_data, job)
 
     threading.Thread(target=_run, daemon=True).start()
     return {"job_id": job_id}
+
+
+@app.post("/api/job/{job_id}/stop")
+def stop_job(job_id: str):
+    """Para uma execução de verdade: encerra o experiment_repeatability (senão
+    ele manda o próximo trecho, ex. na volta ao início), cancela a meta do Nav2
+    (é isso que para o robô) e fecha a gravação que o script deixaria aberta.
+    O botão antigo só parava de acompanhar a execução na tela."""
+    job = _jobs.get(job_id)
+    if job is None:
+        return JSONResponse({"success": False, "message": f"job {job_id} não existe"}, status_code=404)
+    robot_id = _job_robots.get(job_id, "")
+    proc = _job_procs.get(job_id)
+    if proc is not None and proc.poll() is None:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    req = json.dumps({"robot_id": robot_id})
+    cancel_ok, cancel_out = _run_ros2_service("cancel", "fleet_msgs/srv/Cancel", req)
+    coll_ok, coll_out = _run_ros2_service("disable_collection", "fleet_msgs/srv/DisableCollection", req)
+    job["lines"].append(f"[PARADO pelo usuário] cancelar navegação: {'ok' if cancel_ok else 'falhou'}; "
+                        f"gravação: {'fechada' if coll_ok else 'não estava aberta ou falhou'}")
+    return {"success": True, "cancel": cancel_ok, "collection_closed": coll_ok}
 
 
 @app.get("/api/runs")

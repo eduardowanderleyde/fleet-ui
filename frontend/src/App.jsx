@@ -12,6 +12,7 @@ import {
   getStatus,
   goToPoint,
   runConfig,
+  stopJob,
   testSsh,
 } from './api/fleetApi'
 import { useFleetStatus } from './hooks/useFleetStatus'
@@ -164,6 +165,22 @@ export default function App() {
       setTestingSSH(prev => ({ ...prev, [ip]: st }))
       if (st === 'ok') setExtraProfiles(prev => prev.find(p => p.host === ip) ? prev : [...prev, { id: `ssh_${ip}`, label: `SSH ${ip} (${sshUser})`, type: 'ssh', host: ip, user: sshUser }])
     } catch { setTestingSSH(prev => ({ ...prev, [ip]: 'error' })) }
+  }
+
+  // Parar de verdade: o backend encerra o experimento, cancela a meta do Nav2
+  // (o que para o robô) e fecha a gravação. A tela continua acompanhando até o
+  // job terminar, para mostrar o que aconteceu.
+  const [stopping, setStopping] = useState(false)
+  const stopRun = async () => {
+    if (!jobId) { stopPolling(); return }
+    setStopping(true)
+    try {
+      const data = await stopJob(jobId)
+      if (!data?.cancel) setError('Execução encerrada, mas o cancelamento da navegação não foi confirmado: confira o robô.')
+    } catch (e) {
+      setError(`Não foi possível parar pelo servidor: ${e.message}. Pare o robô fisicamente.`)
+      stopPolling()
+    } finally { setStopping(false) }
   }
 
   const run = async () => {
@@ -381,8 +398,8 @@ export default function App() {
               {running ? '⏳ A executar…' : `▶ Executar ${cfg.command}`}
             </button>
             {running && (
-              <button onClick={stopPolling}
-                style={btn(color.dangerBg, color.danger)}>■ Parar</button>
+              <button onClick={stopRun} disabled={stopping}
+                style={btn(color.dangerBg, color.danger)}>{stopping ? '⏳ Parando…' : '■ Parar'}</button>
             )}
           </div>
         </div>

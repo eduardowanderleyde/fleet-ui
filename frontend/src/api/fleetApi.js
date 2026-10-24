@@ -74,6 +74,10 @@ export async function listRoutes(robotId = '') {
   return readJson(await fetch(apiPath(`/list_routes${qs ? `?${qs}` : ''}`)))
 }
 
+export async function stopJob(jobId) {
+  return readJson(await fetch(apiPath(`/job/${jobId}/stop`), { method: 'POST' }))
+}
+
 export async function goToPoint({ robotId = '', x = 0, y = 0, yaw = 0 }) {
   const params = new URLSearchParams({
     robot_id: robotId === 'default' ? '' : robotId,

@@ -46,6 +46,31 @@ test.describe('replay do percurso CBSoft', () => {
     expect(sent.topics).toEqual(expect.arrayContaining(['scan', 'odom', 'amcl_pose']))
   })
 
+  test('Parar encerra a execução no servidor, não só na tela', async ({ page }) => {
+    const stops = []
+    const running = { running: true, lines: ['[CMD] replay'], result: null, error: null, exit_code: null }
+    await mockApi(page, {
+      // Execução que não termina sozinha, como um percurso de 6 min.
+      '/api/job/e2e00001': route => route.fulfill({ json: running }),
+      '/api/job/e2e00001/stop': route => {
+        stops.push(route.request().method())
+        running.running = false
+        return route.fulfill({ json: { success: true, cancel: true, collection_closed: true } })
+      },
+    })
+    await page.goto('/')
+    await connect(page)
+    await runButton(page).click()
+
+    const stop = page.getByRole('button', { name: /Parar/ })
+    await expect(stop).toBeVisible()
+    await stop.click()
+
+    await expect.poll(() => stops).toEqual(['POST'])
+    await expect(stop).toBeHidden()
+    await expect(runButton(page)).toBeEnabled()
+  })
+
   test('rota de outro mundo bloqueia o replay', async ({ page }) => {
     // Pontos muito além do mapa gravado (x de -43 a 11 m, y de -57 a 27 m).
     await mockApi(page, { '/api/route_poses': { poses: [[120, 120, 0], [150, 130, 0], [180, 160, 0]] } })
