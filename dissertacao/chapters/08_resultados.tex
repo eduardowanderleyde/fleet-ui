@@ -662,10 +662,17 @@ TurtleBot4 real, no laboratório da UFPE e junto às autoras, para verificar
 se ele funciona bem no experimento delas. Três pontos estão em aberto e só
 podem ser respondidos lá: a instalação via Docker na máquina do laboratório
 (Ubuntu 22.04); a comunicação entre o framework (ROS~2 Jazzy) e o robô
-(ROS~2 Humble), versões entre as quais a interoperabilidade de mensagens
-não é garantida oficialmente; e a leitura BLE a bordo do robô real, que
-ainda não está integrada. Os resultados desse teste não estão incluídos
-neste texto.
+(ROS~2 Humble); e a leitura BLE a bordo do robô real, que ainda não está
+integrada. Sobre o segundo ponto, a comparação das definições mostra que as
+\textit{actions} do Nav2 usadas pelo framework mudaram entre as duas versões
+(\texttt{FollowWaypoints} no pedido e no resultado, \texttt{NavigateToPose}
+no resultado), enquanto as mensagens de laser, odometria, TF e velocidade
+são idênticas. Por isso o Nav2 roda no computador, do lado do framework, como
+já fazia o setup das autoras, e o robô só troca sensores e comandos de
+velocidade. Uma checagem só de leitura (\texttt{make robot-check}) confere,
+antes de mover o robô, a descoberta dos nós, os tópicos, a árvore de TF e a
+defasagem de relógio entre robô e computador, problemas já registrados pelas
+autoras. Os resultados desse teste não estão incluídos neste texto.
 
 \section{Considerações Finais}
 \label{sec:res_conclusao}
