@@ -63,7 +63,7 @@ cbsoft-csv:
 	$(CBSOFT_RUN) python3 scripts/cbsoft/bag_to_nav_csv.py $(or $(BAG),$(LATEST_BAG)) \
 		--route routes/default/percurso_cbsoft.yaml --out-dir collections/cbsoft --pose-source $(or $(POSE),amcl)
 
-# Gráficos RSSI × posição (script da Fernanda e da Bia). Os arquivos têm de
+# Gráficos RSSI × posição (scripts das autoras do experimento). Os arquivos têm de
 # estar dentro de fleet_ws/collections/ (pasta montada no container):
 #   make cbsoft-analise NAV=collections/cbsoft/<nav>.csv NRF="collections/cbsoft/nrf/<log>.txt"
 cbsoft-analise:

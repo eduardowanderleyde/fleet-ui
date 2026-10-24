@@ -304,7 +304,7 @@ export function useMapCanvas({ robotId, poses, waypoints, onRouteOutsideChange }
 
   // Lista mapas disponíveis (warehouse sempre presente + o que o backend
   // tiver salvo: 'slam' se já rodou SLAM, ou qualquer mapa importado via
-  // /api/import_map — ex.: o hall_cin_v4 da Bia/Fernanda).
+  // /api/import_map — ex.: o hall_cin_v4 do CIn).
   useEffect(() => {
     listMaps()
       .then(d => setMapOptions(['warehouse', ...(d.maps || []).filter(n => n !== 'warehouse')]))

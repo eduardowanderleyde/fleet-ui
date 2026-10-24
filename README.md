@@ -281,8 +281,8 @@ WORLD=depot make docker-up
 
 ### CBSoft BLE route in an open world
 
-Replays the route from the CBSoft'26 BLE connectivity experiment (Neves,
-Barros et al. — script `fleet_ws/scripts/cbsoft/nav_3points.py`) in
+Replays the route from the CBSoft'26 BLE connectivity experiment (script
+`fleet_ws/scripts/cbsoft/nav_3points.py`) in
 simulation: start → 64 m straight → turn → 31 m, at the same 0.26 m/s.
 The world `cbsoft_open` is an open floor with only sparse pillars (≥2.5 m
 from the route) so the robot doesn't hit anything; it uses a prebuilt map +

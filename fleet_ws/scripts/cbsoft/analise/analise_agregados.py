@@ -1,5 +1,5 @@
-# Original: análise agregada do experimento BLE do CBSoft'26 (Fernanda Neves,
-# Beatriz Barros). Mudanças:
+# Original: análise agregada das autoras do artigo do CBSoft'26 “Wireless Connectivity Testing with Mobile Robots: A Bluetooth Low Energy Case Study”.
+# Mudanças:
 # - arquivos por linha de comando (antes a lista ENSAIOS era fixa no código);
 # - PNG salvo sem abrir janela (--show abre);
 # - ponto zero ("Base (Celular)"): antes era a 1ª linha já SINCRONIZADA da

@@ -2,7 +2,7 @@
 """Gera o mundo aberto `cbsoft_open` (Gazebo SDF + mapa PGM/YAML para AMCL).
 
 Reproduz, em simulação, o percurso do experimento BLE do CBSoft'26
-(Fernanda Neves, Beatriz Barros — ver nav_3points.py) num espaço aberto:
+(ver nav_3points.py) num espaço aberto:
 chão plano, paredes só na borda e pilares espaçados que dão referência ao
 LiDAR (alcance 20 m) sem ficar no caminho do robô. O frame `map` coincide
 com o frame do mundo Gazebo, então as coordenadas originais do script

@@ -1,5 +1,5 @@
 # map_name: hall_cin_v4.yaml
-# Original: experimento BLE do CBSoft'26 (Fernanda Neves, Beatriz Barros).
+# Original: script das autoras do artigo do CBSoft'26 “Wireless Connectivity Testing with Mobile Robots: A Bluetooth Low Energy Case Study”.
 # Mudanças em relação ao original: flag --sim (relógio da simulação),
 # --log-dir, e só começa a gravar o CSV depois da primeira pose do AMCL.
 # Na simulação (mundo cbsoft_open) as coordenadas são as mesmas.

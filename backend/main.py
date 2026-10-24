@@ -1289,7 +1289,7 @@ class ImportMapRequest(BaseModel):
 @app.post("/api/import_map")
 async def import_map(req: ImportMapRequest):
     """Importa um mapa real já pronto (par .yaml+.pgm, convenção do
-    map_server do Nav2 — ex.: o hall_cin_v4 da Bia/Fernanda) como fundo
+    map_server do Nav2 — ex.: o hall_cin_v4 do CIn) como fundo
     selecionável no MapView, sem precisar rodar SLAM nesse ambiente."""
     name = req.name.strip()
     if not name or not all(c.isalnum() or c in "_-" for c in name):

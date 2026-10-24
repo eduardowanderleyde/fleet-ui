@@ -1,4 +1,4 @@
-# Original: análise do experimento BLE do CBSoft'26 (Fernanda Neves, Beatriz Barros).
+# Original: análise das autoras do artigo do CBSoft'26 “Wireless Connectivity Testing with Mobile Robots: A Bluetooth Low Energy Case Study”.
 # Mudanças: arquivos por linha de comando (antes fixos no código) e PNG salvo
 # sem abrir janela (--show abre). A lógica de sincronização e os gráficos são
 # os mesmos. Linhas em (0,0) do CSV de navegação são descartadas (bug do

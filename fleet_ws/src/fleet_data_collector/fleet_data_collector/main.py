@@ -56,7 +56,7 @@ class SensorCollector(Node):
         "ground_truth_pose_clean": ("geometry_msgs/msg/PoseStamped", PoseStamped),
         # RSSI (dBm) do dispositivo BLE alvo, publicado por
         # fleet_orchestrator/ble_rssi_publisher.py — teste de conectividade
-        # sem fio, não navegação (ver conhecimento do piloto BLE da Bia/Fernanda).
+        # sem fio, não navegação (ver conhecimento do piloto BLE do CIn).
         "ble_rssi": ("std_msgs/msg/Int32", Int32),
     }
 

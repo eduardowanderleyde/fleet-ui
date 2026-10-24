@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Converte a gravação (MCAP) de um replay do fleet-ui no CSV do nav_3points.py.
 
-Assim os scripts de análise da Fernanda e da Bia (analise/) leem corridas
+Assim os scripts de análise das autoras (analise/) leem corridas
 feitas pelo botão "Executar replay" do mesmo jeito que leem as do script
 delas. Mesmas colunas e mesma semântica:
 
