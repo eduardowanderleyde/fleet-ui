@@ -133,7 +133,7 @@ make docker-down     <span class="c"># depois de Ctrl+C, para desligar</span></p
     <li><label><span class="box"><input type="checkbox" id="s5"><span class="num"></span></span><span class="what">Robô ligado e iniciado</span></label>
       <div class="detail"><p>Esperem o robô terminar de iniciar, como vocês já fazem.</p></div></li>
     <li><label><span class="box"><input type="checkbox" id="s6"><span class="num"></span></span><span class="what">PC e robô na mesma rede</span></label>
-      <div class="detail"><div class="cmd"><button type="button">Copiar</button><pre>ping &lt;IP do robô&gt;</pre></div><p class="expect"><b>Esperado:</b> respostas com tempo, sem “Destination Host Unreachable”.</p></div></li>
+      <div class="detail"><p>O robô se conecta ao PC pelo Wi-Fi, sozinho, sem botão: basta o Raspberry Pi do robô e o PC estarem na mesma rede. Dentro do robô, a base Create3 fala com o Raspberry Pi pelo cabo USB-C, como já está configurado. O ROS encontra o robô porque os dois lados usam o mesmo domínio (0) e o mesmo middleware (CycloneDDS); o passo 9 confirma.</p><div class="cmd"><button type="button">Copiar</button><pre>ping &lt;IP do robô&gt;</pre></div><p class="expect"><b>Esperado:</b> respostas com tempo, sem “Destination Host Unreachable”.</p></div></li>
     <li><label><span class="box"><input type="checkbox" id="s7"><span class="num"></span></span><span class="what">Nav2 de vocês desligado</span></label>
       <div class="detail"><p>O Nav2 do contêiner de vocês é Humble e não conversa com o do Fleet UI. Se ele estiver ligado:</p><div class="cmd"><button type="button">Copiar</button><pre>docker stop ttb4</pre></div></div></li>
     <li><label><span class="box"><input type="checkbox" id="s8"><span class="num"></span></span><span class="what">Relógio do robô igual ao do PC</span></label>
@@ -187,11 +187,11 @@ make robot-check</pre></div><p class="expect"><b>Esperado:</b> “Tudo certo: po
   <div class="phase-head"><span class="when">A corrida</span><h2>Teste BLE</h2></div>
   <ol class="steps" style="--start: 14">
     <li><label><span class="box"><input type="checkbox" id="s15"><span class="num"></span></span><span class="what">Celulares no lugar</span></label>
-      <div class="detail"><p>Um fixo no START, o outro em cima do robô, conectados, como nas corridas de vocês.</p></div></li>
+      <div class="detail"><p>Um fixo no START, o outro em cima do robô, conectados, como nas corridas de vocês. O Fleet UI não mexe no Bluetooth: a conexão entre os celulares e a leitura do sinal continuam do jeito de sempre, fora dele. O botão <b>Conectar robô</b> da tela não tem relação com Bluetooth.</p></div></li>
     <li><label><span class="box"><input type="checkbox" id="s16"><span class="num"></span></span><span class="what">Leitura BLE começando no PC Windows</span></label>
       <div class="detail"><p>Antes, confiram que o relógio do PC Windows está no horário automático e no fuso de Recife: a análise casa o sinal com a posição pelo horário.</p><div class="cmd"><button type="button">Copiar</button><pre>.\script_celular.ps1</pre></div></div></li>
     <li><label><span class="box"><input type="checkbox" id="s17"><span class="num"></span></span><span class="what">Executar o percurso</span></label>
-      <div class="detail"><p>Na tela: <b>Reproduzir</b>, rota <code>percurso_cbsoft</code>, <b>Gravar bag</b> marcado, <b>▶ Executar replay</b>.</p><p class="expect"><b>Esperado:</b> o robô segue o “L” (64 m e depois 31 m), a cerca de 0,25 m/s.</p></div></li>
+      <div class="detail"><p>Na tela: <b>Reproduzir</b>, rota <code>percurso_cbsoft</code>, <b>Gravar bag</b> marcado, <b>▶ Executar replay</b>. Na lista de tópicos, deixem <code>ble_rssi</code> <b>desmarcado</b>: é um recurso opcional que leria o Bluetooth pelo PC Linux e não foi testado com o robô real.</p><p class="expect"><b>Esperado:</b> o robô segue o “L” (64 m e depois 31 m), a cerca de 0,25 m/s.</p></div></li>
     <li><label><span class="box"><input type="checkbox" id="s18"><span class="num"></span></span><span class="what">Parar na desconexão</span></label>
       <div class="detail"><p>Quando o script do Windows registrar a desconexão, parem a corrida com <b>■ Parar</b> na tela e o script com Ctrl+C, como vocês faziam com os dois terminais.</p></div></li>
     <li><label><span class="box"><input type="checkbox" id="s19"><span class="num"></span></span><span class="what">Log do celular copiado</span></label>
