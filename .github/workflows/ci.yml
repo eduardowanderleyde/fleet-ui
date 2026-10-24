@@ -31,6 +31,7 @@ jobs:
             fleet_ws/scripts/health_check.py \
             fleet_ws/scripts/experiment_repeatability.py \
             fleet_ws/scripts/analyze_runs.py \
+            fleet_ws/scripts/robot_preflight.py \
             fleet_ws/src/fleet_orchestrator/fleet_orchestrator/main.py \
             fleet_ws/src/fleet_data_collector/fleet_data_collector/main.py
 
@@ -48,6 +49,15 @@ jobs:
 
       - name: Frontend build
         run: npm --prefix frontend run build
+
+      - name: Frontend unit tests
+        run: npm --prefix frontend test
+
+      - name: Frontend E2E (Playwright, API mockada)
+        run: |
+          cd frontend
+          npx playwright install --with-deps chromium
+          npm run test:e2e
 
   ros-checks:
     # Este ambiente NÃO tem ROS 2/Nav2/xacro/launch — o job "checks" acima
