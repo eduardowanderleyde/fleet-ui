@@ -1,0 +1,247 @@
+<title>Auditoria do Fleet UI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: relatório de auditoria em coluna única; resumo por gravidade no topo, depois um cartão por achado com evidência e correção. */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #15202a; --muted: #5a6876; --line: #d8dfe5;
+  --accent: #0b5cad;
+  --crit: #b42318; --crit-soft: #fdecea; --high: #b54708; --high-soft: #fef0e1;
+  --med: #8a6d00; --med-soft: #fbf4d8; --low: #475467; --low-soft: #eef1f4; --ok: #137344; --ok-soft: #e2f3ea;
+  --code-bg: #eef2f6;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e151b; --surface: #16212a; --ink: #e5ecf2; --muted: #9babb9; --line: #26343f; --accent: #6aa9ef;
+    --crit: #ff8a7a; --crit-soft: #3a1714; --high: #f6a55a; --high-soft: #3a2410; --med: #e8c95a; --med-soft: #33290b;
+    --low: #b3bfcb; --low-soft: #1f2a33; --ok: #5fd39a; --ok-soft: #10301f; --code-bg: #1d2a34; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e151b; --surface: #16212a; --ink: #e5ecf2; --muted: #9babb9; --line: #26343f; --accent: #6aa9ef;
+  --crit: #ff8a7a; --crit-soft: #3a1714; --high: #f6a55a; --high-soft: #3a2410; --med: #e8c95a; --med-soft: #33290b;
+  --low: #b3bfcb; --low-soft: #1f2a33; --ok: #5fd39a; --ok-soft: #10301f; --code-bg: #1d2a34; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1rem; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 3.5rem; }
+.wrap { max-width: 880px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); letter-spacing: -0.015em; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; max-width: 70ch; }
+code { font-family: var(--mono); font-size: 0.85em; background: var(--code-bg); padding: 0.05em 0.3em; border-radius: 4px; }
+.eyebrow { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+header { padding-block: 2.5rem 1.25rem; display: grid; gap: 0.75rem; }
+header p { color: var(--muted); font-size: 1.04rem; }
+
+.tally { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; margin-block: 0.5rem 2rem; }
+.tally div { border-radius: 10px; padding: 0.75rem 0.9rem; display: grid; gap: 0.1rem; border: 1px solid var(--line); background: var(--surface); }
+.tally b { font-family: var(--display); font-size: 1.8rem; font-variant-numeric: tabular-nums; line-height: 1; }
+.tally span { font-size: 0.82rem; color: var(--muted); }
+.tally .c b { color: var(--crit); } .tally .h b { color: var(--high); } .tally .m b { color: var(--med); } .tally .l b { color: var(--low); } .tally .o b { color: var(--ok); }
+
+section { display: grid; gap: 0.8rem; padding-block: 1.5rem; border-top: 1px solid var(--line); }
+.find { background: var(--surface); border: 1px solid var(--line); border-left-width: 5px; border-radius: 10px; padding: 0.9rem 1rem; display: grid; gap: 0.5rem; }
+.find.c { border-left-color: var(--crit); } .find.h { border-left-color: var(--high); } .find.m { border-left-color: var(--med); } .find.l { border-left-color: var(--low); }
+.find .top { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.sev { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.12rem 0.5rem; border-radius: 99px; }
+.c .sev { background: var(--crit-soft); color: var(--crit); } .h .sev { background: var(--high-soft); color: var(--high); }
+.m .sev { background: var(--med-soft); color: var(--med); } .l .sev { background: var(--low-soft); color: var(--low); }
+.area { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+.kv { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0.3rem 0.8rem; font-size: 0.93rem; }
+.kv dt { color: var(--muted); font-weight: 600; }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .kv { grid-template-columns: 1fr; } .kv dt { margin-top: 0.3rem; } }
+
+.okgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.6rem; }
+.okgrid div { background: var(--ok-soft); border-radius: 8px; padding: 0.65rem 0.8rem; font-size: 0.9rem; display: grid; gap: 0.15rem; }
+.okgrid b { color: var(--ok); font-weight: 600; }
+
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 0.45rem 0.7rem; text-align: left; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 0.78rem; }
+td.n { text-align: right; font-family: var(--mono); }
+tbody tr:last-child td { border-bottom: 0; }
+.bar { display: inline-block; height: 8px; border-radius: 4px; background: var(--accent); vertical-align: middle; }
+.bar.zero { background: var(--crit); width: 4px; }
+
+ol.plan { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.4rem; }
+footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 1rem; display: grid; gap: 0.3rem; }
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Fleet UI · ramo new-way-samsung · 24/10/2026</span>
+  <h1>Auditoria do Fleet UI</h1>
+  <p>Verificação do programa inteiro, com ferramentas e testes rodando de verdade: compilação, análise estática, segurança, dependências, cobertura de testes, nós ROS, frontend, Docker, repositório e o próprio experimento. Cada achado traz a evidência e a correção sugerida.</p>
+</header>
+
+<div class="tally" aria-label="Achados por gravidade">
+  <div class="c"><b>2</b><span>críticos</span></div>
+  <div class="h"><b>2</b><span>altos</span></div>
+  <div class="m"><b>5</b><span>médios</span></div>
+  <div class="l"><b>5</b><span>baixos</span></div>
+  <div class="o"><b>10</b><span>áreas sem problema</span></div>
+</div>
+
+<section>
+  <h2>Críticos: resolver antes do teste no CIn</h2>
+
+  <div class="find c">
+    <div class="top"><span class="sev">crítico</span><h3>Qualquer pessoa na rede pode mover o robô</h3><span class="area">segurança · backend</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>O backend escuta em <code>0.0.0.0:8000</code> e a tela em <code>0.0.0.0:5173</code>, sem nenhuma autenticação. No Wi-Fi do laboratório, quem abrir <code>http://&lt;IP do PC&gt;:5173</code> tem a tela completa.</dd>
+      <dt>Evidência</dt><dd>Teste ao vivo pelo IP de rede do PC (192.168.0.157): <code>/api/status</code> e a tela respondem HTTP 200, e <code>POST /api/go_to_point</code> foi aceito sem login (HTTP 200, alvo na posição atual, nada se moveu).</dd>
+      <dt>Correção</dt><dd>Escutar só em <code>127.0.0.1</code> por padrão (backend e Vite), com uma opção explícita para abrir à rede. O proxy da tela já usa <code>localhost</code>, então nada mais muda.</dd>
+    </dl>
+  </div>
+
+  <div class="find c">
+    <div class="top"><span class="sev">crítico</span><h3>Tela servida pelo servidor de desenvolvimento, com falha conhecida</h3><span class="area">segurança · frontend</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>O Docker roda <code>npm run dev --host 0.0.0.0</code>: é o servidor de desenvolvimento do Vite, exposto na rede. A versão instalada (8.2.1) tem falha de severidade alta no recurso “abrir no editor”, que pode executar comandos.</dd>
+      <dt>Evidência</dt><dd><code>npm audit</code>: 3 altas (vite, undici, source-map-js). Ao vivo, <code>/__open-in-editor</code> responde HTTP 200 pelo IP de rede.</dd>
+      <dt>Correção</dt><dd><code>npm audit fix</code> (atualiza o Vite dentro da série 8) e servir a tela compilada (<code>vite build</code>) em vez do modo de desenvolvimento, restrita a <code>localhost</code> como no item anterior.</dd>
+    </dl>
+  </div>
+</section>
+
+<section>
+  <h2>Altos: validade do experimento</h2>
+
+  <div class="find h">
+    <div class="top"><span class="sev">alto</span><h3>Controlador diferente do usado no artigo</h3><span class="area">experimento · Nav2</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>O TurtleBot4 no Humble, usado no artigo, navega com o controlador DWB. No Jazzy, usado pelo Fleet UI, o padrão é o MPPI, que é aleatório e pode dar ré.</dd>
+      <dt>Evidência</dt><dd>Comparação dos <code>nav2.yaml</code>: Humble <code>dwb_core::DWBLocalPlanner</code>, sem ré (<code>min_vel_x 0</code>); Jazzy <code>MPPIController</code> com <code>vx_min −0,35</code>. A velocidade máxima é a mesma (0,26 m/s no suavizador), por isso a simulação deu 0,248 m/s.</dd>
+      <dt>Correção</dt><dd>No <code>make robot-up</code>, usar o DWB com os parâmetros do Humble. O Jazzy ainda traz o DWB, então é configuração.</dd>
+    </dl>
+  </div>
+
+  <div class="find h">
+    <div class="top"><span class="sev">alto</span><h3>O script que executa os experimentos não tem testes</h3><span class="area">testes</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd><code>experiment_repeatability.py</code>, que roda toda gravação e todo replay, inclusive os do CIn, tem 0% de cobertura. O coletor de dados também está em 0%. Foram verificados só rodando a simulação.</dd>
+      <dt>Evidência</dt><dd>Medição com <code>coverage</code> sobre a suíte inteira (tabela abaixo).</dd>
+      <dt>Correção</dt><dd>Testes de unidade para as partes puras (montagem de comandos, métricas do bag, decisão de sucesso e falha) e um teste de ponta a ponta com o robô falso.</dd>
+    </dl>
+  </div>
+</section>
+
+<section>
+  <h2>Médios</h2>
+
+  <div class="find m">
+    <div class="top"><span class="sev">médio</span><h3>Nome de rota vira caminho de arquivo sem validação</h3><span class="area">segurança · backend e orquestrador</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd><code>/api/save_route_waypoints</code> e o nome de rota de <code>run_config</code> → <code>start_record</code> viram <code>routes/&lt;robô&gt;/&lt;nome&gt;.yaml</code> sem checagem. Um nome com <code>../</code> grava fora da pasta de rotas. <code>/api/route_poses</code> já valida com <code>_SAFE_NAME</code>.</dd>
+      <dt>Correção</dt><dd>Aplicar a mesma validação (<code>[A-Za-z0-9_-]+</code>) em todo lugar que recebe nome de rota ou de robô.</dd>
+    </dl>
+  </div>
+
+  <div class="find m">
+    <div class="top"><span class="sev">médio</span><h3>Ordem de subida depende de esperas fixas</h3><span class="area">Docker</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>Os serviços esperam 18 s e 22 s fixos e não há <em>healthcheck</em>. Num PC mais lento, como o do laboratório, algo pode subir antes do que depende dele.</dd>
+      <dt>Correção</dt><dd>Esperar por prontidão de verdade (nós ativos, serviço respondendo) em vez de tempo fixo.</dd>
+    </dl>
+  </div>
+
+  <div class="find m">
+    <div class="top"><span class="sev">médio</span><h3>“■ Parar” leva cerca de 3 s</h3><span class="area">backend · segurança operacional</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>Cada comando ROS do backend abre um processo <code>ros2</code> novo (1,2 a 3,2 s medidos). Com o robô falso, ele andou cerca de 80 cm depois do clique.</dd>
+      <dt>Correção</dt><dd>Cancelar pela conexão ROS que o backend já mantém aberta, em milissegundos.</dd>
+    </dl>
+  </div>
+
+  <div class="find m">
+    <div class="top"><span class="sev">médio</span><h3>Contêineres rodam como root</h3><span class="area">Docker</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>Arquivos criados nas pastas compartilhadas ficam com dono root (já aconteceu com <code>collections/cbsoft</code>).</dd>
+      <dt>Correção</dt><dd>Rodar com o usuário do host, como os alvos <code>cbsoft-csv</code> e <code>cbsoft-analise</code> já fazem.</dd>
+    </dl>
+  </div>
+
+  <div class="find m">
+    <div class="top"><span class="sev">médio</span><h3>CI instala dependências diferentes do Docker</h3><span class="area">CI</span></div>
+    <dl class="kv">
+      <dt>O que é</dt><dd>O CI usa <code>requirements.txt</code> (faixas) e o Docker usa <code>requirements.lock.txt</code> (versões fixas). O resultado do CI não pôde ser conferido daqui: o repositório é privado e o <code>gh</code> não está instalado.</dd>
+      <dt>Correção</dt><dd>O CI instalar o mesmo arquivo travado.</dd>
+    </dl>
+  </div>
+</section>
+
+<section>
+  <h2>Baixos</h2>
+  <div class="find l"><div class="top"><span class="sev">baixo</span><h3>Campo de usuário do teste SSH sem validação</h3><span class="area">backend</span></div>
+    <p>Um “usuário” começando com <code>-o</code> poderia virar opção do <code>ssh</code>. Testado de forma inofensiva: o OpenSSH desta máquina recusou (“hostname contains invalid characters”) e nada foi executado. Validar a entrada mesmo assim.</p></div>
+  <div class="find l"><div class="top"><span class="sev">baixo</span><h3><code>certifi</code> desatualizado</h3><span class="area">dependências</span></div>
+    <p><code>pip-audit</code>: PYSEC-2026-4320 em 2026.7.22; corrigido em 2026.10.19.</p></div>
+  <div class="find l"><div class="top"><span class="sev">baixo</span><h3>Limpezas de código</h3><span class="area">Python</span></div>
+    <p>4 imports sem uso, um <code>tempfile.mktemp</code> obsoleto no launch multi-robô e nove <code>zip()</code> sem <code>strict</code>. O de maior risco, em <code>analyze_runs.py</code>, já tem validação antes e não descarta corridas.</p></div>
+  <div class="find l"><div class="top"><span class="sev">baixo</span><h3>Imagem Docker de 7,65 GB</h3><span class="area">Docker</span></div>
+    <p>Pesa na primeira instalação no PC do laboratório (15 a 30 min).</p></div>
+  <div class="find l"><div class="top"><span class="sev">baixo</span><h3>Versionamento</h3><span class="area">repositório</span></div>
+    <p>O <code>main</code> está 172 commits atrás, não há nenhuma tag, e <code>backend/main.py</code> tem 1.746 linhas.</p></div>
+</section>
+
+<section>
+  <h2>Cobertura de testes</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Arquivo</th><th>Linhas</th><th>Cobertura</th><th></th></tr></thead>
+    <tbody>
+      <tr><td><code>experiment_repeatability.py</code></td><td class="n">717</td><td class="n">0%</td><td><span class="bar zero"></span></td></tr>
+      <tr><td><code>fleet_data_collector/main.py</code></td><td class="n">—</td><td class="n">0%</td><td><span class="bar zero"></span></td></tr>
+      <tr><td><code>analyze_runs.py</code></td><td class="n">385</td><td class="n">27%</td><td><span class="bar" style="width:27%"></span></td></tr>
+      <tr><td><code>fleet_orchestrator/main.py</code></td><td class="n">476</td><td class="n">31%</td><td><span class="bar" style="width:31%"></span></td></tr>
+      <tr><td><code>backend/ros_bridge.py</code></td><td class="n">217</td><td class="n">49%</td><td><span class="bar" style="width:49%"></span></td></tr>
+      <tr><td><code>backend/main.py</code></td><td class="n">983</td><td class="n">53%</td><td><span class="bar" style="width:53%"></span></td></tr>
+      <tr><td><code>robot_preflight.py</code></td><td class="n">126</td><td class="n">59%</td><td><span class="bar" style="width:59%"></span></td></tr>
+    </tbody>
+  </table></div>
+  <p>Os scripts de campanha antigos e de piloto (<code>run_*</code>, <code>pilot_*</code>) também estão em 0%, mas não fazem parte do fluxo do CIn.</p>
+</section>
+
+<section>
+  <h2>O que está em ordem</h2>
+  <div class="okgrid">
+    <div><b>Testes</b>131 de backend e scripts, 26 que dependem do ROS (nenhum pulado), 2 de unidade e 7 de ponta a ponta no frontend, todos passando.</div>
+    <div><b>Python sem erros reais</b><code>ruff</code> nas regras de erro: nenhum nome indefinido nem erro de sintaxe.</div>
+    <div><b>Frontend sem erros</b>Linter de correção sem achados no código.</div>
+    <div><b>Sem segredos no histórico</b>Nenhuma chave de API, token ou chave privada em todo o histórico do git.</div>
+    <div><b>Documentação consistente</b>Todo comando <code>make</code> citado existe e nenhum link local do README está quebrado.</div>
+    <div><b>Dependências Python</b>Só o <code>certifi</code> desatualizado; o resto sem vulnerabilidade conhecida.</div>
+    <div><b>Imagem monta do zero</b>Também a partir do zip entregue, numa pasta limpa.</div>
+    <div><b>Robô real (preparação)</b><code>robot-check</code>, <code>robot-up</code> e Parar testados com o robô falso.</div>
+    <div><b>Análise dos números</b><code>analyze_runs.py</code> recusa rótulos e gravações em quantidade diferente, e os números do Cap. 8 se reproduzem.</div>
+    <div><b>Sem erro de hardware hoje</b>Nenhum erro de memória desde que o PC foi ligado.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Ordem sugerida</h2>
+  <ol class="plan">
+    <li>Restringir backend e tela a <code>localhost</code> e servir a tela compilada, com o Vite atualizado (os dois críticos).</li>
+    <li>Validar nomes de rota e de robô em todos os endpoints.</li>
+    <li>DWB no <code>robot-up</code>, com os parâmetros do artigo.</li>
+    <li>Parar pela conexão ROS já aberta.</li>
+    <li>Testes do <code>experiment_repeatability.py</code> e do coletor.</li>
+    <li>Prontidão em vez de esperas fixas, contêiner sem root, CI com dependências travadas.</li>
+  </ol>
+</section>
+
+<footer>
+  <p>Ferramentas: ruff 0.17.2, bandit 1.9.4, pip-audit 2.10.1, npm audit, eslint, coverage, pytest, Playwright. Varredura de segredos por padrões no histórico completo do git.</p>
+  <p>Código auditado: cerca de 16 mil linhas (backend, nós ROS, scripts, frontend, testes e Docker).</p>
+</footer>
+</div>
