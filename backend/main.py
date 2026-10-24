@@ -289,7 +289,7 @@ async def lifespan(app: FastAPI):
 
             rclpy.init()
             node = Node("fleet_ui_bridge", parameter_overrides=[
-                rclpy.parameter.Parameter("use_sim_time", rclpy.parameter.Parameter.Type.BOOL, True)
+                rclpy.parameter.Parameter("use_sim_time", rclpy.parameter.Parameter.Type.BOOL, FLEET_USE_SIM_TIME)
             ])
 
             def fleet_cb(msg):
@@ -834,6 +834,10 @@ _sim_procs: list[tuple[str, subprocess.Popen]] = []
 _sim_lock = threading.Lock()
 _sim_nav_ready_count = 0
 _sim_fleet_ready = False
+
+
+# Robô real (make robot-up): sem /clock, relógio do sistema. Padrão: simulação.
+FLEET_USE_SIM_TIME = os.environ.get("FLEET_USE_SIM_TIME", "true").strip().lower() not in ("false", "0", "no")
 
 
 def _read_robot_roles() -> dict[str, str]:

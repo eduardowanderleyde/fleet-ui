@@ -383,6 +383,24 @@ It reports discovered nodes, the four topics Nav2 needs and their types,
 in the authors' troubleshooting guide), `odom → base_link`, and warns if a
 Nav2 is already running on that domain.
 
+Then start fleet-ui against the robot (no Gazebo, system clock, robot's
+domain and middleware; map `hall_cin_v4` + AMCL starting at the CBSoft START
+point + Nav2 on the PC):
+
+```bash
+make robot-up                       # domain 0, CycloneDDS
+make robot-up ROBOT_DOMAIN=7 X_POSE=… Y_POSE=… YAW=…   # other domain / start pose
+```
+
+Shut down any other Nav2 on that domain first (their Humble Nav2 cannot
+talk to fleet-ui's Jazzy one). Open http://localhost:5173 as usual.
+
+Tested without the robot using `scripts/fake_turtlebot4.py`, which publishes
+`/scan`, `/odom` and TF with the system clock and integrates `/cmd_vel`: in a
+test domain, `make robot-check` passed, Nav2 came up active, `use_sim_time`
+was false on every node, `/cmd_vel` was `geometry_msgs/Twist`, and a 1 m
+`go_to_point` ended in "Goal succeeded".
+
 ---
 
 ## Running manually

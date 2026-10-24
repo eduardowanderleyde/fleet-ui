@@ -133,6 +133,8 @@ class RosBridge:
             args += ["--robot", robot]
         if not collect:
             args += ["--skip-collection"]
+        if os.environ.get("FLEET_USE_SIM_TIME", "true").strip().lower() in ("false", "0", "no"):
+            args += ["--no-use-sim-time"]
         elif topics:
             args += ["--topics"] + topics
         if initial_pose is not None and any(v != 0 for v in initial_pose):

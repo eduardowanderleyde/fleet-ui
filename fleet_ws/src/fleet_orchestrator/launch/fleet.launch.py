@@ -30,6 +30,10 @@ def launch_setup(context, *args, **kwargs):
     # robô "fantasma" que não existe no Gazebo.
     robots = [r.strip() for r in os.environ.get("FLEET_ROBOTS", "tb1,tb2").split(",") if r.strip()]
 
+    # Robô real não tem /clock: com FLEET_USE_SIM_TIME=false (make robot-up)
+    # os nós usam o relógio do sistema. Padrão true = simulação, como antes.
+    sim_time = os.environ.get("FLEET_USE_SIM_TIME", "true").strip().lower() not in ("false", "0", "no")
+
     use_shared = LaunchConfiguration("use_shared_map_frame")
     routes_dir = LaunchConfiguration("routes_dir")
     collections_dir = LaunchConfiguration("collections_dir")
@@ -40,14 +44,14 @@ def launch_setup(context, *args, **kwargs):
             executable="fleet_orchestrator",
             name="fleet_orchestrator",
             output="screen",
-            parameters=[ParameterFile(single_yaml, allow_substs=True)],
+            parameters=[ParameterFile(single_yaml, allow_substs=True), {"use_sim_time": sim_time}],
         )
         collector = Node(
             package="fleet_data_collector",
             executable="sensor_collector",
             name="sensor_collector",
             output="screen",
-            parameters=[ParameterFile(single_yaml, allow_substs=True)],
+            parameters=[ParameterFile(single_yaml, allow_substs=True), {"use_sim_time": sim_time}],
         )
     else:
         orchestrator = Node(
@@ -56,7 +60,7 @@ def launch_setup(context, *args, **kwargs):
             name="fleet_orchestrator",
             output="screen",
             parameters=[
-                {"routes_dir": routes_dir, "use_shared_map_frame": use_shared, "use_sim_time": True},
+                {"routes_dir": routes_dir, "use_shared_map_frame": use_shared, "use_sim_time": sim_time},
                 {"robots": robots},
             ],
         )
@@ -66,7 +70,7 @@ def launch_setup(context, *args, **kwargs):
             name="sensor_collector",
             output="screen",
             parameters=[
-                {"collections_dir": collections_dir, "use_sim_time": True},
+                {"collections_dir": collections_dir, "use_sim_time": sim_time},
                 {"robots": robots},
             ],
         )

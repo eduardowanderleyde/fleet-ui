@@ -13,7 +13,7 @@ CBSOFT_ENV = ROS_DOMAIN_ID=$(CBSOFT_DOMAIN) WORLD=cbsoft_open LOCALIZATION=amcl 
 	NAV2_DEFAULT_SERVER_TIMEOUT_MS=1000 NAV2_NAVFN_USE_ASTAR=true \
 	X_POSE=1.0216323137283325 Y_POSE=16.61626625061035 YAW=0.0
 
-.PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-check cbsoft-up cbsoft-run cbsoft-csv cbsoft-analise robot-check
+.PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-check cbsoft-up cbsoft-run cbsoft-csv cbsoft-analise robot-check robot-up
 
 # Fuso local no container: o Timestamp_Legivel do CSV precisa casar com o
 # horário do celular (log do nRF Connect), que é local.
@@ -80,3 +80,12 @@ robot-check:
 	$(COMPOSE) run --rm --no-deps -e ROS_DOMAIN_ID=$(ROBOT_DOMAIN) -e RMW_IMPLEMENTATION=$(ROBOT_RMW) \
 		-e TZ=$(TZ_LOCAL) -v $(CURDIR)/fleet_ws/scripts:/workspace/fleet_ws/scripts:ro -w /workspace/fleet_ws backend \
 		bash -c "source /opt/ros/jazzy/setup.bash && python3 scripts/robot_preflight.py"
+
+# Fleet UI contra o TurtleBot4 real: mapa hall_cin_v4 + AMCL + Nav2 no PC, sem
+# Gazebo, relógio do sistema, mesmo domínio e middleware do robô. Rode
+# `make robot-check` antes e desligue qualquer Nav2 que já esteja no domínio.
+robot-up:
+	mkdir -p fleet_ws/routes/default
+	cp fleet_ws/scripts/cbsoft/percurso_cbsoft.yaml fleet_ws/routes/default/
+	ROS_DOMAIN_ID=$(ROBOT_DOMAIN) RMW_IMPLEMENTATION=$(ROBOT_RMW) TZ=$(TZ_LOCAL) \
+		$(COMPOSE) -f docker-compose.yml -f docker-compose.robot.yml up
