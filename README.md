@@ -360,6 +360,31 @@ on the network also uses 42, pick another: `make cbsoft-up CBSOFT_DOMAIN=57`.
 
 ---
 
+#### Real TurtleBot4 (lab day) — preflight check
+
+The CIn robot runs ROS 2 **Humble** with **CycloneDDS** on **domain 0**; the
+fleet-ui image is **Jazzy**. Nav2's actions changed between the two
+(`FollowWaypoints` goal/result, `NavigateToPose` result), so a Jazzy client
+cannot drive a Humble Nav2. The sensor and velocity messages the robot
+exchanges with Nav2 (`LaserScan`, `Odometry`, `TFMessage`, `Twist`, `Imu`,
+`PoseWithCovarianceStamped`) are identical in both distros, so the plan is:
+fleet-ui runs its own Nav2 on the PC, the robot only provides sensors and
+receives `/cmd_vel`.
+
+Before moving the robot, run the read-only check (publishes nothing):
+
+```bash
+make robot-check                    # domain 0, CycloneDDS
+make robot-check ROBOT_DOMAIN=7     # if the robot uses another domain
+```
+
+It reports discovered nodes, the four topics Nav2 needs and their types,
+`/scan` and `/odom` rates, clock skew between robot and PC (the TF problem
+in the authors' troubleshooting guide), `odom → base_link`, and warns if a
+Nav2 is already running on that domain.
+
+---
+
 ## Running manually
 
 `./run_all.sh` (see [Quick start](#quick-start)) covers day-to-day use. It

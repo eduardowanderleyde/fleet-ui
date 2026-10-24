@@ -13,7 +13,7 @@ CBSOFT_ENV = ROS_DOMAIN_ID=$(CBSOFT_DOMAIN) WORLD=cbsoft_open LOCALIZATION=amcl 
 	NAV2_DEFAULT_SERVER_TIMEOUT_MS=1000 NAV2_NAVFN_USE_ASTAR=true \
 	X_POSE=1.0216323137283325 Y_POSE=16.61626625061035 YAW=0.0
 
-.PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-check cbsoft-up cbsoft-run cbsoft-csv cbsoft-analise
+.PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-check cbsoft-up cbsoft-run cbsoft-csv cbsoft-analise robot-check
 
 # Fuso local no container: o Timestamp_Legivel do CSV precisa casar com o
 # horário do celular (log do nRF Connect), que é local.
@@ -70,3 +70,13 @@ cbsoft-analise:
 	@$(CBSOFT_OWN_DIR)
 	$(CBSOFT_RUN) python3 scripts/cbsoft/analise/sync_rssi_nav.py "$(NAV)" "$(NRF)" \
 		--out "$(basename $(NAV))_rssi.png"
+
+# Checagem pré-voo contra o TurtleBot4 real (só escuta, não publica nada).
+# O robô do CIn usa domínio 0 e CycloneDDS; ajuste se mudar:
+#   make robot-check ROBOT_DOMAIN=0 ROBOT_RMW=rmw_cyclonedds_cpp
+ROBOT_DOMAIN ?= 0
+ROBOT_RMW ?= rmw_cyclonedds_cpp
+robot-check:
+	$(COMPOSE) run --rm --no-deps -e ROS_DOMAIN_ID=$(ROBOT_DOMAIN) -e RMW_IMPLEMENTATION=$(ROBOT_RMW) \
+		-e TZ=$(TZ_LOCAL) -v $(CURDIR)/fleet_ws/scripts:/workspace/fleet_ws/scripts:ro -w /workspace/fleet_ws backend \
+		bash -c "source /opt/ros/jazzy/setup.bash && python3 scripts/robot_preflight.py"
