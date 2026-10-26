@@ -1,0 +1,177 @@
+<title>Requisitos da Semana</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: matriz de rastreabilidade em coluna única; placar no topo, uma tabela por branch (requisito → origem → estado → evidência), pendências no fim. */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #15202a; --muted: #5a6876; --line: #d8dfe5; --accent: #0b5cad;
+  --ok: #137344; --ok-soft: #e2f3ea; --part: #8a6100; --part-soft: #fbf1d6; --no: #b42318; --no-soft: #fdecea;
+  --code-bg: #eef2f6;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e151b; --surface: #16212a; --ink: #e5ecf2; --muted: #9babb9; --line: #26343f; --accent: #6aa9ef;
+    --ok: #5fd39a; --ok-soft: #10301f; --part: #e8c95a; --part-soft: #33290b; --no: #ff8a7a; --no-soft: #3a1714; --code-bg: #1d2a34; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e151b; --surface: #16212a; --ink: #e5ecf2; --muted: #9babb9; --line: #26343f; --accent: #6aa9ef;
+  --ok: #5fd39a; --ok-soft: #10301f; --part: #e8c95a; --part-soft: #33290b; --no: #ff8a7a; --no-soft: #3a1714; --code-bg: #1d2a34; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1rem; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 3.5rem; }
+.wrap { max-width: 1040px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.5rem); letter-spacing: -0.015em; }
+h2 { font-size: 1.3rem; }
+p { margin: 0; max-width: 72ch; }
+code { font-family: var(--mono); font-size: 0.84em; background: var(--code-bg); padding: 0.04em 0.3em; border-radius: 4px; }
+.eyebrow { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+header { padding-block: 2.5rem 1.25rem; display: grid; gap: 0.7rem; }
+header p { color: var(--muted); }
+
+.score { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; margin-block: 0.4rem 1.8rem; }
+.score div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 0.9rem; display: grid; gap: 0.1rem; }
+.score b { font-family: var(--display); font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.score span { font-size: 0.82rem; color: var(--muted); }
+.score .ok b { color: var(--ok); } .score .part b { color: var(--part); } .score .no b { color: var(--no); }
+
+section { display: grid; gap: 0.7rem; padding-block: 1.4rem; border-top: 1px solid var(--line); }
+.bhead { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; }
+.bhead .meta { font-family: var(--mono); font-size: 0.76rem; color: var(--muted); }
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+thead th { color: var(--muted); font-weight: 600; font-size: 0.76rem; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td.id { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+td.req { font-weight: 600; min-width: 13rem; }
+td.org { color: var(--muted); min-width: 10rem; font-size: 0.84rem; }
+td.ev { min-width: 16rem; }
+.st { display: inline-block; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.12rem 0.5rem; border-radius: 99px; white-space: nowrap; }
+.st.ok { background: var(--ok-soft); color: var(--ok); } .st.part { background: var(--part-soft); color: var(--part); } .st.no { background: var(--no-soft); color: var(--no); }
+.kind { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); display: block; margin-top: 0.15rem; font-weight: 400; }
+
+ol.next { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.45rem; }
+ol.next b { font-weight: 600; }
+footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 1rem; display: grid; gap: 0.3rem; }
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Análise de requisitos · 19 a 26/10/2026 · 4 branches, 40 commits</span>
+  <h1>Requisitos da semana</h1>
+  <p>Cada requisito foi tirado de um pedido seu nesta semana ou de uma necessidade que apareceu no trabalho. Para cada um: de onde veio, se está atendido e a evidência. O estado foi conferido de novo em 26/10 (testes rodados, dissertação compilada, repositórios checados), não só copiado das mensagens dos commits.</p>
+</header>
+
+<div class="score" aria-label="Resumo">
+  <div class="ok"><b>24</b><span>atendidos</span></div>
+  <div class="part"><b>6</b><span>parcialmente</span></div>
+  <div class="no"><b>6</b><span>não atendidos</span></div>
+  <div><b>36</b><span>requisitos no total</span></div>
+</div>
+
+<section>
+  <div class="bhead"><h2>new-way-samsung</h2><span class="meta">fleet-ui · 26 commits · 21 a 24/10 · código do experimento</span></div>
+  <div class="tablebox"><table>
+    <thead><tr><th>ID</th><th>Requisito</th><th>Origem</th><th>Estado</th><th>Evidência</th></tr></thead>
+    <tbody>
+      <tr><td class="id">RF01</td><td class="req">Percurso do experimento BLE rodando no Docker, num mundo aberto, sem bater em nada<span class="kind">funcional</span></td><td class="org">“rodar num lugar aberto para que não batesse nas coisas”</td><td><span class="st ok">atendido</span></td><td class="ev">Mundo <code>cbsoft_open</code> com o mesmo referencial do mapa do salão; corridas de 96,2 a 96,5 m concluídas, a última em 24/10 a partir de um clone limpo.</td></tr>
+      <tr><td class="id">RF02</td><td class="req">Executar pelo frontend com um clique, abrindo já em Reproduzir e no percurso certo<span class="kind">funcional</span></td><td class="org">“deixe pré-setado em reproduzir e o percurso cbsoft”</td><td><span class="st ok">atendido</span></td><td class="ev">Teste de ponta a ponta “abre em Reproduzir com percurso_cbsoft” passando (7 de 7 em 26/10).</td></tr>
+      <tr><td class="id">RF03</td><td class="req">Um mapa só na tela, sem a planta do armazém sobreposta<span class="kind">funcional</span></td><td class="org">“veja que tem 2 mapas”</td><td><span class="st ok">atendido</span></td><td class="ev">Planta só aparece se o mapa ao vivo couber nela; no percurso CBSoft o botão fica “Planta · outro mapa”, desativado (prints do manual).</td></tr>
+      <tr><td class="id">RF04</td><td class="req">Frontend, backend e sincronia funcionando sem travar<span class="kind">funcional</span></td><td class="org">“quero que o frontend esteja funcionando 100%… o backend e sincronia”</td><td><span class="st ok">atendido</span></td><td class="ev">Pose em tempo real e servidor sem travamentos (f81b090); 2 handlers que bloqueavam o servidor por até 17 s corrigidos (e991202); 131 testes passando em 26/10.</td></tr>
+      <tr><td class="id">RF05</td><td class="req">Bloquear rota de outro mundo<span class="kind">funcional</span></td><td class="org">revisão de código</td><td><span class="st ok">atendido</span></td><td class="ev">Aviso e botão desativado; teste de ponta a ponta “rota de outro mundo bloqueia o replay”.</td></tr>
+      <tr><td class="id">RF06</td><td class="req">Análise do experimento integrada ao Fleet UI<span class="kind">funcional</span></td><td class="org">“o código das meninas tá incorporado no meu código?”</td><td><span class="st ok">atendido</span></td><td class="ev"><code>make cbsoft-csv</code> e <code>make cbsoft-analise</code>; Tabela 3 do artigo refeita a partir dos dados brutos com diferença ≤ 0,4 dBm e ≤ 0,3 m.</td></tr>
+      <tr><td class="id">RF07</td><td class="req">Agentes de IA fora da tela<span class="kind">funcional</span></td><td class="org">“tire a parte de agentes de IA”</td><td><span class="st ok">atendido</span></td><td class="ev">Painel atrás de <code>VITE_SHOW_AGENTS</code>; teste de ponta a ponta “agentes de IA ficam fora da tela”.</td></tr>
+      <tr><td class="id">RF08</td><td class="req">Ligar no TurtleBot4 real pelo Wi-Fi<span class="kind">funcional</span></td><td class="org">“a dissertação vai até o ponto de utilizar o turtlebot4 lá na UFPE”</td><td><span class="st part">parcial</span></td><td class="ev"><code>make robot-check</code> e <code>make robot-up</code> prontos; testados só com o robô falso (checagem OK, Nav2 ativo, deslocamento de 1 m concluído). Nunca com o robô de verdade.</td></tr>
+      <tr><td class="id">RF09</td><td class="req">Botão Parar que para o robô<span class="kind">funcional · segurança</span></td><td class="org">achado na preparação do roteiro</td><td><span class="st ok">atendido</span></td><td class="ev">Encerra o experimento, cancela o Nav2 e fecha a gravação; com o robô falso, parou cerca de 80 cm depois do clique (4830202). A latência de ~3 s fica em RNF05.</td></tr>
+      <tr><td class="id">RF10</td><td class="req">Volta automática ao início<span class="kind">funcional</span></td><td class="org">uso repetido do percurso</td><td><span class="st no">não atendido</span></td><td class="ev">Implementada e com o giro de 180° corrigido (e991202), mas nunca validada numa rota de 96 m; o manual manda reiniciar o <code>cbsoft-up</code>.</td></tr>
+      <tr><td class="id">RF11</td><td class="req">Velocidade média correta nas métricas<span class="kind">funcional</span></td><td class="org">bug achado nos prints</td><td><span class="st ok">atendido</span></td><td class="ev">Usa a janela da odometria (b300a6b): 0,139 → 0,248 m/s na mesma gravação.</td></tr>
+      <tr><td class="id">RF12</td><td class="req">Manual e passo a passo em PDF, sem nomes das autoras<span class="kind">documentação</span></td><td class="org">“passo a passo… em pdf”, “tire o nome de Fernanda e Bia”</td><td><span class="st ok">atendido</span></td><td class="ev">Manual (9 pág.) e roteiro (5 pág.) em <code>docs/ufpe/</code>; nenhum nome no texto dos PDFs nem no código.</td></tr>
+      <tr><td class="id">RF13</td><td class="req">Testes automáticos do frontend<span class="kind">qualidade</span></td><td class="org">uso do skill de Playwright</td><td><span class="st ok">atendido</span></td><td class="ev">7 testes de ponta a ponta, 5 de 5 nas repetições, mais 1 contra o stack real; no CI.</td></tr>
+      <tr><td class="id">RF14</td><td class="req">Recuperar os dados e o script da campanha oficial<span class="kind">rastreabilidade</span></td><td class="org">re-validação da dissertação</td><td><span class="st ok">atendido</span></td><td class="ev">Recuperados do <code>git stash</code> e commitados (6e2484d, ec563fd); números do Cap. 8 reproduzidos exatamente.</td></tr>
+      <tr><td class="id">RNF01</td><td class="req">Só o próprio PC controla o robô<span class="kind">não funcional · segurança</span></td><td class="org">auditoria de 24/10</td><td><span class="st no">não atendido</span></td><td class="ev">Backend e tela em <code>0.0.0.0</code>, sem login; comando de movimento aceito pelo IP de rede (HTTP 200). Aguardando sua decisão.</td></tr>
+      <tr><td class="id">RNF02</td><td class="req">Resultados comparáveis aos do artigo<span class="kind">não funcional · validade</span></td><td class="org">“algo mais para o experimento não falhar”</td><td><span class="st no">não atendido</span></td><td class="ev">O artigo usou o controlador DWB (Humble); o Fleet UI usa o MPPI (Jazzy). Velocidade igual, jeito de andar diferente.</td></tr>
+      <tr><td class="id">RNF03</td><td class="req">Funciona num PC que não é este<span class="kind">não funcional · portabilidade</span></td><td class="org">“ver se nada quebra em outro PC”</td><td><span class="st ok">atendido</span></td><td class="ev">Clone limpo, imagem montada sem cache, 157 testes, corrida completa e robô falso, tudo em 24/10.</td></tr>
+      <tr><td class="id">RNF04</td><td class="req">Código do experimento coberto por testes<span class="kind">não funcional · qualidade</span></td><td class="org">auditoria</td><td><span class="st no">não atendido</span></td><td class="ev"><code>experiment_repeatability.py</code> com 0% de cobertura (717 linhas); coletor também em 0%.</td></tr>
+      <tr><td class="id">RNF05</td><td class="req">Parada rápida<span class="kind">não funcional · segurança</span></td><td class="org">teste do Parar</td><td><span class="st part">parcial</span></td><td class="ev">Funciona, mas leva cerca de 3 s (processo <code>ros2</code> novo a cada comando). Documentado no manual e no roteiro.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="bhead"><h2>dissertacao</h2><span class="meta">fleet-ui (worktree) · 5 commits · 22 e 23/10 · texto da dissertação</span></div>
+  <div class="tablebox"><table>
+    <thead><tr><th>ID</th><th>Requisito</th><th>Origem</th><th>Estado</th><th>Evidência</th></tr></thead>
+    <tbody>
+      <tr><td class="id">RD01</td><td class="req">Agentes de IA fora do texto</td><td class="org">“vai sair da dissertação”</td><td><span class="st ok">atendido</span></td><td class="ev">Nenhuma ocorrência de LLM, agentes de IA ou TypeSafe nos capítulos e resumos (26/10); classificador LLM do piloto FUUT removido.</td></tr>
+      <tr><td class="id">RD02</td><td class="req">Terminar no teste com o TurtleBot4 na UFPE</td><td class="org">“a dissertação vai ficar até o ponto que vamos utilizar o turtlebot4”</td><td><span class="st ok">atendido</span></td><td class="ev">Seção 8.9, estudo de caso, com a etapa final no robô real e os resultados ainda pendentes; Humble × Jazzy verificado (0ae5226).</td></tr>
+      <tr><td class="id">RD03</td><td class="req">Re-validar cada número e afirmação técnica</td><td class="org">“faça re-validação de cada ponto”</td><td><span class="st ok">atendido</span></td><td class="ev">Duas passagens (f1968c0, a5bc827): desvios-padrão, mecanismo do replay, filtro inexistente, script da campanha, citações fiéis às fontes.</td></tr>
+      <tr><td class="id">RD04</td><td class="req">5 vieses com embasamento teórico verificado</td><td class="org">“preciso comprovar embasamentos sérios”</td><td><span class="st ok">atendido</span></td><td class="ev">Cap. 7, Ameaças à Validade, com 11 referências conferidas (DOI ou PDF); <code>EMBASAMENTO_VIESES.md</code>.</td></tr>
+      <tr><td class="id">RD05</td><td class="req">Compila sem erros</td><td class="org">necessidade</td><td><span class="st ok">atendido</span></td><td class="ev">Compilada de novo em 26/10: 121 páginas, nenhuma referência indefinida.</td></tr>
+      <tr><td class="id">RD06</td><td class="req">Zip do Overleaf atualizado</td><td class="org">“qual o zip para overleaf?”</td><td><span class="st ok">atendido</span></td><td class="ev"><code>dissertacao_overleaf_2026-10-23.zip</code> gerado às 21:34, junto com o último commit.</td></tr>
+      <tr><td class="id">RD07</td><td class="req">Texto refletir o que o software faz hoje</td><td class="org">consistência</td><td><span class="st part">parcial</span></td><td class="ev">A seção 8.9 cita o <code>robot-check</code>, mas não o <code>robot-up</code>, o teste com o robô falso nem o repositório <code>fleet-ui-ufpe</code>, todos posteriores a 23/10.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="bhead"><h2>fleet-ui-ufpe · main</h2><span class="meta">repositório novo · 2 commits · 24/10 · entrega para o laboratório</span></div>
+  <div class="tablebox"><table>
+    <thead><tr><th>ID</th><th>Requisito</th><th>Origem</th><th>Estado</th><th>Evidência</th></tr></thead>
+    <tbody>
+      <tr><td class="id">RU01</td><td class="req">Repositório próprio, tudo no main</td><td class="org">“outro repositório… no main… fleet-ui-ufpe”</td><td><span class="st ok">atendido</span></td><td class="ev">github.com/eduardowanderleyde/fleet-ui-ufpe, histórico novo, sem commits antigos.</td></tr>
+      <tr><td class="id">RU02</td><td class="req">Só o conjunto do experimento</td><td class="org">mesmo pedido</td><td><span class="st part">parcial</span></td><td class="ev">Dados e notas da dissertação ficaram de fora, mas o código inteiro foi junto (cerca de 3.700 linhas sem uso no teste). Você aprovou assim (“não, tá ótimo”).</td></tr>
+      <tr><td class="id">RU03</td><td class="req">Funciona clonando do GitHub em outro lugar</td><td class="org">“ver se nada quebra em outro PC”</td><td><span class="st ok">atendido</span></td><td class="ev">Clone em <code>~/Downloads</code> por HTTPS público sem login; imagem do zero; 157 testes; corrida; robô falso.</td></tr>
+      <tr><td class="id">RU04</td><td class="req">Demonstração</td><td class="org">“quero uma demonstração desse repo”</td><td><span class="st ok">atendido</span></td><td class="ev">GIF de 32 s no README e vídeo completo em <code>~/Downloads</code>.</td></tr>
+      <tr><td class="id">RU05</td><td class="req">Sem nomes das autoras</td><td class="org">pedido de 23/10</td><td><span class="st ok">atendido</span></td><td class="ev">Nenhuma ocorrência no repositório (26/10).</td></tr>
+      <tr><td class="id">RU06</td><td class="req">Documentação coerente com o repositório público</td><td class="org">consistência</td><td><span class="st part">parcial</span></td><td class="ev">O manual ainda diz “Se o repositório for privado, o GitHub pede login”; agora ele é público. Também falta confirmar com as autoras que o mapa do salão e os scripts delas podem ser públicos.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="bhead"><h2>mission-coordinate-large-scale</h2><span class="meta">fleet-ui · 7 commits · 21 e 22/10 · diário do projeto (memory.md)</span></div>
+  <div class="tablebox"><table>
+    <thead><tr><th>ID</th><th>Requisito</th><th>Origem</th><th>Estado</th><th>Evidência</th></tr></thead>
+    <tbody>
+      <tr><td class="id">RM01</td><td class="req">Registrar o trabalho no memory.md</td><td class="org">“grave o que tava fazendo no memory.md”, “anotou tudo né?”</td><td><span class="st no">não atendido</span></td><td class="ev">Última entrada em 22/10 21:23. Faltam robot-check, robot-up, robô falso, Parar corrigido, testes de tela, code review, auditoria, manual e roteiro, e o repositório <code>fleet-ui-ufpe</code>.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="bhead"><h2>Transversais</h2><span class="meta">valem para todas as branches</span></div>
+  <div class="tablebox"><table>
+    <thead><tr><th>ID</th><th>Requisito</th><th>Origem</th><th>Estado</th><th>Evidência</th></tr></thead>
+    <tbody>
+      <tr><td class="id">RT01</td><td class="req">Dados oficiais da dissertação a salvo</td><td class="org">MCE na máquina de desenvolvimento</td><td><span class="st no">não atendido</span></td><td class="ev">As 19 gravações de 15/09 continuam só neste disco. O único disco externo montado tem 3,8 MB, sem cópia.</td></tr>
+      <tr><td class="id">RT02</td><td class="req">Tudo commitado e enviado</td><td class="org">rotina</td><td><span class="st ok">atendido</span></td><td class="ev">As 4 branches estão iguais ao remoto; nada pendente além das duas pastas soltas de sempre na raiz do <code>fleet-ui</code>.</td></tr>
+      <tr><td class="id">RT03</td><td class="req">Versionamento organizado</td><td class="org">“reveja o software com o versionamento”</td><td><span class="st part">parcial</span></td><td class="ev">O repositório de entrega usa o <code>main</code>; no <code>fleet-ui</code>, o <code>main</code> continua 172 commits atrás e não há nenhuma tag.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>O que fazer, pela ordem</h2>
+  <ol class="next">
+    <li><b>Backup das gravações da dissertação</b> (RT01): é o único item em que algo pode se perder de vez.</li>
+    <li><b>Fechar o acesso pela rede</b> (RNF01): só precisa da sua decisão; a correção é pequena.</li>
+    <li><b>Controlador DWB no <code>robot-up</code></b> (RNF02): antes da ida à UFPE, para as corridas serem comparáveis às do artigo.</li>
+    <li><b>Atualizar o memory.md</b> (RM01) e a seção 8.9 da dissertação (RD07).</li>
+    <li><b>Ajustar o manual público</b> (RU06) e confirmar com as autoras o mapa e os scripts no repositório público.</li>
+    <li><b>Testes do script do experimento</b> (RNF04), Parar mais rápido (RNF05) e validação da volta ao início (RF10).</li>
+    <li><b>Robô real</b> (RF08): só no dia, seguindo o roteiro.</li>
+  </ol>
+</section>
+
+<footer>
+  <p>Fontes: histórico do git das 4 branches (19 a 26/10), pedidos desta conversa, auditoria de 24/10 e verificações refeitas em 26/10 (131 testes de backend, 7 de ponta a ponta, compilação da dissertação, buscas nos repositórios).</p>
+</footer>
+</div>
