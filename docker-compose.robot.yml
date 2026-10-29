@@ -18,6 +18,7 @@ services:
       YAW: ${YAW:-0.0}
       NAV2_DEFAULT_SERVER_TIMEOUT_MS: ${NAV2_DEFAULT_SERVER_TIMEOUT_MS:-1000}
       NAV2_NAVFN_USE_ASTAR: ${NAV2_NAVFN_USE_ASTAR:-true}
+      NAV2_CONTROLLER: ${NAV2_CONTROLLER:-}  # dwb = o controlador do artigo (Humble); vazio = MPPI
   fleet:
     environment:
       <<: *robot-env
