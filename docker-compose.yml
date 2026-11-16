@@ -14,6 +14,7 @@ x-fleet-common: &fleet-common
     - /tmp/.X11-unix:/tmp/.X11-unix:rw
     - ./fleet_ws/routes:/workspace/fleet_ws/routes
     - ./fleet_ws/collections:/workspace/fleet_ws/collections
+    - ./fleet_ws/agent_runs:/workspace/fleet_ws/agent_runs
     - ./frontend/public:/workspace/frontend/public
 
 services:

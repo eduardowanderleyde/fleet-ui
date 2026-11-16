@@ -21,3 +21,6 @@ __pycache__/
 .vscode/
 *.swp
 *~
+
+# Conversas dos agentes (dados da pesquisa: fazer backup, não commitar)
+fleet_ws/agent_runs/

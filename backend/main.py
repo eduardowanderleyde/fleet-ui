@@ -907,6 +907,8 @@ async def agent_run(body: AgentRunRequest):
         "running": True, "steps": [], "final_text": None, "error": None,
         "instruction": instruction, "model": body.model, "started_at": _now_iso(), "finished_at": None,
     }
+    # Grava já no início: se o backend/PC fechar no meio, a instrução não se perde.
+    _save_agent_run(f"single_{job_id}", {"kind": "single", "job_id": job_id, **_agent_jobs[job_id]})
 
     async def _run_and_persist():
         await _execute_planner(_agent_jobs[job_id], instruction, body.model)
@@ -945,6 +947,8 @@ async def agent_run_fleet(body: AgentFleetRunRequest):
         "running": True, "robots": robots_state, "model": body.model,
         "started_at": _now_iso(), "finished_at": None,
     }
+    # Grava já no início: se o backend/PC fechar no meio, as instruções não se perdem.
+    _save_agent_run(f"fleet_{job_id}", {"kind": "fleet", "job_id": job_id, **_fleet_jobs[job_id]})
 
     async def _run_all():
         await asyncio.gather(*(
