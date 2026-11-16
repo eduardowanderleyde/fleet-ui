@@ -10,7 +10,7 @@ finalmente chegam ao alcance de todos.''}{\normalfont --- adaptado de Max Planck
 
 A robótica autônoma atravessa um momento singular em sua história. A convergência de
 plataformas de software maduras, especialmente o ROS~2 \cite{macenski2022ros2},
-com hardware acessível e simuladores de alta fidelidade tornou possível, pela
+com hardware acessível e simuladores de alta fidelidade \cite{koenig2004gazebo} tornou possível, pela
 primeira vez, que grupos de pesquisa sem grandes laboratórios físicos conduzam
 experimentos de navegação com rigor comparável ao de instituições bem equipadas.
 O que antes exigia uma sala climatizada, técnicos especializados e robôs industriais
@@ -79,7 +79,7 @@ do ROS~2 \cite{macenski2022ros2} exige que os nós de navegação sejam ativados
 sequência correta antes que qualquer comando seja enviado. As políticas de QoS de
 tópicos como \texttt{/\allowbreak scan} (BEST\_EFFORT), \texttt{/\allowbreak pose} (RELIABLE) e
 \texttt{/\allowbreak amcl\_\allowbreak pose} (TRANSIENT\_LOCAL) determinam se os dados serão efetivamente
-gravados nos bags ou silenciosamente descartados. O protocolo de ações do Nav2
+gravados nos bags ou silenciosamente descartados \cite{omgdds2015}. O protocolo de ações do Nav2
 \cite{macenski2020marathon} opera de forma assíncrona, e uma chamada prematura ao
 servidor de ações resulta em timeout sem mensagem de erro clara. O SLAM Toolbox
 \cite{macenski2021slam} precisa de scans suficientes antes de publicar uma estimativa
@@ -115,7 +115,7 @@ nesta dissertação visa resolver.
 \label{sec:frota}
 
 A tendência recente em robótica de serviço e logística autônoma é operar não um
-robô isolado, mas frotas de agentes coordenados \cite{macenski2022ros2}. Em um
+robô isolado, mas frotas de agentes coordenados \cite{macenski2022ros2,verma2021}. Em um
 testbed experimental, isso cria possibilidades metodológicas que um único robô
 não oferece: enquanto uma Unidade Móvel sob Teste (MUUT) percorre sua rota, uma
 Unidade Fixa sob Teste (FUUT) pode observar a mesma cena de um ângulo externo,
@@ -141,24 +141,16 @@ garante condições perfeitamente controladas mas abstrai os fenômenos físicos
 superfícies reais, slip de roda e variação de calibração de sensores ao longo do
 tempo.
 
-Embora a Seção~\ref{sec:frota} discuta o papel da robótica de frota, e a
-arquitetura de papéis MUUT/FUUT/SU seja formalizada para suportar múltiplas
-unidades, a campanha principal de avaliação empírica desta dissertação
-(Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados}, QA1--QA4)
-restringe-se a uma única unidade móvel sob teste (MUUT), sem unidade fixa
-(FUUT) ativa e sem operação simultânea de múltiplos robôs. Um piloto
-pequeno e posterior a essa campanha principal ($N=3$,
-Seção~\ref{sec:res_fuut_piloto}) exercita a combinação MUUT+FUUT pela
-primeira vez, mas permanece preliminar e não substitui uma avaliação
-formal da dualidade endógena/exógena nas condições QA1--QA4. A
-coordenação de frota com múltiplos robôs navegando simultaneamente
-permanece, portanto, contribuição de projeto e arquitetura verificada em
-software, não resultado empírico coberto pela avaliação de
-repetibilidade; a extensão da avaliação para múltiplos robôs navegando é
-tratada como trabalho futuro (Seção~\ref{sec:futuros}).
+Embora a arquitetura de papéis MUUT/FUUT/SU (Seção~\ref{sec:frota}) seja
+formalizada para múltiplas unidades, a campanha principal de avaliação
+(Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados}, QA1--QA4) usa uma
+única MUUT, sem FUUT ativa. Um piloto MUUT+FUUT preliminar ($N=3$) está na
+Seção~\ref{sec:res_fuut_piloto}, e a avaliação com múltiplos robôs
+navegando simultaneamente fica como trabalho futuro
+(Seção~\ref{sec:futuros}).
 
 As métricas adotadas (RMSE, erro de endpoint e consistência temporal) são
-métricas espaciotemporais clássicas para avaliação de navegação \cite{amigoni2010},
+métricas espaciotemporais clássicas para avaliação de navegação \cite{amigoni2010,sturm2012,zhang2018trajectory},
 mas não capturam aspectos como consumo energético, desgaste mecânico ou robustez
 a falhas de comunicação. Essas dimensões constituem extensões naturais do trabalho,
 identificadas na seção de trabalhos futuros.
@@ -169,10 +161,7 @@ identificadas na seção de trabalhos futuros.
 O objetivo geral desta dissertação é projetar e implementar um framework
 open-source de orquestração de experimentos de repetibilidade de navegação
 autônoma para frotas de robôs móveis em ROS~2, avaliando empiricamente sua
-capacidade de produzir execuções repetíveis. Essa avaliação, como detalhado
-no Capítulo~\ref{chap:avaliacao}, foi conduzida com uma única unidade móvel; a
-extensão para operação simultânea de múltiplos robôs é tratada como trabalho
-futuro (Seção~\ref{sec:futuros}).
+capacidade de produzir execuções repetíveis.
 
 Os objetivos específicos são:
 
@@ -242,18 +231,11 @@ Avaliação e Resultados (Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados
     controle explícito de ação de navegação, pose inicial e retorno ao ponto
     de partida entre réplicas) apresentem RMSE e variabilidade de duração
     substancialmente maiores que a campanha controlada final. Esta dissertação não
-    hipotetiza, a priori, uma causa única para essa diferença; a Seção
-    ~\ref{sec:res_exp_complementares} discute evidência exploratória
+    hipotetiza, a priori, uma causa única para essa diferença; a Seção~\ref{sec:res_exp_complementares} discute evidência exploratória
     compatível com H3, mas insuficiente para atribuir causalidade específica,
     e a Seção~\ref{sec:ameacas} trata essa limitação como ameaça à validade
-    de conclusão. Diferentemente de H2, que estabelece um critério numérico
-    explícito (RMSE inferior a 25\,cm), H3 não define um limiar quantitativo
-    de aceite: trata-se de uma hipótese de natureza qualitativa e exploratória,
-    voltada a caracterizar uma tendência (aumento de variabilidade fora do
-    protocolo controlado) e não a confirmar ou refutar um valor-limite
-    pré-definido. As duas hipóteses são "verificadas empiricamente" em
-    sentidos distintos: H2 por comparação direta com um limiar, H3 por
-    análise descritiva e exploratória dos dados coletados.
+    de conclusão. Ao contrário de H2, H3 é qualitativa e não tem limiar de
+    aceite (Seção~\ref{sec:questoes}, QA4).
 
     \item[PP4: Custo de engenharia para o pesquisador.] O framework reduz
     o esforço de engenharia necessário para configurar e executar um
@@ -273,7 +255,7 @@ plataforma simulada e uma única configuração de navegação, limitação reco
 explicitamente na Seção~\ref{sec:ameacas}. As hipóteses acima são tratadas,
 portanto, como proposições descritivas a serem corroboradas ou refutadas pela
 evidência empírica coletada, no espírito de um estudo exploratório de engenharia
-de software experimental \cite{amigoni2010}, não de um experimento controlado
+de software experimental \cite{amigoni2010,runeson2009,wohlin2012}, não de um experimento controlado
 com validação estatística confirmatória.
 
 \section{Contribuições}
@@ -299,7 +281,7 @@ As contribuições desta dissertação podem ser organizadas em três dimensões
     simulação e navegação.
 
     \item Backend REST em FastAPI que expõe serviços ROS~2 sem dependência de
-    ROSBridge, reduzindo a configuração necessária para novos usuários.
+    ROSBridge \cite{toris2015}, reduzindo a configuração necessária para novos usuários.
 
     \item Extensão de qualidade de engenharia construída após a
     campanha de avaliação quantitativa reportada nos Capítulos~\ref{chap:avaliacao}
@@ -346,35 +328,24 @@ As contribuições desta dissertação podem ser organizadas em três dimensões
 \section{Organização da Dissertação}
 \label{sec:organizacao}
 
-O restante desta dissertação está organizado da seguinte forma.
-
-O \textbf{Capítulo~\ref{chap:fundamentacao}} apresenta o embasamento teórico sobre
+O restante desta dissertação está organizado da seguinte forma. O
+Capítulo~\ref{chap:fundamentacao} apresenta o embasamento teórico sobre
 navegação autônoma, cinemática diferencial, SLAM, o ecossistema ROS~2 e Nav2,
-e as métricas clássicas de avaliação de repetibilidade de trajetórias.
-
-O \textbf{Capítulo~\ref{chap:relacionados}} discute trabalhos relacionados em
-frameworks de navegação, avaliação de SLAM e metodologias de teste em robótica,
-posicionando a proposta em relação ao estado da arte.
-
-O \textbf{Capítulo~\ref{chap:arquitetura}} descreve a arquitetura do framework
-proposto, incluindo a formalização dos papéis experimentais, o orquestrador de frota,
-o coletor de dados e a interface web.
-
-O \textbf{Capítulo~\ref{chap:metodologia}} detalha o protocolo record--replay,
-as métricas adotadas e o procedimento de análise de repetibilidade.
-
-O \textbf{Capítulo~\ref{chap:implementacao}} apresenta decisões de implementação,
-integração com o ambiente de simulação Gazebo Harmonic e a interface web desenvolvida.
-
-O \textbf{Capítulo~\ref{chap:avaliacao}} descreve o arranjo experimental, as
-questões de avaliação e os critérios de validação adotados.
-
-O \textbf{Capítulo~\ref{chap:resultados}} analisa os resultados obtidos no
-cenário de validação controlado e nas execuções exploratórias
-complementares, e discute suas implicações.
-
-O \textbf{Capítulo~\ref{chap:conclusao}} conclui com um resumo das contribuições,
-limitações identificadas e a agenda de trabalhos futuros.
-
-O \textbf{Glossário} reúne os termos técnicos centrais utilizados ao longo da
-dissertação com suas definições precisas.
+e as métricas clássicas de avaliação de repetibilidade de trajetórias. O
+Capítulo~\ref{chap:relacionados} discute trabalhos relacionados em frameworks
+de navegação, avaliação de SLAM e metodologias de teste em robótica,
+posicionando a proposta em relação ao estado da arte. O
+Capítulo~\ref{chap:arquitetura} descreve a arquitetura do framework proposto,
+incluindo a formalização dos papéis experimentais, o orquestrador de frota, o
+coletor de dados e a interface web. O Capítulo~\ref{chap:metodologia} detalha
+o protocolo record--replay, as métricas adotadas e o procedimento de análise
+de repetibilidade. O Capítulo~\ref{chap:implementacao} apresenta decisões de
+implementação, integração com o ambiente de simulação Gazebo Harmonic e a
+interface web desenvolvida. O Capítulo~\ref{chap:avaliacao} descreve o arranjo
+experimental, as questões de avaliação e os critérios de validação adotados. O
+Capítulo~\ref{chap:resultados} analisa os resultados obtidos no cenário de
+validação controlado e nas execuções exploratórias complementares, e discute
+suas implicações. O Capítulo~\ref{chap:conclusao} conclui com um resumo das
+contribuições, limitações identificadas e a agenda de trabalhos futuros. Por
+fim, o Glossário reúne o vocabulário próprio do trabalho e os termos usados sem
+definição no texto.

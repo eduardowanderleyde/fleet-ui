@@ -6,7 +6,7 @@
 
 O protocolo experimental é composto por três fases sequenciais que garantem
 comparabilidade entre execuções: gravação do baseline, execuções de replay e
-análise offline.
+análise offline (Figura~\ref{fig:protocolo_record_replay}).
 
 \begin{figure}[H]
 \centering
@@ -18,7 +18,7 @@ reexecução e auditoria independentes de cada etapa.}
 \end{figure}
 
 
-\subsection{Fase 1 — Gravação do Baseline}
+\subsection{Fase 1 --- Gravação do Baseline}
 
 A gravação do baseline define a rota de referência. O pesquisador especifica um
 conjunto de waypoints $\{w_1, w_2, \ldots, w_k\}$ no referencial do mapa SLAM.
@@ -26,7 +26,7 @@ O sistema ativa a coleta de sensores, aciona o \texttt{start\_\allowbreak record
 e comanda o robô via \texttt{NavigateToPose} sequencial para cada waypoint.
 Durante todo o trajeto, o orquestrador consulta a cadeia TF \texttt{map} $\to$
 \texttt{base\_\allowbreak link} a 5\,Hz e salva a pose do robô sempre que ele
-se deslocou ao menos 10\,cm ou girou mais de 5° desde a última pose salva;
+se deslocou ao menos 10\,cm ou girou mais de 5\textdegree{} desde a última pose salva;
 quando o Nav2 confirma a chegada a um waypoint, a pose desse waypoint também é
 acrescentada. Ao final, \texttt{stop\_\allowbreak record} persiste o arquivo de
 rota YAML e \texttt{disable\_\allowbreak collection} fecha o bag.
@@ -34,10 +34,10 @@ rota YAML e \texttt{disable\_\allowbreak collection} fecha o bag.
 O arquivo de rota descreve, portanto, o caminho que o robô \textit{fez}, em
 poses densas, e não apenas os poucos pontos \textit{pedidos}. Isso importa
 porque o Nav2 considera a meta atingida dentro da tolerância configurada
-(0,25\,m em posição e 0,25\,rad, aproximadamente 14°, em ângulo), não
+(0,25\,m em posição e 0,25\,rad, aproximadamente 14\textdegree{}, em ângulo), não
 necessariamente no ponto exato.
 
-\subsection{Fase 2 — Execuções de Replay}
+\subsection{Fase 2 --- Execuções de Replay}
 
 As execuções de replay reproduzem a rota gravada. O orquestrador lê o arquivo
 YAML do baseline e envia todas as poses como lista para o action
@@ -56,14 +56,16 @@ Antes de cada replay, o robô retorna ao ponto de partida via \texttt{go\_\allow
 o robô parta da mesma pose inicial em todas as execuções, requisito fundamental
 para isolamento de variáveis.
 
-\subsection{Fase 3 — Análise Offline}
+\subsection{Fase 3 --- Análise Offline}
 
 A análise é realizada offline sobre os bags coletados. Para cada bag, o script
 \texttt{analyze\_\allowbreak runs.py} extrai a trajetória da odometria
 (\texttt{/\allowbreak odom}, publicada a 30\,Hz pelo plugin DiffDrive da simulação)
 e interpola todas as trajetórias para uma grade de tempo normalizada $\{t_1, t_2, \ldots, t_n\}$
 \cite{amigoni2010}.
-O RMSE pairwise é calculado conforme a Equação~\ref{eq:rmse_pairwise}.
+O RMSE pairwise é calculado conforme a Equação~\ref{eq:rmse_pairwise},
+seguindo a prática de avaliar trajetórias pelo RMSE entre poses
+\cite{sturm2012,zhang2018trajectory}.
 
 A normalização temporal foi escolhida, em vez de alternativas de
 alinhamento mais elaboradas da literatura de comparação de trajetórias,
@@ -102,8 +104,8 @@ adotada por \citeonline{maset2022}:
     de dois percursos. Mede se o robô termina no mesmo lugar, independente do
     caminho percorrido.
 
-    \item \textbf{Consistência temporal}: desvio padrão das durações entre execuções
-    equivalentes. Um desvio pequeno indica que o controlador opera a velocidades
+    \item \textbf{Consistência temporal}: coeficiente de variação das durações entre
+    execuções equivalentes, $\text{CV}_t = \sigma_t / \mu_t$. Um valor pequeno indica que o controlador opera a velocidades
     estáveis e não encontra obstáculos que forcem replanejamentos.
 
     \item \textbf{Comprimento de percurso}: soma das distâncias euclidianas entre
@@ -194,23 +196,23 @@ o hardware real \cite{amigoni2010}.
 \centering
 \caption{Ambiente experimental utilizado nas validações reportadas nesta dissertação.}
 \label{tab:ambiente_hw}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{lX}
 \toprule
 \textbf{Componente} & \textbf{Especificação} \\
 \midrule
 Sistema operacional & Ubuntu 24.04 LTS \\
-Middleware ROS & ROS~2 Jazzy Jalisco (instalação \textit{desktop}) \\
-Simulador & Gazebo Harmonic \\
+Middleware ROS & ROS~2 Jazzy Jalisco (instalação \textit{desktop}) \cite{macenski2022ros2} \\
+Simulador & Gazebo Harmonic 8.x \cite{koenig2004gazebo} \\
 Pacote de simulação & \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} \\
 Modelo de robô & TurtleBot4 Standard \\
 Sensor LiDAR & RPLIDAR 2D simulado (360 amostras, 10\,Hz, 0,164--20\,m) \\
 Sensor de imagem & Câmera OAK-D Pro \\
 Mundo de simulação & \textit{warehouse} (\texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim}) \\
-Pilha de navegação & Navigation2 (Nav2), controlador MPPI \\
-SLAM & SLAM Toolbox, modo síncrono \\
+Pilha de navegação & Navigation2 (Nav2) \cite{macenski2020marathon}, controlador MPPI \cite{williams2016} \\
+SLAM & SLAM Toolbox \cite{macenski2021slam}, modo síncrono \\
 Formato de gravação & rosbag2 / MCAP \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \section{Fluxo de Execução do Protocolo}

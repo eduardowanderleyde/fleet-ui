@@ -27,14 +27,14 @@ ilustra essa estrutura.
 \begin{scope}[on background layer]
 \node[draw, dashed, rounded corners, fit=(orch)(msgs)(coll), inner sep=0.4cm] (orchlayer) {};
 \end{scope}
-\node[font=\small, above=0.25cm of orchlayer.north] (orchlbl) {Camada de orquestração e coleta};
+\node[font=\small, anchor=south west] (orchlbl) at ([yshift=0.1cm]orchlayer.north west) {Camada de orquestração e coleta};
 
 \node[modbox, below=2.2cm of msgs] (backend) {Backend FastAPI\\\scriptsize bridge REST, sem ROSBridge};
 \node[modbox, below=1.8cm of backend] (frontend) {Frontend React\\\scriptsize mapa SLAM, waypoints};
 
-\draw[arr] (sim.south) -- (orchlayer.north)
+\draw[arr] (sim.south) -- (sim.south |- orchlayer.north)
   node[lbl, pos=0.22, right=0.25cm] {tópicos ROS~2};
-\draw[arr] (orchlayer.south) -- (backend.north)
+\draw[arr] (backend.north |- orchlayer.south) -- (backend.north)
   node[lbl, pos=0.5, right=0.3cm] {REST};
 \draw[arr] (backend.south) -- (frontend.north)
   node[lbl, pos=0.5, right=0.3cm] {HTTP + WebSocket};
@@ -58,13 +58,9 @@ entre simulação, orquestração/coleta, backend e interface. Segundo, o
 um backend REST e de uma interface web (Seção~\ref{sec:backend_web}) permite
 que a operação cotidiana do framework (lançar uma formação, iniciar uma
 gravação, consultar um resultado) não dependa de conhecimento de tópicos,
-serviços ou \textit{namespaces} do DDS. Terceiro, a \textbf{extensibilidade}:
-o Painel de Simulação (Seção~\ref{sec:painel_simulacao}), adicionado
-posteriormente à campanha de avaliação, introduz endpoints de gerenciamento
-de processos de longa duração inteiramente sobre a API REST já existente,
-sem alterar o orquestrador ROS~2 ou o coletor de dados --- evidência de que
-essas fronteiras entre camadas sustentam extensões substanciais sem
-retrabalho na base. É essa
+serviços ou \textit{namespaces} do DDS. Terceiro, a \textbf{extensibilidade}: novas funções devem poder entrar sobre
+a API REST sem retrabalho no orquestrador e no coletor, como mostra o Painel de
+Simulação (Seção~\ref{sec:arq_conclusao}). É essa
 combinação de requisitos --- e não só a ordem em que os problemas foram
 encontrados durante o desenvolvimento --- que motiva a divisão em camadas
 da Figura~\ref{fig:arquitetura}, ainda que, como a Seção~\ref{sec:arq_conclusao}
@@ -75,7 +71,7 @@ problemas concretos surgidos ao longo do desenvolvimento.
 \label{sec:papeis}
 
 A decisão de design mais importante do framework é a formalização de papéis
-experimentais. Cada robô na frota é classificado em um de três papéis:
+experimentais. Cada robô na frota é classificado em um de três papéis (Tabela~\ref{tab:papeis_muut_fuut_su}):
 
 \begin{itemize}
     \item \textbf{MUUT} (\textit{Mobile Unit Under Test/Tasking}): a unidade que
@@ -96,7 +92,7 @@ experimentais. Cada robô na frota é classificado em um de três papéis:
 distinguem: capacidade de receber comandos de navegação e participação na
 coleta de dados sensoriais.}
 \label{tab:papeis_muut_fuut_su}
-\begin{tabular}{lcc}
+\begin{tabular}{@{}lcc@{}}
 \toprule
 \textbf{Papel} & \textbf{Recebe comandos de navegação} & \textbf{Coleta dados sensoriais} \\
 \midrule
@@ -160,8 +156,8 @@ tópico correto, o que permite lookups simultâneos e independentes da cadeia
 
 A execução do orquestrador em um \texttt{MultiThreadedExecutor} é fundamental para
 evitar deadlocks: os callbacks de serviço que invocam \texttt{wait\_\allowbreak for\_\allowbreak server}
-do action client Nav2 precisam ocorrer em threads separadas das que processam
-as respostas de descoberta automática de nós do DDS \cite{macenski2022ros2}. A
+do action client Nav2 \cite{macenski2020marathon} precisam ocorrer em threads separadas das que processam
+as respostas de descoberta automática de nós do DDS \cite{pardocastellote2003dds,macenski2022ros2}. A
 versão inicial com executor single-thread manifestava timeouts intermitentes em
 chamadas de \texttt{go\_\allowbreak to\_\allowbreak point} exatamente por esse motivo, uma
 manifestação específica do ROS~2 da mesma classe geral de defeitos de
@@ -223,10 +219,10 @@ inferência posterior sobre qual arquivo corresponde a qual execução.
 A camada de QoS do coletor é a sua parte mais delicada. Tópicos de sensores
 em simulação Gazebo usam \texttt{BEST\_\allowbreak EFFORT}, enquanto o SLAM Toolbox
 \cite{macenski2021slam} usa \texttt{RELIABLE + VOLATILE} e o AMCL usa
-\texttt{RELIABLE + TRANSIENT\_\allowbreak LOCAL}. Assinar um tópico \texttt{RELIABLE} com
-um subscriber \texttt{BEST\_\allowbreak EFFORT} resulta em incompatibilidade silenciosa de
-QoS: o subscriber nunca recebe mensagens, mas nenhum erro é reportado
-\cite{macenski2022ros2}. A implementação cria perfis de QoS distintos por
+\texttt{RELIABLE + TRANSIENT\_\allowbreak LOCAL}. Um subscriber \texttt{RELIABLE} não recebe nada de um publisher
+\texttt{BEST\_\allowbreak EFFORT}: a combinação é incompatível no DDS, e a única
+indicação é um aviso de QoS incompatível no log, fácil de passar despercebido
+numa coleta longa \cite{macenski2022ros2}. A implementação cria perfis de QoS distintos por
 categoria de tópico, eliminando essa fonte de dados ausentes.
 
 \section{O Backend REST e a Interface Web}
@@ -267,7 +263,11 @@ de terminal.
 
 Antes deste painel, subir a simulação exigia abrir dois terminais e invocar
 manualmente os \textit{launch files} do ROS~2. O painel "Missão
-Coordenada" do frontend elimina essa etapa, permitindo escolher uma
+Coordenada"\footnote{O painel com formações e ativação sequencial está no
+ramo \texttt{mission-\allowbreak coordinate-\allowbreak large-\allowbreak scale}
+do repositório (\textit{commit} \texttt{9626f84}, de 22/10/2026), e não no
+ramo usado nas campanhas de repetibilidade desta dissertação.} do frontend
+elimina essa etapa, permitindo escolher uma
 formação para a frota e lançar ou encerrar a simulação a partir de um
 único botão; a mecânica de processo por trás desse painel (endpoints,
 gerenciamento dos processos de longa duração e leitura de log) é
@@ -275,35 +275,24 @@ descrita no Capítulo~\ref{chap:implementacao}
 (Seção~\ref{sec:impl_backend_simulacao}).
 
 A decisão de arquitetura relevante para este capítulo é não subir, no modo
-com múltiplos robôs, mais de uma pilha completa de Nav2 simultaneamente: o
-despacho de cada robô para seu ponto da formação é sequencial (ativar a
-navegação, aguardar a conclusão, desativar) antes de passar ao próximo
-robô. Essa escolha troca paralelismo por estabilidade: a ativação
-simultânea de duas ou mais pilhas completas de Nav2/SLAM~Toolbox nessa
-configuração reproduziu, durante o desenvolvimento, o sintoma do relógio
-simulado retrocedendo e invalidando o buffer de TF antes do prazo interno
-do Nav2 (ver Seção~\ref{sec:limitacoes} da Conclusão para o registro
-detalhado desse problema e da decisão de redesenho que resultou na
-ativação sequencial). Uma investigação posterior, registrada na mesma
-seção, encontrou e testou ao vivo uma correção para o próprio sintoma
-(troca do middleware DDS padrão), com resultado promissor o bastante
-para ser recomendada como prioridade de trabalho futuro — mas não
-adotada como arquitetura padrão nesta dissertação, que permanece
-avaliada sob ativação sequencial em todo o restante do texto.
+com múltiplos robôs, mais de uma pilha completa de Nav2 ao mesmo tempo: cada
+robô é despachado para seu ponto da formação em sequência (ativar a navegação,
+aguardar a conclusão, desativar). Essa escolha troca paralelismo por
+estabilidade, porque a ativação simultânea reproduziu um salto do relógio
+simulado que invalida o buffer de TF; o episódio e a correção investigada
+depois estão na Seção~\ref{sec:limitacoes}.
 
 \section{Considerações Finais}
 \label{sec:arq_conclusao}
 
-A arquitetura do Fleet UI resulta de uma série de decisões motivadas por problemas
-concretos encontrados durante o desenvolvimento: o executor multithreaded para evitar
-deadlocks de action client, os buffers TF por robô para suporte multi-robô, os perfis
-de QoS diferenciados para garantir integridade dos bags, e a separação entre
-orquestrador e coletor para permitir falhas independentes.
+A arquitetura do Fleet UI resulta de decisões motivadas por problemas concretos
+do desenvolvimento (executor multithreaded, buffers TF por robô, perfis de QoS
+diferenciados e separação entre orquestrador e coletor).
 
 Vistos em conjunto, esses mecanismos resolvem uma instância concreta de um
 problema clássico de Engenharia de Software: integrar componentes
 desenvolvidos independentemente --- o xacro vendor do TurtleBot4, o plugin
-\texttt{DiffDrive} do Gazebo, o Nav2, o SLAM Toolbox --- sem que nenhum
+\texttt{DiffDrive} do Gazebo \cite{koenig2004gazebo}, o Nav2 \cite{macenski2020marathon}, o SLAM Toolbox \cite{macenski2021slam} --- sem que nenhum
 deles pressupusesse múltiplas instâncias coexistindo, um descompasso
 arquitetural conhecido na literatura como \textit{architectural mismatch}
 \cite{garlan1995architectural}. O caso dos perfis de QoS é uma

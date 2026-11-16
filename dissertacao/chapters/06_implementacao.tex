@@ -7,8 +7,8 @@
 Seguindo a prática estabelecida de validar algoritmos de navegação em simulação
 ROS~+~Gazebo antes de sua implantação no robô físico \cite{takaya2016}, o
 ambiente de simulação utiliza o Gazebo Harmonic, versão de suporte estendido
-pareada com o ROS~2 Jazzy, e o modelo TurtleBot4 Standard com LiDAR 2D RPLIDAR
-(360 amostras por volta, 10\,Hz) e câmera OAK-D Pro. O mundo \textit{warehouse} disponível no pacote
+pareada com o ROS~2 Jazzy, e o modelo TurtleBot4 Standard
+(especificações na Tabela~\ref{tab:ambiente_hw}). O mundo \textit{warehouse} disponível no pacote
 \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim} representa um armazém industrial com prateleiras,
 barreiras e espaços abertos, oferecendo diversidade de geometria para testar o SLAM
 em diferentes condições de observabilidade.
@@ -55,17 +55,9 @@ confirmando isolamento correto de \textit{namespace} entre robôs. Uma
 campanha com dois robôs simultâneos também gravou uma rota real no
 \texttt{tb1} (sensores \texttt{imu}/\texttt{odom}/\texttt{scan}/\texttt{pose} capturados no bag) enquanto o
 \texttt{tb2} navegava para outro alvo ao mesmo tempo, sem interferência cruzada de
-\texttt{cmd\_\allowbreak vel} ou odometria entre os dois. Essa estabilidade, porém, não se
-sustentou em testes posteriores sob carga mais realista: subir a pilha
-completa de Nav2 e SLAM Toolbox de dois ou três robôs simultaneamente faz o
-relógio simulado (\texttt{/clock}) saltar para trás sob carga, invalidando a
-árvore de TF antes que o Nav2 consiga uma leitura estável de
-\texttt{base\_\allowbreak link \textrightarrow{} map} dentro do prazo interno. Trata-se de contenção identificada
-como de CPU/DDS, não de GPU. Por isso a arquitetura foi redesenhada para
-ativar a pilha de navegação completa de um robô por vez em vez de manter
-duas (ou três) pilhas simultâneas como alvo suportado por padrão. A
-ativação sequencial foi medida formalmente em 70\% de taxa de sucesso (sete em
-dez ativações individuais; Seção~\ref{sec:limitacoes}). Essa mesma correção de xacro é validada
+\texttt{cmd\_\allowbreak vel} ou odometria entre os dois. Sob carga mais realista, com a pilha completa de dois ou três robôs ao mesmo
+tempo, o relógio simulado salta para trás e invalida a árvore de TF; por isso a
+pilha de navegação é ativada um robô por vez (Seção~\ref{sec:limitacoes}). Essa mesma correção de xacro é validada
 automaticamente por um job de integração contínua que expande o xacro e
 valida o URDF resultante para os namespaces vazio, \texttt{tb1}, \texttt{tb2} e
 \texttt{tb3} dentro de um \textit{container} com ROS~2 Jazzy real, prevenindo
@@ -89,7 +81,7 @@ A lógica de gravação baseada em polling de TF (\texttt{\_\allowbreak record\_
 paralelo, cobrindo os casos em que o Nav2 não reporta SUCCEEDED (e.g., quando o controlador
 para dentro da tolerância antes de publicar o callback). O tick a 5\,Hz consulta a
 cadeia TF e adiciona a pose ao buffer se o robô deslocou ao menos 10\,cm ou girou
-mais de 5° desde a última amostra, evitando redundância em trechos estacionários.
+mais de 5\textdegree{} desde a última amostra, evitando redundância em trechos estacionários.
 
 Como descrito na Seção~\ref{sec:orquestrador} do Capítulo~\ref{chap:arquitetura},
 essa mesma lógica de gravação por polling de TF precisou de um
@@ -105,7 +97,7 @@ consultando em cada uma a transformação \texttt{map \textrightarrow{} base\_\a
 \label{sec:impl_servicos_exemplo}
 
 Para tornar concreta a discussão anterior, o Código~\ref{lst:start_stop_record}
-reproduz os \textit{callbacks} que implementam o início e o fim de uma gravação de
+(Apêndice~\ref{ap:listagens}) reproduz os \textit{callbacks} que implementam o início e o fim de uma gravação de
 rota, com a verificação de robô desconhecido (\texttt{UNKNOWN\_\allowbreak ROBOT}) e a montagem
 dos campos de resposta elididas (\texttt{...}) na segunda função por serem idênticas
 às da primeira. O que importa para a discussão é a rejeição explícita de
@@ -114,54 +106,6 @@ requisições inconsistentes com o estado corrente do robô
 salvo (\texttt{last\_\allowbreak saved = None}) a cada novo início de gravação. Sem essa
 limpeza, uma segunda gravação herdaria pontos da anterior, corrompendo
 silenciosamente o arquivo de rota resultante.
-
-\begin{lstlisting}[style=pycode, caption={Callbacks \texttt{\_\allowbreak cb\_\allowbreak start\_\allowbreak record} e \texttt{\_\allowbreak cb\_\allowbreak stop\_\allowbreak record}, com boilerplate repetido elidido (\texttt{fleet\_\allowbreak orchestrator/\allowbreak main.py}).}, label={lst:start_stop_record}]
-def _cb_start_record(self, req, resp):
-    rid = req.robot_id
-    if not self._known_robot(rid):
-        resp.success = False
-        resp.message = f"Unknown robot {rid!r}"
-        resp.error_code = "UNKNOWN_ROBOT"
-        return resp
-    st = self._state[rid]
-    if st.is_navigating:
-        resp.success = False
-        resp.message = "Cannot start recording while navigating"
-        resp.error_code = "ALREADY_NAVIGATING"
-        return resp
-    st.route_poses.clear()
-    st.last_saved = None
-    st.is_recording = True
-    st.nav_state = "recording"
-    st.current_route = req.route_name
-    st.last_error = ""
-    resp.success = True
-    resp.message = "Recording started"
-    resp.error_code = ""
-    return resp
-
-def _cb_stop_record(self, req, resp):
-    rid = req.robot_id
-    # ... verificação de UNKNOWN_ROBOT idêntica à de _cb_start_record ...
-    st = self._state[rid]
-    route_name = st.current_route
-    st.is_recording = False
-    n = len(st.route_poses)
-    if n == 0:
-        st.nav_state = "idle"
-        st.current_route = ""
-        resp.success = True
-        resp.message = "Route length: 0"
-        return resp
-    path = self._save_route_yaml(rid, route_name, st.route_poses)
-    st.route_poses.clear()
-    st.last_saved = None
-    st.nav_state = "idle"
-    st.current_route = ""
-    resp.success = True
-    resp.message = f"Saved {n} poses to {path}"
-    return resp
-\end{lstlisting}
 
 Um segundo aspecto relevante do orquestrador é a separação entre os papéis
 experimentais e a permissão de movimento, aplicada em \texttt{\_\allowbreak cb\_\allowbreak play\_\allowbreak route}
@@ -179,7 +123,7 @@ requisição que já se sabe inválida por construção.
 O backend não utiliza um cliente ROS~2 nativo para encaminhar comandos de
 serviço vindos da interface web: em vez disso, cada endpoint HTTP dispara
 um processo \texttt{ros2 service call} via \texttt{subprocess}, como mostra
-o Código~\ref{lst:backend_bridge}. A justificativa para essa escolha, aparentemente
+o Código~\ref{lst:backend_bridge} (Apêndice~\ref{ap:listagens}). A justificativa para essa escolha, aparentemente
 pouco ortodoxa, está detalhada na Seção~\ref{sec:backend_web}: evitar que o
 processo do backend precise ele mesmo inicializar um nó \texttt{rclpy} completo
 só para chamadas pontuais de serviço, mantendo essa inicialização (via
@@ -198,44 +142,15 @@ servidor WebSocket (\textit{rosbridge}) como camada intermediária entre o
 navegador e o ROS~2; a comparação entre as duas abordagens é discutida na
 Seção~\ref{sec:rel_web}.
 
-\begin{lstlisting}[style=pycode, caption={Método \texttt{RosBridge.\allowbreak run\_\allowbreak service}, usado por \texttt{\_\allowbreak run\_\allowbreak ros2\_\allowbreak service} e por todos os endpoints \texttt{/\allowbreak api/\allowbreak *} que encaminham comandos ao orquestrador (\texttt{backend/\allowbreak ros\_\allowbreak bridge.py}).}, label={lst:backend_bridge}]
-def run_service(self, service: str, service_type: str, request: dict | str, timeout: int = 10) -> tuple[bool, str]:
-    request_json = request if isinstance(request, str) else json.dumps(request)
-    cmd = f"{self.ros_setup_prefix()}ros2 service call {shlex.quote(service)} {shlex.quote(service_type)} {shlex.quote(request_json)}"
-    try:
-        result = subprocess.run(
-            ["bash", "-c", cmd],
-            env=self.ros_env(),
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            cwd=self.ros_ws,
-        )
-        out = (result.stdout or "").strip() + (result.stderr or "").strip()
-        if result.returncode != 0:
-            return False, out or "ros2 service call failed"
-        return True, out
-    except subprocess.TimeoutExpired:
-        return False, "timeout"
-    except Exception as exc:
-        return False, str(exc)
-\end{lstlisting}
-
 Note-se, em relação à primeira versão dessa função, o uso de \texttt{shlex.\allowbreak quote}
 em cada argumento do comando montado, substituindo a interpolação direta
 do JSON da requisição entre aspas simples, o que evita que caracteres
 especiais no payload (por exemplo, aspas simples dentro de um nome de rota)
 quebrem o comando \textit{shell} resultante.
 
-O custo mensurável dessa abordagem --- entre 1,2 e 3,2\,s por chamada, medidos
-na máquina de desenvolvimento, dominados pela inicialização do processo
-\texttt{ros2} --- e o trade-off que ele
-representa frente ao acoplamento mínimo resultante já foram discutidos na
-Seção~\ref{sec:backend_web}, onde essa decisão de arquitetura é tomada; o
-que importa destacar aqui é só a mecânica concreta: o backend nunca
-importa diretamente os módulos gerados de \texttt{fleet\_\allowbreak msgs} para
-essas chamadas específicas, conhecendo apenas o nome e o tipo do serviço
-em tempo de execução.
+O backend não importa os módulos gerados de \texttt{fleet\_\allowbreak msgs} para
+essas chamadas: conhece só o nome e o tipo do serviço em tempo de execução (o
+custo dessa escolha é discutido na Seção~\ref{sec:backend_web}).
 
 \subsection{Processos de Longa Duração: a Simulação Lançada pela Interface}
 \label{sec:impl_backend_simulacao}
@@ -325,26 +240,11 @@ foram calculados com \texttt{/\allowbreak odom} e são reproduzidos exatamente p
 versão atual do script quando se passa \texttt{--\allowbreak trajectory-\allowbreak topic odom}.
 A correção vale, portanto, para análises posteriores, e a comparação entre as
 fontes está na Seção~\ref{sec:res_fonte_trajetoria}. O Código~\ref{lst:pose_fallback}
-reproduz o trecho de \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} que implementa a
+(Apêndice~\ref{ap:listagens}) reproduz o trecho de \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} que implementa a
 prioridade do modo \texttt{auto}: a primeira fonte candidata (\texttt{amcl\_\allowbreak pose},
 depois \texttt{pose} do SLAM~Toolbox, depois \texttt{odom}) que de fato tiver
 mensagens gravadas no bag (\texttt{counts.\allowbreak get(topic, 0) > 0}, não apenas presença
 no \textit{schema}) é a escolhida.
-
-\begin{lstlisting}[style=pycode, caption={Prioridade do modo \texttt{auto} em \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} (\texttt{fleet\_\allowbreak ws/\allowbreak scripts/\allowbreak analyze\_\allowbreak runs.py}).}, label={lst:pose_fallback}]
-if mode == "auto":
-    # Prioridade: amcl_pose > pose (SLAM Toolbox, ao vivo) > odom (deriva sem
-    # correção). Antes desta correção, "auto" nunca reconhecia o tópico "pose"
-    # e caía direto pra odom mesmo quando a pose corrigida do SLAM tinha sido
-    # gravada.
-    amcl = _find_amcl_topic_name(tmap)
-    if amcl is not None and counts.get(amcl, 0) > 0:
-        return amcl
-    slam_pose = _find_slam_pose_topic_name(tmap)
-    if slam_pose is not None and counts.get(slam_pose, 0) > 0:
-        return slam_pose
-    return _find_odom_topic_name(tmap)
-\end{lstlisting}
 
 Note-se a checagem por contagem de mensagens (\texttt{counts}), e não apenas
 pela presença do nome do tópico em \texttt{tmap}: um bag pode registrar
@@ -352,19 +252,10 @@ pela presença do nome do tópico em \texttt{tmap}: um bag pode registrar
 publicada nele (por exemplo, AMCL sem pose inicial definida), caso em que a
 cadeia de fallback precisa seguir adiante em vez de escolher um tópico vazio.
 
-Uma segunda ressalva também é relevante para interpretar o RMSE: ela não está
-relacionada a nenhum bug, mas ao próprio método de controle escolhido.
-O \texttt{nav2\_\allowbreak mppi\_\allowbreak controller} sorteia ruído gaussiano sobre a trajetória
-candidata a cada ciclo de controle, com \texttt{regenerate\_\allowbreak noises: true} e
-desvios-padrão explicitamente configurados (\texttt{vx\_\allowbreak std}, \texttt{vy\_\allowbreak std},
-\texttt{wz\_\allowbreak std}). É assim que o MPPI (\textit{Model Predictive Path Integral})
-\cite{williams2016} funciona por definição, não um parâmetro mal ajustado. A consequência direta
-é que duas execuções da mesma rota, no mesmo robô e no mesmo ambiente,
-divergem um pouco apenas pela amostragem aleatória do controlador: uma fonte
-de variância esperada e não eliminável, a menos que se troque de controlador,
-por exemplo, para um determinístico como DWB \cite{fox1997} ou Regulated Pure Pursuit
-\cite{macenski2023survey}, alternativa não avaliada nesta dissertação.
-
+A amostragem aleatória do MPPI \cite{williams2016}, que um controlador
+determinístico como DWB \cite{fox1997} ou Regulated Pure Pursuit
+\cite{macenski2023survey} não teria, é outra fonte de variância do RMSE, discutida
+na Seção~\ref{sec:ameacas}.
 
 \subsection{Reamostragem e RMSE: o Código que Sustenta a Métrica}
 \label{sec:impl_rmse_codigo}
@@ -377,7 +268,7 @@ homólogas na mesma grade normalizada. A implementação por índice permanece
 disponível como opção de compatibilidade (\texttt{--resample-mode index}), mas
 não foi usada na campanha final reportada no Capítulo~\ref{chap:resultados}.
 
-\begin{lstlisting}[style=pycode, caption={Reamostragem temporal normalizada e RMSE pairwise (\texttt{scripts/\allowbreak analyze\_\allowbreak runs.py}).}, label={lst:rmse_impl}]
+\begin{lstlisting}[style=pycode, float=tbp, caption={Reamostragem temporal normalizada e RMSE pairwise (\texttt{scripts/\allowbreak analyze\_\allowbreak runs.py}).}, label={lst:rmse_impl}]
 def _normalised_time_grid(t: np.ndarray) -> np.ndarray:
     if len(t) < 2:
         return np.zeros(len(t), dtype=np.float64)
@@ -416,61 +307,27 @@ muito grandes de duração ainda podem indicar que as execuções não são
 experimentalmente equivalentes), mas reduz o artefato geométrico introduzido
 pela reamostragem puramente por índice.
 
-O Código~\ref{lst:rmse_impl} mostra apenas as funções auxiliares; falta o
-laço que efetivamente compara cada par de execuções e a agregação final que
-produz o ``RMSE médio'' citado nos Capítulos~\ref{chap:resultados}
-e~\ref{chap:conclusao}. Esses dois passos vivem em lugares diferentes do
-código, o que já é, em si, relevante para auditar de onde vêm os números: o
-laço pairwise que monta a matriz $N\times N$ (gravada em \texttt{summary.json}
-como \texttt{pairwise\_\allowbreak rmse\_\allowbreak m}) está em \texttt{analyze\_\allowbreak runs.py}, na
-função \texttt{main}:
+O Código~\ref{lst:rmse_impl} mostra apenas as funções auxiliares. O laço
+pairwise que monta a matriz $N\times N$ (gravada em \texttt{summary.json} como
+\texttt{pairwise\_\allowbreak rmse\_\allowbreak m}, Código~\ref{lst:rmse_pairwise}) e o
+cálculo de cada entrada de \texttt{vs\_\allowbreak reference}, o RMSE de cada
+execução contra a primeira, tomada como referência
+(Código~\ref{lst:rmse_mean}), estão em \texttt{analyze\_\allowbreak runs.py} e são
+reproduzidos no Apêndice~\ref{ap:listagens}. Nenhuma dessas duas estruturas é,
+por si só, o ``RMSE médio'' relatado nos Capítulos~\ref{chap:resultados}
+e~\ref{chap:conclusao}.
 
-\begin{lstlisting}[style=pycode, caption={Laço pairwise que produz a matriz $N\times N$ de RMSE (\texttt{scripts/\allowbreak analyze\_\allowbreak runs.py}, função \texttt{main}).}, label={lst:rmse_pairwise}]
-n = len(trajectories)
-rmse_matrix: List[List[Optional[float]]] = [[None] * n for _ in range(n)]
-for i in range(n):
-    for j in range(i + 1, n):
-        a, b = _resample_pair(
-            trajectories[i], trajectories[j],
-            t1=times[i], t2=times[j],
-            mode=args.resample_mode, samples=args.resample_samples,
-        )
-        r = _rmse(a, b)
-        rmse_matrix[i][j] = r
-        rmse_matrix[j][i] = r
-    rmse_matrix[i][i] = 0.0
-\end{lstlisting}
-
-O mesmo script calcula também, para cada execução, o RMSE contra a primeira
-execução da lista (tomada como referência), armazenado em \texttt{summary.json}
-como a lista \texttt{vs\_\allowbreak reference}. Nenhuma dessas duas estruturas, porém, é
-por si só o ``RMSE médio'' relatado nos capítulos de resultados e conclusão.
-Essa média é calculada fora de \texttt{analyze\_\allowbreak runs.py}, no backend,
-lendo o \texttt{summary.json} já produzido e agregando a lista
-\texttt{vs\_\allowbreak reference} (o mesmo cálculo refeito sobre os dados da campanha
-final dá 3,35\,cm; a média da matriz pairwise completa daria 2,76\,cm):
-
-\begin{lstlisting}[style=pycode, caption={Agregação final do RMSE médio a partir de \texttt{summary.json} (\texttt{backend/\allowbreak agents/\allowbreak analyst.py}, método \texttt{Analyst.\allowbreak analyze\_\allowbreak experiment}).}, label={lst:rmse_mean}]
-summary = self.load_summary(run_id)
-vs_reference: list[dict[str, Any]] = summary.get("vs_reference", [])
-
-rmse_values = [
-    e["rmse_vs_ref_m"] for e in vs_reference
-    if e["label"] != summary.get("reference_label")
-]
-
-return {
-    ...
-    "mean_rmse_vs_ref_m": sum(rmse_values) / len(rmse_values) if rmse_values else 0.0,
-    "max_rmse_vs_ref_m": max(rmse_values) if rmse_values else 0.0,
-    ...
-}
-\end{lstlisting}
-
-É importante notar o que essa média de fato representa: \texttt{mean\_\allowbreak rmse\_\allowbreak vs\_\allowbreak ref\_\allowbreak m}
-é a média do RMSE de cada execução \textit{contra a execução de referência}
-(\texttt{rmse\_\allowbreak vs\_\allowbreak ref\_\allowbreak m}), e não uma agregação da matriz pairwise completa
-de \texttt{pairwise\_\allowbreak rmse\_\allowbreak m}, uma distinção que a simples leitura do
+O RMSE médio relatado é a média aritmética dessa lista, excluída a própria
+referência. Com $N$ execuções e a referência de índice $0$,
+\begin{equation}
+  \overline{\mathrm{RMSE}} = \frac{1}{N-1}\sum_{i=1}^{N-1} \mathrm{RMSE}_{\mathrm{ref}}(i).
+  \label{eq:rmse_medio}
+\end{equation}
+Aplicada aos dados da campanha final, essa média dá 3,35\,cm; a média da
+matriz pairwise completa daria 2,76\,cm. A Equação~\ref{eq:rmse_medio}
+mede, portanto, a distância de cada execução \textit{até a execução de
+referência}, e não uma agregação de \texttt{pairwise\_\allowbreak rmse\_\allowbreak m},
+uma distinção que a simples leitura do
 Código~\ref{lst:rmse_impl}, isolado do restante do pipeline, não deixa clara.
 
 \section{Interface Web}
@@ -489,7 +346,9 @@ como tanto o mapa SLAM ao vivo quanto o PGM utilizam o mesmo sistema de coordena
 do mundo Gazebo, a sobreposição é pixel-a-pixel. O pesquisador vê paredes, prateleiras
 e o robô em tempo real, podendo clicar para definir waypoints diretamente na planta.
 
-Além do mapa interativo, o painel \textbf{Missão Coordenada} (componente
+Além do mapa interativo, o painel \textbf{Missão Coordenada}, implementado no
+ramo \texttt{mission-\allowbreak coordinate-\allowbreak large-\allowbreak scale}
+do repositório (Seção~\ref{sec:painel_simulacao}; componente
 \texttt{SimulationPanel}, consumindo os endpoints descritos na
 Seção~\ref{sec:impl_backend_simulacao}) permite ao pesquisador escolher
 uma formação (L, I, V ou barra invertida, um ponto por robô) e lançar ou
@@ -509,15 +368,10 @@ Seção~\ref{sec:limitacoes}).
 \section{Considerações Finais}
 \label{sec:impl_conclusao}
 
-As decisões de implementação descritas neste capítulo resultaram de problemas
-concretos encontrados durante o desenvolvimento: o patch runtime do
-\texttt{nav2.yaml}, o fork do xacro do TurtleBot4 para isolar por robô os
-tópicos gz-transport que o Gazebo publica de forma absoluta, o
-\texttt{MultiThreadedExecutor} para evitar deadlocks, o gerenciamento de
-processos de longa duração da simulação por grupo de processos
-(\texttt{setsid}/\texttt{killpg}), a correção de detecção do tópico de pose em
-\texttt{analyze\_\allowbreak runs.py} (Seção~\ref{sec:impl_fallback_pose}) e a
-conversão de coordenadas canvas--mundo. Cada uma representa uma contribuição de
+As decisões de implementação descritas neste capítulo, do patch do
+\texttt{nav2.yaml} à correção de detecção do tópico de pose
+(Seção~\ref{sec:impl_fallback_pose}), resultaram de problemas concretos do
+desenvolvimento. Cada uma representa uma contribuição de
 engenharia que outros grupos de pesquisa não precisarão replicar ao adotar
 o framework. A correção de detecção do tópico de pose, em
 particular, protege análises futuras contra um viés que não tem relação com o

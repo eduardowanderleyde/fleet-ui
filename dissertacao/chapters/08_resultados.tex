@@ -25,12 +25,12 @@ rotas; a baseline (linha sólida) diverge mais em Val01.}
 
 A Tabela~\ref{tab:val_rmse} resume o RMSE observado em cada rota. O RMSE
 entre as duas réplicas, que compartilham o mesmo mecanismo de navegação,
-ficou bem abaixo da tolerância padrão de 25\,cm do Nav2 nas duas rotas. Já
+ficou bem abaixo da tolerância padrão de 25\,cm do Nav2 \cite{macenski2020marathon} nas duas rotas. Já
 o RMSE de cada réplica contra a baseline inflou de forma assimétrica,
-sobretudo em Val01 --- o mesmo padrão identificado e explicado com mais
-rigor, posteriormente, pela campanha \texttt{dissertacao\_\allowbreak teste1}
-(Seção~\ref{sec:res_exp_complementares}): baseline e réplicas percorrem a
-rota por mecanismos de navegação distintos do Nav2.
+sobretudo em Val01, porque baseline e réplicas percorrem a rota por mecanismos
+de navegação distintos do Nav2 (Seção~\ref{sec:res_qa2_mecanismo}). Por isso a
+análise de QA2 usa como medida primária o RMSE entre execuções do mesmo
+mecanismo \cite{maset2022}, não o RMSE contra a baseline.
 
 \begin{table}[H]
 \centering
@@ -38,7 +38,7 @@ rota por mecanismos de navegação distintos do Nav2.
 contra a baseline e erro de endpoint, todos abaixo da tolerância de 25\,cm
 do Nav2 exceto onde indicado.}
 \label{tab:val_rmse}
-\begin{tabular}{lccc}
+\begin{tabular}{@{}lccc@{}}
 \toprule
 \textbf{Rota} & \textbf{RMSE entre réplicas} & \textbf{RMSE vs.\ baseline} & \textbf{Erro de endpoint} \\
 \midrule
@@ -49,37 +49,10 @@ Val02 (\textasciitilde2,3\,m) & 8,1\,cm & 9,2--16,7\,cm & 5,8--9,3\,cm \\
 \end{table}
 \footnotetext{Inflado pelo mesmo gap de mecanismo de navegação entre
 baseline (\texttt{go\_\allowbreak to\_\allowbreak point}) e réplicas
-(\texttt{FollowWaypoints}) caracterizado na Seção~\ref{sec:res_exp_complementares};
+(\texttt{FollowWaypoints}) caracterizado na Seção~\ref{sec:res_qa2_mecanismo};
 não reflete falta de repetibilidade do robô.}
 
-A Figura~\ref{fig:rmse_val} visualiza essa mesma assimetria: o RMSE entre
-réplicas (repetibilidade pura, mesma estratégia de navegação) permanece de
-um a dois dígitos de centímetro nas duas rotas, enquanto o RMSE
-replay-vs-baseline em Val01 ultrapassa em muito a tolerância de 25\,cm do
-Nav2 --- não por falha de repetibilidade, mas pelo gap metodológico entre
-mecanismos de navegação já discutido.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{rmse_comparacao.png}
-\caption{RMSE de repetibilidade por experimento na validação preliminar:
-réplica contra baseline (esquerda, inclui o gap de estratégia de
-navegação) e entre réplicas (direita, repetibilidade pura).}
-\label{fig:rmse_val}
-\end{figure}
-
-Essa validação preliminar, com $N=2$ réplicas por rota, antecipou em
-escala menor o achado depois caracterizado com mais rigor estatístico pela
-campanha \texttt{dissertacao\_\allowbreak teste1} ($N=3$,
-Seção~\ref{sec:res_exp_complementares}) e consolidou a decisão
-metodológica adotada na análise de QA2 (Seção~\ref{sec:res_qa2}): reportar
-o RMSE par-a-par entre execuções que compartilham o mesmo mecanismo de
-navegação como medida primária de repetibilidade \cite{maset2022}, não o
-RMSE contra uma baseline gravada por um mecanismo distinto. A unificação
-do mecanismo de gravação da baseline com o do replay permanece como
-trabalho futuro (Seção~\ref{sec:futuros}).
-
-\section{QA1 — Automatização do Protocolo}
+\section{QA1 --- Automatização do Protocolo}
 \label{sec:res_qa1}
 
 O protocolo record--replay foi executado de forma automática em duas etapas.
@@ -106,7 +79,7 @@ automaticamente pela campanha, não é reproduzido como figura formal neste
 capítulo; os resultados numéricos equivalentes são apresentados na
 Tabela~\ref{tab:campanha_final}, a seguir.
 
-\section{QA2 — RMSE de Repetibilidade}
+\section{QA2 --- RMSE de Repetibilidade}
 \label{sec:res_qa2}
 
 A Tabela~\ref{tab:campanha_final} apresenta as métricas por replay da campanha
@@ -138,22 +111,15 @@ Replay 10 & 16,78 & 0,817 & 4,08 & 2,26 \\
 \end{table}
 
 Considerando os nove replays comparados à referência, o RMSE médio foi de
-3,35\,cm, com desvio-padrão amostral de 1,16\,cm — seguindo a prática, adotada por
+3,35\,cm, com desvio-padrão amostral de 1,16\,cm --- seguindo a prática, adotada por
 \citeonline{maset2022} na avaliação de repetibilidade de sistemas robóticos,
 de reportar a dispersão entre execuções e não apenas um valor médio isolado.
 O menor RMSE observado foi de 1,65\,cm e o maior foi de 4,76\,cm. Todos os
 valores ficaram substancialmente abaixo dos 25\,cm da tolerância padrão de
 objetivo do Nav2.
 
-Esse limiar de 25\,cm não foi calibrado a partir dos dados desta campanha nem
-escolhido a posteriori para garantir sucesso: corresponde à tolerância padrão
-de chegada do \texttt{general\_\allowbreak goal\_\allowbreak checker} do Nav2, parâmetro
-usado operacionalmente pelo framework independentemente deste experimento
-específico de repetibilidade (discussão mais detalhada na
-Seção~\ref{sec:criterios}). O RMSE máximo observado (4,76\,cm,
-Tabela~\ref{tab:campanha_final}) está quase uma ordem de grandeza abaixo desse
-valor, o que afasta a hipótese de que o limiar tenha sido ajustado a partir dos
-próprios resultados para torná-los positivos.
+O limiar de 25\,cm é a tolerância padrão do Nav2, fixada antes desta campanha
+(Seção~\ref{sec:criterios}).
 
 O resultado é metodologicamente mais forte que as campanhas preliminares porque
 os pontos iniciais foram controlados. No \texttt{summary.json}, todos os dez
@@ -175,25 +141,25 @@ Uma campanha independente e menor, executada em 23/09/2026 sobre a rota
 2\,m de percurso, configuração single-robot), foi usada para investigar por
 que o RMSE contra a execução baseline tende a ser maior que o RMSE entre
 réplicas. Essa campanha consistiu em uma gravação baseline seguida de três
-réplicas
+réplicas (Figura~\ref{fig:overlay_teste1})
 (\texttt{fleet\_\allowbreak ws/\allowbreak runs/\allowbreak dissertacao\_\allowbreak teste1\_\allowbreak 20260923\_\allowbreak 182049/\allowbreak analysis/\allowbreak summary.json}).
 
 A Tabela~\ref{tab:mecanismo_navegacao} resume o resultado: o RMSE médio
 entre as três réplicas foi de 2,00\,cm, enquanto o RMSE médio de cada réplica
-contra a baseline foi de 13,90\,cm — quase sete vezes maior.
+contra a baseline foi de 13,90\,cm --- quase sete vezes maior.
 
 \begin{table}[H]
 \centering
 \caption{Campanha \texttt{dissertacao\_teste1} (23/09/2026): RMSE médio conforme o mecanismo de navegação comparado.}
 \label{tab:mecanismo_navegacao}
-\begin{tabular}{lccr}
+\begin{tabularx}{\textwidth}{@{}Xccr@{}}
 \toprule
 \textbf{Comparação} & \textbf{Mecanismo baseline} & \textbf{Mecanismo réplica} & \textbf{RMSE médio (cm)} \\
 \midrule
 Baseline vs.\ réplicas (3 pares) & \texttt{go\_to\_point} & \texttt{play\_route} & 13,90 \\
 Réplicas entre si (3 pares) & \texttt{play\_route} & \texttt{play\_route} & 2,00 \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \begin{figure}[H]
@@ -208,40 +174,22 @@ assimetria quantificada na Tabela~\ref{tab:mecanismo_navegacao}.}
 \label{fig:overlay_teste1}
 \end{figure}
 
-A causa não é degradação de repetibilidade do robô: o script
-\texttt{experiment\_\allowbreak repeatability.py} grava a baseline enviando uma
-sequência de metas individuais (\texttt{go\_\allowbreak to\_\allowbreak point}, um
-objetivo Nav2 por vez, apenas para os quatro waypoints indicados pelo
-usuário), enquanto o replay envia ao \texttt{FollowWaypoints} do Nav2
-(\texttt{play\_\allowbreak route}) todas as poses gravadas durante a baseline,
-salvas a cada 10\,cm de deslocamento. O \texttt{FollowWaypoints} trata cada
-pose como uma meta própria: o robô chega, para, aguarda 200\,ms
-(\texttt{wait\_\allowbreak at\_\allowbreak waypoint}) e só então segue para a próxima.
-Baseline e réplicas percorrem a mesma região por caminhos de código do Nav2
-diferentes, e as paradas repetidas do replay explicam a duração média das
-réplicas (29,47\,s) ser cerca de 2,5 vezes maior que a da baseline (11,70\,s) — a mesma ordem de grandeza
-da razão \texttt{duration\_\allowbreak ratio\_\allowbreak vs\_\allowbreak ref} registrada
-no \texttt{summary.json} dessa campanha. Esse achado reforça a escolha
-metodológica adotada nesta seção: a métrica de repetibilidade que isola o
-fenômeno de interesse é o RMSE entre execuções que usam o mesmo mecanismo de
-navegação (par-a-par, matriz \texttt{pairwise\_\allowbreak rmse\_\allowbreak m} do
-\texttt{summary.json}), não o RMSE contra uma execução de referência gravada
-por um mecanismo distinto. Essa escolha está alinhada à recomendação de
-\citeonline{maset2022} de comparar execuções nominalmente idênticas entre si
-como medida primária de repetibilidade, em vez de depender exclusivamente de
-uma referência única, e ao diagnóstico de \citeonline{amigoni2014} de que
-parte expressiva da literatura de robótica autônoma se limita a reportar
-médias sem uma comparação estatística mais rigorosa entre execuções.
+A causa não é degradação de repetibilidade do robô, mas a diferença de
+mecanismo entre baseline (\texttt{go\_\allowbreak to\_\allowbreak point} nos quatro
+waypoints) e replay (\texttt{FollowWaypoints} sobre as poses salvas a cada
+10\,cm, com parada de 200\,ms em cada uma), descrita na
+Seção~\ref{sec:record_replay} (Fase~2). As paradas explicam a duração média das
+réplicas (29,47\,s) ser cerca de 2,5 vezes a da baseline (11,70\,s), na mesma
+ordem de grandeza da razão \texttt{duration\_\allowbreak ratio\_\allowbreak vs\_\allowbreak ref}
+do \texttt{summary.json}. Isso reforça a escolha desta seção: a métrica que
+isola a repetibilidade é o RMSE par-a-par entre execuções do mesmo mecanismo
+(\texttt{pairwise\_\allowbreak rmse\_\allowbreak m}), como recomendam
+\citeonline{maset2022}, e não só a média contra uma referência, prática que
+\citeonline{amigoni2014} criticam na literatura. O RMSE residual de 2,00\,cm
+entre réplicas é compatível com a amostragem aleatória do MPPI
+\cite{williams2016} (Seção~\ref{sec:ameacas}).
 
-O RMSE residual de 2,00\,cm observado entre réplicas que compartilham o mesmo
-mecanismo de navegação não é atribuível a falha de repetibilidade do sistema:
-o controlador padrão do Nav2 utilizado, o MPPI (\textit{Model Predictive Path
-Integral}, Seção~\ref{sec:mppi}), amostra ruído gaussiano sobre a sequência de
-controles a cada ciclo \cite{williams2016}. Alguma variação entre execuções
-nominalmente idênticas é, portanto, esperada por construção do próprio método
-de controle, não um indício de degradação do protocolo de replay.
-
-\section{QA3 — Consistência Temporal}
+\section{QA3 --- Consistência Temporal}
 \label{sec:res_qa3}
 
 A duração média dos dez replays foi de 17,51\,s, com desvio-padrão amostral de
@@ -318,26 +266,17 @@ anterior. O efeito visual era uma separação progressiva entre trajetórias, ma
 essa separação não media apenas a variabilidade do controlador ou do SLAM; media
 também a consequência de iniciar cada nova execução a partir de uma pose diferente.
 
-Os três conjuntos exploratórios referidos como base de QA4
-(Seção~\ref{sec:questoes}) são discutidos aqui de forma qualitativa, sem uma
-tabela consolidada de N de replays e RMSE por conjunto: ao contrário da
-campanha controlada de QA1--QA3, eles foram gerados antes de existir um
-protocolo padronizado de reinicialização e coleta, com condições heterogêneas
-entre si, e seu papel nesta dissertação é diagnóstico, servindo para motivar
-e justificar o desenho da campanha final, não para compor uma métrica
-central comparável às de QA1--QA3.
-
-Por essa razão, os resultados exploratórios são mantidos como evidência
-diagnóstica e motivação do protocolo final, mas não substituem a campanha
-\texttt{dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual}, na qual
-o estado inicial foi efetivamente controlado. O principal valor desses dados é
-mostrar empiricamente que a infraestrutura de coleta não basta: para que o RMSE
-seja interpretável como repetibilidade de trajetória, o protocolo precisa impor
-mesma rota, mesma ação de navegação, mesma condição inicial e coleta padronizada
-— o tipo de controle completo de variáveis que \citeonline{amigoni2010}
-identifica como vantagem da simulação sobre o hardware real, e uma
-pré-condição, segundo \citeonline{bonsignorio2015}, para que resultados de
-robótica autônoma sejam replicáveis e mensuráveis.
+Os três conjuntos exploratórios que servem de base a QA4
+(Seção~\ref{sec:questoes}) são discutidos de forma qualitativa, sem tabela
+consolidada: foram gerados antes do protocolo padronizado de reinicialização e
+coleta, com condições heterogêneas, e não substituem a campanha
+\texttt{dissertation\_\allowbreak clean01\_\allowbreak final\_\allowbreak manual}. Seu valor é
+mostrar que a infraestrutura de coleta não basta: para que o RMSE seja
+interpretável como repetibilidade, o protocolo precisa impor mesma rota, mesma
+ação de navegação, mesma condição inicial e coleta padronizada, o controle de
+variáveis que \citeonline{amigoni2010} apontam como vantagem da simulação e que
+\citeonline{bonsignorio2015} tratam como pré-condição de resultados replicáveis
+e mensuráveis.
 
 \section{Fonte de Trajetória: Odometria, SLAM e \textit{Ground Truth}}
 \label{sec:res_fonte_trajetoria}
@@ -347,8 +286,8 @@ As análises de QA1--QA3 (Seções~\ref{sec:res_qa1}--\ref{sec:res_qa3}) usam
 criticamente na Seção~\ref{sec:res_bags}: trata-se de odometria por
 integração, sem correção por mapa, potencialmente sujeita a deriva que
 cresce com a distância percorrida. Esta seção reporta uma campanha adicional,
-fora do desenho formal QA1--QA4 (Seção~\ref{sec:questoes}) — portanto sem
-hipótese de pesquisa nem critério de aceitação pré-registrado associado —
+fora do desenho formal QA1--QA4 (Seção~\ref{sec:questoes}) --- portanto sem
+hipótese de pesquisa nem critério de aceitação pré-registrado associado ---
 que compara diretamente \texttt{/\allowbreak odom}, \texttt{/\allowbreak pose}
 (corrigido pelo SLAM Toolbox) e a pose verdadeira do simulador
 (\textit{ground truth}, obtida do tópico nativo
@@ -370,7 +309,7 @@ foram executadas com o mesmo rigor metodológico de QA1--QA3: a simulação, a
 pilha Nav2, o SLAM Toolbox e o coletor de sensores foram completamente
 relançados antes de cada réplica, com confirmação ativa (via varredura de
 processos do sistema operacional) de que nenhum processo da réplica
-anterior permanecia ativo antes do próximo relançamento — refinamento sobre
+anterior permanecia ativo antes do próximo relançamento --- refinamento sobre
 o procedimento original (Seção~\ref{sec:procedimento}), motivado por uma
 contaminação de CPU por processos remanescentes observada ao vivo durante
 esta campanha. Um mecanismo de \textit{timeout} e nova tentativa foi
@@ -380,8 +319,8 @@ Seção~\ref{sec:limitacoes}); os manifestos da campanha registram que
 nenhuma das 30 réplicas precisou dele, e todas produziram dados válidos.
 
 O RMSE de cada fonte (\texttt{/\allowbreak odom}, \texttt{/\allowbreak pose})
-contra o \textit{ground truth} foi calculado interpolando o
-\textit{ground truth} — a fonte mais densa, publicada a mais de 50\,Hz —
+contra o \textit{ground truth} \cite{sturm2012} foi calculado interpolando o
+\textit{ground truth} --- a fonte mais densa, publicada a mais de 50\,Hz ---
 para os instantes de tempo exatos de cada amostra da fonte mais esparsa, em
 vez do inverso; interpolar uma fonte esparsa como \texttt{/\allowbreak pose}
 (frequência efetiva de apenas $\approx$0,3\,Hz, Tabela~\ref{tab:sensor_bags})
@@ -390,16 +329,16 @@ arrisca subestimar sua distância real em trechos de maior curvatura.
 Um problema real de alinhamento temporal foi identificado e corrigido antes
 da análise final: comparar amostras de tópicos diferentes dentro do mesmo
 \textit{bag} usando o tempo decorrido desde a primeira mensagem de cada
-tópico individualmente — válido para comparar a mesma trajetória entre
-\textit{bags} diferentes, como em QA2 — produz desalinhamento artificial
+tópico individualmente --- válido para comparar a mesma trajetória entre
+\textit{bags} diferentes, como em QA2 --- produz desalinhamento artificial
 quando os tópicos começam a publicar em instantes absolutos diferentes.
 \texttt{/\allowbreak pose} só começa a publicar depois que o SLAM Toolbox é
-ativado (com atraso deliberado de 8\,s após o Gazebo, Seção~\ref{sec:res_qa1})
+ativado (com atraso deliberado de 8\,s após o Gazebo, Seção~\ref{sec:fluxo_protocolo})
 e que o robô percorre a distância mínima exigida pelo parâmetro
 \texttt{minimum\_\allowbreak travel\_\allowbreak distance} do SLAM Toolbox
 \cite{macenski2021slam}. Sem corrigir esse desalinhamento, o RMSE aparente
 de \texttt{/\allowbreak pose} contra o \textit{ground truth} ficava entre
-50 e 66\,cm — valor suspeito por ser aproximadamente constante entre rotas
+50 e 66\,cm --- valor suspeito por ser aproximadamente constante entre rotas
 de comprimento muito diferente, ao contrário do esperado para um erro de
 localização real. A análise foi corrigida para usar o tempo absoluto
 (\textit{sim time}) de cada amostra, não o tempo relativo à primeira
@@ -420,7 +359,7 @@ estatística de QA2).
 \centering
 \caption{RMSE médio (cm) de \texttt{/odom} e \texttt{/pose} contra o \textit{ground truth}, por rota, com IC 95\% ($N=10$).}
 \label{tab:fonte_trajetoria}
-\begin{tabular}{lrr}
+\begin{tabularx}{\textwidth}{l>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X}
 \toprule
 \textbf{Rota} & \textbf{RMSE \texttt{/odom} vs.\ GT (cm)} & \textbf{RMSE \texttt{/pose} vs.\ GT (cm)} \\
 \midrule
@@ -428,7 +367,7 @@ Curta (\textasciitilde0,9\,m)            & 0,01 (IC [0,01; 0,01])  & 3,28 (IC [0
 Longa (\textasciitilde7,7\,m, 1 curva)   & 5,18 (IC [4,93; 5,43])  & 2,25 (IC [1,46; 3,03])  \\
 Loop (\textasciitilde11,3\,m, 4 curvas)  & 14,27 (IC [13,78; 14,76]) & 2,45 (IC [1,83; 3,07]) \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \begin{figure}[H]
@@ -440,8 +379,8 @@ e rota, com barras de erro de IC 95\% ($N=10$ réplicas por rota).}
 \end{figure}
 
 O erro de \texttt{/\allowbreak odom} cresce de forma monotônica com o
-comprimento/complexidade da rota — de essencialmente zero na rota Curta a
-14,27\,cm na rota Loop —, consistente com o comportamento esperado de
+comprimento/complexidade da rota --- de essencialmente zero na rota Curta a
+14,27\,cm na rota Loop ---, consistente com o comportamento esperado de
 deriva por integração \cite{borenstein1996}: quanto mais distância e
 quantas mais curvas o robô percorre, mais o erro acumulado de odometria
 pura se afasta da pose verdadeira. Já o erro de
@@ -459,7 +398,7 @@ desprezível (ambas abaixo de 4\,cm), o que sustenta retroativamente a
 escolha de \texttt{/\allowbreak odom} feita no Procedimento
 (Seção~\ref{sec:procedimento}) para aquela rota específica. Em rotas mais
 longas e com mais curvas, porém, a diferença passa a ser substancial
-(14,27\,cm contra 2,45\,cm na rota Loop) — ao ponto de poder alterar a
+(14,27\,cm contra 2,45\,cm na rota Loop) --- ao ponto de poder alterar a
 conclusão qualitativa sobre repetibilidade dependendo da fonte escolhida.
 Esse resultado responde à tensão identificada entre a limitação de
 \texttt{/\allowbreak odom} discutida nesta dissertação e a adoção dessa
@@ -479,7 +418,7 @@ enriquecimento metodológico: uma unidade fixa sob teste (FUUT) observando
 a cena de um ângulo externo oferece uma fonte de verdade independente da
 odometria/SLAM que o próprio robô móvel (MUUT) usa para reportar sua
 pose. Até a versão anterior deste texto, essa dualidade permanecia
-inteiramente não exercitada — contribuição de projeto verificada em
+inteiramente não exercitada --- contribuição de projeto verificada em
 software, sem nenhuma evidência empírica de funcionamento. Esta seção
 reporta um piloto pequeno ($N=3$ réplicas), fora do desenho formal
 QA1--QA4 (Seção~\ref{sec:questoes}) e sem pretensão de poder amostral,
@@ -512,11 +451,11 @@ primeira execução completa produziu discrepância geométrica de
 $\approx$2,8\,m entre a pose do MUUT e a detecção do FUUT, consistente
 nas três réplicas. Decompondo o erro por componente, a distância
 detectada já era compatível com a geometria real ($\approx$2,0--2,15\,m);
-só a direção (\textit{bearing}) estava sistematicamente $\approx$87--90°
+só a direção (\textit{bearing}) estava sistematicamente $\approx$87--90\textdegree{}
 fora do esperado nas três réplicas --- assinatura de um offset de
 montagem do LiDAR do FUUT relativo ao seu \texttt{base\_\allowbreak link},
 nunca verificado contra o URDF do TurtleBot4. Uma correção empírica de
-+90° foi aplicada e o piloto foi re-executado; a Seção~\ref{sec:res_fuut_limitacoes}
++90\textdegree{} foi aplicada e o piloto foi re-executado; a Seção~\ref{sec:res_fuut_limitacoes}
 retoma essa correção como uma limitação explícita do resultado.
 
 \subsection{Resultado}
@@ -566,12 +505,12 @@ acima:
 
 \begin{itemize}
     \item \textbf{Calibração geométrica empírica, não verificada contra o
-    URDF.} A correção de +90° aplicada ao \textit{bearing} do FUUT
+    URDF.} A correção de +90\textdegree{} aplicada ao \textit{bearing} do FUUT
     (Protocolo, acima) foi obtida ajustando o valor que colapsava a
     discrepância observada, não lendo o transform real
     \texttt{lidar\_\allowbreak link} $\rightarrow$ \texttt{base\_\allowbreak link}
     do URDF do TurtleBot4. O resultado é consistente com essa correção,
-    mas o valor de 90° em si permanece uma hipótese empírica, não uma
+    mas o valor de 90\textdegree{} em si permanece uma hipótese empírica, não uma
     grandeza confirmada na fonte.
 
     \item \textbf{$N=3$, uma única rota curta, uma única posição do
@@ -600,7 +539,7 @@ o teste de conectividade \textit{Bluetooth Low Energy} (BLE) de
 carrega um celular por um percurso em ``L'' (cerca de 64\,m em linha reta
 e mais 31\,m) num salão previamente mapeado, enquanto um segundo aparelho
 fica parado no ponto de partida; cada corrida segue até a conexão BLE cair.
-O robô usa ROS~2 Humble com AMCL sobre o mapa do salão, e a navegação é
+O robô usa ROS~2 Humble \cite{macenski2022ros2} com AMCL sobre o mapa do salão, e a navegação é
 feita por um script próprio das autoras (\texttt{nav\_\allowbreak 3points.py}).
 O artigo relata seis corridas reais, de 19/05/2026.
 
@@ -639,6 +578,7 @@ O artigo relata seis corridas reais, de 19/05/2026.
 \centering
 \caption{Tabela~3 de \citeonline{neves2026ble} (artigo) e o mesmo cálculo refeito sobre os dados brutos das corridas de 19/05/2026 (refeito).}
 \label{tab:cbsoft_tabela3}
+\small\setlength{\tabcolsep}{3pt}
 \begin{tabular}{llcccccc}
 \toprule
  & & \multicolumn{2}{c}{\textbf{RSSI médio (dBm)}} & \multicolumn{2}{c}{\textbf{Vel. média (m/s)}} & \multicolumn{2}{c}{\textbf{Dist. desconexão (m)}} \\
@@ -677,28 +617,14 @@ autoras. Os resultados desse teste não estão incluídos neste texto.
 \section{Considerações Finais}
 \label{sec:res_conclusao}
 
-Os resultados respondem afirmativamente às três primeiras questões de avaliação.
-QA1 é respondida pela execução automatizada da baseline e dos dez replays, com
-geração automática de bags, CSVs, gráfico e \texttt{summary.json}. QA2 é
-respondida pelo RMSE médio de 3,35\,cm e máximo de 4,76\,cm contra a execução de
-referência, ambos muito abaixo da tolerância de 25\,cm do Nav2. QA3 é respondida
-pela baixa variabilidade temporal observada nos dez replays, com duração média
-de 17,51\,s e desvio-padrão de 0,38\,s (coeficiente de variação de
-aproximadamente 2,2\%, bem abaixo do limiar de 10\% da Seção~\ref{sec:criterios}).
-
-QA4 não é respondida com o mesmo grau de certeza. Os dados exploratórios da
-Seção~\ref{sec:res_exp_complementares} são compatíveis com a repetibilidade
-observada sob o protocolo controlado, mas, como já discutido na
-Seção~\ref{sec:questoes}, essa questão foi formulada a partir de dados que já
-existiam, é geradora de hipótese e não confirmatória, e os próprios dados que a
-sustentam confundem mecanismo de navegação com variação de pose inicial. Nos
-mesmos termos adotados no Capítulo~\ref{chap:conclusao}: trata-se de evidência
-exploratória compatível, não de causalidade estabelecida.
-
-A análise também reforça uma lição metodológica central: a pose inicial precisa
-ser controlada explicitamente \cite{bonsignorio2015}. Campanhas preliminares sem reinicialização entre
-replays produziram métricas contaminadas por deslocamentos iniciais progressivos.
-A campanha final evita essa ameaça ao relançar a simulação e a pilha de navegação
-antes de cada replay, fazendo com que as dez trajetórias analisadas partam do
-mesmo estado em \texttt{/\allowbreak odom}. O capítulo seguinte conclui a
-dissertação, discutindo implicações, limitações e trabalhos futuros.
+Os resultados respondem afirmativamente a QA1--QA3. QA1: a baseline e os dez
+replays rodaram de forma automática, com bags, CSVs, gráfico e
+\texttt{summary.json} gerados sem intervenção. QA2: o RMSE contra a referência
+ficou muito abaixo da tolerância de 25\,cm (Seção~\ref{sec:res_qa2}). QA3: o
+coeficiente de variação da duração ficou bem abaixo do limiar de 10\%
+(Seção~\ref{sec:res_qa3}). QA4 fica sem resposta confirmatória: os dados
+exploratórios da Seção~\ref{sec:res_exp_complementares} são evidência
+compatível com H3, não causal, porque confundem mecanismo de navegação com
+variação de pose inicial, que precisa ser controlada explicitamente
+\cite{bonsignorio2015}. O capítulo seguinte conclui a dissertação, discutindo
+implicações, limitações e trabalhos futuros.

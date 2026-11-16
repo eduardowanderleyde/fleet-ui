@@ -11,9 +11,7 @@ protocolo record--replay que transforma uma prática informal e fragmentada, a
 de executar um robô várias vezes e comparar os resultados ``na mão'', em um
 pipeline documentado, automatizável e transferível.
 
-As contribuições se organizam em três níveis, complementados por uma extensão
-de automação construída sobre essa base depois da campanha de avaliação
-quantitativa:
+As contribuições se organizam em três níveis, mais uma extensão de engenharia:
 
 \textbf{Nível arquitetural}: a separação de papéis MUUT/FUUT formaliza a distinção
 entre unidades que executam tarefas e unidades que observam, permitindo designs
@@ -36,15 +34,9 @@ idênticas que \citeonline{maset2022} empregam em mapeamento 3D, e preenchendo a
 lacuna de protocolo formal de record--replay e de métricas de RMSE entre
 trajetórias que \citeonline{hamer2025} deixam em aberto ao comparar algoritmos
 de SLAM quanto à variabilidade entre execuções. A campanha final em
-simulação, composta por uma baseline limpa e $N=10$ replays independentes da
-rota \texttt{dissertation\_\allowbreak clean01}, obteve RMSE médio de
-3,35\,cm contra a execução de referência, RMSE máximo de 4,76\,cm, erro final
-médio de 1,64\,cm e duração média de 17,51\,s. Esses resultados fornecem um
-baseline empírico controlado para comparação com hardware real e com outras
-pilhas de navegação. Campanhas exploratórias executadas antes do controle
-rigoroso de pose inicial são reportadas apenas como achados diagnósticos, pois
-demonstraram que não reinicializar o estado entre replays pode contaminar
-diretamente a interpretação do RMSE.
+simulação ($N=10$, Seção~\ref{sec:retomada_pp}, PP2) fornece um baseline
+empírico controlado para comparação com hardware real e com outras pilhas de
+navegação.
 
 \textbf{Nível de acessibilidade}: a interface web reduz a necessidade de
 interação direta com a linha de comando do ROS~2 para configurar, executar e
@@ -53,39 +45,23 @@ reais e o botão \textit{Executar record} representam uma redução perceptível
 no esforço de configuração de um experimento do zero, uma percepção
 qualitativa dos autores, já que, como discutido na Seção~\ref{sec:limitacoes},
 nenhum estudo de usabilidade controlado foi conduzido para quantificar essa
-redução. O Painel de Simulação (Seção~\ref{sec:painel_simulacao}), adicionado
-posteriormente, aprofunda essa mesma direção ao eliminar a necessidade de
-abrir terminais para subir a simulação: o pesquisador escolhe mapa, modo e
-robôs pela tela, e o backend lança os mesmos processos que antes eram
-digitados manualmente.
+redução. O Painel de Simulação (Seção~\ref{sec:painel_simulacao}) dispensa
+também os terminais para subir a simulação.
 
-\textbf{Extensão de qualidade de engenharia}: paralelamente à campanha de
-avaliação quantitativa, uma suíte de integração contínua
-(\texttt{.github/\allowbreak workflows/\allowbreak ci.yml}) passou a
-validar o lado ROS~2 do projeto a cada alteração: compilação via
-\texttt{colcon}, validação de xacro/URDF por robô (incluindo os
-\textit{namespaces} multi-robô), verificação dos \textit{launch files} e
-execução da suíte de testes específicos de ROS~2 sem permitir que sejam
-pulados silenciosamente, o que evita que um ambiente ROS incompleto produza um
-selo verde enganoso. Essa extensão não foi exercitada pela campanha
-quantitativa de repetibilidade relatada nos Capítulos~\ref{chap:avaliacao}
-e~\ref{chap:resultados}, que permanece restrita a um único robô
-(Seção~\ref{sec:limitacoes}); seu valor é ampliar a base de engenharia sobre a
-qual uma avaliação multi-robô futura pode ser construída sem retrabalho.
+\textbf{Extensão de qualidade de engenharia}: uma suíte de integração contínua
+(\texttt{.github/\allowbreak workflows/\allowbreak ci.yml}) valida a cada alteração a
+compilação, o xacro/URDF por robô e os \textit{launch files}
+(Seção~\ref{sec:contribuicoes}). Ela não foi exercitada pela campanha
+quantitativa, mas amplia a base para uma futura avaliação multi-robô.
 
-Em conjunto, o framework aqui descrito endereça a crise de orquestração
-experimental nomeada na Introdução (Seção~\ref{sec:problema}) ao formalizar em
-software três das camadas que, segundo aquela seção, operam de forma
-descoordenada e tacitamente resolvida a cada novo experimento: a separação de
-papéis MUUT/FUUT e os mecanismos de compatibilidade multi-robô (nível
-arquitetural), o protocolo record--replay com análise RMSE pairwise (nível
-experimental) e a redução da interação manual via interface web e Painel de
-Simulação (nível de acessibilidade). Essa formalização não elimina a
-dificuldade de coordenação multi-camada descrita na Introdução: os limites
-discutidos na Seção~\ref{sec:limitacoes}, sobretudo sob operação simultânea de
-múltiplos robôs, mostram que parte dela permanece. Ainda assim, transforma o
-conhecimento tácito que antes vivia em scripts não publicados e notebooks
-descartados em um pipeline documentado, automatizável e transferível.
+Em conjunto, o framework endereça a crise de orquestração experimental nomeada
+na Introdução (Seção~\ref{sec:problema}) ao formalizar em software três das
+camadas que ali operam de forma descoordenada: papéis e compatibilidade
+multi-robô, protocolo record--replay com RMSE pairwise e interface web. Os
+limites da Seção~\ref{sec:limitacoes}, sobretudo sob operação simultânea de
+múltiplos robôs, mostram que parte da dificuldade permanece; ainda assim, o
+conhecimento tácito de scripts não publicados vira um pipeline documentado,
+automatizável e transferível.
 
 \section{Retomada das Perguntas de Pesquisa}
 \label{sec:retomada_pp}
@@ -146,38 +122,25 @@ que a campanha que produziu os resultados de PP2 (Seção~\ref{sec:res_qa2}) foi
 executada via linha de comando e scripts, não pela interface web; a evidência
 de PP4 relatada aqui é de disponibilidade funcional da interface (ela
 existe, está implementada e é operável), não de uso efetivo dela na geração
-dos números reportados nesta dissertação, o que é consistente com a
-classificação de ``evidência funcional apenas'' já atribuída a PP4 na
-Tabela~\ref{tab:pp_h_qa_sintese}. O que não foi medido é se essa
-redução de interação manual se traduz em menor esforço percebido pelo
-pesquisador: nenhum estudo de usabilidade com participantes externos (tempo de
-configuração, número de erros, SUS, NASA-TLX ou instrumento equivalente) foi
-conduzido, uma lacuna explicitamente reconhecida na Seção~\ref{sec:limitacoes}
-e retomada como trabalho futuro.
+dos números reportados nesta dissertação. Nenhum estudo de usabilidade com
+participantes externos (tempo de configuração, número de erros, SUS, NASA-TLX
+ou instrumento equivalente) foi conduzido, lacuna reconhecida na
+Seção~\ref{sec:limitacoes} e retomada como trabalho futuro.
 
 \section{Reprodutibilidade vs.\ Repetibilidade: Retomada}
 \label{sec:repro_vs_repet}
 
-A Seção~\ref{sec:motivacao} distinguiu repetibilidade (o mesmo sistema, no
-mesmo ambiente, produzindo resultados equivalentes em execuções sucessivas) de
-reprodutibilidade (um investigador independente, em outro ambiente, obtendo
-resultados equivalentes a partir do artefato publicado), dois conceitos que
-a literatura de ciência experimental frequentemente trata como sinônimos, mas
-que não o são \cite{acm2020badging, bonsignorio2015}. Essa distinção se
-confirma, e não se dilui, à luz dos resultados apresentados: os dados da
-campanha final controlada (Capítulo~\ref{chap:resultados}) medem repetibilidade:
-nenhum deles envolveu replicação por outro pesquisador ou laboratório. O
+A distinção entre repetibilidade e reprodutibilidade feita na
+Seção~\ref{sec:motivacao}, que a literatura costuma tratar como sinônimas
+\cite{acm2020badging, bonsignorio2015}, se confirma à luz dos resultados: os
+dados da campanha final (Capítulo~\ref{chap:resultados}) medem repetibilidade,
+pois nenhum envolveu replicação por outro pesquisador ou laboratório. O
 framework favorece reprodutibilidade por construção (código aberto, protocolo
 documentado, artefatos estruturados de saída, Seção~\ref{sec:rel_reprodutibilidade}),
-no espírito da estrutura de artefatos de pesquisa orientada pelos
-\textit{badges} da ACM que \citeonline{guevaravega2024} propõem para tornar
-experimentos de fato reexecutáveis por terceiros, mas essa é uma propriedade
-de \emph{desenho}, não um resultado \emph{demonstrado} nesta dissertação. Essa
-distinção não invalida a contribuição do trabalho; delimita, com precisão, o
-que foi de fato demonstrado empiricamente, em contraste com o que é apenas
-facilitado pelo desenho do sistema, e é por isso que a replicação
-independente do protocolo por outro laboratório aparece explicitamente como
-primeiro passo de trabalho futuro (Seção~\ref{sec:futuros}).
+no espírito dos \textit{badges} da ACM aplicados por \citeonline{guevaravega2024},
+mas essa é uma propriedade de \emph{desenho}, não um resultado
+\emph{demonstrado}. Por isso a replicação independente por outro laboratório
+aparece como trabalho futuro (Seção~\ref{sec:futuros}).
 
 \section{Limitações}
 \label{sec:limitacoes}
@@ -194,21 +157,13 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     Capítulos~\ref{chap:avaliacao} e~\ref{chap:resultados} foi realizada com um
     único TurtleBot4 Standard. Escalabilidade e comportamento sob operação
     simultânea de múltiplos robôs, incluindo eventuais interferências de
-    rede, DDS ou TF entre unidades, não foram empiricamente avaliados. Um
-    teste funcional preliminar, fora do escopo da campanha quantitativa,
-    sugeriu originalmente que dois robôs simultâneos (\texttt{tb1}+\texttt{tb2})
-    executavam ciclos completos de gravação e reprodução sem interferência
-    cruzada de \texttt{cmd\_\allowbreak vel} ou odometria, com o teto prático de
-    escala atribuído a três robôs simultâneos (contenção de CPU/DDS entre três
-    pilhas independentes de SLAM Toolbox e Nav2, não falta de GPU: a GPU
-    dedicada desta máquina foi confirmada em uso real pela renderização do
-    Gazebo). Investigação mais aprofundada na mesma semana, porém, reproduziu
-    repetidamente o mesmo sintoma: o relógio simulado saltando para trás,
-    invalidando o buffer de TF antes do prazo interno do Nav2; mesmo com
-    apenas dois robôs sob navegação Nav2 simultânea, invalidando essa
-    conclusão preliminar. A arquitetura foi então redesenhada para ativar a
-    pilha completa de navegação de um robô por vez (ativação sequencial em
-    vez de duas pilhas simultâneas), e essa arquitetura revisada foi medida
+    rede, DDS ou TF entre unidades, não foram empiricamente avaliados. Com
+    duas ou mais pilhas completas de SLAM Toolbox e Nav2 ao mesmo tempo, o
+    relógio simulado salta para trás e invalida o buffer de TF antes do
+    prazo interno do Nav2 (contenção de CPU/DDS, não falta de GPU: a GPU
+    dedicada foi confirmada em uso pela renderização do Gazebo). A
+    arquitetura foi então redesenhada para ativar a pilha completa de
+    navegação de um robô por vez, e essa ativação sequencial foi medida
     formalmente em cinco tentativas: taxa de sucesso de 70\% (sete em dez
     ativações individuais), sem padrão claro de falha ligado à ordem de
     ativação: robôs na primeira e na segunda posição falharam com
@@ -233,7 +188,7 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     \texttt{tf2\_\allowbreak ros} (pacote \texttt{geometry2}, ramo
     \textit{jazzy}) confirma que qualquer recuo do relógio, por menor que seja
     (limiar de $-1$\,ns), limpa o buffer de TF, e que esse limiar não é exposto
-    como parâmetro configurável — o que explica por que nenhuma forma de ajustar
+    como parâmetro configurável --- o que explica por que nenhuma forma de ajustar
     tolerância, só a troca de middleware, resolveu o sintoma. Este
     resultado não foi integrado como arquitetura padrão do projeto nem
     reavaliado quantitativamente (RMSE, consistência temporal) sob a
@@ -245,40 +200,15 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     (Seção~\ref{sec:futuros}).
 
     \item \textbf{Papel FUUT exercitado apenas em piloto pequeno.}
-    Distinta da limitação de escala acima, há uma lacuna específica quanto
-    ao papel de observação exógena: a dualidade MUUT/FUUT, motivada em
-    seção inteira da Introdução (Seção~\ref{sec:frota}) como enriquecimento
-    metodológico da análise de repetibilidade, permaneceu inteiramente não
-    testada até um piloto de três réplicas reportado na
-    Seção~\ref{sec:res_fuut_piloto}, que exercitou pela primeira vez a
-    combinação MUUT+FUUT (distinta das três ou duas unidades móveis
-    simultâneas, MUUT+MUUT, testadas nos experimentos exploratórios de
-    escala citados acima) e obteve corroboração geométrica forte entre a
-    pose reivindicada pelo MUUT e a detecção do FUUT (discrepância de
-    3,06--5,88\,cm, Tabela~\ref{tab:fuut_piloto}). O valor da observação
-    exógena como fonte de verdade alternativa, central ao argumento da
-    Introdução, deixa portanto de ser só uma contribuição de projeto
-    verificada em software e passa a ter evidência empírica preliminar a
-    favor de seu funcionamento --- mas permanece preliminar: $N=3$, uma
-    única rota curta, uma única posição do FUUT, e uma calibração
-    geométrica obtida empiricamente (ajuste de +90° no \textit{bearing}
-    do LiDAR do FUUT) sem confirmação contra o transform real do URDF do
-    TurtleBot4 (detalhes em Seção~\ref{sec:res_fuut_limitacoes}). A
-    extensão para mais réplicas, mais geometrias de observação e a
-    confirmação da calibração contra o URDF permanecem como lacunas
-    abertas.
+    A dualidade MUUT/FUUT (Seção~\ref{sec:frota}) foi exercitada só no piloto
+    de $N=3$ da Seção~\ref{sec:res_fuut_piloto}, com evidência preliminar a
+    favor; suas limitações estão na Seção~\ref{sec:res_fuut_limitacoes}.
 
     \item \textbf{Estocasticidade do controlador local não isolada como fator
-    de variância.} O controlador \texttt{nav2\_\allowbreak mppi\_\allowbreak controller}
-    (algoritmo MPPI, \textit{Model Predictive Path Integral} \cite{williams2016})
-    reamostra ruído gaussiano a cada ciclo de controle por definição do
-    algoritmo (discussão de validade interna, Seção~\ref{sec:ameacas}), de
-    modo que parte da variância
-    de RMSE observada é ruído esperado do método de controle escolhido, não
-    necessariamente falta de repetibilidade do sistema como um todo. Esta
-    dissertação não avaliou um controlador determinístico (DWB \cite{fox1997}
-    ou Regulated Pure Pursuit \cite{macenski2023survey}) sob o mesmo protocolo
-    para isolar essas duas fontes de variância.
+    de variância.} Parte da variância de RMSE vem da amostragem aleatória do
+    MPPI \cite{williams2016} (Seção~\ref{sec:ameacas}); um controlador
+    determinístico (DWB \cite{fox1997} ou Regulated Pure Pursuit
+    \cite{macenski2023survey}) não foi avaliado sob o mesmo protocolo.
 
     \item \textbf{Escopo restrito da campanha quantitativa.} A campanha final
     utiliza $N=10$ replays, superando a limitação inicial de amostra muito
@@ -296,12 +226,10 @@ afetarem diretamente a interpretação dos resultados desta dissertação:
     em um cenário controlado.
 \end{itemize}
 
-A validação em simulação, embora controlada, não captura todos os fenômenos
-relevantes em ambientes físicos: slip de roda em superfícies irregulares, variação
-de temperatura e umidade que afeta a calibração do LiDAR, e deriva de IMU de longo
-prazo: a mesma complementaridade entre simulação e experimentação física
-defendida por \citeonline{amigoni2010} (Seção~\ref{sec:rel_repeticao}).
-Experimentos em hardware real são a extensão mais urgente deste trabalho.
+A validação em simulação não captura os fenômenos físicos discutidos na
+validade externa (Seção~\ref{sec:ameacas}), na complementaridade entre simulação
+e hardware defendida por \citeonline{amigoni2010}; experimentos em hardware
+real são a extensão mais urgente deste trabalho.
 
 O protocolo atual assume que o ambiente permanece estático entre as execuções.
 Qualquer variação (um objeto movido, uma pessoa cruzando o campo do LiDAR)
@@ -330,21 +258,13 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     fontes de trajetória discutida no item seguinte.
 
     \item \textbf{Comparar \texttt{/\allowbreak odom}, pose estimada por
-    SLAM e \textit{ground truth} do Gazebo — realizado}
-    (Seção~\ref{sec:res_fonte_trajetoria}): em três rotas de complexidade
-    crescente ($N=10$ cada), o erro de \texttt{/\allowbreak odom} contra o
-    \textit{ground truth} cresce de 0,01\,cm (rota curta) a 14,27\,cm (rota
-    em loop com quatro curvas), enquanto o erro de \texttt{/\allowbreak pose}
-    (corrigido pelo SLAM) permanece baixo e sem diferença perceptível
-    entre rotas ($\approx$2--3\,cm). O que permanece como trabalho futuro
-    nessa frente é estender a comparação a mais geometrias de rota, a
-    cenários multi-robô, e re-executar o mesmo protocolo comparativo em
-    hardware físico (item anterior nesta lista) — o \textit{ground truth}
-    do simulador não tem equivalente direto fora da simulação, de modo que
-    essa validação em hardware exigiria um sistema de rastreamento externo
-    independente (ex.: captura de movimento ou RTK-GPS).
+    SLAM e \textit{ground truth} do Gazebo}: já feito em simulação
+    (Seção~\ref{sec:res_fonte_trajetoria}). Falta estender a comparação a
+    mais geometrias de rota, a cenários multi-robô e a hardware físico, onde
+    o \textit{ground truth} exigiria um rastreamento externo independente
+    (ex.: captura de movimento ou RTK-GPS).
 
-    \item Avaliar também AMCL com mapa pré-construído
+    \item Avaliar também AMCL \cite{thrun2005} com mapa pré-construído
     (Seção~\ref{sec:localizacao_bayes}) como alternativa ao SLAM ao vivo em
     sessões experimentais longas, motivado pela variabilidade observada nos
     experimentos exploratórios (Seção~\ref{sec:res_exp_complementares}).
@@ -361,7 +281,7 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     \textit{tags} a cada marco (a da dissertação e a do teste na UFPE),
     seguindo o versionamento semântico \cite{semver} (hoje todos os pacotes
     estão em 0.1.0, faixa que a especificação reserva a desenvolvimento
-    inicial), e dividir o módulo principal do backend, com mais de 1.700
+    inicial), e dividir o módulo principal do backend, com cerca de 1.000
     linhas, segundo as refatorações para classes grandes de
     \citeonline{fowler2018}; práticas de software científico sugeridas por
     \citeonline{wilson2017}.
@@ -373,24 +293,13 @@ A agenda de trabalhos futuros pode ser organizada em três horizontes.
     um todo (Seção~\ref{sec:limitacoes}).
 
     \item Avaliar quantitativamente cenários multi-robô (MUUT+MUUT) com RMSE
-    pairwise por robô. Dois alvos concretos ficam disponíveis a partir da
-    Seção~\ref{sec:limitacoes}: a arquitetura de ativação sequencial já
-    em uso (taxa de sucesso de 70\% medida qualitativamente, ainda sem
-    RMSE) e, mais promissor, a ativação SIMULTÂNEA sob Cyclone DDS
-    (mesma seção), que mediu 100\% de sucesso de ativação em dez de dez
-    tentativas e eliminou o sintoma que motivou a ativação sequencial em
-    primeiro lugar — mas segue sem nenhuma avaliação quantitativa de RMSE
-    sob navegação simultânea prolongada, só um teste de fumaça de 25\,s.
-    Adotar a troca de RMW como arquitetura padrão do projeto e então medir
-    RMSE pairwise sob essa configuração é o caminho que este trabalho
-    recomenda como prioridade, por responder à mesma limitação de escopo
-    single-robot com uma arquitetura já validada quanto ao sintoma que
-    inviabilizava a tentativa anterior — distinta da lacuna específica do
-    papel FUUT, exercitada apenas em piloto de $N=3$
-    (Seção~\ref{sec:res_fuut_piloto}) e sem alvo de ativação sequencial
-    equivalente, já que uma unidade fixa não navega. A extensão natural
-    dessa lacuna é ampliar o piloto FUUT para mais réplicas e mais
-    geometrias de observação, não um alvo de escala de ativação.
+    pairwise por robô. A prioridade recomendada é adotar a troca de RMW para
+    Cyclone DDS como arquitetura padrão, que eliminou o sintoma do relógio na
+    ativação simultânea (Seção~\ref{sec:limitacoes}), e então medir RMSE
+    pairwise sob navegação simultânea prolongada. Para o papel FUUT, que não
+    navega, o passo seguinte é ampliar o piloto
+    (Seção~\ref{sec:res_fuut_piloto}) para mais réplicas e geometrias de
+    observação.
 
 \end{itemize}
 

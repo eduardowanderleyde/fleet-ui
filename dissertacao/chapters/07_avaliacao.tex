@@ -5,24 +5,10 @@
 \label{sec:arranjo}
 
 A avaliação do framework foi conduzida em simulação Gazebo Harmonic com um robô
-TurtleBot4 Standard no mundo \textit{warehouse}. O ambiente de simulação garante
-condições perfeitamente repetíveis dentro do mesmo laboratório, sem variação de iluminação, temperatura
-ou tráfego de outros agentes, o que permite isolar a variabilidade introduzida
-pelos algoritmos de navegação e SLAM da variabilidade ambiental. Esse é o tipo
-de controle completo de variáveis apontado como vantagem da simulação sobre o
-hardware real \cite{amigoni2010}; experimentos em hardware real, com sua camada
-adicional de incerteza, constituem trabalho futuro.
-
-A configuração da pilha de software é:
-
-\begin{itemize}
-    \item \textbf{Sistema operacional}: Ubuntu 24.04 LTS (Noble Numbat)
-    \item \textbf{ROS~2}: Jazzy Jalisco (LTS)
-    \item \textbf{Simulador}: Gazebo Harmonic 8.x
-    \item \textbf{Navegação}: Nav2 (pacotes \texttt{ros-jazzy-nav2-*})
-    \item \textbf{SLAM}: SLAM Toolbox (modo síncrono)
-    \item \textbf{Plataforma}: TurtleBot4 Standard (via \texttt{nav2\_\allowbreak minimal\_\allowbreak tb4\_\allowbreak sim})
-\end{itemize}
+TurtleBot4 Standard no mundo \textit{warehouse}, com a pilha de software da
+Tabela~\ref{tab:ambiente_hw}. A simulação isola a variabilidade dos algoritmos
+de navegação e SLAM da variabilidade ambiental \cite{amigoni2010}; hardware real
+fica como trabalho futuro.
 
 \section{Questões de Avaliação}
 \label{sec:questoes}
@@ -108,10 +94,8 @@ O framework é considerado válido se:
     da duração média (\textbf{QA3}).
 \end{enumerate}
 
-\noindent QA4 não tem critério de aceitação/rejeição nesta lista, deliberadamente:
-por ser geradora de hipótese, e não confirmatória (ver discussão na
-Seção~\ref{sec:questoes}), não há um limiar numérico que a "valide" ou
-"invalide" sem o risco de ajustá-lo aos próprios dados que a motivaram.
+\noindent QA4 não tem critério nesta lista por ser geradora de hipótese
+(Seção~\ref{sec:questoes}).
 
 O limiar de 25\,cm acima (QA2 e erro final) é o mesmo valor da tolerância
 padrão de chegada do \texttt{general\_\allowbreak goal\_\allowbreak checker} do
@@ -120,11 +104,16 @@ Nav2 (Seção~\ref{sec:record_replay}), uma métrica de chegada a um
 trajetória completa e erro de endpoint, sem derivação independente
 específica para essas duas grandezas. Essa escolha é operacionalmente
 conveniente (reusa um parâmetro já existente do sistema), mas não foi
-calibrada a partir dos dados da campanha nem comparada contra limiares
-usados por trabalhos relacionados que medem grandezas semelhantes
-(Seção~\ref{sec:rel_sintese}); o RMSE médio obtido (Capítulo~\ref{chap:resultados})
-ficou bem abaixo desse limiar, o que deve ser lido como evidência de
-repetibilidade, não como validação do limiar em si.
+calibrada a partir dos dados da campanha. Ela é bem mais permissiva que os
+números de trabalhos relacionados (Seção~\ref{sec:rel_sintese}): o Regulated
+Pure Pursuit isolado tem erro lateral médio inferior a 5\,cm
+\cite{macenski2023survey}, e \citeonline{maset2022} reportam distância
+\textit{cloud-to-cloud} da ordem de 2\,cm em mapeamento 3D com hardware
+dedicado. Esses números medem um controlador ou um sensor isolados, enquanto o
+limiar daqui vale para o pipeline completo (SLAM + Nav2 + odometria); se ele
+deveria ser mais apertado fica como limite de escopo. O RMSE médio obtido
+(Capítulo~\ref{chap:resultados}) ficou bem abaixo do limiar, o que deve ser lido
+como evidência de repetibilidade, não como validação do limiar em si.
 
 O limiar de 10\% acima é usado como critério mínimo de aceitação para QA3. Ele
 não significa que durações diferentes sejam desejáveis, apenas que variações
@@ -173,61 +162,33 @@ repetível de uma falha grosseira, mas não diferencia níveis de repetibilidade
 entre si. Como mitigação, os valores brutos de cada execução são reportados
 (Tabela~\ref{tab:campanha_final}), e não só a aprovação no critério, e os
 resultados processados, os scripts de campanha e de análise estão versionados
-para conferência por terceiros (os bags brutos, pelo tamanho, ficam fora do
+para conferência por terceiros \cite{acm2020badging} (os bags brutos, pelo tamanho, ficam fora do
 repositório).
 
 Um risco de validade de construto foi identificado e corrigido durante o
 desenvolvimento: o modo automático de detecção de tópico do
-\texttt{analyze\_\allowbreak runs.py} originalmente só reconhecia um tópico chamado
-literalmente \texttt{amcl\_\allowbreak pose}; como este trabalho usa SLAM Toolbox, e não
-AMCL, esse tópico nunca existe, e a análise recaía silenciosamente em
-\texttt{/\allowbreak odom} mesmo quando a pose corrigida do SLAM
-(\texttt{/\allowbreak pose}) também havia sido gravada no mesmo bag. Esse
-comportamento poderia inflar artificialmente o RMSE em rotas mais longas ou
-demoradas, já que a odometria bruta deriva continuamente enquanto a pose do
-SLAM é corrigida pelo casamento de \textit{scans} contra o mapa. O modo
-automático foi corrigido para priorizar, nessa ordem, \texttt{amcl\_\allowbreak pose}
-$>$ \texttt{pose} (SLAM Toolbox) $>$ \texttt{odom}, escolhendo a primeira opção
-com mensagens de fato gravadas; a seleção também pode ser forçada
-explicitamente. Análises realizadas antes dessa correção que tenham caído no
-\textit{fallback} de \texttt{/\allowbreak odom} deveriam, a rigor, ser
-reconsideradas caso a pose do SLAM também estivesse disponível no mesmo bag.
-Esse tipo de falha (uma suposição de nomenclatura de tópico que deixa de
-valer quando o pacote de SLAM é trocado, degradando silenciosamente para um
-\textit{fallback} em vez de falhar de forma visível) é consistente com
-classes de defeito já catalogadas empiricamente em sistemas baseados em ROS
-\cite{timperley2024}. O bug descrito afeta especificamente o modo
-\textit{automático} de detecção de tópico; a campanha principal reportada
-neste capítulo (Seção~\ref{sec:procedimento}, passo 9) especifica
-\texttt{/\allowbreak odom} explicitamente como fonte da trajetória, não
-dependendo dessa detecção automática. A escolha de manter \texttt{/\allowbreak odom}
-em vez de \texttt{/\allowbreak pose} para essa campanha específica é, portanto, uma
-decisão de projeto distinta do bug corrigido acima, discutida na íntegra
-na Seção~\ref{sec:res_bags}.
+\texttt{analyze\_\allowbreak runs.py} recaía silenciosamente em \texttt{/\allowbreak odom}
+mesmo quando a pose do SLAM estava gravada, o que poderia inflar o RMSE em rotas
+longas; a correção e a cadeia \texttt{amcl\_\allowbreak pose} $>$ \texttt{pose} $>$
+\texttt{odom} estão na Seção~\ref{sec:impl_fallback_pose}. Esse tipo de
+degradação silenciosa para um \textit{fallback} é uma classe de defeito já
+catalogada em sistemas baseados em ROS \cite{timperley2024}. A campanha
+principal não é afetada: ela especifica \texttt{/\allowbreak odom} de forma
+explícita (Seção~\ref{sec:procedimento}, passo 9), uma decisão de projeto
+discutida na Seção~\ref{sec:res_bags}.
 
-Uma segunda fonte de viés de construto, evidenciada em execuções exploratórias
-reais (Seção~\ref{sec:res_exp_complementares}), é que a fase de gravação e a
-fase de replay não navegam pelo mesmo mecanismo: \texttt{record} envia uma
-sequência de comandos \texttt{go\_\allowbreak to\_\allowbreak point}, um objetivo Nav2 de
-cada vez, só para os poucos waypoints indicados pelo usuário; \texttt{replay}
-envia uma \texttt{play\_\allowbreak route}, em que o \texttt{FollowWaypoints} do
-Nav2 percorre todas as poses salvas durante a gravação (uma a cada 10\,cm),
-parando em cada uma e aguardando 200\,ms antes da próxima. Em uma campanha exploratória com essa
-configuração (rota de quatro waypoints, $N=3$ replays), o RMSE par-a-par entre
-replays foi da ordem de 0,02\,m, contra cerca de 0,14\,m entre a baseline e
-cada replay, com os replays durando cerca de 2,5$\times$ mais que a baseline, efeito das
-paradas repetidas.
-Essa diferença é explicada quase inteiramente pelo mecanismo de navegação
-distinto, não por falta de repetibilidade do robô. Por esse motivo, o RMSE
-calculado entre os replays (que compartilham o mesmo mecanismo de
-navegação) é a métrica mais fiel à repetibilidade que este trabalho pretende
-medir, seguindo a mesma lógica metodológica adotada por
-\citeonline{maset2022} para repetibilidade em mapeamento 3D, de comparar
-execuções nominalmente idênticas diretamente entre si em vez de cada uma
-isoladamente contra um único valor de referência; comparações contra a
-gravação baseline, que usa um mecanismo de
-navegação distinto, misturam essa diferença de implementação com
-repetibilidade real e devem ser interpretadas com essa ressalva.
+Uma segunda fonte de viés de construto é que gravação e replay não navegam
+pelo mesmo mecanismo: \texttt{record} usa \texttt{go\_\allowbreak to\_\allowbreak point}
+para os poucos waypoints do usuário, e \texttt{replay} usa
+\texttt{FollowWaypoints} sobre as poses densas gravadas
+(Seção~\ref{sec:record_replay}, Fase~2). Na campanha exploratória
+\texttt{dissertacao\_\allowbreak teste1} (Seção~\ref{sec:res_qa2_mecanismo}), isso
+basta para explicar quase toda a diferença entre o RMSE contra a baseline e o
+RMSE entre réplicas. Por isso o RMSE entre replays é a métrica mais fiel à
+repetibilidade, na mesma lógica de \citeonline{maset2022} de comparar execuções
+nominalmente idênticas entre si; comparações contra a baseline misturam a
+diferença de implementação com repetibilidade real e devem ser lidas com essa
+ressalva.
 
 Esse experimento exploratório, portanto, confunde dois fatores manipulados
 simultaneamente: o mecanismo de navegação (\texttt{go\_\allowbreak
@@ -269,7 +230,7 @@ escolhido (a menos que se troque por um controlador determinístico, como DWB
 não avaliada nesta dissertação).
 Adicionalmente, o critério de chegada do Nav2 (\texttt{general\_\allowbreak goal\_\allowbreak
 checker}) aceita até 0,25\,m de erro de posição e 0,25\,rad (aproximadamente
-14°) de erro angular; desvios de endpoint dentro dessa faixa refletem o
+14\textdegree{}) de erro angular; desvios de endpoint dentro dessa faixa refletem o
 comportamento configurado do Nav2, não necessariamente imprecisão do
 framework de medição.
 
@@ -279,7 +240,7 @@ frequentemente ignorados, também são resultados e têm valor \cite{borji2018}.
 réplicas planejadas foram executadas na primeira tentativa, sem descarte, o
 que os registros de cada réplica confirmam. A ameaça permanece, porém, para
 os resultados exploratórios: a ativação sequencial multi-robô falhou em três
-de dez tentativas (Seção~\ref{sec:limitacoes}), e as execuções interrompidas
+de dez ativações (Seção~\ref{sec:limitacoes}), e as execuções interrompidas
 não geram dados de trajetória.
 
 \textbf{Validade externa.} A validação usa simulação com TurtleBot4 em um único

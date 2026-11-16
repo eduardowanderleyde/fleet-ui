@@ -16,7 +16,7 @@ O TurtleBot4 Standard, plataforma de referência desta dissertação, opera com 
 diferencial: duas rodas traseiras independentes e uma roda dianteira livre (caster)
 que segue passivamente o movimento. Nesse modelo, a velocidade linear $v$ e angular
 $\omega$ do robô relacionam-se com as velocidades individuais das rodas $v_R$ e $v_L$
-pela cinemática inversa \cite{siegwart2011}:
+pela cinemática direta \cite{siegwart2011}:
 
 \begin{equation}
 v = \frac{v_R + v_L}{2}, \quad \omega = \frac{v_R - v_L}{L}
@@ -25,28 +25,14 @@ v = \frac{v_R + v_L}{2}, \quad \omega = \frac{v_R - v_L}{L}
 
 \noindent onde $L$ é a distância entre as rodas (wheelbase). A integração dessas
 velocidades ao longo do tempo produz a estimativa de pose $(x, y, \theta)$, o
-que é denominado \textit{dead reckoning} ou odometria de roda.
+que é denominado \textit{dead reckoning} ou odometria de roda \cite{siegwart2011}.
 
 \subsection{Acúmulo de Erro de Odometria}
 \label{sec:erro_odometria}
 
-A odometria por integração é inerentemente propensa a erros acumulados
-\cite{thrun2005, siegwart2011}. Três fontes dominam:
-
-\begin{enumerate}
-    \item \textbf{Resolução dos encoders}: encoders incrementais possuem resolução
-    finita; a discretização introduz erro por passo que, integrado ao longo de
-    centenas de metros, pode exceder um metro de deriva posicional.
-
-    \item \textbf{Slip de roda}: deslizamento entre roda e superfície viola a
-    suposição de rolamento puro do modelo cinemático, introduzindo erro sistemático
-    que varia com velocidade, carga e tipo de superfície.
-
-    \item \textbf{Desalinhamento de rodas}: pequenas diferenças no diâmetro efetivo
-    de cada roda introduzem curvatura sistemática mesmo em trajetos nominalmente retos.
-\end{enumerate}
-
-Para robôs de acionamento diferencial em superfície regular, erros de odometria pura
+A odometria por integração acumula erro, por resolução dos encoders, slip de
+roda e desalinhamento das rodas \cite{thrun2005, siegwart2011, borenstein1996}. Para robôs de
+acionamento diferencial em superfície regular, erros de odometria pura
 da ordem de 5--10\% do percurso total são típicos \cite{siegwart2011}. Percursos de
 5\,m podem acumular até 50\,cm de erro de posição sem correção externa, tornando o SLAM
 indispensável para experimentos que exijam repetibilidade sub-decimétrica.
@@ -71,14 +57,9 @@ conjunto de hipóteses amostradas; abordagens baseadas em grafos (como o SLAM To
 \cite{macenski2021slam}) representam a trajetória do robô como um grafo de poses
 e minimizam a energia do grafo via otimização esparsa.
 
-Uma terceira família algorítmica clássica, o EKF-SLAM (\textit{Extended Kalman
-Filter SLAM}), aproxima a mesma distribuição pelo filtro de Kalman estendido,
-representando a pose do robô e os marcos do mapa em um único vetor de estado
-gaussiano \cite{thrun2005}. Esta dissertação não emprega EKF-SLAM. O SLAM
-Toolbox, adotado como ferramenta de mapeamento (Seção~\ref{sec:slam_toolbox}),
-pertence à família baseada em grafos; ainda assim, esta dissertação introduz o
-conceito aqui porque ele é retomado como uma das três famílias algorítmicas
-dominantes na revisão de literatura do Capítulo~\ref{chap:relacionados}.
+Uma terceira família clássica, o EKF-SLAM, representa pose e marcos do mapa
+em um único vetor de estado gaussiano \cite{thrun2005}; não é usada aqui, mas
+reaparece na revisão do Capítulo~\ref{chap:relacionados}.
 
 \subsection{A Cadeia TF no ROS~2}
 \label{sec:cadeia_tf}
@@ -112,9 +93,9 @@ robótica publicada como software livre pela Open Robotics \cite{macenski2022ros
 Desenvolvida desde 2014 para corrigir limitações arquiteturais do
 ROS~1 \cite{quigley2009}, foi
 construída sobre o protocolo DDS (\textit{Data Distribution Service}
-\cite{pardocastellote2003dds}), que lhe
+\cite{pardocastellote2003dds, macenski2022ros2}), que lhe
 confere comunicação distribuída nativa, descoberta automática de nós, e suporte
-a múltiplos perfis de qualidade de serviço (QoS), um modelo de
+a múltiplos perfis de qualidade de serviço (QoS) \cite{omgdds2015}, um modelo de
 publicador/assinante cuja fundamentação geral antecede o DDS
 \cite{eugster2003pubsub}.
 
@@ -122,29 +103,16 @@ publicador/assinante cuja fundamentação geral antecede o DDS
 \label{sec:qos}
 
 A configuração de QoS determina o comportamento da comunicação entre publicadores
-e subscritores. Para experimentos de coleta de dados, três dimensões são críticas:
-
-\begin{description}
-    \item[\texttt{Reliability}] \textbf{BEST\_EFFORT} descarta mensagens se o
-    buffer encher; \textbf{RELIABLE} garante entrega com retransmissão. Sensores
-    de alta frequência (LiDAR, IMU) usam BEST\_EFFORT para minimizar latência.
-
-    \item[\texttt{Durability}] \textbf{VOLATILE} descarta mensagens para subscritores
-    que chegam após a publicação; \textbf{TRANSIENT\_LOCAL} mantém a última mensagem
-    para novos subscritores. O \texttt{/\allowbreak amcl\_\allowbreak pose} usa TRANSIENT\_LOCAL para que
-    um novo nó sempre receba a última estimativa de pose.
-
-    \item[\texttt{History}] \textbf{KEEP\_LAST(N)} mantém as N mensagens mais
-    recentes; \textbf{KEEP\_ALL} mantém todas. Tópicos de navegação crítica usam
-    KEEP\_LAST(1) para garantir que apenas a informação mais recente seja processada.
-\end{description}
+e subscritores. Para experimentos de coleta de dados, três dimensões são críticas
+(Tabela~\ref{tab:qos_dimensoes}): \texttt{Reliability}, \texttt{Durability} e
+\texttt{History}.
 
 \begin{table}[H]
 \centering
 \caption{As três dimensões de QoS críticas para coleta de dados, suas
 opções e um exemplo de uso neste projeto.}
 \label{tab:qos_dimensoes}
-\begin{tabular}{lll}
+\begin{tabularx}{\textwidth}{llX}
 \toprule
 \textbf{Dimensão} & \textbf{Opções} & \textbf{Exemplo neste projeto} \\
 \midrule
@@ -152,7 +120,7 @@ Reliability & BEST\_EFFORT / RELIABLE & LiDAR, IMU $\to$ BEST\_EFFORT \\
 Durability  & VOLATILE / TRANSIENT\_LOCAL & \texttt{/amcl\_pose} $\to$ TRANSIENT\_LOCAL \\
 History     & KEEP\_LAST(N) / KEEP\_ALL & navegação crítica $\to$ KEEP\_LAST(1) \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 A incompatibilidade de QoS entre publicador e subscritor é \textit{silenciosa}
@@ -187,7 +155,7 @@ que se comunicam por meio de ROS~2 actions e serviços:
 
 \begin{description}
     \item[\texttt{planner\_\allowbreak server}] Computa planos globais (trajetória completa
-    até o destino) usando algoritmos como NavFn (Dijkstra/A*) ou Theta*.
+    até o destino) usando algoritmos como NavFn (Dijkstra/A*) ou Theta* \cite{macenski2020marathon}.
 
     \item[\texttt{controller\_\allowbreak server}] Executa o plano localmente, publicando
     comandos de velocidade (\texttt{cmd\_\allowbreak vel}) para o robô. Na versão Jazzy,
@@ -202,7 +170,7 @@ que se comunicam por meio de ROS~2 actions e serviços:
     o planejamento ou controle falham.
 
     \item[\texttt{bt\_\allowbreak navigator}] Orquestra os servidores via \textit{Behavior Trees}
-    (BTs) \cite{colledanchise2018}. Cada ação de navegação corresponde a uma
+    (BTs) \cite{colledanchise2018, macenski2020marathon}. Cada ação de navegação corresponde a uma
     árvore de comportamento que define a sequência de operações, condições de
     falha e estratégias de recuperação.
 \end{description}
@@ -215,18 +183,18 @@ algoritmo de controle ótimo baseado em amostragem. Em cada ciclo de controle, o
 controlador gera $K$ trajetórias candidatas amostrando ruído gaussiano sobre a
 sequência de controles atual; avalia o custo de cada trajetória segundo um funcional
 que penaliza colisões, desvios do plano global e velocidades extremas; e atualiza
-o controle com a média ponderada das trajetórias amostradas, com pesos inversamente
-proporcionais ao custo.
+o controle com a média ponderada das trajetórias amostradas, com pesos que decrescem
+exponencialmente com o custo.
 
 Essa abordagem tem duas vantagens relevantes para experimentos de repetibilidade:
 (i) produz trajetórias suaves e consistentes porque a atualização é uma média ponderada,
-não uma seleção discreta; (ii) é naturalmente paralelizável em GPU, embora em
+não uma seleção discreta; (ii) é naturalmente paralelizável em GPU \cite{williams2016}, embora em
 aplicações com TurtleBot4 em CPU a versão CPU seja suficiente.
 
 \subsection{Actions de Navegação}
 \label{sec:actions}
 
-O Nav2 expõe sua funcionalidade via ROS~2 actions, um protocolo assíncrono
+O Nav2 expõe sua funcionalidade via ROS~2 actions \cite{macenski2022ros2}, um protocolo assíncrono
 que permite enviar uma meta, receber feedback periódico e cancelar execuções em
 andamento. Os dois actions centrais para este trabalho são:
 
@@ -239,22 +207,15 @@ andamento. Os dois actions centrais para este trabalho são:
     as poses gravadas no baseline; cada pose é tratada como uma meta própria.
 \end{itemize}
 
-A diferença comportamental entre os dois actions é relevante: o \texttt{NavigateToPose}
-chamado sequencialmente para cada waypoint e o \texttt{FollowWaypoints} param
-ambos em cada meta, mas no baseline as metas são os poucos waypoints do usuário,
-enquanto no replay são as dezenas de poses densas gravadas, cada uma seguida de
-uma pausa de 200\,ms (\texttt{wait\_\allowbreak at\_\allowbreak waypoint}). O replay
-para muito mais vezes, dura mais e descreve uma trajetória geometricamente
-diferente. Essa
-distinção entre baseline e replay constitui uma fonte de variação sistemática que
-o framework identifica e documenta.
+A diferença de comportamento entre baseline e replay que decorre dessa
+escolha é tratada na Seção~\ref{sec:record_replay} (Fase~2).
 
 \subsection{Ciclo de Vida de uma Meta de Action}
 \label{sec:action_lifecycle}
 
 O protocolo de \textit{actions} do ROS~2 define uma máquina de estados bem
 definida para cada meta enviada a um servidor: uma meta é primeiro aceita ou
-rejeitada (\texttt{ACCEPTED}/\texttt{REJECTED}); em seguida, se aceita, evolui
+rejeitada (\texttt{ACCEPTED}/\allowbreak\texttt{REJECTED}); em seguida, se aceita, evolui
 para \texttt{EXECUTING}, podendo ser cancelada (\texttt{CANCELING} $\to$
 \texttt{CANCELED}) ou concluir em \texttt{SUCCEEDED} ou \texttt{ABORTED}. Essa
 máquina de estados é exposta ao cliente por meio de três \textit{futures}
@@ -263,74 +224,27 @@ a meta; o segundo, obtido a partir do \textit{goal handle} retornado pelo
 primeiro, resolve quando a execução termina, com o \texttt{GoalStatus} final
 anexado ao resultado.
 
-Essa assincronia de três estágios tem uma implicação direta de implementação,
-discutida em detalhe na Seção~\ref{sec:impl_orquestrador}. O orquestrador usa o
-mesmo mecanismo de \textit{callback} tanto para atualizar o estado interno
-do robô (\texttt{nav\_\allowbreak state}) quanto para decidir se uma pose deve ser salva
-durante uma gravação; um erro na composição desses \textit{callbacks} (por
-exemplo, tratar \texttt{ACCEPTED} como se fosse \texttt{SUCCEEDED}) resultaria
-em poses gravadas antes que o robô de fato tivesse alcançado o destino. A
-implementação evita esse erro condicionando a gravação exclusivamente ao
-\textit{callback} de resultado, nunca ao de aceitação (Código~\ref{lst:start_stop_record}
-não mostra esse trecho especificamente, mas o método
-\texttt{\_\allowbreak make\_\allowbreak result\_\allowbreak cb}, descrito na
-Seção~\ref{sec:impl_orquestrador}, o implementa).
+A implicação dessa assincronia para o orquestrador é tratada na
+Seção~\ref{sec:impl_orquestrador}.
 
 \section{Localização: Filtros Bayesianos e AMCL}
 \label{sec:localizacao_bayes}
 
-Enquanto o SLAM Toolbox (Seção~\ref{sec:slam_toolbox}) resolve o problema de
-\emph{construir} o mapa e estimar a pose simultaneamente, uma parcela relevante
-dos sistemas de navegação autônoma opera com um mapa já conhecido e resolve
-apenas o subproblema de localização: estimar a pose do robô dado um mapa
-fixo e um fluxo de observações sensoriais ruidosas. Esse é o papel do AMCL
-(\textit{Adaptive Monte Carlo Localization}), o localizador padrão empacotado
-com o Nav2. Esta dissertação não o utiliza: opera com SLAM Toolbox
-(Seção~\ref{sec:slam_toolbox}) ao vivo durante toda a campanha; mas o
-introduz aqui como contraponto teórico ao filtro de partículas e como
-proposta de trabalho futuro (Seção~\ref{sec:futuros}), discutida ao final
-desta seção.
-
-O AMCL é uma instância de filtro de partículas: mantém um conjunto de $M$
-hipóteses de pose (partículas), cada uma ponderada por sua verossimilhança
-face à observação de \textit{laser scan} mais recente, e reamostra as partículas
-proporcionalmente a esse peso a cada iteração. Formalmente, o filtro de
-partículas aproxima numericamente a mesma recursão bayesiana que o filtro de
-Kalman resolve de forma fechada sob hipóteses de linearidade e ruído gaussiano
-\cite{kalman1960}: a etapa de predição aplica o modelo de movimento do robô a
-cada partícula, e a etapa de atualização repondera as partículas pela
-verossimilhança da observação. A vantagem do filtro de partículas sobre o
-filtro de Kalman clássico é justamente dispensar a hipótese de linearidade do
-modelo de observação: o modelo de \textit{laser scan matching} contra um
-mapa de ocupação é fortemente não linear e multimodal (múltiplas poses podem
-explicar igualmente bem a mesma leitura de LiDAR em ambientes com simetria,
-como corredores repetidos de um armazém), às custas de um custo
-computacional proporcional a $M$, tipicamente na ordem de centenas a milhares
-de partículas.
-
-Essa distinção tem relevância direta para o framework proposto, ainda que por um
-motivo mais sutil do que uma leitura superficial da literatura sugeriria.
-\citeonline{hamer2025} (discutida na Seção~\ref{sec:rel_es}) comparam o custo
-computacional de quatro algoritmos de SLAM entre si (não SLAM contra AMCL) e
-mostram que o paradigma grafo-vs-filtro não é, isoladamente, um bom preditor de
-custo: o Cartographer, baseado em grafos, foi o mais caro em CPU (cerca de 43\% em
-um Raspberry Pi~4) por fundir dados de IMU e realizar refinamento de mapa e
-fechamento de laços, enquanto o Karto, também baseado em grafos, foi o algoritmo
-mais eficiente do estudo em todas as métricas avaliadas. O fator determinante
-identificado pelos autores é o conjunto de escolhas de projeto de cada
-implementação (fusão sensorial, frequência de publicação de mensagens,
-refinamento de mapa), não a família algorítmica em si.
-
-Mesmo assim, o argumento estrutural desta dissertação para preferir AMCL com mapa
-pré-construído em sessões experimentais longas permanece válido por um motivo mais
-elementar, independente do algoritmo específico de SLAM utilizado: SLAM precisa
-manter e expandir continuamente uma representação do ambiente (grafo de poses,
-submapas, fechamento de laços) enquanto localiza o robô, ao passo que o AMCL
-localiza um robô já posicionado sobre um mapa finalizado, com um conjunto de
-partículas de tamanho fixo. Essa diferença estrutural (construir e otimizar um
-mapa versus apenas localizar-se nele) motiva a proposta, discutida como trabalho
-futuro na Seção~\ref{sec:futuros} a partir da variabilidade observada nos
-experimentos exploratórios da Seção~\ref{sec:res_exp_complementares}.
+O AMCL (\textit{Adaptive Monte Carlo Localization}), localizador padrão do
+Nav2 \cite{macenski2020marathon}, resolve só a localização sobre um mapa já pronto. É um filtro de
+partículas \cite{thrun2005}: mantém $M$ hipóteses de pose ponderadas pela verossimilhança do
+\textit{laser scan} mais recente e as reamostra a cada iteração. Aproxima
+numericamente a mesma recursão bayesiana que o filtro de Kalman resolve de
+forma fechada sob linearidade e ruído gaussiano \cite{kalman1960}, sem exigir
+que o modelo de observação seja linear, ao custo de computação proporcional a
+$M$. Entre algoritmos de SLAM, o custo computacional depende mais das escolhas
+de cada implementação do que da família grafo ou filtro: o Cartographer e o
+Karto, ambos baseados em grafos, foram, respectivamente, o mais caro em CPU (cerca de 43\% num
+Raspberry Pi~4) e o mais eficiente \cite{hamer2025} (Seção~\ref{sec:rel_slam}). Esta dissertação não usa AMCL (usa SLAM Toolbox ao vivo,
+Seção~\ref{sec:slam_toolbox}). Ele entra como proposta de trabalho futuro
+(Seção~\ref{sec:futuros}): localizar-se num mapa finalizado dispensa manter e
+otimizar o mapa durante a sessão, o que pode reduzir a variabilidade observada
+na Seção~\ref{sec:res_exp_complementares}.
 
 \section{SLAM Toolbox}
 \label{sec:slam_toolbox}
@@ -344,16 +258,16 @@ superam filtros de partículas em ambientes de médio a grande porte
 \begin{enumerate}
     \item \textbf{Grafos de poses}: representa a trajetória do robô como um grafo
     e otimiza globalmente via fator Ceres, produzindo mapas de alta consistência
-    mesmo em ambientes com fechamento de loop.
+    mesmo em ambientes com fechamento de loop \cite{macenski2021slam}.
 
     \item \textbf{Mapeamento lifelong}: suporta sessões de mapeamento múltiplas,
     fundindo novos scans com mapas previamente construídos. Relevante para
-    experimentos que reusam o mesmo ambiente ao longo de dias.
+    experimentos que reusam o mesmo ambiente ao longo de dias \cite{macenski2021slam}.
 
     \item \textbf{Modos sync/async}: o modo síncrono (\textit{online sync})
     processa cada scan antes de prosseguir, garantindo consistência absoluta
     entre scans e mapa. O modo assíncrono prioriza a taxa de publicação,
-    adequado para robôs com CPU limitada.
+    adequado para robôs com CPU limitada \cite{macenski2021slam}.
 \end{enumerate}
 
 Para os experimentos desta dissertação, o modo síncrono é adotado para maximizar
@@ -362,34 +276,19 @@ a qualidade do mapa SLAM durante os experimentos de validação.
 \section{Sensores e Coleta de Dados}
 \label{sec:sensores}
 
-O TurtleBot4 Standard integra três fontes de dados sensoriais relevantes para
-análise de repetibilidade de navegação:
-
-\subsection{LiDAR 2D (RPLIDAR)}
-
-O RPLIDAR do TurtleBot4 é um sensor de varredura rotativo que emite pulsos
-laser em 360° e mede distâncias. No modelo de simulação usado nesta dissertação,
-ele produz 360 amostras por volta a 10\,Hz, com alcance de 0,164 a 20\,m. Cada scan resulta em uma mensagem
-\texttt{sensor\_\allowbreak msgs/\allowbreak msg/\allowbreak LaserScan} com os campos \texttt{ranges} (distâncias em
-metros por ângulo), \texttt{range\_\allowbreak min} e \texttt{range\_\allowbreak max} (limites de alcance
-válido). O SLAM consome essas mensagens para atualizar o mapa e a estimativa de pose.
-
-\subsection{Odometria de Roda}
-
-A odometria é publicada como \texttt{nav\_\allowbreak msgs/\allowbreak msg/\allowbreak Odometry}, contendo a pose
-estimada e a velocidade do robô. Em simulação Gazebo Harmonic
-\cite{koenig2004gazebo}, o plugin DiffDrive
-computa a odometria a partir das velocidades das juntas e publica diretamente no
-tópico \texttt{/\allowbreak odom} via bridge ROS-Gazebo, configurado para 30\,Hz
-(27,8\,Hz medidos nos bags da campanha final).
-
-\subsection{IMU}
-
-A IMU (\textit{Inertial Measurement Unit}) do Create3 publica aceleração linear
-e velocidade angular a até 200\,Hz como \texttt{sensor\_\allowbreak msgs/\allowbreak msg/\allowbreak Imu}. Em experimentos
-de repetibilidade, a variância da aceleração durante o percurso serve como indicador
-indireto de instabilidade: vibração acima do esperado pode indicar superfícies
-irregulares ou acelerações abruptas do controlador \cite{siegwart2011}.
+O TurtleBot4 Standard fornece três fontes de dados para a análise de
+repetibilidade; as especificações do modelo simulado estão na
+Tabela~\ref{tab:ambiente_hw}. O LiDAR 2D (RPLIDAR) publica
+\texttt{sensor\_\allowbreak msgs/\allowbreak msg/\allowbreak LaserScan}, que o
+SLAM consome para atualizar o mapa e a pose. A odometria de roda é publicada
+como \texttt{nav\_\allowbreak msgs/\allowbreak msg/\allowbreak Odometry}; no
+Gazebo Harmonic \cite{koenig2004gazebo}, o plugin DiffDrive a calcula a partir
+das juntas e a publica em \texttt{/\allowbreak odom} via bridge ROS-Gazebo,
+configurado para 30\,Hz (27,8\,Hz medidos nos bags da campanha final). A IMU
+do Create3 publica aceleração linear e velocidade angular a até 200\,Hz
+(\texttt{sensor\_\allowbreak msgs/\allowbreak msg/\allowbreak Imu}); a variância
+da aceleração no percurso indica instabilidade, como superfícies irregulares ou
+acelerações abruptas do controlador \cite{siegwart2011}.
 
 \section{Coordenação Multi-Robô}
 \label{sec:coordenacao_multirrobo}
@@ -429,7 +328,7 @@ Execuções de replay com o Nav2 raramente têm exatamente a mesma duração: va
 de até 5\% são comuns devido ao jitter do sistema operacional, variações de carga
 computacional e o comportamento adaptativo do controlador MPPI. Para comparar
 trajetórias de durações ligeiramente diferentes, é necessário normalizá-las para
-uma grade de tempo comum \cite{amigoni2010}.
+uma grade de tempo comum \cite{amigoni2010, zhang2018trajectory}.
 
 A abordagem adotada nesta dissertação normaliza cada trajetória para o intervalo
 $[0, 1]$ e interpola linearmente os valores de $x$ e $y$ em $n = 100$ pontos
@@ -442,7 +341,7 @@ amostras consecutivas o movimento é essencialmente linear.
 
 O RMSE (\textit{Root Mean Square Error}) entre duas trajetórias interpoladas
 $T_i = \{(x_i^k, y_i^k)\}_{k=1}^{n}$ e $T_j = \{(x_j^k, y_j^k)\}_{k=1}^{n}$
-é calculado como:
+é calculado como \cite{sturm2012, maset2022}:
 
 \begin{equation}
 \text{RMSE}(T_i, T_j) = \sqrt{\frac{1}{n} \sum_{k=1}^{n}

@@ -1,0 +1,140 @@
+\chapter{Listagens de Código}
+\label{ap:listagens}
+
+Este apêndice reúne as listagens citadas no Capítulo~\ref{chap:implementacao},
+na ordem em que aparecem lá. A explicação de cada uma está na seção indicada.
+
+\section{Orquestrador: \texttt{start\_\allowbreak record} e \texttt{stop\_\allowbreak record}}
+
+Discutida na Seção~\ref{sec:impl_servicos_exemplo}.
+
+\begin{lstlisting}[style=pycode, caption={Callbacks \texttt{\_\allowbreak cb\_\allowbreak start\_\allowbreak record} e \texttt{\_\allowbreak cb\_\allowbreak stop\_\allowbreak record}, com boilerplate repetido elidido (\texttt{fleet\_\allowbreak orchestrator/\allowbreak main.py}).}, label={lst:start_stop_record}]
+def _cb_start_record(self, req, resp):
+    rid = req.robot_id
+    if not self._known_robot(rid):
+        resp.success = False
+        resp.message = f"Unknown robot {rid!r}"
+        resp.error_code = "UNKNOWN_ROBOT"
+        return resp
+    st = self._state[rid]
+    if st.is_navigating:
+        resp.success = False
+        resp.message = "Cannot start recording while navigating"
+        resp.error_code = "ALREADY_NAVIGATING"
+        return resp
+    st.route_poses.clear()
+    st.last_saved = None
+    st.is_recording = True
+    st.nav_state = "recording"
+    st.current_route = req.route_name
+    st.last_error = ""
+    resp.success = True
+    resp.message = "Recording started"
+    resp.error_code = ""
+    return resp
+
+def _cb_stop_record(self, req, resp):
+    rid = req.robot_id
+    # ... verificação de UNKNOWN_ROBOT idêntica à de _cb_start_record ...
+    st = self._state[rid]
+    route_name = st.current_route
+    st.is_recording = False
+    n = len(st.route_poses)
+    if n == 0:
+        st.nav_state = "idle"
+        st.current_route = ""
+        resp.success = True
+        resp.message = "Route length: 0"
+        return resp
+    path = self._save_route_yaml(rid, route_name, st.route_poses)
+    st.route_poses.clear()
+    st.last_saved = None
+    st.nav_state = "idle"
+    st.current_route = ""
+    resp.success = True
+    resp.message = f"Saved {n} poses to {path}"
+    return resp
+\end{lstlisting}
+
+\section{Backend: a ponte REST--ROS~2}
+
+Discutida na Seção~\ref{sec:impl_backend_ponte}.
+
+\begin{lstlisting}[style=pycode, caption={Método \texttt{RosBridge.\allowbreak run\_\allowbreak service}, usado por \texttt{\_\allowbreak run\_\allowbreak ros2\_\allowbreak service} e por todos os endpoints \texttt{/\allowbreak api/\allowbreak *} que encaminham comandos ao orquestrador (\texttt{backend/\allowbreak ros\_\allowbreak bridge.py}).}, label={lst:backend_bridge}]
+def run_service(self, service: str, service_type: str, request: dict | str, timeout: int = 10) -> tuple[bool, str]:
+    request_json = request if isinstance(request, str) else json.dumps(request)
+    cmd = f"{self.ros_setup_prefix()}ros2 service call {shlex.quote(service)} {shlex.quote(service_type)} {shlex.quote(request_json)}"
+    try:
+        result = subprocess.run(
+            ["bash", "-c", cmd],
+            env=self.ros_env(),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=self.ros_ws,
+        )
+        out = (result.stdout or "").strip() + (result.stderr or "").strip()
+        if result.returncode != 0:
+            return False, out or "ros2 service call failed"
+        return True, out
+    except subprocess.TimeoutExpired:
+        return False, "timeout"
+    except Exception as exc:
+        return False, str(exc)
+\end{lstlisting}
+
+\section{Análise: prioridade do tópico de trajetória}
+
+Discutida na Seção~\ref{sec:impl_fallback_pose}.
+
+\begin{lstlisting}[style=pycode, caption={Prioridade do modo \texttt{auto} em \texttt{\_\allowbreak resolve\_\allowbreak trajectory\_\allowbreak topic} (\texttt{fleet\_\allowbreak ws/\allowbreak scripts/\allowbreak analyze\_\allowbreak runs.py}).}, label={lst:pose_fallback}]
+if mode == "auto":
+    # Prioridade: amcl_pose > pose (SLAM Toolbox, ao vivo) > odom (deriva sem
+    # correção). Antes desta correção, "auto" nunca reconhecia o tópico "pose"
+    # e caía direto pra odom mesmo quando a pose corrigida do SLAM tinha sido
+    # gravada.
+    amcl = _find_amcl_topic_name(tmap)
+    if amcl is not None and counts.get(amcl, 0) > 0:
+        return amcl
+    slam_pose = _find_slam_pose_topic_name(tmap)
+    if slam_pose is not None and counts.get(slam_pose, 0) > 0:
+        return slam_pose
+    return _find_odom_topic_name(tmap)
+\end{lstlisting}
+
+\section{Análise: matriz pairwise e RMSE contra a referência}
+
+Discutidas na Seção~\ref{sec:impl_rmse_codigo}.
+
+\begin{lstlisting}[style=pycode, caption={Laço pairwise que produz a matriz $N\times N$ de RMSE (\texttt{scripts/\allowbreak analyze\_\allowbreak runs.py}, função \texttt{main}).}, label={lst:rmse_pairwise}]
+n = len(trajectories)
+rmse_matrix: List[List[Optional[float]]] = [[None] * n for _ in range(n)]
+for i in range(n):
+    for j in range(i + 1, n):
+        a, b = _resample_pair(
+            trajectories[i], trajectories[j],
+            t1=times[i], t2=times[j],
+            mode=args.resample_mode, samples=args.resample_samples,
+        )
+        r = _rmse(a, b)
+        rmse_matrix[i][j] = r
+        rmse_matrix[j][i] = r
+    rmse_matrix[i][i] = 0.0
+\end{lstlisting}
+
+\begin{lstlisting}[style=pycode, caption={RMSE de cada execução contra a execução de referência (\texttt{fleet\_ws/\allowbreak scripts/\allowbreak analyze\_runs.py}).}, label={lst:rmse_mean}]
+ref_idx = 0
+vs_reference: List[dict] = []
+for i in range(n):
+    entry: dict = {"label": labels[i], ...}
+    if i != ref_idx:
+        a, b = _resample_pair(
+            trajectories[ref_idx], trajectories[i],
+            t1=times[ref_idx], t2=times[i],
+            mode=args.resample_mode, samples=args.resample_samples,
+        )
+        entry["rmse_vs_ref_m"] = _rmse(a, b)
+    else:
+        entry["rmse_vs_ref_m"] = 0.0
+    vs_reference.append(entry)
+\end{lstlisting}
